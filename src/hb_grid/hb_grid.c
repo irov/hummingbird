@@ -20,10 +20,8 @@ int main( int _argc, const char * _argv[] )
     hb_mongo_value_handler_t value;
     hb_mongo_get_value( &collection, "5d90b689a1fb944214b3c899", &value );
 
-    const char * str = hb_mongo_value_lock( &value );
+    const char * str = value.value;
     printf( "%s\n", str );
-
-    hb_mongo_value_unlock( &value );
 
     hb_mongo_value_destroy( &value );
 
