@@ -1,0 +1,1 @@
+call make_solution_msvc16.bat Debug

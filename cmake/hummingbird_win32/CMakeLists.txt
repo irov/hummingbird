@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+
+PROJECT(hummingbird_win32 LANGUAGES C)
+
+INCLUDE(../win32_template.cmake)
+INCLUDE(../hummingbird_template.cmake)
+INCLUDE(../macro_template.cmake)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+
+ADD_SUBDIRECTORY(${HUMMINGBIRD_SOURCE_DIRECTORY} ${CMAKE_BINARY_DIR}/src)
