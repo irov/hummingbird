@@ -1,9 +1,9 @@
-PROJECT(hb_grid C)
+PROJECT(hb_node C)
 
 ADD_FILTER(
 src
-	hb_grid.h
-	hb_grid.c
+	hb_node.h
+	hb_node.c
 )
 
 ADD_EXECUTABLE(${PROJECT_NAME} WIN32 ${HUMMINGBIRD_SOURCE_FILES})
