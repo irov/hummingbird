@@ -1,9 +1,9 @@
-PROJECT(hb_mongo C)
+PROJECT(hb_db C)
 
 ADD_FILTER(
 src
-	hb_mongo.h
-	hb_mongo.c
+	hb_db.h
+	hb_db.c
 )
 
 ADD_DEFINITIONS(-DMONGOC_STATIC)

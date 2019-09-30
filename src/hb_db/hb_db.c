@@ -1,4 +1,4 @@
-#include "hb_mongo.h"
+#include "hb_db.h"
 
 #include "hb_config/hb_config.h"
 #include "hb_log/hb_log.h"
@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////////////////////////
 mongoc_client_t * g_mongo_client = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-int hb_mongo_initialze( const char * _name, const char * _uri )
+int hb_db_initialze( const char * _name, const char * _uri )
 {
     mongoc_init();
 
@@ -44,7 +44,7 @@ int hb_mongo_initialze( const char * _name, const char * _uri )
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_mongo_finalize()
+void hb_db_finalize()
 {
     mongoc_client_destroy( g_mongo_client );
     g_mongo_client = HB_NULLPTR;
@@ -52,7 +52,7 @@ void hb_mongo_finalize()
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_mongo_get_collection( const char * _db, const char * _name, hb_mongo_collection_handler_t * _collection )
+int hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handler_t * _collection )
 {
     mongoc_collection_t * collection = mongoc_client_get_collection( g_mongo_client, _db, _name );
 
@@ -61,14 +61,14 @@ int hb_mongo_get_collection( const char * _db, const char * _name, hb_mongo_coll
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_mongo_collection_destroy( hb_mongo_collection_handler_t * _collection )
+void hb_db_collection_destroy( hb_db_collection_handler_t * _collection )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
 
     mongoc_collection_destroy( mongo_collection );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_mongo_get_value( hb_mongo_collection_handler_t * _collection, const char * _id, hb_mongo_value_handler_t * _value )
+int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id, hb_db_value_handler_t * _value )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
 
@@ -119,14 +119,14 @@ int hb_mongo_get_value( hb_mongo_collection_handler_t * _collection, const char 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_mongo_value_destroy( hb_mongo_value_handler_t * _value )
+void hb_db_value_destroy( hb_db_value_handler_t * _value )
 {
     mongoc_cursor_t * cursor = (mongoc_cursor_t *)_value->handler;
 
     mongoc_cursor_destroy( cursor );
 }
 //////////////////////////////////////////////////////////////////////////
-const char * hb_mongo_value_as_utf8( hb_mongo_value_handler_t * _value, size_t * _length )
+const char * hb_db_value_as_utf8( hb_db_value_handler_t * _value, size_t * _length )
 {
     if( _length != HB_NULLPTR )
     {

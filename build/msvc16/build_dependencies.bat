@@ -2,7 +2,7 @@
 
 set "CONFIGURATION=%1"
 
-set "BUILD_TEMP_DIR=..\..\solutions\dependencies_msvc16\%CONFIGURATION%"
+set "BUILD_TEMP_DIR=%~dp0..\..\solutions\dependencies_msvc16\%CONFIGURATION%"
 
 @mkdir "%BUILD_TEMP_DIR%"
 @pushd "%BUILD_TEMP_DIR%"
