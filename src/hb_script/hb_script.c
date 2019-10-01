@@ -55,12 +55,24 @@ static int __server_GetCurrentUserData( lua_State * L )
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
-    int nargs = lua_gettop( L );
-    for( int i = 1; i <= nargs; ++i )
+    int n = lua_gettop( L );  /* number of arguments */
+    int i;
+    lua_getglobal( L, "tostring" );
+    for( i = 1; i <= n; i++ )
     {
-        printf( lua_tostring( L, i ) );
+        const char * s;
+        size_t l;
+        lua_pushvalue( L, -1 );  /* function to be called */
+        lua_pushvalue( L, i );   /* value to print */
+        lua_call( L, 1, 1 );
+        s = lua_tolstring( L, -1, &l );  /* get result */
+        if( s == NULL )
+            return luaL_error( L, "'tostring' must return a string to 'print'" );
+        if( i > 1 ) printf( "\t" );
+        printf( s );
+        lua_pop( L, 1 );  /* pop result */
     }
-    printf( "\n" );
+    printf("\n");
 
     return 0;
 }
@@ -155,12 +167,38 @@ int hb_script_load( const void * _buffer, size_t _size )
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_call( const char * _method, const char * _data, char * _result, size_t _capacity )
+int hb_script_call( const char * _method, const char * _data, size_t _size, char * _result, size_t _capacity )
 {
-    lua_getglobal( g_L, "client" );
-    lua_getfield( g_L, -1, _method );
-    lua_pushstring( g_L, _data );
+    HB_UNUSED( _capacity );
 
+    lua_getglobal( g_L, "server" );
+    lua_getfield( g_L, -1, _method );
+    
+    int res = luaL_loadbufferx( g_L, _data, _size, HB_NULLPTR, HB_NULLPTR );
+
+    if( res != LUA_OK )
+    {
+        const char * e = lua_tostring( g_L, -1 );
+        hb_log_message( HB_LOG_ERROR, "%s", e );
+
+        return 0;
+    }
+
+    int status2 = lua_pcallk( g_L, 0, 1, 0, 0, HB_NULLPTR );
+
+    if( status2 != LUA_OK )
+    {
+        const char * error_msg = lua_tolstring( g_L, -1, HB_NULLPTR );
+
+        hb_log_message( HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
+            , _method
+            , _data
+            , error_msg
+        );
+
+        return 0;
+    }
+    
     int status = lua_pcallk( g_L, 1, 1, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
@@ -176,26 +214,53 @@ int hb_script_call( const char * _method, const char * _data, char * _result, si
         return 0;
     }
 
-    if( lua_isstring( g_L, -1 ) != LUA_OK )
+    strcpy( _result, "{" );
+
+    lua_pushnil( g_L );
+    int it = lua_next( g_L, -2 );
+    while( it != 0 )
     {
-        hb_log_message( HB_LOG_ERROR, "call function '%s' must return a string"
-            , _method
-        );
+        const char * key = lua_tostring( g_L, -2 );
 
-        return 0;
-    }
+        if( lua_isinteger( g_L, -1 ) == 1 )
+        {
+            const char * value = lua_tostring( g_L, -1 );
 
-    size_t length;
-    const char * value = lua_tolstring( g_L, -1, &length );
+            strcat( _result, key );
+            strcat( _result, "=" );
+            strcat( _result, value );
+        }
+        else if( lua_isnumber( g_L, -1 ) == 1 )
+        {
+            const char * value = lua_tostring( g_L, -1 );
 
-    if( length >= _capacity )
-    {
+            strcat( _result, key );
+            strcat( _result, "=" );
+            strcat( _result, value );
+        }
+        else if( lua_isstring( g_L, -1 ) == 1 )
+        {
+            const char * value = lua_tostring( g_L, -1 );
+
+            strcat( _result, key );
+            strcat( _result, "=\"" );
+            strcat( _result, value );
+            strcat( _result, "\"" );
+        }
+
         lua_pop( g_L, 1 );
 
-        return 0;
+        it = lua_next( g_L, -2 );
+
+        if( it == 0 )
+        {
+            break;
+        }
+
+        strcat( _result, "," );
     }
 
-    strcpy( _result, value );
+    strcat( _result, "}" );
 
     lua_pop( g_L, 1 );
 
