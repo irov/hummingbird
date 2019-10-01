@@ -1,4 +1,4 @@
-bin/
-lib/
-solutions/
-dependencies/
+/bin/
+/lib/
+/solutions/
+/dependencies/
