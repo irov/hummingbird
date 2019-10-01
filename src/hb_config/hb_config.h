@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#define HB_UNUSED(X) (void)(X)
 #define HB_NULLPTR (0)
 
 void * hb_new( size_t _size );

@@ -1,0 +1,69 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+
+PROJECT(lua)
+
+SET(LUA_SOURCE_DIRECTORY ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)
+
+SET(LUA_SOURCES
+    ${LUA_SOURCE_DIRECTORY}/lapi.c
+    ${LUA_SOURCE_DIRECTORY}/lapi.h
+    ${LUA_SOURCE_DIRECTORY}/lauxlib.c
+    ${LUA_SOURCE_DIRECTORY}/lauxlib.h
+    ${LUA_SOURCE_DIRECTORY}/lbaselib.c
+    ${LUA_SOURCE_DIRECTORY}/lbitlib.c
+    ${LUA_SOURCE_DIRECTORY}/lcode.c
+    ${LUA_SOURCE_DIRECTORY}/lcode.h
+    ${LUA_SOURCE_DIRECTORY}/lcorolib.c
+    ${LUA_SOURCE_DIRECTORY}/lctype.c
+    ${LUA_SOURCE_DIRECTORY}/lctype.h
+    ${LUA_SOURCE_DIRECTORY}/ldblib.c
+    ${LUA_SOURCE_DIRECTORY}/ldebug.c
+    ${LUA_SOURCE_DIRECTORY}/ldebug.h
+    ${LUA_SOURCE_DIRECTORY}/ldo.c
+    ${LUA_SOURCE_DIRECTORY}/ldo.h
+    ${LUA_SOURCE_DIRECTORY}/ldump.c
+    ${LUA_SOURCE_DIRECTORY}/lfunc.c
+    ${LUA_SOURCE_DIRECTORY}/lfunc.h
+    ${LUA_SOURCE_DIRECTORY}/lgc.c
+    ${LUA_SOURCE_DIRECTORY}/lgc.h
+    ${LUA_SOURCE_DIRECTORY}/linit.c
+    ${LUA_SOURCE_DIRECTORY}/liolib.c
+    ${LUA_SOURCE_DIRECTORY}/llex.c
+    ${LUA_SOURCE_DIRECTORY}/llex.h
+    ${LUA_SOURCE_DIRECTORY}/llimits.h
+    ${LUA_SOURCE_DIRECTORY}/lmathlib.c
+    ${LUA_SOURCE_DIRECTORY}/lmem.c
+    ${LUA_SOURCE_DIRECTORY}/lmem.h
+    ${LUA_SOURCE_DIRECTORY}/loadlib.c
+    ${LUA_SOURCE_DIRECTORY}/lobject.c
+    ${LUA_SOURCE_DIRECTORY}/lobject.h
+    ${LUA_SOURCE_DIRECTORY}/lopcodes.c
+    ${LUA_SOURCE_DIRECTORY}/lopcodes.h
+    ${LUA_SOURCE_DIRECTORY}/loslib.c
+    ${LUA_SOURCE_DIRECTORY}/lparser.c
+    ${LUA_SOURCE_DIRECTORY}/lparser.h
+    ${LUA_SOURCE_DIRECTORY}/lprefix.h
+    ${LUA_SOURCE_DIRECTORY}/lstate.c
+    ${LUA_SOURCE_DIRECTORY}/lstate.h
+    ${LUA_SOURCE_DIRECTORY}/lstring.c
+    ${LUA_SOURCE_DIRECTORY}/lstring.h
+    ${LUA_SOURCE_DIRECTORY}/lstrlib.c
+    ${LUA_SOURCE_DIRECTORY}/ltable.c
+    ${LUA_SOURCE_DIRECTORY}/ltable.h
+    ${LUA_SOURCE_DIRECTORY}/ltablib.c
+    ${LUA_SOURCE_DIRECTORY}/ltests.c
+    ${LUA_SOURCE_DIRECTORY}/ltests.h
+    ${LUA_SOURCE_DIRECTORY}/ltm.c
+    ${LUA_SOURCE_DIRECTORY}/ltm.h
+    ${LUA_SOURCE_DIRECTORY}/luaconf.h
+    ${LUA_SOURCE_DIRECTORY}/lualib.h
+    ${LUA_SOURCE_DIRECTORY}/lundump.c
+    ${LUA_SOURCE_DIRECTORY}/lundump.h
+    ${LUA_SOURCE_DIRECTORY}/lutf8lib.c
+    ${LUA_SOURCE_DIRECTORY}/lvm.c
+    ${LUA_SOURCE_DIRECTORY}/lvm.h
+    ${LUA_SOURCE_DIRECTORY}/lzio.c
+    ${LUA_SOURCE_DIRECTORY}/lzio.h
+)
+
+add_library(${PROJECT_NAME} STATIC ${LUA_SOURCES})

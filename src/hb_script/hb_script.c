@@ -1,34 +1,121 @@
 #include "hb_script.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_db/hb_db.h"
 
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 
 #include <string.h>
+#include <setjmp.h>
 
 //////////////////////////////////////////////////////////////////////////
 lua_State * g_L = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-static const luaL_Reg serverReg[] = {
-    {"GetCurrentUser", math_abs},
-{"cos", math_cos},
-{"sin", math_sin},
-{NULL, NULL}
+typedef struct hb_script_settings_t
+{
+    char user[32];
+
+    hb_db_collection_handler_t db_collection;
+} hb_script_settings_t;
+//////////////////////////////////////////////////////////////////////////
+hb_script_settings_t * g_settings;
+//////////////////////////////////////////////////////////////////////////
+static int __server_GetCurrentUserData( lua_State * L )
+{
+    const char * fields[16];
+
+    uint32_t field_iterator = 0;
+
+    lua_pushnil( L );
+    while( lua_next( L, 1 ) != 0 )
+    {
+        const char * value = lua_tostring( L, -1 );
+        fields[field_iterator++] = value;
+
+        lua_pop( L, 1 );
+    }
+
+    hb_db_value_handler_t handler;
+    hb_db_get_value( &g_settings->db_collection, g_settings->user, fields, field_iterator, &handler );
+
+    for( uint32_t index = 0; index != field_iterator; ++index )
+    {
+        const char * value = handler.value[index];
+        size_t length = handler.length[index];
+
+        lua_pushlstring( L, value, length );
+    }
+
+    hb_db_value_destroy( &handler );
+
+    return field_iterator;
+}
+//////////////////////////////////////////////////////////////////////////
+static int __hb_lua_print( lua_State * L )
+{
+    int nargs = lua_gettop( L );
+    for( int i = 1; i <= nargs; ++i )
+    {
+        printf( lua_tostring( L, i ) );
+    }
+    printf( "\n" );
+
+    return 0;
+}
+//////////////////////////////////////////////////////////////////////////
+static const struct luaL_Reg globalLib[] = {
+    {"print", &__hb_lua_print},
+{NULL, NULL} /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
-int hb_script_initialize()
+static jmp_buf g_hb_lua_panic_jump;
+//////////////////////////////////////////////////////////////////////////
+static int __hb_lua_panic( lua_State * L )
 {
+    HB_UNUSED( L );
+
+    longjmp( g_hb_lua_panic_jump, 1 );
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_script_initialize(const char * _user )
+{
+    g_settings = HB_NEW( hb_script_settings_t );
+    strcpy( g_settings->user, _user );
+
+    if( hb_db_get_collection( "hb_users", "hb_data", &g_settings->db_collection ) == 0 )
+    {
+        return 0;
+    }
+
     lua_State * L = luaL_newstate();
+
+    if( setjmp( g_hb_lua_panic_jump ) == 1 )
+    {
+        /* recovered from panic. log and return */
+
+        return 0;
+    }
+
+    lua_atpanic( L, &__hb_lua_panic );
 
     luaopen_base( L );
     luaopen_coroutine( L );
     luaopen_table( L );
     luaopen_string( L );
     luaopen_utf8( L );
-    luaopen_bit32( L );
     luaopen_math( L );
+
+    lua_getglobal( L, "_G" );
+    luaL_setfuncs( L, globalLib, 0 );
+
+    lua_newtable( L );
+    lua_pushstring( L, "GetCurrentUserData" );
+    lua_pushcfunction( L, &__server_GetCurrentUserData );
+    lua_settable( L, -3 );
+
+    lua_setglobal( L, "server" );
 
     g_L = L;
 
@@ -37,6 +124,8 @@ int hb_script_initialize()
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
+    hb_db_collection_destroy( &g_settings->db_collection );
+
     lua_close( g_L );
 
     g_L = HB_NULLPTR;
@@ -48,14 +137,20 @@ int hb_script_load( const void * _buffer, size_t _size )
 
     if( status != LUA_OK )
     {
+        const char * e = lua_tostring( g_L, -1 );
+        hb_log_message( HB_LOG_ERROR, "%s", e );
+
+        lua_pop( g_L, 1 );  /* pop error message from the stack */
+
         return 0;
     }
 
-    lua_createtable( g_L, 0, 256 );
-    lua_setglobal( g_L, "client" );
+    int ret = lua_pcallk( g_L, 0, 0, 0, 0, HB_NULLPTR );
 
-    lua_createtable( g_L, 0, 256 );
-    lua_setglobal( g_L, "server" );
+    if( ret != 0 )
+    {
+        return 0;
+    }
 
     return 1;
 }

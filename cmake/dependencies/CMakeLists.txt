@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 OPTION(HUMMINGBIRD_DEPENDENCE_MONGO "HUMMINGBIRD_DEPENDENCE_MONGO" ON)
+OPTION(HUMMINGBIRD_DEPENDENCE_LUA "HUMMINGBIRD_DEPENDENCE_LUA" ON)
 
 PROJECT(dependencies)
 
@@ -21,18 +22,18 @@ if(HUMMINGBIRD_DEPENDENCE_MONGO)
     SET(ENABLE_UNINSTALL OFF CACHE BOOL "ENABLE_UNINSTALL" FORCE)
     
     SET(ENABLE_STATIC ON CACHE BOOL "Build static libmongoc. Set to ON/AUTO/OFF, default AUTO." FORCE)
-    
-    MESSAGE("==============================================")
-    MESSAGE(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/mongo/libbson/src/bson/bson-config.h)
-    MESSAGE(${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo)
-    MESSAGE(${PROJECT_BINARY_DIR})
-    MESSAGE("==============================================")
-    
+        
     ADD_SUBDIRECTORY(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/mongo ${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo)
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libmongoc/src/mongoc/mongoc-config.h"
         "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/mongoc/mongoc-config.h"
+        COPYONLY
+    )    
+    
+    configure_file(
+        "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libmongoc/src/mongoc/mongoc-version.h"
+        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/mongoc/mongoc-version.h"
         COPYONLY
     )    
     
@@ -46,6 +47,11 @@ if(HUMMINGBIRD_DEPENDENCE_MONGO)
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libbson/src/bson/bson-version.h"
         "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/bson/bson-version.h"
         COPYONLY
-    )    
+    )
+endif()
+
+if(HUMMINGBIRD_DEPENDENCE_LUA)
+    message("================lua================")
     
+    ADD_SUBDIRECTORY(lua)
 endif()
