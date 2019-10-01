@@ -9,3 +9,4 @@ include(../download_template.cmake)
 
 HUMMINGBIRD_GIT_CLONE(mongo https://github.com/mongodb/mongo-c-driver.git "1.15.1")
 HUMMINGBIRD_GIT_CLONE(lua https://github.com/lua/lua.git "v5.3.5")
+HUMMINGBIRD_GIT_CLONE(postgres https://github.com/postgres/postgres.git "REL_11_5")

@@ -1,11 +1,10 @@
 #include "hb_node.h"
 
 #include "hb_db/hb_db.h"
+#include "hb_script/hb_script.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#define HB_UNUSED(X) (void)(X)
 
 int main( int _argc, const char * _argv[] )
 {
@@ -14,18 +13,14 @@ int main( int _argc, const char * _argv[] )
 
     hb_db_initialze( "hb_grid", "mongodb://localhost:27017" );
 
-    hb_db_collection_handler_t collection;
-    hb_db_get_collection( "admin", "users", &collection );
+    hb_script_initialize( "5d932e6820cdb53b7c26b73f" );
 
-    hb_db_value_handler_t value;
-    hb_db_get_value( &collection, "5d90b689a1fb944214b3c899", &value );
+    const char s[] = "a, b = server.GetCurrentUserData({\"a\", \"b\"}); print(a); print(b)";
 
-    const char * str = value.value;
-    printf( "%s\n", str );
+    hb_script_load( s, sizeof( s ) - 1 );
 
-    hb_db_value_destroy( &value );
+    hb_script_finalize();
 
-    hb_db_finalize();
 
     return EXIT_SUCCESS;
 }

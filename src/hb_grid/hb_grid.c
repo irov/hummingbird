@@ -1,11 +1,9 @@
 #include "hb_grid.h"
 
-#include "hb_mongo/hb_mongo.h"
+#include "hb_db/hb_db.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#define HB_UNUSED(X) (void)(X)
 
 int main( int _argc, const char * _argv[] )
 {
@@ -18,9 +16,9 @@ int main( int _argc, const char * _argv[] )
     hb_db_get_collection( "admin", "users", &collection );
 
     hb_db_value_handler_t value;
-    hb_db_get_value( &collection, "5d90b689a1fb944214b3c899", &value );
+    hb_db_get_value( &collection, "5d90b689a1fb944214b3c899", HB_NULLPTR, 0, &value );
 
-    const char * str = value.value;
+    const char * str = value.value[0];
     printf( "%s\n", str );
 
     hb_db_value_destroy( &value );
