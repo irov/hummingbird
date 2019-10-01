@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int main( int _argc, const char * _argv[] )
 {
@@ -15,9 +16,19 @@ int main( int _argc, const char * _argv[] )
 
     hb_script_initialize( "5d932e6820cdb53b7c26b73f" );
 
-    const char s[] = "a, b = server.GetCurrentUserData({\"a\", \"b\"}); print(a); print(b)";
+    FILE * f = fopen( "server.lua", "rb" );
+    fseek( f, 0L, SEEK_END );
+    long sz = ftell( f );
+    rewind( f );
 
-    hb_script_load( s, sizeof( s ) - 1 );
+    char fbuf[2048];
+    fread( fbuf, sz, 1, f );
+    fclose( f );
+
+    hb_script_load( fbuf, sz );
+
+    char res[1024];
+    hb_script_call( "test", "return {test=17}", strlen( "return {test=17}" ), res, 1024 );
 
     hb_script_finalize();
 
