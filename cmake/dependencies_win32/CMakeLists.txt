@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
-PROJECT(hummingbird_win32)
+PROJECT(dependencies_win32)
 
 INCLUDE(../win32_template.cmake)
 INCLUDE(../hummingbird_template.cmake)

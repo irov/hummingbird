@@ -136,7 +136,7 @@ void hb_db_value_destroy( hb_db_value_handler_t * _value )
     mongoc_cursor_destroy( cursor );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle )
+int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
 
@@ -151,28 +151,7 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t *
     const bson_t * data;
     mongoc_cursor_next( cursor, &data );
 
-    if( data != HB_NULLPTR )
-    {
-        bson_iter_t iter;
-        if( bson_iter_init( &iter, data ) == false )
-        {
-            mongoc_cursor_destroy( cursor );
-
-            return 0;
-        }
-
-        if( bson_iter_find( &iter, "_id" ) == false )
-        {
-            mongoc_cursor_destroy( cursor );
-
-            return 0;
-        }
-
-        const bson_oid_t * bs_oid = bson_iter_oid_unsafe( &iter );
-
-        bson_oid_to_string( bs_oid, _handle->oid );
-    }
-    else
+    if( data == HB_NULLPTR )
     {
         bson_t document;
         bson_init( &document );
@@ -182,6 +161,8 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t *
         bson_error_t insert_error;
         if( mongoc_collection_insert_one( mongo_collection, &document, HB_NULLPTR, HB_NULLPTR, &insert_error ) == false )
         {
+            mongoc_cursor_destroy( cursor );
+
             char sha1hex[41];
             hb_sha1_hex( _sha1, sha1hex );
 
@@ -196,6 +177,66 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t *
 
         bson_destroy( &document );
     }
+
+    mongoc_cursor_destroy( cursor );
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_db_load_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, hb_db_file_handler_t * _handler )
+{
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
+
+    bson_t query;
+    bson_init( &query );
+    BSON_APPEND_BINARY( &query, "sha1", BSON_SUBTYPE_BINARY, _sha1, 20 );
+
+    mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, HB_NULLPTR, HB_NULLPTR );
+
+    bson_destroy( &query );
+
+    const bson_t * data;
+    mongoc_cursor_next( cursor, &data );
+
+    bson_iter_t iter;
+    if( bson_iter_init( &iter, data ) == false )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        return 0;
+    }
+
+    if( bson_iter_find( &iter, "data" ) == false )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        return 0;
+    }
+
+    bson_subtype_t subtype;
+    uint32_t length;
+    const uint8_t * buffer;
+    bson_iter_binary( &iter, &subtype, &length, &buffer );
+
+    if( subtype != BSON_SUBTYPE_BINARY )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        return 0;
+    }
+
+    _handler->handler = cursor;
+    _handler->length = length;
+    _handler->buffer = buffer;
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_db_close_file( hb_db_file_handler_t * _handler )
+{
+    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handler->handler;
+
+    mongoc_cursor_destroy( cursor );
 
     return 1;
 }
