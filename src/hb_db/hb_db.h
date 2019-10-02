@@ -32,6 +32,6 @@ typedef struct hb_db_file_handler_t
 
 } hb_db_file_handler_t;
 
-int hb_db_upload_file( hb_db_collection_handler_t * _collection, const char * _sha1hex, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle );
+int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle );
 
 #endif

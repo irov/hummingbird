@@ -78,7 +78,7 @@ static void __hb_sha1_process( uint32_t * result, uint32_t * w )
     result[4] += e;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_sha1_hex( const void * _buffer, const size_t _size, char * _hex )
+void hb_sha1( const void * _buffer, const size_t _size, uint8_t * _sha1 )
 {
     uint32_t result[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0};
 
@@ -127,18 +127,20 @@ void hb_sha1_hex( const void * _buffer, const size_t _size, char * _hex )
     w[15] = _size << 3;
     __hb_sha1_process( result, w );
 
-    uint8_t hash[20];
     for( int32_t hashByte = 20; --hashByte >= 0; )
     {
-        hash[hashByte] = (result[hashByte >> 2] >> (((3 - hashByte) & 0x3) << 3)) & 0xff;
+        _sha1[hashByte] = (result[hashByte >> 2] >> (((3 - hashByte) & 0x3) << 3)) & 0xff;
     }
-
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_sha1_hex( const uint8_t * _sha1, char * _hex )
+{
     const char hexDigits[] = {"0123456789abcdef"};
 
     for( int32_t hashByte = 20; --hashByte >= 0; )
     {
-        _hex[hashByte << 1] = hexDigits[(hash[hashByte] >> 4) & 0xf];
-        _hex[(hashByte << 1) + 1] = hexDigits[hash[hashByte] & 0xf];
+        _hex[hashByte << 1] = hexDigits[(_sha1[hashByte] >> 4) & 0xf];
+        _hex[(hashByte << 1) + 1] = hexDigits[_sha1[hashByte] & 0xf];
     }
 
     _hex[40] = '\0';
