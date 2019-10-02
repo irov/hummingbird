@@ -61,11 +61,11 @@ int hb_storage_set( const void * _data, size_t _size )
         return 0;
     }
 
-    char sha1hex[41];
-    hb_sha1_hex( buffer, compressSize, sha1hex );
+    uint8_t sha1[20];
+    hb_sha1( buffer, compressSize, sha1 );
 
     hb_db_file_handler_t handler;
-    hb_db_upload_file( &g_storage_settings->db_collection, sha1hex, buffer, compressSize, &handler );
+    hb_db_upload_file( &g_storage_settings->db_collection, sha1, buffer, compressSize, &handler );
 
     return 1;
 }

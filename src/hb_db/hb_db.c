@@ -2,6 +2,7 @@
 
 #include "hb_config/hb_config.h"
 #include "hb_log/hb_log.h"
+#include "hb_utils/hb_sha1.h"
 
 #include "mongoc/mongoc.h"
 
@@ -135,16 +136,13 @@ void hb_db_value_destroy( hb_db_value_handler_t * _value )
     mongoc_cursor_destroy( cursor );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_upload_file( hb_db_collection_handler_t * _collection, const char * _sha1hex, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle )
+int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle )
 {
-    HB_UNUSED( _buffer );
-    HB_UNUSED( _size );
-
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
 
     bson_t query;
     bson_init( &query );
-    BSON_APPEND_SYMBOL( &query, "sha1", _sha1hex );
+    BSON_APPEND_BINARY( &query, "sha1", BSON_SUBTYPE_BINARY, _sha1, 20 );
 
     mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, HB_NULLPTR, HB_NULLPTR );
 
@@ -178,16 +176,19 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const char * _s
     {
         bson_t document;
         bson_init( &document );
-        BSON_APPEND_SYMBOL( &document, "sha1", _sha1hex );
+        BSON_APPEND_BINARY( &document, "sha1", BSON_SUBTYPE_BINARY, _sha1, 20 );
         BSON_APPEND_BINARY( &document, "data", BSON_SUBTYPE_BINARY, _buffer, _size );
 
         bson_error_t insert_error;
         if( mongoc_collection_insert_one( mongo_collection, &document, HB_NULLPTR, HB_NULLPTR, &insert_error ) == false )
         {
+            char sha1hex[41];
+            hb_sha1_hex( _sha1, sha1hex );
+
             hb_log_message( "db", HB_LOG_ERROR,
                 "failed to insert: %s\n"
                 "error message: %s\n",
-                _sha1hex,
+                sha1hex,
                 insert_error.message );
 
             return 0;
