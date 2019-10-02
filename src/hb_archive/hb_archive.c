@@ -24,7 +24,7 @@ int hb_archive_compress( void * _buffer, size_t _capacity, const void * _source,
 
     if( compressSize < 0 )
     {
-        hb_log_message( HB_LOG_ERROR, "archive", "invalid compress code [%d]"
+        hb_log_message( "archive", HB_LOG_ERROR, "invalid compress code [%d]"
             , compressSize
         );
 
@@ -45,7 +45,7 @@ int hb_archive_decompress( void * _buffer, size_t _capacity, const void * _sourc
 
     if( decompressSize < 0 )
     {
-        hb_log_message( HB_LOG_ERROR, "archive", "invalid uncompress code [%d]"
+        hb_log_message( "archive", HB_LOG_ERROR, "invalid uncompress code [%d]"
             , decompressSize
         );
 

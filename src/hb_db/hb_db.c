@@ -17,7 +17,7 @@ int hb_db_initialze( const char * _name, const char * _uri )
 
     if( uri == HB_NULLPTR )
     {
-        hb_log_message( HB_LOG_ERROR,
+        hb_log_message( "db", HB_LOG_ERROR,
             "failed to parse URI: %s\n"
             "error message:       %s\n",
             _uri,
@@ -184,7 +184,7 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const char * _s
         bson_error_t insert_error;
         if( mongoc_collection_insert_one( mongo_collection, &document, HB_NULLPTR, HB_NULLPTR, &insert_error ) == false )
         {
-            hb_log_message( HB_LOG_ERROR,
+            hb_log_message( "db", HB_LOG_ERROR,
                 "failed to insert: %s\n"
                 "error message: %s\n",
                 _sha1hex,

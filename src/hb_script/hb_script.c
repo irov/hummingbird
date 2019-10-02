@@ -153,7 +153,7 @@ int hb_script_load( const void * _buffer, size_t _size )
     if( status != LUA_OK )
     {
         const char * e = lua_tostring( g_L, -1 );
-        hb_log_message( HB_LOG_ERROR, "%s", e );
+        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
 
         lua_pop( g_L, 1 );  /* pop error message from the stack */
 
@@ -182,7 +182,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     if( res != LUA_OK )
     {
         const char * e = lua_tostring( g_L, -1 );
-        hb_log_message( HB_LOG_ERROR, "%s", e );
+        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
 
         return 0;
     }
@@ -193,7 +193,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     {
         const char * error_msg = lua_tolstring( g_L, -1, HB_NULLPTR );
 
-        hb_log_message( HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
             , _method
             , _data
             , error_msg
@@ -208,7 +208,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     {
         const char * error_msg = lua_tolstring( g_L, -1, HB_NULLPTR );
 
-        hb_log_message( HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
             , _method
             , _data
             , error_msg
