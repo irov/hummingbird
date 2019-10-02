@@ -30,7 +30,7 @@ typedef struct hb_log_service_t
 //////////////////////////////////////////////////////////////////////////
 hb_log_service_t * g_log_service = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-int hb_log_add_observer( int _level, const char * _category, hb_log_observer_t _observer )
+int hb_log_add_observer( const char * _category, int _level, hb_log_observer_t _observer )
 {
     if( g_log_service == HB_NULLPTR )
     {
@@ -87,7 +87,7 @@ int hb_log_remove_observer( hb_log_observer_t _observer )
     return 0;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_message_args( int _level, const char * _category, const char * _message )
+static void __hb_log_message_args( const char * _category, int _level, const char * _message )
 {
     int count = g_log_service->observer_count;
 
@@ -105,11 +105,11 @@ static void __hb_log_message_args( int _level, const char * _category, const cha
             continue;
         }
 
-        (*desc->observer)(_level, _category, _message);
+        (*desc->observer)(_category, _level, _message);
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_log_message( int _level, const char * _category, const char * _format, ... )
+void hb_log_message( const char * _category, int _level, const char * _format, ... )
 {
     if( g_log_service == HB_NULLPTR )
     {
@@ -123,7 +123,7 @@ void hb_log_message( int _level, const char * _category, const char * _format, .
     
     if( vsprintf( message, _format, args ) > 0 )
     {
-        __hb_log_message_args( _level, _category, message );
+        __hb_log_message_args( _category, _level, message );
     }
 
     va_end( args );
