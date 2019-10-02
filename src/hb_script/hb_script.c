@@ -192,7 +192,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
         return 0;
     }
     
-    int status = lua_pcallk( L, 1, 1, 0, 0, HB_NULLPTR );
+    int status = lua_pcallk( L, 1, 2, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
     {
@@ -205,6 +205,15 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
         );
 
         return 0;
+    }
+
+    lua_Integer successful = lua_tointeger( L, -2 );
+
+    if( successful == 0 )
+    {
+        strcpy( _result, "{}" );
+
+        return 1;
     }
 
     strcpy( _result, "{" );
