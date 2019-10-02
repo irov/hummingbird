@@ -2,9 +2,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 OPTION(HUMMINGBIRD_DEPENDENCE_MONGO "HUMMINGBIRD_DEPENDENCE_MONGO" ON)
 OPTION(HUMMINGBIRD_DEPENDENCE_LUA "HUMMINGBIRD_DEPENDENCE_LUA" ON)
+OPTION(HUMMINGBIRD_DEPENDENCE_LZ4 "HUMMINGBIRD_DEPENDENCE_LZ4" ON)
 
 PROJECT(dependencies)
 
+#dependencies mongo
 if(HUMMINGBIRD_DEPENDENCE_MONGO)
     message("================mongo================")
     SET(ENABLE_TESTS OFF CACHE BOOL "ENABLE_TESTS" FORCE)
@@ -50,8 +52,15 @@ if(HUMMINGBIRD_DEPENDENCE_MONGO)
     )
 endif()
 
+#dependencies lua
 if(HUMMINGBIRD_DEPENDENCE_LUA)
     message("================lua================")
     
     ADD_SUBDIRECTORY(lua)
+endif()
+
+#dependencies lz4
+if(HUMMINGBIRD_DEPENDENCE_LZ4)
+    message("================lz4================")
+    ADD_SUBDIRECTORY(lz4)
 endif()

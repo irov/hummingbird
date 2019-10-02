@@ -20,7 +20,7 @@ typedef struct hb_script_settings_t
     hb_db_collection_handler_t db_collection;
 } hb_script_settings_t;
 //////////////////////////////////////////////////////////////////////////
-hb_script_settings_t * g_settings;
+static hb_script_settings_t * g_script_settings;
 //////////////////////////////////////////////////////////////////////////
 static int __server_GetCurrentUserData( lua_State * L )
 {
@@ -38,7 +38,7 @@ static int __server_GetCurrentUserData( lua_State * L )
     }
 
     hb_db_value_handler_t handler;
-    hb_db_get_value( &g_settings->db_collection, g_settings->user, fields, field_iterator, &handler );
+    hb_db_get_value( &g_script_settings->db_collection, g_script_settings->user, fields, field_iterator, &handler );
 
     for( uint32_t index = 0; index != field_iterator; ++index )
     {
@@ -93,10 +93,10 @@ static int __hb_lua_panic( lua_State * L )
 //////////////////////////////////////////////////////////////////////////
 int hb_script_initialize(const char * _user )
 {
-    g_settings = HB_NEW( hb_script_settings_t );
-    strcpy( g_settings->user, _user );
+    g_script_settings = HB_NEW( hb_script_settings_t );
+    strcpy( g_script_settings->user, _user );
 
-    if( hb_db_get_collection( "hb_users", "hb_data", &g_settings->db_collection ) == 0 )
+    if( hb_db_get_collection( "hb_users", "hb_data", &g_script_settings->db_collection ) == 0 )
     {
         return 0;
     }
@@ -136,11 +136,14 @@ int hb_script_initialize(const char * _user )
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
-    hb_db_collection_destroy( &g_settings->db_collection );
+    hb_db_collection_destroy( &g_script_settings->db_collection );
 
     lua_close( g_L );
 
     g_L = HB_NULLPTR;
+
+    HB_DELETE( g_script_settings );
+    g_script_settings = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
 int hb_script_load( const void * _buffer, size_t _size )

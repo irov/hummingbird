@@ -4,6 +4,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef HB_LOG_MAX_OBSERVER
 #define HB_LOG_MAX_OBSERVER 16
@@ -17,6 +18,7 @@
 typedef struct hb_log_service_observer_desc_t
 {
     int level;
+    char category[32];
     hb_log_observer_t observer;
 }hb_log_service_observer_desc_t;
 //////////////////////////////////////////////////////////////////////////
@@ -28,7 +30,7 @@ typedef struct hb_log_service_t
 //////////////////////////////////////////////////////////////////////////
 hb_log_service_t * g_log_service = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-int hb_log_add_observer( int _level, hb_log_observer_t _observer )
+int hb_log_add_observer( int _level, const char * _category, hb_log_observer_t _observer )
 {
     if( g_log_service == HB_NULLPTR )
     {
@@ -44,6 +46,16 @@ int hb_log_add_observer( int _level, hb_log_observer_t _observer )
 
     hb_log_service_observer_desc_t desc;
     desc.level = _level;
+
+    if( _category == HB_NULLPTR )
+    {
+        strcpy( desc.category, _category );
+    }
+    else
+    {
+        desc.category[0] = '\0';
+    }
+
     desc.observer = _observer;
 
     g_log_service->observers[g_log_service->observer_count++] = desc;
@@ -75,7 +87,7 @@ int hb_log_remove_observer( hb_log_observer_t _observer )
     return 0;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_message_args( int _level, const char * _message )
+static void __hb_log_message_args( int _level, const char * _category, const char * _message )
 {
     int count = g_log_service->observer_count;
 
@@ -83,11 +95,21 @@ static void __hb_log_message_args( int _level, const char * _message )
     {
         hb_log_service_observer_desc_t * desc = g_log_service->observers + i;
 
-        (*desc->observer)(_level, _message);
+        if( desc->level < _level )
+        {
+            continue;
+        }
+
+        if( desc->category[0] != '\0' && strcmp( desc->category, _category ) != 0 )
+        {
+            continue;
+        }
+
+        (*desc->observer)(_level, _category, _message);
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_log_message( int _level, const char * _format, ... )
+void hb_log_message( int _level, const char * _category, const char * _format, ... )
 {
     if( g_log_service == HB_NULLPTR )
     {
@@ -101,7 +123,7 @@ void hb_log_message( int _level, const char * _format, ... )
     
     if( vsprintf( message, _format, args ) > 0 )
     {
-        __hb_log_message_args( _level, message );
+        __hb_log_message_args( _level, _category, message );
     }
 
     va_end( args );
