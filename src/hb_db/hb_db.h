@@ -23,7 +23,15 @@ typedef struct hb_db_value_handler_t
     const char * value[16];
 } hb_db_value_handler_t;
 
-int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id, const char ** _fields, uint32_t _count, hb_db_value_handler_t * _value );
+int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id, const char ** _fields, uint32_t _count, hb_db_value_handler_t * _handle );
 void hb_db_value_destroy( hb_db_value_handler_t * _value );
+
+typedef struct hb_db_file_handler_t
+{
+    char oid[25];
+
+} hb_db_file_handler_t;
+
+int hb_db_upload_file( hb_db_collection_handler_t * _collection, const char * _sha1hex, const void * _buffer, size_t _size, hb_db_file_handler_t * _handle );
 
 #endif

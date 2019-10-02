@@ -2,6 +2,7 @@
 
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
+#include "hb_storage/hb_storage.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,6 +14,7 @@ int main( int _argc, const char * _argv[] )
     HB_UNUSED( _argv );
 
     hb_db_initialze( "hb_grid", "mongodb://localhost:27017" );
+    hb_storage_initialize( "$user_id$", "hb_storage", "hb_files", ".store" );
 
     hb_script_initialize( "5d932e6820cdb53b7c26b73f" );
 
@@ -24,6 +26,8 @@ int main( int _argc, const char * _argv[] )
     char fbuf[2048];
     fread( fbuf, sz, 1, f );
     fclose( f );
+
+    hb_storage_set( fbuf, sz );
 
     hb_script_load( fbuf, sz );
 

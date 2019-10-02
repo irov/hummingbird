@@ -1,0 +1,20 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+                                             
+project(lz4)
+
+SET(LZ4_SOURCE_DIR ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lz4)
+
+# OUR SOURCES
+set(LZ4_SOURCES
+    ${LZ4_SOURCE_DIR}/lib/lz4.c
+    ${LZ4_SOURCE_DIR}/lib/lz4hc.c
+)
+
+if(WIN32)
+    ADD_DEFINITIONS(-DLZ4HC_HEAPMODE=0)
+    ADD_DEFINITIONS(-DLZ4_FORCE_MEMORY_ACCESS=2)
+endif()
+
+include_directories(${SOURCE_DIR}/lib)
+
+add_library(${PROJECT_NAME} STATIC ${LZ4_SOURCES})

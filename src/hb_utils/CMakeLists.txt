@@ -1,0 +1,9 @@
+PROJECT(hb_utils C)
+
+ADD_FILTER(
+src
+	hb_sha1.h
+	hb_sha1.c
+)
+
+ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
