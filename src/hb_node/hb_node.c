@@ -30,16 +30,28 @@ int main( int _argc, const char * _argv[] )
     fclose( f );
 
     uint8_t sha1[20];
-    hb_storage_set( fbuf, sz, sha1 );
+    if( hb_storage_set( fbuf, sz, sha1 ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
 
     size_t fbufl;
     char fbufg[10240];
-    hb_storage_get( sha1, fbufg, 10240, &fbufl );
+    if( hb_storage_get( sha1, fbufg, 10240, &fbufl ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
 
-    hb_script_load( fbufg, fbufl );
+    if( hb_script_load( fbufg, fbufl ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
 
     char res[1024];
-    hb_script_call( "test", "return {test=17}", strlen( "return {test=17}" ), res, 1024 );
+    if( hb_script_call( "test", "return {test=17}", strlen( "return {test=17}" ), res, 1024 ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_script_finalize();
 

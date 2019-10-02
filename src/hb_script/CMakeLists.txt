@@ -4,6 +4,10 @@ ADD_FILTER(
 src
 	hb_script.h
 	hb_script.c
+    
+    hb_script_settings.h
+    
+    hb_script_server_GetCurrentUserData.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)
