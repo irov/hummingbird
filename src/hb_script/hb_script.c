@@ -1,57 +1,15 @@
 #include "hb_script.h"
 
 #include "hb_log/hb_log.h"
-#include "hb_db/hb_db.h"
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "hb_script_settings.h"
 
 #include <string.h>
-#include <setjmp.h>
 
 //////////////////////////////////////////////////////////////////////////
-lua_State * g_L = HB_NULLPTR;
+hb_script_settings_t * g_script_settings;
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_script_settings_t
-{
-    char user[32];
-
-    hb_db_collection_handler_t db_collection;
-} hb_script_settings_t;
-//////////////////////////////////////////////////////////////////////////
-static hb_script_settings_t * g_script_settings;
-//////////////////////////////////////////////////////////////////////////
-static int __server_GetCurrentUserData( lua_State * L )
-{
-    const char * fields[16];
-
-    uint32_t field_iterator = 0;
-
-    lua_pushnil( L );
-    while( lua_next( L, 1 ) != 0 )
-    {
-        const char * value = lua_tostring( L, -1 );
-        fields[field_iterator++] = value;
-
-        lua_pop( L, 1 );
-    }
-
-    hb_db_value_handler_t handler;
-    hb_db_get_value( &g_script_settings->db_collection, g_script_settings->user, fields, field_iterator, &handler );
-
-    for( uint32_t index = 0; index != field_iterator; ++index )
-    {
-        const char * value = handler.value[index];
-        size_t length = handler.length[index];
-
-        lua_pushlstring( L, value, length );
-    }
-
-    hb_db_value_destroy( &handler );
-
-    return field_iterator;
-}
+extern int __hb_script_server_GetCurrentUserData( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
@@ -82,13 +40,16 @@ static const struct luaL_Reg globalLib[] = {
 {NULL, NULL} /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
-static jmp_buf g_hb_lua_panic_jump;
+static const struct luaL_Reg serverLib[] = {
+    { "GetCurrentUserData", &__hb_script_server_GetCurrentUserData },
+{ NULL, NULL } /* end of array */
+};
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_panic( lua_State * L )
 {
     HB_UNUSED( L );
 
-    longjmp( g_hb_lua_panic_jump, 1 );
+    longjmp( g_script_settings->panic_jump, 1 );
 }
 //////////////////////////////////////////////////////////////////////////
 int hb_script_initialize(const char * _user )
@@ -101,14 +62,14 @@ int hb_script_initialize(const char * _user )
         return 0;
     }
 
-    lua_State * L = luaL_newstate();
-
-    if( setjmp( g_hb_lua_panic_jump ) == 1 )
+    if( setjmp( g_script_settings->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
         return 0;
     }
+
+    lua_State * L = luaL_newstate();
 
     lua_atpanic( L, &__hb_lua_panic );
 
@@ -123,24 +84,30 @@ int hb_script_initialize(const char * _user )
     luaL_setfuncs( L, globalLib, 0 );
 
     lua_newtable( L );
-    lua_pushstring( L, "GetCurrentUserData" );
-    lua_pushcfunction( L, &__server_GetCurrentUserData );
-    lua_settable( L, -3 );
-
+    lua_setglobal( L, "api" );
+    
+    lua_newtable( L );
+    luaL_setfuncs( L, serverLib, 0 );
     lua_setglobal( L, "server" );
 
-    g_L = L;
+    g_script_settings->L = L;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
+    if( setjmp( g_script_settings->panic_jump ) == 1 )
+    {
+        /* recovered from panic. log and return */
+
+        return;
+    }
+
     hb_db_collection_destroy( &g_script_settings->db_collection );
 
-    lua_close( g_L );
-
-    g_L = HB_NULLPTR;
+    lua_close( g_script_settings->L );
+    g_script_settings->L = HB_NULLPTR;
 
     HB_DELETE( g_script_settings );
     g_script_settings = HB_NULLPTR;
@@ -148,22 +115,36 @@ void hb_script_finalize()
 //////////////////////////////////////////////////////////////////////////
 int hb_script_load( const void * _buffer, size_t _size )
 {
-    int status = luaL_loadbufferx( g_L, _buffer, _size, "script", HB_NULLPTR );
-
-    if( status != LUA_OK )
+    if( setjmp( g_script_settings->panic_jump ) == 1 )
     {
-        const char * e = lua_tostring( g_L, -1 );
-        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
-
-        lua_pop( g_L, 1 );  /* pop error message from the stack */
+        /* recovered from panic. log and return */
 
         return 0;
     }
 
-    int ret = lua_pcallk( g_L, 0, 0, 0, 0, HB_NULLPTR );
+    lua_State * L = g_script_settings->L;
+
+    int status = luaL_loadbufferx( L, _buffer, _size, "script", HB_NULLPTR );
+
+    if( status != LUA_OK )
+    {
+        const char * e = lua_tostring( L, -1 );
+        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
+
+        lua_pop( L, 1 );  /* pop error message from the stack */
+
+        return 0;
+    }
+
+    int ret = lua_pcallk( L, 0, 0, 0, 0, HB_NULLPTR );
 
     if( ret != 0 )
     {
+        const char * e = lua_tostring( L, -1 );
+        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
+
+        lua_pop( L, 1 );  /* pop error message from the stack */
+
         return 0;
     }
 
@@ -174,24 +155,33 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
 {
     HB_UNUSED( _capacity );
 
-    lua_getglobal( g_L, "server" );
-    lua_getfield( g_L, -1, _method );
+    if( setjmp( g_script_settings->panic_jump ) == 1 )
+    {
+        /* recovered from panic. log and return */
+
+        return 0;
+    }
+
+    lua_State * L = g_script_settings->L;
+
+    lua_getglobal( L, "api" );
+    lua_getfield( L, -1, _method );
     
-    int res = luaL_loadbufferx( g_L, _data, _size, HB_NULLPTR, HB_NULLPTR );
+    int res = luaL_loadbufferx( L, _data, _size, HB_NULLPTR, HB_NULLPTR );
 
     if( res != LUA_OK )
     {
-        const char * e = lua_tostring( g_L, -1 );
+        const char * e = lua_tostring( L, -1 );
         hb_log_message( "script", HB_LOG_ERROR, "%s", e );
 
         return 0;
     }
 
-    int status2 = lua_pcallk( g_L, 0, 1, 0, 0, HB_NULLPTR );
+    int status2 = lua_pcallk( L, 0, 1, 0, 0, HB_NULLPTR );
 
     if( status2 != LUA_OK )
     {
-        const char * error_msg = lua_tolstring( g_L, -1, HB_NULLPTR );
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
         hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
             , _method
@@ -202,11 +192,11 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
         return 0;
     }
     
-    int status = lua_pcallk( g_L, 1, 1, 0, 0, HB_NULLPTR );
+    int status = lua_pcallk( L, 1, 1, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
     {
-        const char * error_msg = lua_tolstring( g_L, -1, HB_NULLPTR );
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
         hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
             , _method
@@ -219,31 +209,31 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
 
     strcpy( _result, "{" );
 
-    lua_pushnil( g_L );
-    int it = lua_next( g_L, -2 );
+    lua_pushnil( L );
+    int it = lua_next( L, -2 );
     while( it != 0 )
     {
-        const char * key = lua_tostring( g_L, -2 );
+        const char * key = lua_tostring( L, -2 );
 
-        if( lua_isinteger( g_L, -1 ) == 1 )
+        if( lua_isinteger( L, -1 ) == 1 )
         {
-            const char * value = lua_tostring( g_L, -1 );
-
-            strcat( _result, key );
-            strcat( _result, "=" );
-            strcat( _result, value );
-        }
-        else if( lua_isnumber( g_L, -1 ) == 1 )
-        {
-            const char * value = lua_tostring( g_L, -1 );
+            const char * value = lua_tostring( L, -1 );
 
             strcat( _result, key );
             strcat( _result, "=" );
             strcat( _result, value );
         }
-        else if( lua_isstring( g_L, -1 ) == 1 )
+        else if( lua_isnumber( L, -1 ) == 1 )
         {
-            const char * value = lua_tostring( g_L, -1 );
+            const char * value = lua_tostring( L, -1 );
+
+            strcat( _result, key );
+            strcat( _result, "=" );
+            strcat( _result, value );
+        }
+        else if( lua_isstring( L, -1 ) == 1 )
+        {
+            const char * value = lua_tostring( L, -1 );
 
             strcat( _result, key );
             strcat( _result, "=\"" );
@@ -251,9 +241,9 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
             strcat( _result, "\"" );
         }
 
-        lua_pop( g_L, 1 );
+        lua_pop( L, 1 );
 
-        it = lua_next( g_L, -2 );
+        it = lua_next( L, -2 );
 
         if( it == 0 )
         {
@@ -265,7 +255,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
 
     strcat( _result, "}" );
 
-    lua_pop( g_L, 1 );
+    lua_pop( L, 1 );
 
     return 1;
 }

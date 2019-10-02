@@ -96,7 +96,12 @@ int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id,
     bson_destroy( &fields );
 
     const bson_t * data;
-    mongoc_cursor_next( cursor, &data );
+    if( mongoc_cursor_next( cursor, &data ) == false )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        return 0;
+    }
 
     bson_iter_t iter;
     if( bson_iter_init( &iter, data ) == false )

@@ -50,7 +50,9 @@ int hb_file_open_read( const char * _path, hb_file_handler_t * _handler )
     strcpy( fullpath, g_file_settings->folder );
     strncat( fullpath, _path, 2 );
     strcat( fullpath, "/" );
-    strcat( fullpath, _path + 2 );
+    strncat( fullpath, _path + 2, 2 );
+    strcat( fullpath, "/" );
+    strcat( fullpath, _path + 4 );
 
     FILE * f = fopen( fullpath, "rb" );
 
@@ -95,7 +97,12 @@ int hb_file_open_write( const char * _path, hb_file_handler_t * _handler )
 
     __hb_file_make_directory( fullpath );
 
-    strcat( fullpath, _path + 2 );
+    strncat( fullpath, _path + 2, 2 );
+    strcat( fullpath, "/" );
+
+    __hb_file_make_directory( fullpath );
+
+    strcat( fullpath, _path + 4 );
 
     FILE * f = fopen( fullpath, "wb" );
 
