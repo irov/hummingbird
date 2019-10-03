@@ -11,3 +11,5 @@ call cmake -G "Visual Studio 16 2019" -A Win32 -S "%CD%\..\..\..\cmake\dependenc
 call cmake --build .\ --config %CONFIGURATION%
 
 @popd
+
+@pause
