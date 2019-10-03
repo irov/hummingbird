@@ -18,7 +18,7 @@ static void __hb_log_observer( const char * _category, int _level, const char * 
     printf( "[%s] %s: %s\n", _category, ls[_level], _message );
 }
 //////////////////////////////////////////////////////////////////////////
-int main( int _argc, const char * _argv[] )
+int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
