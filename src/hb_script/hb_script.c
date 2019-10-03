@@ -4,6 +4,7 @@
 
 #include "hb_script_settings.h"
 
+#include <malloc.h>
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,58 @@ static int __hb_lua_panic( lua_State * L )
     longjmp( g_script_settings->panic_jump, 1 );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_initialize(const char * _user )
+static void * __hb_lua_alloc( void * ud, void * ptr, size_t osize, size_t nsize )
+{
+    HB_UNUSED( ud );
+
+    hb_script_settings_t * g = g_script_settings;
+
+    if( ptr == HB_NULLPTR )
+    {
+        osize = 0;
+    }
+
+    if( g->memory_limit < g->memory_used + nsize - osize )
+    {
+        return HB_NULLPTR;
+    }
+
+    g->memory_used += nsize;
+    g->memory_used -= osize;
+
+    if( g->memory_used > g->memory_peak )
+    {
+        g->memory_peak = g->memory_used;
+    }
+    
+    if( nsize == 0 )
+    {
+        free( ptr );
+
+        return HB_NULLPTR;
+    }
+    else
+    {
+        void * nptr = realloc( ptr, nsize );
+
+        return nptr;
+    }
+}
+//////////////////////////////////////////////////////////////////////////
+static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
+{
+    HB_UNUSED( L );
+    HB_UNUSED( ar );
+
+    if( ++g_script_settings->call_used == g_script_settings->call_limit )
+    {
+        luaL_error( L, "call limit" );
+    }
+
+    return;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_script_initialize( const char * _user, size_t _memorylimit, size_t _calllimit )
 {
     g_script_settings = HB_NEW( hb_script_settings_t );
     strcpy( g_script_settings->user, _user );
@@ -69,7 +121,15 @@ int hb_script_initialize(const char * _user )
         return 0;
     }
 
-    lua_State * L = luaL_newstate();
+    g_script_settings->memory_base = 0;
+    g_script_settings->memory_used = 0;
+    g_script_settings->memory_peak = 0;
+    g_script_settings->memory_limit = _memorylimit;
+
+    lua_State * L = lua_newstate( &__hb_lua_alloc, HB_NULLPTR );
+
+    lua_gc( L, LUA_GCCOLLECT, 0 );
+    lua_gc( L, LUA_GCSTOP, 0 );
 
     lua_atpanic( L, &__hb_lua_panic );
 
@@ -87,8 +147,19 @@ int hb_script_initialize(const char * _user )
     lua_setglobal( L, "api" );
     
     lua_newtable( L );
-    luaL_setfuncs( L, serverLib, 0 );
     lua_setglobal( L, "server" );
+
+    lua_getglobal( L, "server" );
+    luaL_setfuncs( L, serverLib, 0 );
+
+
+    g_script_settings->call_used = 0;
+    g_script_settings->call_limit = _calllimit;
+    lua_sethook( L, &__hb_lua_hook, LUA_MASKCOUNT, 1 );
+
+    size_t memory_used = g_script_settings->memory_used;
+    g_script_settings->memory_base = memory_used;
+    g_script_settings->memory_limit += memory_used;
 
     g_script_settings->L = L;
 
@@ -104,8 +175,11 @@ void hb_script_finalize()
         return;
     }
 
+    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_settings->memory_peak - g_script_settings->memory_base, g_script_settings->memory_limit - g_script_settings->memory_base, (float)(g_script_settings->memory_peak - g_script_settings->memory_base) / (float)(g_script_settings->memory_limit - g_script_settings->memory_base) * 100.f );
+    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_settings->call_used, g_script_settings->call_limit, (float)(g_script_settings->call_used) / (float)(g_script_settings->call_limit) * 100.f );
+    
     hb_db_collection_destroy( &g_script_settings->db_collection );
-
+    
     lua_close( g_script_settings->L );
     g_script_settings->L = HB_NULLPTR;
 
@@ -167,12 +241,18 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     lua_getglobal( L, "api" );
     lua_getfield( L, -1, _method );
     
-    int res = luaL_loadbufferx( L, _data, _size, HB_NULLPTR, HB_NULLPTR );
+    char lua_data[2048] = {"return "};
+    strncat( lua_data, _data, _size );
+
+    int res = luaL_loadbufferx( L, lua_data, _size + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
 
     if( res != LUA_OK )
     {
-        const char * e = lua_tostring( L, -1 );
-        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
+
+        hb_log_message( "script", HB_LOG_ERROR, "%s"
+            , error_msg 
+        );
 
         return 0;
     }
@@ -207,12 +287,14 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
         return 0;
     }
 
-    lua_Integer successful = lua_tointeger( L, -2 );
+    int successful = lua_toboolean( L, -2 );
 
     if( successful == 0 )
     {
-        strcpy( _result, "{}" );
+        lua_pop( L, 2 );
 
+        strcpy( _result, "{}" );
+        
         return 1;
     }
 
@@ -264,7 +346,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
 
     strcat( _result, "}" );
 
-    lua_pop( L, 1 );
+    lua_pop( L, 2 );
 
     return 1;
 }
