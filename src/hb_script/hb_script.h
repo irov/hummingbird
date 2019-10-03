@@ -3,7 +3,7 @@
 
 #include "hb_config/hb_config.h"
 
-int hb_script_initialize( const char * _user );
+int hb_script_initialize( const char * _user, size_t _memorylimit, size_t _calllimit );
 void hb_script_finalize();
 
 int hb_script_load( const void * _buffer, size_t _size );

@@ -1,5 +1,6 @@
 #include "hb_node.h"
 
+#include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
 #include "hb_storage/hb_storage.h"
@@ -9,16 +10,25 @@
 #include <stdio.h>
 #include <string.h>
 
+//////////////////////////////////////////////////////////////////////////
+static void __hb_log_observer( const char * _category, int _level, const char * _message )
+{    
+    const char * ls[] = {"info", "warning", "error", "critical"};
+
+    printf( "[%s] %s: %s\n", _category, ls[_level], _message );
+}
+//////////////////////////////////////////////////////////////////////////
 int main( int _argc, const char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
+    hb_log_initialize();
+    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
     hb_db_initialze( "hb_grid", "mongodb://localhost:27017" );
     hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
     hb_file_initialize( ".store/" );
-
-    hb_script_initialize( "5d932e6820cdb53b7c26b73f" );
+    hb_script_initialize( "5d932e6820cdb53b7c26b73f", 10240, 10240 );
 
     FILE * f = fopen( "server.lua", "rb" );
     fseek( f, 0L, SEEK_END );
@@ -48,7 +58,7 @@ int main( int _argc, const char * _argv[] )
     }
 
     char res[1024];
-    if( hb_script_call( "test", "return {test=17}", strlen( "return {test=17}" ), res, 1024 ) == 0 )
+    if( hb_script_call( "test", "{test=17}", strlen( "{test=17}" ), res, 1024 ) == 0 )
     {
         return EXIT_FAILURE;
     }

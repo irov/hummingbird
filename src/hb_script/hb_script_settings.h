@@ -15,6 +15,14 @@ typedef struct hb_script_settings_t
 
     jmp_buf panic_jump;
 
+    size_t memory_base;
+    size_t memory_used;
+    size_t memory_peak;
+    size_t memory_limit;
+
+    uint32_t call_used;
+    uint32_t call_limit;
+
     char user[32];
 
     hb_db_collection_handler_t db_collection;
