@@ -1,0 +1,11 @@
+PROJECT(hb_process C)
+
+ADD_FILTER(
+src
+	hb_process.h
+	hb_process.c
+)
+
+ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_process)

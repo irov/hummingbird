@@ -7,6 +7,6 @@ int hb_script_initialize( const char * _user, size_t _memorylimit, size_t _calll
 void hb_script_finalize();
 
 int hb_script_load( const void * _buffer, size_t _size );
-int hb_script_call( const char * _method, const char * _data, size_t _size, char * _result, size_t _capacity );
+int hb_script_call( const char * _method, size_t _methodsize, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize );
 
 #endif

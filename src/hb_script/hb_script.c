@@ -225,7 +225,7 @@ int hb_script_load( const void * _buffer, size_t _size )
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_call( const char * _method, const char * _data, size_t _size, char * _result, size_t _capacity )
+int hb_script_call( const char * _method, size_t _methodsize, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
 {
     HB_UNUSED( _capacity );
 
@@ -239,12 +239,17 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     lua_State * L = g_script_settings->L;
 
     lua_getglobal( L, "api" );
-    lua_getfield( L, -1, _method );
+
+    char lua_method[64];
+    strncpy( lua_method, _method, _methodsize );
+    lua_method[_methodsize] = '\0';
+
+    lua_getfield( L, -1, lua_method );
     
     char lua_data[2048] = {"return "};
-    strncat( lua_data, _data, _size );
+    strncat( lua_data, _data, _datasize );
 
-    int res = luaL_loadbufferx( L, lua_data, _size + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
+    int res = luaL_loadbufferx( L, lua_data, _datasize + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
 
     if( res != LUA_OK )
     {
@@ -294,8 +299,10 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
         lua_pop( L, 2 );
 
         strcpy( _result, "{}" );
+
+        *_resultsize = 2;
         
-        return 1;
+        return -1;
     }
 
     strcpy( _result, "{" );
@@ -345,6 +352,8 @@ int hb_script_call( const char * _method, const char * _data, size_t _size, char
     }
 
     strcat( _result, "}" );
+
+    *_resultsize = strlen( _result );
 
     lua_pop( L, 2 );
 

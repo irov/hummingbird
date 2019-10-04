@@ -4,7 +4,10 @@
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
 #include "hb_storage/hb_storage.h"
+#include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_file/hb_file.h"
+#include "hb_utils/hb_getopt.h"
+#include "hb_utils/hb_httpopt.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,6 +32,24 @@ int main( int _argc, char * _argv[] )
     hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
     hb_file_initialize( ".store/" );
     hb_script_initialize( "5d932e6820cdb53b7c26b73f", 10240, 10240 );
+
+    const char * sm_name;
+    hb_getopt( _argc, _argv, "--sm", &sm_name );
+
+    hb_sharedmemory_handler_t sharedmemory_handler;
+    hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handler );
+
+    size_t httpoptions_size;
+    char httpoptions[2048];
+    hb_sharedmemory_read( &sharedmemory_handler, httpoptions, 2048, &httpoptions_size );
+
+    const char * script_func;
+    size_t script_func_size;
+    hb_httpopt( httpoptions, httpoptions_size, "func", &script_func, &script_func_size );
+
+    const char * script_data;
+    size_t script_data_size;
+    hb_httpopt( httpoptions, httpoptions_size, "data", &script_data, &script_data_size );
 
     FILE * f = fopen( "server.lua", "rb" );
     fseek( f, 0L, SEEK_END );
@@ -57,13 +78,23 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    char res[1024];
-    if( hb_script_call( "test", "{test=17}", strlen( "{test=17}" ), res, 1024 ) == 0 )
+    size_t scriptr_result_size;
+    char scriptr_result[2048];
+    if( hb_script_call( script_func, script_func_size, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
     hb_script_finalize();
+    hb_file_finialize();
+    hb_storage_finalize();
+    hb_db_finalize();
+
+    hb_sharedmemory_rewind( &sharedmemory_handler );
+    hb_sharedmemory_write( &sharedmemory_handler, scriptr_result, scriptr_result_size );
+    hb_sharedmemory_destroy( &sharedmemory_handler );
+
+    hb_log_finalize();
 
     return EXIT_SUCCESS;
 }
