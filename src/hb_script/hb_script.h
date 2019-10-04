@@ -3,10 +3,13 @@
 
 #include "hb_config/hb_config.h"
 
-int hb_script_initialize( const char * _user, size_t _memorylimit, size_t _calllimit );
+int hb_script_initialize( size_t _memorylimit, size_t _calllimit );
 void hb_script_finalize();
 
-int hb_script_load( const void * _buffer, size_t _size );
-int hb_script_call( const char * _method, size_t _methodsize, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize );
+int hb_script_user_initialize( const char * _user );
+void hb_script_user_finalize();
+
+int hb_script_user_load( const void * _buffer, size_t _size );
+int hb_script_user_call( const char * _method, size_t _methodsize, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize );
 
 #endif

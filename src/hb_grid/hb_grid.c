@@ -38,8 +38,10 @@ static void __hb_ev_on_request( struct evhttp_request * _request, void * _ud )
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
     HB_UNUSED( input_buffer );
 
+    size_t length = evbuffer_get_length( input_buffer );
+
     uint8_t copyout_buffer[2048];
-    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, 2048 );
+    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
     HB_UNUSED( copyout_buffer_size );
 
     hb_sharedmemory_write( &handler->sharedmemory, copyout_buffer, copyout_buffer_size );
