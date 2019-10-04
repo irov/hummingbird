@@ -4,8 +4,10 @@ ADD_FILTER(
 src
 	hb_script.h
 	hb_script.c
+    hb_script_compiler.h
+    hb_script_compiler.c
     
-    hb_script_settings.h
+    hb_script_handler.h
     
     hb_script_server_GetCurrentUserData.c
 )

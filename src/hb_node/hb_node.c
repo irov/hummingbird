@@ -3,6 +3,7 @@
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
+#include "hb_script/hb_script_compiler.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_file/hb_file.h"
@@ -33,24 +34,6 @@ int main( int _argc, char * _argv[] )
     hb_file_initialize( ".store/" );
     hb_script_initialize( "5d932e6820cdb53b7c26b73f", 10240, 10240 );
 
-    const char * sm_name;
-    hb_getopt( _argc, _argv, "--sm", &sm_name );
-
-    hb_sharedmemory_handler_t sharedmemory_handler;
-    hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handler );
-
-    size_t httpoptions_size;
-    char httpoptions[2048];
-    hb_sharedmemory_read( &sharedmemory_handler, httpoptions, 2048, &httpoptions_size );
-
-    const char * script_func;
-    size_t script_func_size;
-    hb_httpopt( httpoptions, httpoptions_size, "func", &script_func, &script_func_size );
-
-    const char * script_data;
-    size_t script_data_size;
-    hb_httpopt( httpoptions, httpoptions_size, "data", &script_data, &script_data_size );
-
     FILE * f = fopen( "server.lua", "rb" );
     fseek( f, 0L, SEEK_END );
     long sz = ftell( f );
@@ -60,10 +43,50 @@ int main( int _argc, char * _argv[] )
     fread( fbuf, sz, 1, f );
     fclose( f );
 
+    size_t code_size;
+    uint8_t code_buffer[10240];
+    if( hb_script_compiler( fbuf, sz, code_buffer, 10240, &code_size ) == 0 )
+    {
+        return 0;
+    }
+
     uint8_t sha1[20];
-    if( hb_storage_set( fbuf, sz, sha1 ) == 0 )
+    if( hb_storage_set( code_buffer, code_size, sha1 ) == 0 )
     {
         return EXIT_FAILURE;
+    }
+
+    const char * sm_name;
+    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    {
+        return 0;
+    }
+
+    hb_sharedmemory_handler_t sharedmemory_handler;
+    if( hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handler ) == 0 )
+    {
+        return 0;
+    }
+
+    size_t httpoptions_size;
+    char httpoptions[2048];
+    if( hb_sharedmemory_read( &sharedmemory_handler, httpoptions, 2048, &httpoptions_size ) == 0 )
+    {
+        return 0;
+    }
+
+    const char * script_func;
+    size_t script_func_size;
+    if( hb_httpopt( httpoptions, httpoptions_size, "func", &script_func, &script_func_size ) == 0 )
+    {
+        return 0;
+    }
+
+    const char * script_data;
+    size_t script_data_size;
+    if( hb_httpopt( httpoptions, httpoptions_size, "data", &script_data, &script_data_size ) == 0 )
+    {
+        return 0;
     }
 
     size_t fbufl;
