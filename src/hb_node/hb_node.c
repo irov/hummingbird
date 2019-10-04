@@ -32,7 +32,8 @@ int main( int _argc, char * _argv[] )
     hb_db_initialze( "hb_grid", "mongodb://localhost:27017" );
     hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
     hb_file_initialize( ".store/" );
-    hb_script_initialize( "5d932e6820cdb53b7c26b73f", 10240, 10240 );
+    hb_script_initialize( 10240, 10240 );
+    hb_script_user_initialize( "5d932e6820cdb53b7c26b73f" );
 
     FILE * f = fopen( "server.lua", "rb" );
     fseek( f, 0L, SEEK_END );
@@ -96,18 +97,19 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_script_load( fbufg, fbufl ) == 0 )
+    if( hb_script_user_load( fbufg, fbufl ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
     size_t scriptr_result_size;
     char scriptr_result[2048];
-    if( hb_script_call( script_func, script_func_size, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == 0 )
+    if( hb_script_user_call( script_func, script_func_size, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
+    hb_script_user_finalize();
     hb_script_finalize();
     hb_file_finialize();
     hb_storage_finalize();
