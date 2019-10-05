@@ -12,8 +12,6 @@
 #include <memory.h>
 
 //////////////////////////////////////////////////////////////////////////
-extern struct hb_script_handler_t * g_script_handler;
-//////////////////////////////////////////////////////////////////////////
 typedef struct hb_script_writer_desc_t
 {    
     size_t carriage;
@@ -42,7 +40,7 @@ static int writer( lua_State * L, const void * p, size_t size, void * u )
 //////////////////////////////////////////////////////////////////////////
 int hb_script_compiler( const void * _source, size_t _size, void * _code, size_t _capacity, size_t * _compilesize )
 {
-    lua_State * L = g_script_handler->L;
+    lua_State * L = luaL_newstate();
 
     int ret_loadbuffer = luaL_loadbufferx( L, _source, _size, "compiler", HB_NULLPTR );
 
@@ -62,6 +60,8 @@ int hb_script_compiler( const void * _source, size_t _size, void * _code, size_t
 
     luaU_dump( L, f, writer, &desc, 1 );
 
+    lua_close( L );
+    
     *_compilesize = desc.carriage;
     
     return 1;

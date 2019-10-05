@@ -1,7 +1,5 @@
 #include "hb_file.h"
 
-#include "hb_config/hb_config.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
