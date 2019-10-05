@@ -302,17 +302,6 @@ int hb_script_user_call( const char * _method, size_t _methodsize, const char * 
 
     int successful = lua_toboolean( L, -2 );
 
-    if( successful == 0 )
-    {
-        lua_pop( L, 2 );
-
-        strcpy( _result, "{}" );
-
-        *_resultsize = 2;
-        
-        return -1;
-    }
-
     strcpy( _result, "{" );
 
     lua_pushnil( L );
@@ -364,6 +353,11 @@ int hb_script_user_call( const char * _method, size_t _methodsize, const char * 
     *_resultsize = strlen( _result );
 
     lua_pop( L, 2 );
+
+    if( successful == 0 )
+    {
+        return -1;
+    }
 
     return 1;
 }

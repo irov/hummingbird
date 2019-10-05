@@ -7,12 +7,15 @@
 #include "hb_storage/hb_storage.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_file/hb_file.h"
+#include "hb_json/hb_json.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, int _level, const char * _message )
@@ -69,23 +72,29 @@ int main( int _argc, char * _argv[] )
         return 0;
     }
 
-    size_t httpoptions_size;
-    char httpoptions[2048];
-    if( hb_sharedmemory_read( &sharedmemory_handler, httpoptions, 2048, &httpoptions_size ) == 0 )
+    size_t data_size;
+    char data[2048];
+    if( hb_sharedmemory_read( &sharedmemory_handler, data, 2048, &data_size ) == 0 )
     {
         return 0;
     }
 
-    const char * script_func;
-    size_t script_func_size;
-    if( hb_httpopt( httpoptions, httpoptions_size, "func", &script_func, &script_func_size ) == 0 )
+    hb_json_handler_t json_handler;
+    if( hb_json_create( data, data_size, &json_handler ) == 0 )
     {
         return 0;
     }
 
-    const char * script_data;
+    size_t script_cmd_size;
+    const char * script_cmd;    
+    if( hb_json_get_string( &json_handler, "f", &script_cmd, &script_cmd_size ) == 0 )
+    {
+        return 0;
+    }
+        
     size_t script_data_size;
-    if( hb_httpopt( httpoptions, httpoptions_size, "data", &script_data, &script_data_size ) == 0 )
+    char script_data[10240];
+    if( hb_json_dumpb_value( &json_handler, "d", script_data, 10240, &script_data_size ) == 0 )
     {
         return 0;
     }
@@ -104,7 +113,7 @@ int main( int _argc, char * _argv[] )
 
     size_t scriptr_result_size;
     char scriptr_result[2048];
-    if( hb_script_user_call( script_func, script_func_size, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == 0 )
+    if( hb_script_user_call( script_cmd, script_cmd_size, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == 0 )
     {
         return EXIT_FAILURE;
     }

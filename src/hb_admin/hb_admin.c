@@ -9,10 +9,14 @@
 #include "hb_file/hb_file.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
+#include "hb_utils/hb_multipart.h"
+#include "hb_utils/hb_memmem.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, int _level, const char * _message )
@@ -26,6 +30,8 @@ int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
+
+    MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
@@ -42,8 +48,15 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    size_t sm_boundary_size;
+    char sm_boundary[2048];
+    if( hb_sharedmemory_read( &sharedmemory_handler, sm_boundary, 2048, &sm_boundary_size ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
+
     size_t sm_data_size;
-    char sm_data[2048];
+    uint8_t sm_data[10240];
     if( hb_sharedmemory_read( &sharedmemory_handler, sm_data, 2048, &sm_data_size ) == 0 )
     {
         return EXIT_FAILURE;
@@ -57,17 +70,20 @@ int main( int _argc, char * _argv[] )
 
     hb_db_initialze( "admin", db_uri );
 
-    const char * db_cmd;
-    if( hb_getopt( _argc, _argv, "--cmd", &db_cmd ) == 0 )
+    const char * cmd;
+    if( hb_getopt( _argc, _argv, "--cmd", &cmd ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    if( strcmp( db_cmd, "upload_script" ) == 0 )
+    if( strcmp( cmd, "upload" ) == 0 )
     {
         hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
-        hb_script_initialize( 10240, 10240 );
 
+        uint32_t multipart_params_count;
+        multipart_params_desc_t multipart_params[8];
+        hb_multipart_parse( sm_boundary, sm_boundary_size, multipart_params, 8, sm_data, sm_data_size, &multipart_params_count );
+       
         size_t code_size;
         uint8_t code_buffer[10240];
         if( hb_script_compiler( sm_data, sm_data_size, code_buffer, 10240, &code_size ) == 0 )
@@ -82,7 +98,6 @@ int main( int _argc, char * _argv[] )
         }
 
         hb_storage_finalize();
-        hb_script_finalize();
     }
 
     hb_db_finalize();

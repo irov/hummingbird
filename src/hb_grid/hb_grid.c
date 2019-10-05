@@ -3,12 +3,21 @@
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_process/hb_process.h"
 #include "hb_log/hb_log.h"
+#include "hb_utils/hb_memmem.h"
+#include "hb_utils/hb_multipart.h"
 
 #include "evhttp.h"
 #include "event2/thread.h"
 
 #include <process.h>
 
+//////////////////////////////////////////////////////////////////////////
+static void __hb_log_observer( const char * _category, int _level, const char * _message )
+{
+    const char * ls[] = { "info", "warning", "error", "critical" };
+
+    printf( "[%s] %s: %s\n", _category, ls[_level], _message );
+}
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_process_handler_t
 {
@@ -23,7 +32,7 @@ typedef struct hb_grid_process_handler_t
     hb_sharedmemory_handler_t sharedmemory;
 } hb_grid_process_handler_t;
 //////////////////////////////////////////////////////////////////////////
-static void __hb_ev_on_request( struct evhttp_request * _request, void * _ud )
+static void __hb_ev_on_request_api( struct evhttp_request * _request, void * _ud )
 {
     HB_UNUSED( _request );
     
@@ -32,8 +41,11 @@ static void __hb_ev_on_request( struct evhttp_request * _request, void * _ud )
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
 
-    struct evkeyvalq * keyval = evhttp_request_get_input_headers( _request );
-    HB_UNUSED( keyval );
+    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
+    HB_UNUSED( headers );
+
+    const char * content_type = evhttp_find_header( headers, "Content-Type" );
+    HB_UNUSED( content_type );
 
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
     HB_UNUSED( input_buffer );
@@ -71,6 +83,72 @@ static void __hb_ev_on_request( struct evhttp_request * _request, void * _ud )
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }
 //////////////////////////////////////////////////////////////////////////
+static void __hb_ev_on_request_upload( struct evhttp_request * _request, void * _ud )
+{
+    HB_UNUSED( _request );
+
+    hb_grid_process_handler_t * handler = (hb_grid_process_handler_t *)_ud;
+
+    enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
+    HB_UNUSED( command_type );
+
+    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
+    HB_UNUSED( headers );
+
+    const char * content_type = evhttp_find_header( headers, "Content-Type" );
+    HB_UNUSED( content_type );
+
+    const char * content_type_boundary = strstr( content_type, "boundary=" );
+    content_type_boundary += sizeof( "boundary=" ) - 1;
+
+    char boundary[64];
+    sprintf( boundary, "--%s", content_type_boundary );
+
+    size_t boundary_size = strlen( boundary );
+
+    hb_sharedmemory_write( &handler->sharedmemory, boundary, boundary_size );
+
+    struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
+    
+    size_t length = evbuffer_get_length( input_buffer );
+
+    uint8_t copyout_buffer[2048];
+    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
+
+
+
+    hb_sharedmemory_write( &handler->sharedmemory, copyout_buffer, copyout_buffer_size );
+
+    const char * cmd = "upload";
+    const char * mongodb = "mongodb://localhost:27017";
+
+    char process_command[64];
+    sprintf( process_command, "--sm %s --cmd %s --db %s"
+        , handler->sharedmemory.name
+        , cmd
+        , mongodb
+    );
+
+    hb_process_run( "hb_admin.exe", process_command );
+
+    hb_sharedmemory_rewind( &handler->sharedmemory );
+
+    size_t process_result_size;
+    char process_result[2048];
+    hb_sharedmemory_read( &handler->sharedmemory, process_result, 2048, &process_result_size );
+
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
+
+    if( output_buffer == HB_NULLPTR )
+    {
+        return;
+    }
+
+    evbuffer_add( output_buffer, process_result, process_result_size );
+
+    evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
+}
+//////////////////////////////////////////////////////////////////////////
 static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 {
     HB_UNUSED( _ud );
@@ -83,7 +161,9 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
     struct evhttp * http_server = evhttp_new( base );
     HB_UNUSED( http_server );
 
-    evhttp_set_gencb( http_server, &__hb_ev_on_request, handler );
+    //evhttp_set_gencb( http_server, &__hb_ev_on_request, handler );
+    evhttp_set_cb( http_server, "/api", __hb_ev_on_request_api, handler );
+    evhttp_set_cb( http_server, "/upload", __hb_ev_on_request_upload, handler );
 
     if( *handler->ev_socket == -1 )
     {
@@ -110,6 +190,8 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argv );
 
     hb_log_initialize();
+    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
+
 
     //char const server_address[] = "127.0.0.1";
     //char const server_address[] = "0.0.0.0";
@@ -174,6 +256,8 @@ int main( int _argc, char * _argv[] )
     HB_DELETE( process_handlers );
 
     WSACleanup();
+
+    hb_log_finalize();
 
     return EXIT_SUCCESS;
 }

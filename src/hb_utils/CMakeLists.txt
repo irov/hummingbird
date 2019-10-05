@@ -10,6 +10,12 @@ src
     
     hb_httpopt.h
     hb_httpopt.c
+    
+    hb_memmem.h
+    hb_memmem.c
+    
+    hb_multipart.h
+    hb_multipart.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

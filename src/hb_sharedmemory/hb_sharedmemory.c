@@ -68,15 +68,13 @@ int hb_sharedmemory_write( hb_sharedmemory_handler_t * _handler, const void * _b
 
     uint32_t u32_size = (uint32_t)_size;
 
-    uint8_t * pBuf = (uint8_t *)_handler->buffer;
-
-    CopyMemory( (PVOID)pBuf, &u32_size, sizeof( u32_size ) );
+    uint8_t * pBufSize = (uint8_t *)_handler->buffer + _handler->carriage;
+    CopyMemory( (PVOID)pBufSize, &u32_size, sizeof( u32_size ) );
 
     _handler->carriage += 4;
 
-    pBuf += _handler->carriage;
-
-    CopyMemory( (PVOID)pBuf, _buffer, _size );
+    uint8_t * pBufData = (uint8_t *)_handler->buffer + _handler->carriage;
+    CopyMemory( (PVOID)pBufData, _buffer, _size );
 
     _handler->carriage += _size;
 
@@ -115,10 +113,10 @@ int hb_sharedmemory_read( hb_sharedmemory_handler_t * _handler, void * _buffer, 
         return 0;
     }
 
-    uint8_t * pBuf = (uint8_t *)_handler->buffer;
+    uint8_t * pBufSize = (uint8_t *)_handler->buffer + _handler->carriage;
 
     uint32_t u32_size;
-    CopyMemory( &u32_size, pBuf, sizeof( u32_size ) );
+    CopyMemory( &u32_size, pBufSize, sizeof( u32_size ) );
 
     if( _capacity < u32_size )
     {
@@ -132,9 +130,9 @@ int hb_sharedmemory_read( hb_sharedmemory_handler_t * _handler, void * _buffer, 
         return 0;
     }
 
-    pBuf += _handler->carriage;
+    uint8_t * pBufData = (uint8_t *)_handler->buffer + _handler->carriage;
 
-    CopyMemory( _buffer, pBuf, u32_size );
+    CopyMemory( _buffer, pBufData, u32_size );
 
     _handler->carriage += u32_size;
 
