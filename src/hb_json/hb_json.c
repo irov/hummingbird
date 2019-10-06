@@ -35,7 +35,7 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
     return _buflen;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_create( const void * _data, size_t _size, hb_json_handler_t * _handler )
+int hb_json_create( const void * _data, size_t _size, hb_json_handle_t * _handle )
 {
     hb_json_load_data_t jd;
     jd.buffer = (const uint8_t *)(_data);
@@ -58,21 +58,21 @@ int hb_json_create( const void * _data, size_t _size, hb_json_handler_t * _handl
         return 0;
     }
 
-    _handler->handler = jroot;
+    _handle->handle = jroot;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_json_destroy( hb_json_handler_t * _handler )
+void hb_json_destroy( hb_json_handle_t * _handle )
 {
-    json_t * jroot = (json_t *)_handler->handler;
+    json_t * jroot = (json_t *)_handle->handle;
 
     json_decref( jroot );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_get_string( hb_json_handler_t * _handler, const char * _key, const char ** _value, size_t * _size )
+int hb_json_get_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size )
 {
-    json_t * jroot = (json_t *)_handler->handler;
+    json_t * jroot = (json_t *)_handle->handle;
 
     json_t * jvalue = json_object_get( jroot, _key );
 
@@ -90,9 +90,9 @@ int hb_json_get_string( hb_json_handler_t * _handler, const char * _key, const c
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_dumpb_value( hb_json_handler_t * _handler, const char * _key, char * _buffer, size_t _capacity, size_t * _size )
+int hb_json_dumpb_value( hb_json_handle_t * _handle, const char * _key, char * _buffer, size_t _capacity, size_t * _size )
 {
-    json_t * jroot = (json_t *)_handler->handler;
+    json_t * jroot = (json_t *)_handle->handle;
 
     json_t * jvalue = json_object_get( jroot, _key );
 

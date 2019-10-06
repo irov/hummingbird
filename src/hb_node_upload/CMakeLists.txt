@@ -1,9 +1,9 @@
-PROJECT(hb_admin C)
+PROJECT(hb_node_upload C)
 
 ADD_FILTER(
 src
-	hb_admin.h
-	hb_admin.c
+	hb_node_upload.h
+	hb_node_upload.c
 )
 
 ADD_EXECUTABLE(${PROJECT_NAME} WIN32 ${HUMMINGBIRD_SOURCE_FILES})

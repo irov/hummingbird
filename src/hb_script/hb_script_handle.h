@@ -9,7 +9,7 @@
 
 #include <setjmp.h>
 
-typedef struct hb_script_handler_t
+typedef struct hb_script_handle_t
 {
     lua_State * L;
 
@@ -25,7 +25,7 @@ typedef struct hb_script_handler_t
 
     char user[32];
 
-    hb_db_collection_handler_t db_collection;
-} hb_script_handler_t;
+    hb_db_collection_handle_t db_collection;
+} hb_script_handle_t;
 
 #endif

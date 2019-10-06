@@ -1,4 +1,4 @@
-#include "hb_node.h"
+#include "hb_node_api.h"
 
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
@@ -32,7 +32,15 @@ int main( int _argc, char * _argv[] )
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
-    hb_db_initialze( "hb_grid", "mongodb://localhost:27017" );
+
+    const char * db_uri;
+    if( hb_getopt( _argc, _argv, "--db_uri", &db_uri ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
+
+    hb_db_initialze( "hb_node_api", db_uri );
+
     hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
     hb_file_initialize( ".store/" );
     hb_script_initialize( 10240, 10240 );
@@ -66,35 +74,35 @@ int main( int _argc, char * _argv[] )
         return 0;
     }
 
-    hb_sharedmemory_handler_t sharedmemory_handler;
-    if( hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handler ) == 0 )
+    hb_sharedmemory_handle_t sharedmemory_handle;
+    if( hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handle ) == 0 )
     {
         return 0;
     }
 
     size_t data_size;
     char data[2048];
-    if( hb_sharedmemory_read( &sharedmemory_handler, data, 2048, &data_size ) == 0 )
+    if( hb_sharedmemory_read( &sharedmemory_handle, data, 2048, &data_size ) == 0 )
     {
         return 0;
     }
 
-    hb_json_handler_t json_handler;
-    if( hb_json_create( data, data_size, &json_handler ) == 0 )
+    hb_json_handle_t json_handle;
+    if( hb_json_create( data, data_size, &json_handle ) == 0 )
     {
         return 0;
     }
 
     size_t script_cmd_size;
     const char * script_cmd;    
-    if( hb_json_get_string( &json_handler, "f", &script_cmd, &script_cmd_size ) == 0 )
+    if( hb_json_get_string( &json_handle, "f", &script_cmd, &script_cmd_size ) == 0 )
     {
         return 0;
     }
         
     size_t script_data_size;
     char script_data[10240];
-    if( hb_json_dumpb_value( &json_handler, "d", script_data, 10240, &script_data_size ) == 0 )
+    if( hb_json_dumpb_value( &json_handle, "d", script_data, 10240, &script_data_size ) == 0 )
     {
         return 0;
     }
@@ -124,9 +132,9 @@ int main( int _argc, char * _argv[] )
     hb_storage_finalize();
     hb_db_finalize();
 
-    hb_sharedmemory_rewind( &sharedmemory_handler );
-    hb_sharedmemory_write( &sharedmemory_handler, scriptr_result, scriptr_result_size );
-    hb_sharedmemory_destroy( &sharedmemory_handler );
+    hb_sharedmemory_rewind( &sharedmemory_handle );
+    hb_sharedmemory_write( &sharedmemory_handle, scriptr_result, scriptr_result_size );
+    hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();
 

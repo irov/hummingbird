@@ -42,7 +42,7 @@ int hb_file_available()
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_open_read( const char * _path, hb_file_handler_t * _handler )
+int hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
 {
     char fullpath[256];
     strcpy( fullpath, g_file_settings->folder );
@@ -59,13 +59,13 @@ int hb_file_open_read( const char * _path, hb_file_handler_t * _handler )
         return 0;
     }
 
-    _handler->handler = f;
+    _handle->handle = f;
 
     fseek( f, 0L, SEEK_END );
     long sz = ftell( f );
     rewind( f );
 
-    _handler->length = (size_t)sz;    
+    _handle->length = (size_t)sz;    
 
     return 1;
 }
@@ -83,7 +83,7 @@ static int __hb_file_make_directory( const char * _path )
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_open_write( const char * _path, hb_file_handler_t * _handler )
+int hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
 {
     char fullpath[256];
     strcpy( fullpath, g_file_settings->folder );
@@ -109,16 +109,16 @@ int hb_file_open_write( const char * _path, hb_file_handler_t * _handler )
         return 0;
     }
 
-    _handler->handler = f;
-    _handler->length = 0;
+    _handle->handle = f;
+    _handle->length = 0;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_read( hb_file_handler_t * _observer, void * _buffer, size_t _capacity )
+int hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _capacity )
 {
-    FILE * f = (FILE *)_observer->handler;
-    size_t sz = _observer->length;
+    FILE * f = (FILE *)_handle->handle;
+    size_t sz = _handle->length;
 
     if( sz == 0 )
     {
@@ -140,9 +140,9 @@ int hb_file_read( hb_file_handler_t * _observer, void * _buffer, size_t _capacit
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_write( hb_file_handler_t * _observer, const void * _buffer, size_t _size )
+int hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _size )
 {
-    FILE * f = (FILE *)_observer->handler;
+    FILE * f = (FILE *)_handle->handle;
 
     size_t r = fwrite( _buffer, _size, 1, f );
 
@@ -154,9 +154,9 @@ int hb_file_write( hb_file_handler_t * _observer, const void * _buffer, size_t _
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_close( hb_file_handler_t * _observer )
+int hb_file_close( hb_file_handle_t * _handle )
 {
-    FILE * f = (FILE *)_observer->handler;
+    FILE * f = (FILE *)_handle->handle;
 
     int res = fclose( f );
 
