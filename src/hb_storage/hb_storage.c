@@ -17,7 +17,7 @@ typedef struct hb_storage_settings_t
 {
     char user[25];
 
-    hb_db_collection_handler_t db_collection;
+    hb_db_collection_handle_t db_collection;
 } hb_storage_settings_t;
 //////////////////////////////////////////////////////////////////////////
 static hb_storage_settings_t * g_storage_settings;
@@ -80,50 +80,50 @@ int hb_storage_get( const uint8_t * _sha1, void * _data, size_t _capacity, size_
     {        
         hb_sha1_hex( _sha1, sha1hex );
 
-        hb_file_handler_t read_file_handler;
-        if( hb_file_open_read( sha1hex, &read_file_handler ) == 1 )
+        hb_file_handle_t read_file_handle;
+        if( hb_file_open_read( sha1hex, &read_file_handle ) == 1 )
         {
             uint8_t compress_data[HB_STORAGE_MAX_SIZE];
-            if( hb_file_read( &read_file_handler, compress_data, _capacity ) == 0 )
+            if( hb_file_read( &read_file_handle, compress_data, _capacity ) == 0 )
             {
-                hb_file_close( &read_file_handler );
+                hb_file_close( &read_file_handle );
 
                 return 0;
             }
 
-            hb_file_close( &read_file_handler );
+            hb_file_close( &read_file_handle );
 
-            hb_archive_decompress( _data, _capacity, compress_data, read_file_handler.length, _size );            
+            hb_archive_decompress( _data, _capacity, compress_data, read_file_handle.length, _size );            
 
             return 1;
         }
     }
 
-    hb_db_file_handler_t db_file_handler;
-    if( hb_db_load_file( &g_storage_settings->db_collection, _sha1, &db_file_handler ) == 0 )
+    hb_db_file_handle_t db_file_handle;
+    if( hb_db_load_file( &g_storage_settings->db_collection, _sha1, &db_file_handle ) == 0 )
     {
         return 0;
     }
 
     if( file_available )
     {
-        hb_file_handler_t write_file_handler;
-        if( hb_file_open_write( sha1hex, &write_file_handler ) == 1 )
+        hb_file_handle_t write_file_handle;
+        if( hb_file_open_write( sha1hex, &write_file_handle ) == 1 )
         {
-            if( hb_file_write( &write_file_handler, db_file_handler.buffer, db_file_handler.length ) == 0 )
+            if( hb_file_write( &write_file_handle, db_file_handle.buffer, db_file_handle.length ) == 0 )
             {
-                hb_file_close( &write_file_handler );
+                hb_file_close( &write_file_handle );
 
                 return 0;
             }
 
-            hb_file_close( &write_file_handler );
+            hb_file_close( &write_file_handle );
         }
     }
 
-    hb_archive_decompress( _data, _capacity, db_file_handler.buffer, db_file_handler.length, _size );
+    hb_archive_decompress( _data, _capacity, db_file_handle.buffer, db_file_handle.length, _size );
 
-    hb_db_close_file( &db_file_handler );
+    hb_db_close_file( &db_file_handle );
 
     return 1;
 }

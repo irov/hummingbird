@@ -1,7 +1,7 @@
-#include "hb_script_handler.h"
+#include "hb_script_handle.h"
 
 //////////////////////////////////////////////////////////////////////////
-extern struct hb_script_handler_t * g_script_handler;
+extern struct hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_GetCurrentUserData( lua_State * L )
 {
@@ -18,8 +18,8 @@ int __hb_script_server_GetCurrentUserData( lua_State * L )
         lua_pop( L, 1 );
     }
 
-    hb_db_value_handler_t handler;
-    if( hb_db_get_value( &g_script_handler->db_collection, g_script_handler->user, fields, field_iterator, &handler ) == 0 )
+    hb_db_value_handle_t handler;
+    if( hb_db_get_value( &g_script_handle->db_collection, g_script_handle->user, fields, field_iterator, &handler ) == 0 )
     {
         lua_pushboolean( L, 0 );
 

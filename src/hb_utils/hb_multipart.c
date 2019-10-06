@@ -5,7 +5,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_params_desc_t * _params, size_t _capacity, const void * _buffer, size_t _buffersize, uint32_t * _count )
+int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_params_handle_t * _params, size_t _capacity, const void * _buffer, size_t _buffersize, uint32_t * _count )
 {
     uint32_t count = 0;
 
@@ -16,14 +16,14 @@ int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_
     {
         if( count == _capacity )
         {
-            return 1;
+            break;
         }
 
         const void * boundary_iterator_end = hb_memmem( boundary_iterator_begin, _buffersize - offset, _boundary, _boundarysize, &offset );
 
         if( boundary_iterator_end == HB_NULLPTR )
         {
-            return 1;
+            break;
         }
 
         const char data_name_mask[] = "Content-Disposition: form-data; name=\"";
@@ -38,13 +38,13 @@ int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_
         begin_data += sizeof( data_value_mask ) - 1;
         HB_UNUSED( begin_data );
 
-        multipart_params_desc_t * desc = _params + count;
-        desc->key = data_name;
-        desc->key_size = key_size;
-        desc->memory_begin = (const void *)begin_data;
+        multipart_params_handle_t * handle = _params + count;
+        handle->key = data_name;
+        handle->key_size = key_size;
+        handle->data = (const void *)begin_data;
 
         size_t data_size = hb_memsize( begin_data, boundary_iterator_end );
-        desc->memory_end = (const void *)(begin_data + data_size);
+        handle->data_size = data_size;
 
         ++count;
 
@@ -54,4 +54,24 @@ int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_
     *_count = count;
 
     return 1;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_multipart_get_value( multipart_params_handle_t * _handles, uint32_t _count, const char * _key, const void ** _data, size_t * _size )
+{
+    for( uint32_t index = 0; index != _count; ++index )
+    {
+        multipart_params_handle_t * handle = _handles + index;
+
+        if( strncmp( _key, handle->key, handle->key_size ) != 0 )
+        {
+            continue;
+        }
+
+        *_data = handle->data;
+        *_size = handle->data_size;
+
+        return 1;
+    }
+
+    return 0;
 }

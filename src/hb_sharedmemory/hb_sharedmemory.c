@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handler_t * _handler )
+int hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
 {
     HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, _name );
 
@@ -27,61 +27,61 @@ int hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_ha
         return 0;
     }
 
-    strcpy( _handler->name, _name );
-    _handler->size = _size;
-    _handler->carriage = 0;
-    _handler->handler = (void *)hMapFile;
-    _handler->buffer = (void *)pBuf;
+    strcpy( _handle->name, _name );
+    _handle->size = _size;
+    _handle->carriage = 0;
+    _handle->handle = (void *)hMapFile;
+    _handle->buffer = (void *)pBuf;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_destroy( hb_sharedmemory_handler_t * _handler )
+int hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
 {
-    LPVOID pBuf = (LPVOID)_handler->buffer;
-    HANDLE hMapFile = (HANDLE)_handler->handler;    
+    LPVOID pBuf = (LPVOID)_handle->buffer;
+    HANDLE hMapFile = (HANDLE)_handle->handle;    
 
     UnmapViewOfFile( pBuf );
     CloseHandle( hMapFile );
 
-    _handler->size = 0;
-    _handler->carriage = 0;
-    _handler->handler = HB_NULLPTR;
-    _handler->buffer = HB_NULLPTR;    
+    _handle->size = 0;
+    _handle->carriage = 0;
+    _handle->handle = HB_NULLPTR;
+    _handle->buffer = HB_NULLPTR;    
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_rewind( hb_sharedmemory_handler_t * _handler )
+int hb_sharedmemory_rewind( hb_sharedmemory_handle_t * _handle )
 {
-    _handler->carriage = 0;
+    _handle->carriage = 0;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_write( hb_sharedmemory_handler_t * _handler, const void * _buffer, size_t _size )
+int hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const void * _buffer, size_t _size )
 {
-    if( _handler->carriage + 4 + _size > _handler->size )
+    if( _handle->carriage + 4 + _size > _handle->size )
     {
         return 0;
     }
 
     uint32_t u32_size = (uint32_t)_size;
 
-    uint8_t * pBufSize = (uint8_t *)_handler->buffer + _handler->carriage;
+    uint8_t * pBufSize = (uint8_t *)_handle->buffer + _handle->carriage;
     CopyMemory( (PVOID)pBufSize, &u32_size, sizeof( u32_size ) );
 
-    _handler->carriage += 4;
+    _handle->carriage += 4;
 
-    uint8_t * pBufData = (uint8_t *)_handler->buffer + _handler->carriage;
+    uint8_t * pBufData = (uint8_t *)_handle->buffer + _handle->carriage;
     CopyMemory( (PVOID)pBufData, _buffer, _size );
 
-    _handler->carriage += _size;
+    _handle->carriage += _size;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_handler_t * _handler )
+int hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
 {
     HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, _name );
     
@@ -97,23 +97,23 @@ int hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_hand
         return 0;
     }
 
-    strcpy( _handler->name, _name );
-    _handler->size = _size;
-    _handler->carriage = 0;
-    _handler->handler = (void *)hMapFile;
-    _handler->buffer = (void *)pBuf;
+    strcpy( _handle->name, _name );
+    _handle->size = _size;
+    _handle->carriage = 0;
+    _handle->handle = (void *)hMapFile;
+    _handle->buffer = (void *)pBuf;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_read( hb_sharedmemory_handler_t * _handler, void * _buffer, size_t _capacity, size_t * _size )
+int hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, size_t _capacity, size_t * _size )
 {
-    if( _handler->carriage + 4 > _handler->size )
+    if( _handle->carriage + 4 > _handle->size )
     {
         return 0;
     }
 
-    uint8_t * pBufSize = (uint8_t *)_handler->buffer + _handler->carriage;
+    uint8_t * pBufSize = (uint8_t *)_handle->buffer + _handle->carriage;
 
     uint32_t u32_size;
     CopyMemory( &u32_size, pBufSize, sizeof( u32_size ) );
@@ -123,18 +123,18 @@ int hb_sharedmemory_read( hb_sharedmemory_handler_t * _handler, void * _buffer, 
         return 0;
     }
 
-    _handler->carriage += 4;
+    _handle->carriage += 4;
 
-    if( _handler->carriage + u32_size > _handler->size )
+    if( _handle->carriage + u32_size > _handle->size )
     {
         return 0;
     }
 
-    uint8_t * pBufData = (uint8_t *)_handler->buffer + _handler->carriage;
+    uint8_t * pBufData = (uint8_t *)_handle->buffer + _handle->carriage;
 
     CopyMemory( _buffer, pBufData, u32_size );
 
-    _handler->carriage += u32_size;
+    _handle->carriage += u32_size;
 
     *_size = u32_size;
 

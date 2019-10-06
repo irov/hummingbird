@@ -2,7 +2,7 @@
 
 #include "hb_log/hb_log.h"
 
-#include "hb_script_handler.h"
+#include "hb_script_handle.h"
 
 #include "lua.h"
 

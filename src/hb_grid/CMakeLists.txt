@@ -4,6 +4,9 @@ ADD_FILTER(
 src
 	hb_grid.h
 	hb_grid.c
+    
+    hb_grid_request_api.c
+    hb_grid_request_upload.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
@@ -17,4 +20,5 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_config)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_sharedmemory)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_process)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_thread)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_db)

@@ -53,25 +53,25 @@ void hb_db_finalize()
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handler_t * _collection )
+int hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection )
 {
     mongoc_collection_t * collection = mongoc_client_get_collection( g_mongo_client, _db, _name );
 
-    _collection->handler = collection;
+    _collection->handle = collection;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_collection_destroy( hb_db_collection_handler_t * _collection )
+void hb_db_collection_destroy( hb_db_collection_handle_t * _collection )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
     mongoc_collection_destroy( mongo_collection );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id, const char ** _fields, uint32_t _count, hb_db_value_handler_t * _handle )
+int hb_db_get_value( hb_db_collection_handle_t * _collection, const char * _id, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handle )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
     bson_oid_t oid;
     bson_oid_init_from_string( &oid, _id );
@@ -111,7 +111,7 @@ int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id,
         return 0;
     }
 
-    _handle->handler = cursor;
+    _handle->handle = cursor;
 
     for( uint32_t index = 0; index != _count; ++index )
     {
@@ -134,16 +134,16 @@ int hb_db_get_value( hb_db_collection_handler_t * _collection, const char * _id,
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_value_destroy( hb_db_value_handler_t * _value )
+void hb_db_value_destroy( hb_db_value_handle_t * _value )
 {
-    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_value->handler;
+    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_value->handle;
 
     mongoc_cursor_destroy( cursor );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
+int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
     bson_t query;
     bson_init( &query );
@@ -188,9 +188,9 @@ int hb_db_upload_file( hb_db_collection_handler_t * _collection, const uint8_t *
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_load_file( hb_db_collection_handler_t * _collection, const uint8_t * _sha1, hb_db_file_handler_t * _handler )
+int hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handler;
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
     bson_t query;
     bson_init( &query );
@@ -230,16 +230,16 @@ int hb_db_load_file( hb_db_collection_handler_t * _collection, const uint8_t * _
         return 0;
     }
 
-    _handler->handler = cursor;
-    _handler->length = length;
-    _handler->buffer = buffer;
+    _handle->handle = cursor;
+    _handle->length = length;
+    _handle->buffer = buffer;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_close_file( hb_db_file_handler_t * _handler )
+int hb_db_close_file( hb_db_file_handle_t * _handle )
 {
-    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handler->handler;
+    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handle->handle;
 
     mongoc_cursor_destroy( cursor );
 

@@ -2,13 +2,13 @@
 
 #include "hb_log/hb_log.h"
 
-#include "hb_script_handler.h"
+#include "hb_script_handle.h"
 
 #include <malloc.h>
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_script_handler_t * g_script_handler;
+hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 extern int __hb_script_server_GetCurrentUserData( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
@@ -50,14 +50,14 @@ static int __hb_lua_panic( lua_State * L )
 {
     HB_UNUSED( L );
 
-    longjmp( g_script_handler->panic_jump, 1 );
+    longjmp( g_script_handle->panic_jump, 1 );
 }
 //////////////////////////////////////////////////////////////////////////
 static void * __hb_lua_alloc( void * ud, void * ptr, size_t osize, size_t nsize )
 {
     HB_UNUSED( ud );
 
-    hb_script_handler_t * g = g_script_handler;
+    hb_script_handle_t * g = g_script_handle;
 
     if( ptr == HB_NULLPTR )
     {
@@ -96,7 +96,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     HB_UNUSED( L );
     HB_UNUSED( ar );
 
-    if( ++g_script_handler->call_used == g_script_handler->call_limit )
+    if( ++g_script_handle->call_used == g_script_handle->call_limit )
     {
         luaL_error( L, "call limit" );
     }
@@ -106,19 +106,19 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
 //////////////////////////////////////////////////////////////////////////
 int hb_script_initialize( size_t _memorylimit, size_t _calllimit )
 {
-    g_script_handler = HB_NEW( hb_script_handler_t );
+    g_script_handle = HB_NEW( hb_script_handle_t );
     
-    if( setjmp( g_script_handler->panic_jump ) == 1 )
+    if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
         return 0;
     }
 
-    g_script_handler->memory_base = 0;
-    g_script_handler->memory_used = 0;
-    g_script_handler->memory_peak = 0;
-    g_script_handler->memory_limit = _memorylimit;
+    g_script_handle->memory_base = 0;
+    g_script_handle->memory_used = 0;
+    g_script_handle->memory_peak = 0;
+    g_script_handle->memory_limit = _memorylimit;
 
     lua_State * L = lua_newstate( &__hb_lua_alloc, HB_NULLPTR );
 
@@ -146,40 +146,40 @@ int hb_script_initialize( size_t _memorylimit, size_t _calllimit )
     lua_getglobal( L, "server" );
     luaL_setfuncs( L, serverLib, 0 );
 
-    g_script_handler->call_used = 0;
-    g_script_handler->call_limit = _calllimit;
+    g_script_handle->call_used = 0;
+    g_script_handle->call_limit = _calllimit;
     lua_sethook( L, &__hb_lua_hook, LUA_MASKCOUNT, 1 );
 
-    size_t memory_used = g_script_handler->memory_used;
-    g_script_handler->memory_base = memory_used;
-    g_script_handler->memory_limit += memory_used;
+    size_t memory_used = g_script_handle->memory_used;
+    g_script_handle->memory_base = memory_used;
+    g_script_handle->memory_limit += memory_used;
 
-    g_script_handler->L = L;
+    g_script_handle->L = L;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
-    if( setjmp( g_script_handler->panic_jump ) == 1 )
+    if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
         return;
     }
 
-    lua_close( g_script_handler->L );
-    g_script_handler->L = HB_NULLPTR;
+    lua_close( g_script_handle->L );
+    g_script_handle->L = HB_NULLPTR;
 
-    HB_DELETE( g_script_handler );
-    g_script_handler = HB_NULLPTR;
+    HB_DELETE( g_script_handle );
+    g_script_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
 int hb_script_user_initialize( const char * _user )
 {
-    strcpy( g_script_handler->user, _user );
+    strcpy( g_script_handle->user, _user );
 
-    if( hb_db_get_collection( "hb_users", "hb_data", &g_script_handler->db_collection ) == 0 )
+    if( hb_db_get_collection( "hb_users", "hb_data", &g_script_handle->db_collection ) == 0 )
     {
         return 0;
     }
@@ -189,22 +189,22 @@ int hb_script_user_initialize( const char * _user )
 //////////////////////////////////////////////////////////////////////////
 void hb_script_user_finalize()
 {
-    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handler->memory_peak - g_script_handler->memory_base, g_script_handler->memory_limit - g_script_handler->memory_base, (float)(g_script_handler->memory_peak - g_script_handler->memory_base) / (float)(g_script_handler->memory_limit - g_script_handler->memory_base) * 100.f );
-    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handler->call_used, g_script_handler->call_limit, (float)(g_script_handler->call_used) / (float)(g_script_handler->call_limit) * 100.f );
+    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
+    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
 
-    hb_db_collection_destroy( &g_script_handler->db_collection );
+    hb_db_collection_destroy( &g_script_handle->db_collection );
 }
 //////////////////////////////////////////////////////////////////////////
 int hb_script_user_load( const void * _buffer, size_t _size )
 {
-    if( setjmp( g_script_handler->panic_jump ) == 1 )
+    if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
         return 0;
     }
 
-    lua_State * L = g_script_handler->L;
+    lua_State * L = g_script_handle->L;
 
     int status = luaL_loadbufferx( L, _buffer, _size, "script", HB_NULLPTR );
 
@@ -237,14 +237,14 @@ int hb_script_user_call( const char * _method, size_t _methodsize, const char * 
 {
     HB_UNUSED( _capacity );
 
-    if( setjmp( g_script_handler->panic_jump ) == 1 )
+    if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
         return 0;
     }
 
-    lua_State * L = g_script_handler->L;
+    lua_State * L = g_script_handle->L;
 
     lua_getglobal( L, "api" );
 
