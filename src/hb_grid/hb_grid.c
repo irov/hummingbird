@@ -16,6 +16,7 @@ static void __hb_log_observer( const char * _category, int _level, const char * 
 //////////////////////////////////////////////////////////////////////////
 extern void hb_grid_request_api( struct evhttp_request *, void * );
 extern void hb_grid_request_upload( struct evhttp_request *, void * );
+extern void hb_grid_request_newproject( struct evhttp_request *, void * );
 //////////////////////////////////////////////////////////////////////////
 static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 {
@@ -31,6 +32,7 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 
     evhttp_set_cb( http_server, "/api", &hb_grid_request_api, handle );
     evhttp_set_cb( http_server, "/upload", &hb_grid_request_upload, handle );
+    evhttp_set_cb( http_server, "/newproject", &hb_grid_request_newproject, handle );
 
     if( *handle->ev_socket == -1 )
     {
