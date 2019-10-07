@@ -98,7 +98,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" ) == 0 )
+    if( hb_storage_initialize( "$user_id$", "hb", "hb_files" ) == 0 )
     {
         return EXIT_FAILURE;
     }

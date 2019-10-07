@@ -6,7 +6,7 @@
 int hb_script_initialize( size_t _memorylimit, size_t _calllimit );
 void hb_script_finalize();
 
-int hb_script_user_initialize( const char * _user );
+int hb_script_user_initialize( const char * _user, const char * _db, const char * _collection );
 void hb_script_user_finalize();
 
 int hb_script_user_load( const void * _buffer, size_t _size );

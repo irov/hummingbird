@@ -41,10 +41,10 @@ int main( int _argc, char * _argv[] )
 
     hb_db_initialze( "hb_node_api", db_uri );
 
-    hb_storage_initialize( "$user_id$", "hb_storage", "hb_files" );
+    hb_storage_initialize( "$user_id$", "hb", "hb_files" );
     hb_file_initialize( ".store/" );
     hb_script_initialize( 10240, 10240 );
-    hb_script_user_initialize( "5d932e6820cdb53b7c26b73f" );
+    hb_script_user_initialize( "5d932e6820cdb53b7c26b73f", "hb", "hb_users" );
 
     FILE * f = fopen( "server.lua", "rb" );
     fseek( f, 0L, SEEK_END );

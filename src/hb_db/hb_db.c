@@ -69,12 +69,57 @@ void hb_db_collection_destroy( hb_db_collection_handle_t * _collection )
     mongoc_collection_destroy( mongo_collection );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_value( hb_db_collection_handle_t * _collection, const char * _id, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handle )
+int hb_db_new_document( hb_db_collection_handle_t * _collection, uint8_t _newoid[12] )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
     bson_oid_t oid;
-    bson_oid_init_from_string( &oid, _id );
+    bson_oid_init( &oid, HB_NULLPTR );
+
+    bson_t query;
+    bson_init( &query );
+
+    BSON_APPEND_OID( &query, "_id", &oid );
+
+    bson_error_t error;
+    if( mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error ) == false )
+    {
+        return 0;
+    }
+
+    bson_destroy( &query );
+
+    memcpy( _newoid, oid.bytes, 12 );
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
+{
+    _handle->handle = HB_NULLPTR;
+    _handle->type = e_hb_db_string;
+    _handle->field = _field;
+    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->value_string = _value;
+    _handle->length_string = _valuelength == ~0U ? strlen( _value ) : _valuelength;    
+    
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle )
+{
+    _handle->handle = HB_NULLPTR;
+    _handle->type = e_hb_db_int64;
+    _handle->field = _field;
+    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->value_int64 = _value;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_type_e _type, hb_db_value_handle_t * _handle )
+{
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+
+    bson_oid_t oid;
+    bson_oid_init_from_data( &oid, _oid );
 
     bson_t query;
     bson_init( &query );
@@ -83,12 +128,7 @@ int hb_db_get_value( hb_db_collection_handle_t * _collection, const char * _id, 
     bson_t fields;
     bson_init( &fields );
 
-    for( uint32_t index = 0; index != _count; ++index )
-    {
-        const char * field = _fields[index];
-
-        BSON_APPEND_INT32( &fields, field, 1 );
-    }
+    BSON_APPEND_INT32( &fields, _field, 1 );
 
     mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, &fields, HB_NULLPTR );
 
@@ -112,24 +152,79 @@ int hb_db_get_value( hb_db_collection_handle_t * _collection, const char * _id, 
     }
 
     _handle->handle = cursor;
+    _handle->type = _type;
+    _handle->field = _field;
+    _handle->length_field = strlen( _field );
 
-    for( uint32_t index = 0; index != _count; ++index )
+    if( bson_iter_find( &iter, _field ) == false )
     {
-        const char * field = _fields[index];
+        mongoc_cursor_destroy( cursor );
 
-        if( bson_iter_find( &iter, field ) == false )
-        {
-            mongoc_cursor_destroy( cursor );
-
-            return 0;
-        }
-
-        uint32_t length;
-        const char * value = bson_iter_utf8( &iter, &length );
-
-        _handle->length[index] = (size_t)length;
-        _handle->value[index] = value;
+        return 0;
     }
+
+    switch( _type )
+    {
+    case e_hb_db_string:
+        {
+            uint32_t bson_length;
+            const char * bson_value = bson_iter_utf8( &iter, &bson_length );
+
+            _handle->length_string = bson_length;
+            _handle->value_string = bson_value;
+        }break;
+    case e_hb_db_int64:
+        {
+            _handle->value_int64 = bson_iter_int64( &iter );
+        }break;
+    default:
+        {
+            return 0;
+        }break;
+    }
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////
+int hb_db_new_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handle )
+{
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+
+    bson_oid_t oid;
+    bson_oid_init_from_data( &oid, _oid );
+
+    bson_t query;
+    bson_init( &query );
+    BSON_APPEND_OID( &query, "_id", &oid );
+
+    bson_t update;
+    bson_init( &update );
+
+    bson_t fields;
+    bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields );
+
+    switch( _handle->type )
+    {
+    case e_hb_db_string:
+        {
+            bson_append_symbol( &fields, _handle->field, _handle->length_field, _handle->value_string, _handle->length_string );
+        }break;
+    case e_hb_db_int64:
+        {
+            bson_append_int64( &fields, _handle->field, _handle->length_field, _handle->value_int64 );
+        }break;
+    }
+
+    bson_append_document_end( &update, &fields );
+
+    bson_error_t error;
+    if( mongoc_collection_update_one( mongo_collection, &query, &update, HB_NULLPTR, HB_NULLPTR, &error ) == false )
+    {
+        return 0;
+    }
+
+    bson_destroy( &query );
+    bson_destroy( &update );
 
     return 1;
 }

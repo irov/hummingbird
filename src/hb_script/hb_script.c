@@ -175,11 +175,11 @@ void hb_script_finalize()
     g_script_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_user_initialize( const char * _user )
+int hb_script_user_initialize( const char * _user, const char * _db, const char * _collection )
 {
     strcpy( g_script_handle->user, _user );
 
-    if( hb_db_get_collection( "hb_users", "hb_data", &g_script_handle->db_collection ) == 0 )
+    if( hb_db_get_collection( _db, _collection, &g_script_handle->db_collection ) == 0 )
     {
         return 0;
     }
