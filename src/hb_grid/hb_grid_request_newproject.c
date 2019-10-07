@@ -2,10 +2,10 @@
 
 #include "hb_process/hb_process.h"
 
-void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
+void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 {
     HB_UNUSED( _request );
-    
+
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
@@ -24,7 +24,7 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
 
     uint8_t copyout_buffer[2048];
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
-    
+
     hb_sharedmemory_write( &handle->sharedmemory, copyout_buffer, copyout_buffer_size );
 
     const char * mongodb_uri = "mongodb://localhost:27017";
@@ -35,7 +35,7 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         , mongodb_uri
     );
 
-    hb_process_run( "hb_node_api.exe", process_command );
+    hb_process_run( "hb_node_newproject.exe", process_command );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
@@ -44,7 +44,7 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     hb_sharedmemory_read( &handle->sharedmemory, process_result, 2048, &process_result_size );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-    
+
     if( output_buffer == HB_NULLPTR )
     {
         return;

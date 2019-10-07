@@ -7,6 +7,7 @@ src
     
     hb_grid_request_api.c
     hb_grid_request_upload.c
+    hb_grid_request_newproject.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
