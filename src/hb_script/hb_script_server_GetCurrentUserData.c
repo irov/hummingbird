@@ -19,24 +19,24 @@ int __hb_script_server_GetCurrentUserData( lua_State * L )
     }
 
     hb_db_value_handle_t handler;
-    if( hb_db_get_value( &g_script_handle->db_collection, g_script_handle->user, fields, field_iterator, &handler ) == 0 )
-    {
-        lua_pushboolean( L, 0 );
+    //if( hb_db_get_value( &g_script_handle->db_collection, g_script_handle->user, fields, field_iterator, &handler ) == 0 )
+    //{
+    //    lua_pushboolean( L, 0 );
 
-        for( uint32_t index = 0; index != field_iterator; ++index )
-        {
-            lua_pushnil( L );
-        }
+    //    for( uint32_t index = 0; index != field_iterator; ++index )
+    //    {
+    //        lua_pushnil( L );
+    //    }
 
-        return 1 + field_iterator;
-    }
+    //    return 1 + field_iterator;
+    //}
 
     lua_pushboolean( L, 1 );
 
     for( uint32_t index = 0; index != field_iterator; ++index )
     {
-        const char * value = handler.value[index];
-        size_t length = handler.length[index];
+        const char * value = handler.value_string[index];
+        size_t length = handler.length_string[index];
 
         lua_pushlstring( L, value, length );
     }
