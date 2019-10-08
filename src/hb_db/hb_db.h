@@ -17,9 +17,10 @@ void hb_db_collection_destroy( hb_db_collection_handle_t * _collection );
 int hb_db_new_document( hb_db_collection_handle_t * _collection, uint8_t _newoid[12] );
 
 typedef enum hb_db_value_type_e
-{
-    e_hb_db_string,
+{    
     e_hb_db_int64,
+    e_hb_db_string,
+    e_hb_db_binary,
 } hb_db_value_type_e;
 
 typedef struct hb_db_value_handle_t
@@ -33,11 +34,16 @@ typedef struct hb_db_value_handle_t
     const char * value_string;
     size_t length_string;
 
+    const void * value_binary;
+    size_t length_binary;
+
     int64_t value_int64;
 } hb_db_value_handle_t;
 
-void hb_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
 void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle );
+void hb_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
+void hb_make_buffer_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
+
 
 int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_type_e _type, hb_db_value_handle_t * _handle );
 int hb_db_new_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handle );

@@ -15,7 +15,7 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     const char * mongodb_uri = "mongodb://localhost:27017";
     strcpy( in.db_uri, mongodb_uri );
 
-    hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_newproject_in_t ) );    
+    hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_newproject_in_t ) );
 
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );

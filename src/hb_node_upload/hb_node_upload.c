@@ -80,6 +80,39 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    hb_db_collection_handle_t db_projects_handle;
+    hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
+
+    hb_db_value_handle_t db_script_version_handle;
+    hb_db_get_value( &db_projects_handle, in.puid, "script_version", e_hb_db_int64, &db_script_version_handle );
+
+    int64_t script_version = db_script_version_handle.value_int64;
+    
+    hb_db_value_destroy( &db_script_version_handle );
+
+    hb_db_collection_handle_t db_project_scripts_handler;
+    if( hb_db_get_collection( "hb", "hb_project_scripts", &db_project_scripts_handler ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( script_version == 0 )
+    {
+        uint8_t oid[12];
+        hb_db_new_document( &db_project_scripts_handler, oid );
+
+        hb_db_value_handle_t handles[3];
+        hb_make_buffer_value( "sha1", ~0U, sha1, 20, handles + 0 );
+        hb_make_buffer_value( "prev", ~0U, sha1, 20, handles + 0 );
+
+        //hb_db_new_values( &db_project_scripts_handler, oid, const hb_db_value_handle_t * _handles, size_t _count );
+    }
+    else
+    {
+
+    }
+
+
     hb_storage_finalize();
 
     hb_db_finalize();

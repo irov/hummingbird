@@ -102,8 +102,17 @@ void hb_make_string_value( const char * _field, size_t _fieldlength, const char 
     _handle->field = _field;
     _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
     _handle->value_string = _value;
-    _handle->length_string = _valuelength == ~0U ? strlen( _value ) : _valuelength;    
-    
+    _handle->length_string = _valuelength == ~0U ? strlen( _value ) : _valuelength;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_make_buffer_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
+{
+    _handle->handle = HB_NULLPTR;
+    _handle->type = e_hb_db_binary;
+    _handle->field = _field;
+    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->value_binary = _value;
+    _handle->length_binary = _valuelength;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle )
@@ -166,17 +175,27 @@ int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid
 
     switch( _type )
     {
-    case e_hb_db_string:
-        {
-            uint32_t bson_length;
-            const char * bson_value = bson_iter_utf8( &iter, &bson_length );
-
-            _handle->length_string = bson_length;
-            _handle->value_string = bson_value;
-        }break;
     case e_hb_db_int64:
         {
             _handle->value_int64 = bson_iter_int64( &iter );
+        }break;
+    case e_hb_db_string:
+        {
+            uint32_t utf8_length;
+            const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
+
+            _handle->length_string = utf8_length;
+            _handle->value_string = utf8_value;
+        }break;
+    case e_hb_db_binary:
+        {
+            bson_subtype_t binary_subtype;
+            uint32_t binary_length;
+            const uint8_t * binary_value;
+            bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_value );
+
+            _handle->length_binary = binary_length;
+            _handle->value_binary = binary_value;
         }break;
     default:
         {
@@ -206,13 +225,21 @@ int hb_db_new_value( hb_db_collection_handle_t * _collection, const uint8_t _oid
 
     switch( _handle->type )
     {
+    case e_hb_db_int64:
+        {
+            bson_append_int64( &fields, _handle->field, _handle->length_field, _handle->value_int64 );
+        }break;
     case e_hb_db_string:
         {
             bson_append_symbol( &fields, _handle->field, _handle->length_field, _handle->value_string, _handle->length_string );
         }break;
-    case e_hb_db_int64:
+    case e_hb_db_binary:
         {
-            bson_append_int64( &fields, _handle->field, _handle->length_field, _handle->value_int64 );
+            bson_append_binary( &fields, _handle->field, _handle->length_field, BSON_SUBTYPE_BINARY, _handle->value_binary, _handle->length_binary );
+        }break;
+    default:
+        {
+            return 0;
         }break;
     }
 
@@ -253,13 +280,21 @@ int hb_db_new_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
 
         switch( handle->type )
         {
+        case e_hb_db_int64:
+            {
+                bson_append_int64( &fields, handle->field, handle->length_field, handle->value_int64 );
+            }break;
         case e_hb_db_string:
             {
                 bson_append_symbol( &fields, handle->field, handle->length_field, handle->value_string, handle->length_string );
             }break;
-        case e_hb_db_int64:
+        case e_hb_db_binary:
             {
-                bson_append_int64( &fields, handle->field, handle->length_field, handle->value_int64 );
+                bson_append_binary( &fields, handle->field, handle->length_field, BSON_SUBTYPE_BINARY, handle->value_binary, handle->length_binary );
+            }break;
+        default:
+            {
+                return 0;
             }break;
         }
     }
