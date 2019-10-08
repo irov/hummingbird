@@ -136,7 +136,10 @@ int hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, si
 
     _handle->carriage += u32_size;
 
-    *_size = u32_size;
+    if( _size != HB_NULLPTR )
+    {
+        *_size = u32_size;
+    }
 
     return 1;
 }

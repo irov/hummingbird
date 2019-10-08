@@ -3,6 +3,7 @@
 #include "hb_config/hb_config.h"
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_sha1.h"
+#include "hb_utils/hb_base64.h"
 
 #include "mongoc/mongoc.h"
 
@@ -229,6 +230,54 @@ int hb_db_new_value( hb_db_collection_handle_t * _collection, const uint8_t _oid
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
+int hb_db_new_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, size_t _count )
+{
+    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+
+    bson_oid_t oid;
+    bson_oid_init_from_data( &oid, _oid );
+
+    bson_t query;
+    bson_init( &query );
+    BSON_APPEND_OID( &query, "_id", &oid );
+
+    bson_t update;
+    bson_init( &update );
+
+    bson_t fields;
+    bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields );
+
+    for( uint32_t index = 0; index != _count; ++index )
+    {
+        const hb_db_value_handle_t * handle = _handles + index;
+
+        switch( handle->type )
+        {
+        case e_hb_db_string:
+            {
+                bson_append_symbol( &fields, handle->field, handle->length_field, handle->value_string, handle->length_string );
+            }break;
+        case e_hb_db_int64:
+            {
+                bson_append_int64( &fields, handle->field, handle->length_field, handle->value_int64 );
+            }break;
+        }
+    }
+
+    bson_append_document_end( &update, &fields );
+
+    bson_error_t error;
+    if( mongoc_collection_update_one( mongo_collection, &query, &update, HB_NULLPTR, HB_NULLPTR, &error ) == false )
+    {
+        return 0;
+    }
+
+    bson_destroy( &query );
+    bson_destroy( &update );
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////
 void hb_db_value_destroy( hb_db_value_handle_t * _value )
 {
     mongoc_cursor_t * cursor = (mongoc_cursor_t *)_value->handle;
@@ -264,7 +313,7 @@ int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * 
             mongoc_cursor_destroy( cursor );
 
             char sha1hex[41];
-            hb_sha1_hex( _sha1, sha1hex );
+            hb_base64_decode( _sha1, 20, sha1hex, 41, HB_NULLPTR );
 
             hb_log_message( "db", HB_LOG_ERROR,
                 "failed to insert: %s\n"

@@ -18,6 +18,8 @@ typedef struct hb_grid_process_handle_t
 
     hb_thread_handle_t thread;
     hb_sharedmemory_handle_t sharedmemory;
+
+    char db_uri[128];
 } hb_grid_process_handle_t;
 
 #endif

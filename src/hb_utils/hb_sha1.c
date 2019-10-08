@@ -132,17 +132,3 @@ void hb_sha1( const void * _buffer, const size_t _size, uint8_t * _sha1 )
         _sha1[hashByte] = (result[hashByte >> 2] >> (((3 - hashByte) & 0x3) << 3)) & 0xff;
     }
 }
-//////////////////////////////////////////////////////////////////////////
-void hb_sha1_hex( const uint8_t * _sha1, char * _hex )
-{
-    const char hexDigits[] = {"0123456789abcdef"};
-
-    for( int32_t hashByte = 20; --hashByte >= 0; )
-    {
-        _hex[hashByte << 1] = hexDigits[(_sha1[hashByte] >> 4) & 0xf];
-        _hex[(hashByte << 1) + 1] = hexDigits[_sha1[hashByte] & 0xf];
-    }
-
-    _hex[40] = '\0';
-}
-//////////////////////////////////////////////////////////////////////////

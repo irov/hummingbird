@@ -5,6 +5,7 @@
 #include "hb_archive/hb_archive.h"
 #include "hb_file/hb_file.h"
 #include "hb_utils/hb_sha1.h"
+#include "hb_utils/hb_base64.h"
 
 #include <string.h>
 
@@ -77,8 +78,8 @@ int hb_storage_get( const uint8_t * _sha1, void * _data, size_t _capacity, size_
     int file_available = hb_file_available();
 
     if( file_available == 1 )
-    {        
-        hb_sha1_hex( _sha1, sha1hex );
+    {
+        hb_base64_decode( _sha1, 20, sha1hex, 41, HB_NULLPTR );
 
         hb_file_handle_t read_file_handle;
         if( hb_file_open_read( sha1hex, &read_file_handle ) == 1 )
