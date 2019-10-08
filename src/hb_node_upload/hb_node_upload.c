@@ -9,7 +9,6 @@
 #include "hb_file/hb_file.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
-#include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_memmem.h"
 
 #include <stdlib.h>
@@ -46,54 +45,26 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    const char * db_uri;
-    if( hb_getopt( _argc, _argv, "--db_uri", &db_uri ) == 0 )
-    {
-        return EXIT_FAILURE;
-    }
-
     hb_sharedmemory_handle_t sharedmemory_handle;
     if( hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handle ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    size_t sm_boundary_size;
-    char sm_boundary[2048];
-    if( hb_sharedmemory_read( &sharedmemory_handle, sm_boundary, 2048, &sm_boundary_size ) == 0 )
-    {
-        return EXIT_FAILURE;
-    }
-
-    size_t sm_data_size;
-    uint8_t sm_data[10240];
-    if( hb_sharedmemory_read( &sharedmemory_handle, sm_data, 2048, &sm_data_size ) == 0 )
-    {
-        return EXIT_FAILURE;
-    }
-
-    uint32_t multipart_params_count;
-    multipart_params_handle_t multipart_params[8];
-    if( hb_multipart_parse( sm_boundary, sm_boundary_size, multipart_params, 8, sm_data, sm_data_size, &multipart_params_count ) == 0 )
-    {
-        return EXIT_FAILURE;
-    }
-
-    size_t params_data_size;
-    const void * params_data;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size ) == 0 )
+    hb_node_upload_in_t in;
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in, sizeof( hb_node_upload_in_t ), HB_NULLPTR ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
     size_t code_size;
     uint8_t code_buffer[10240];
-    if( hb_script_compiler( params_data, params_data_size, code_buffer, 10240, &code_size ) == 0 )
+    if( hb_script_compiler( in.data, in.data_size, code_buffer, 10240, &code_size ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_db_initialze( "hb_node_upload", db_uri ) == 0 )
+    if( hb_db_initialze( "hb_node_upload", in.db_uri ) == 0 )
     {
         return EXIT_FAILURE;
     }

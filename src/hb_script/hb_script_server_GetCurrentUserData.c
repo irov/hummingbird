@@ -33,13 +33,13 @@ int __hb_script_server_GetCurrentUserData( lua_State * L )
 
     lua_pushboolean( L, 1 );
 
-    for( uint32_t index = 0; index != field_iterator; ++index )
-    {
-        const char * value = handler.value_string[index];
-        size_t length = handler.length_string[index];
+    //for( uint32_t index = 0; index != field_iterator; ++index )
+    //{
+    //    const char * value = handler.value_string[index];
+    //    size_t length = handler.length_string[index];
 
-        lua_pushlstring( L, value, length );
-    }
+    //    lua_pushlstring( L, value, length );
+    //}
 
     hb_db_value_destroy( &handler );
 

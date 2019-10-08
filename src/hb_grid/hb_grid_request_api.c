@@ -3,9 +3,7 @@
 #include "hb_process/hb_process.h"
 
 void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
-{
-    HB_UNUSED( _request );
-    
+{    
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
@@ -27,12 +25,9 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     
     hb_sharedmemory_write( &handle->sharedmemory, copyout_buffer, copyout_buffer_size );
 
-    const char * mongodb_uri = "mongodb://localhost:27017";
-
     char process_command[64];
-    sprintf( process_command, "--sm %s --db_uri %s"
+    sprintf( process_command, "--sm %s"
         , handle->sharedmemory.name
-        , mongodb_uri
     );
 
     hb_process_run( "hb_node_api.exe", process_command );

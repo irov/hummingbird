@@ -3,8 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-#include <stdint.h>
-
 int hb_db_initialze( const char * _name, const char * _uri );
 void hb_db_finalize();
 
@@ -43,6 +41,7 @@ void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _val
 
 int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_type_e _type, hb_db_value_handle_t * _handle );
 int hb_db_new_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handle );
+int hb_db_new_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, size_t _count );
 void hb_db_value_destroy( hb_db_value_handle_t * _value );
 
 int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size );

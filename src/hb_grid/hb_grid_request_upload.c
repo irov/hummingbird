@@ -1,12 +1,19 @@
 #include "hb_grid.h"
 
+#include "hb_node_upload/hb_node_upload.h"
 #include "hb_process/hb_process.h"
+#include "hb_utils/hb_multipart.h"
+#include "hb_utils/hb_strstre.h"
+#include "hb_utils/hb_base64.h"
 
 void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
 {
-    HB_UNUSED( _request );
-
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
+
+    hb_sharedmemory_rewind( &handle->sharedmemory );
+
+    hb_node_upload_in_t in;
+    strcpy( in.db_uri, handle->db_uri );
 
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
@@ -17,40 +24,50 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     const char * content_type = evhttp_find_header( headers, "Content-Type" );
     HB_UNUSED( content_type );
 
-    const char * content_type_boundary = strstr( content_type, "boundary=" );
-    content_type_boundary += sizeof( "boundary=" ) - 1;
-
-    char boundary[64];
-    sprintf( boundary, "--%s", content_type_boundary );
-
-    size_t boundary_size = strlen( boundary );
-
-    hb_sharedmemory_write( &handle->sharedmemory, boundary, boundary_size );
+    const char * content_type_boundary = hb_strstre( content_type, "boundary=" );
+    size_t content_type_boundary_size = strlen( content_type_boundary );
 
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
     
-    size_t length = evbuffer_get_length( input_buffer );
+    size_t multipart_length = evbuffer_get_length( input_buffer );
 
-    uint8_t copyout_buffer[2048];
-    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
+    char multipart[10240];
+    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
+    HB_UNUSED( copyout_buffer_size );
 
-    hb_sharedmemory_write( &handle->sharedmemory, copyout_buffer, copyout_buffer_size );
+    uint32_t multipart_params_count;
+    multipart_params_handle_t multipart_params[8];
+    int multipart_parse_error = hb_multipart_parse( content_type_boundary, content_type_boundary_size, multipart_params, 8, multipart, multipart_length, &multipart_params_count );
+    HB_UNUSED( multipart_parse_error );
 
-    const char * mongodb = "mongodb://localhost:27017";
+    size_t params_puid_size;
+    const void * params_puid;
+    int multipart_get_puid_error = hb_multipart_get_value( multipart_params, multipart_params_count, "puid", &params_puid, &params_puid_size );
+    HB_UNUSED( multipart_get_puid_error );
+
+    hb_base64_encode( params_puid, params_puid_size, in.puid, 12, HB_NULLPTR );
+
+    size_t params_data_size;
+    const void * params_data;
+    int multipart_get_data_error = hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size );
+    HB_UNUSED( multipart_get_data_error );
+
+    memcpy( in.data, params_data, params_data_size );
+    in.data_size = params_data_size;
+
+    hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_upload_in_t ) );
 
     char process_command[64];
-    sprintf( process_command, "--sm %s --db_uri %s"
+    sprintf( process_command, "--sm %s"
         , handle->sharedmemory.name
-        , mongodb
     );
 
     hb_process_run( "hb_node_upload.exe", process_command );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    size_t process_result_size;
-    char process_result[2048];
-    hb_sharedmemory_read( &handle->sharedmemory, process_result, 2048, &process_result_size );
+    hb_node_upload_out_t out;
+    hb_sharedmemory_read( &handle->sharedmemory, &out, sizeof( hb_node_upload_out_t ), HB_NULLPTR );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 
@@ -59,7 +76,10 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    evbuffer_add( output_buffer, process_result, process_result_size );
+    char result[256];
+    size_t result_size = sprintf( result, "{}" );
+
+    evbuffer_add( output_buffer, result, result_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

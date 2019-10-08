@@ -95,12 +95,14 @@ int main( int _argc, char * _argv[] )
 
         process_handle->ev_socket = &ev_socket;
 
-        hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread );
-
         char sharedmemory_name[64];
         sprintf( sharedmemory_name, "hb_%s_sm_%03u", id, i );
 
         hb_sharedmemory_create( sharedmemory_name, 10240, &process_handle->sharedmemory );
+
+        strcpy( process_handle->db_uri, "mongodb://localhost:27017" );
+
+        hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread );
 
         Sleep( 100 ); //hack
     }
