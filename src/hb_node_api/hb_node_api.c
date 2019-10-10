@@ -75,7 +75,7 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 10240, &sharedmemory_handle ) == 0 )
+    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
     {
         return 0;
     }

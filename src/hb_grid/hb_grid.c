@@ -99,7 +99,7 @@ int main( int _argc, char * _argv[] )
         char sharedmemory_name[64];
         sprintf( sharedmemory_name, "hb_%s_sm_%03u", id, i );
 
-        hb_sharedmemory_create( sharedmemory_name, 10240, &process_handle->sharedmemory );
+        hb_sharedmemory_create( sharedmemory_name, 65536, &process_handle->sharedmemory );
 
         strcpy( process_handle->db_uri, "mongodb://localhost:27017" );
 
