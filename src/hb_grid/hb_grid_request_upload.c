@@ -45,7 +45,7 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     int multipart_get_puid_error = hb_multipart_get_value( multipart_params, multipart_params_count, "puid", &params_puid, &params_puid_size );
     HB_UNUSED( multipart_get_puid_error );
 
-    hb_base64_encode( params_puid, params_puid_size, in.puid, 12, HB_NULLPTR );
+    hb_base64_decode( params_puid, params_puid_size, in.puid, 12, HB_NULLPTR );
 
     size_t params_data_size;
     const void * params_data;

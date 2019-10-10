@@ -101,11 +101,10 @@ int main( int _argc, char * _argv[] )
         uint8_t oid[12];
         hb_db_new_document( &db_project_scripts_handler, oid );
 
-        hb_db_value_handle_t handles[3];
+        hb_db_value_handle_t handles[1];
         hb_make_buffer_value( "sha1", ~0U, sha1, 20, handles + 0 );
-        hb_make_buffer_value( "prev", ~0U, sha1, 20, handles + 0 );
 
-        //hb_db_new_values( &db_project_scripts_handler, oid, const hb_db_value_handle_t * _handles, size_t _count );
+        hb_db_new_values( &db_project_scripts_handler, oid, handles, 1 );
     }
     else
     {

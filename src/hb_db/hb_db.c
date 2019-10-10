@@ -347,8 +347,9 @@ int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * 
         {
             mongoc_cursor_destroy( cursor );
 
+            size_t sha1hexsize;
             char sha1hex[41];
-            hb_base64_decode( _sha1, 20, sha1hex, 41, HB_NULLPTR );
+            hb_base64_encode( _sha1, 20, sha1hex, 41, &sha1hexsize );
 
             hb_log_message( "db", HB_LOG_ERROR,
                 "failed to insert: %s\n"

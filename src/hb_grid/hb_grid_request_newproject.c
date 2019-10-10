@@ -56,8 +56,9 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         return;
     }
 
+    size_t puid64_size;
     char puid64[25];
-    hb_base64_decode( out.puid, 12, puid64, 25, HB_NULLPTR );
+    hb_base64_encode( out.puid, 12, puid64, 25, &puid64_size );
 
     char request[256];
     size_t request_size = sprintf( request, "{\"puid\"=\"%s\"}"
