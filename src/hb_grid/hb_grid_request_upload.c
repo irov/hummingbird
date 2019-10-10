@@ -25,7 +25,9 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     HB_UNUSED( content_type );
 
     const char * content_type_boundary = hb_strstre( content_type, "boundary=" );
-    size_t content_type_boundary_size = strlen( content_type_boundary );
+
+    char boundary[64];
+    int boundary_size = sprintf( boundary, "--%s", content_type_boundary );
 
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
     
@@ -37,7 +39,7 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
-    int multipart_parse_error = hb_multipart_parse( content_type_boundary, content_type_boundary_size, multipart_params, 8, multipart, multipart_length, &multipart_params_count );
+    int multipart_parse_error = hb_multipart_parse( boundary, boundary_size, multipart_params, 8, multipart, multipart_length, &multipart_params_count );
     HB_UNUSED( multipart_parse_error );
 
     size_t params_puid_size;
@@ -55,7 +57,12 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     memcpy( in.data, params_data, params_data_size );
     in.data_size = params_data_size;
 
-    hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_upload_in_t ) );
+    if( hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_upload_in_t ) ) == 0 )
+    {
+        evhttp_send_reply( _request, HTTP_INTERNAL, "", HB_NULLPTR );
+
+        return;
+    }
 
     char process_command[64];
     sprintf( process_command, "--sm %s"
