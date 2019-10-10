@@ -4,6 +4,7 @@
 #include "hb_utils/hb_memmem.h"
 #include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_getopt.h"
+#include "hb_utils/hb_base64.h"
 
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, int _level, const char * _message )

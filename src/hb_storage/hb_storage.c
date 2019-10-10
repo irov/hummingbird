@@ -73,13 +73,14 @@ int hb_storage_set( const void * _data, size_t _size, uint8_t * _sha1 )
 //////////////////////////////////////////////////////////////////////////
 int hb_storage_get( const uint8_t * _sha1, void * _data, size_t _capacity, size_t * _size )
 {
+    size_t sha1hex_size;
     char sha1hex[41];
 
     int file_available = hb_file_available();
 
     if( file_available == 1 )
     {
-        hb_base64_decode( _sha1, 20, sha1hex, 41, HB_NULLPTR );
+        hb_base64_encode( _sha1, 20, sha1hex, 41, &sha1hex_size );
 
         hb_file_handle_t read_file_handle;
         if( hb_file_open_read( sha1hex, &read_file_handle ) == 1 )
