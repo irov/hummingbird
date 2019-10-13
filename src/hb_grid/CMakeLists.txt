@@ -5,9 +5,15 @@ src
 	hb_grid.h
 	hb_grid.c
     
+    hb_grid_request.h
+    hb_grid_request.c
+    
     hb_grid_request_api.c
     hb_grid_request_upload.c
-    hb_grid_request_newproject.c
+    hb_grid_request_loginuser.c
+    hb_grid_request_newuser.c
+    hb_grid_request_newproject.c    
+    hb_grid_request_universe.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)

@@ -1,12 +1,11 @@
-#include "hb_node_newproject.h"
+#include "hb_node_universe.h"
 
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
-#include "hb_json/hb_json.h"
 #include "hb_utils/hb_getopt.h"
-#include "hb_utils/hb_httpopt.h"
+#include "hb_utils/hb_sha1.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,42 +26,42 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
+    MessageBox( NULL, "Test", "Test", MB_OK );
+
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
 
     const char * sm_name;
     if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
     if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
-    hb_node_newproject_in_t in_data;
+    hb_node_universe_in_t in_data;
     if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
-    hb_db_initialze( "hb_node_newproject", in_data.db_uri );
+    hb_db_initialze( "hb_node_universe", in_data.db_uri );
 
-    hb_db_collection_handle_t db_projects_handle;
-    hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
+    hb_db_collection_handle_t db_users_handle;
+    hb_db_get_collection( "hb", "hb_token", &db_users_handle );
 
-    hb_db_value_handle_t new_value[1];
-    hb_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
-
-    uint8_t oid[12];
-    hb_db_new_document( &db_projects_handle, new_value, 1, oid );
-
+    if( hb_db_set_collection_expire( &db_users_handle, "loginAt", in_data.token_expire_time ) == 0 )
+    {
+        return EXIT_FAILURE;
+    }
+    
     hb_db_finalize();
 
-    hb_node_newproject_out_t out_data;
-    memcpy( out_data.puid, oid, 12 );
+    hb_node_universe_out_t out_data;
 
     hb_sharedmemory_rewind( &sharedmemory_handle );
     hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );

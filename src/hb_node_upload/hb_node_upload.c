@@ -51,25 +51,28 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_node_upload_in_t in;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in, sizeof( hb_node_upload_in_t ), HB_NULLPTR ) == 0 )
+    hb_node_upload_in_t in_data;
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
     size_t code_size;
     uint8_t code_buffer[10240];
-    if( hb_script_compiler( in.data, in.data_size, code_buffer, 10240, &code_size ) == 0 )
+    if( hb_script_compiler( in_data.data, in_data.data_size, code_buffer, 10240, &code_size ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_db_initialze( "hb_node_upload", in.db_uri ) == 0 )
+    if( hb_db_initialze( "hb_node_upload", in_data.db_uri ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_storage_initialize( "$user_id$", "hb", "hb_files" ) == 0 )
+    hb_db_collection_handle_t db_files_handle;
+    hb_db_get_collection( "hb", "hb_files", &db_files_handle );
+
+    if( hb_storage_initialize( &db_files_handle ) == 0 )
     {
         return EXIT_FAILURE;
     }
@@ -83,41 +86,65 @@ int main( int _argc, char * _argv[] )
     hb_db_collection_handle_t db_projects_handle;
     hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
 
-    hb_db_value_handle_t db_script_version_handle;
-    hb_db_get_value( &db_projects_handle, in.puid, "script_version", e_hb_db_int64, &db_script_version_handle );
+    const char * db_projects_fields[] = { "script_revision" };
 
-    int64_t script_version = db_script_version_handle.value_int64;
-    
-    hb_db_value_destroy( &db_script_version_handle );
-
-    hb_db_collection_handle_t db_project_scripts_handler;
-    if( hb_db_get_collection( "hb", "hb_project_scripts", &db_project_scripts_handler ) == 0 )
+    hb_db_value_handle_t db_script_revision_handle[1];
+    if( hb_db_get_values( &db_projects_handle, in_data.puid, db_projects_fields, 1, db_script_revision_handle ) == 0 )
     {
         return EXIT_FAILURE;
     }
 
-    if( script_version == 0 )
+    int64_t script_revision = db_script_revision_handle[0].value_int64;
+    
+    hb_db_destroy_values( db_script_revision_handle, 1 );
+
+    hb_db_collection_handle_t db_project_subversion_handler;
+    if( hb_db_get_collection( "hb", "hb_project_subversion", &db_project_subversion_handler ) == 0 )
     {
-        uint8_t oid[12];
-        hb_db_new_document( &db_project_scripts_handler, oid );
+        return EXIT_FAILURE;
+    }
 
+    uint8_t oid[12];
+    
+    if( script_revision == 0 )
+    {
         hb_db_value_handle_t handles[1];
-        hb_make_buffer_value( "sha1", ~0U, sha1, 20, handles + 0 );
+        hb_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
 
-        hb_db_new_values( &db_project_scripts_handler, oid, handles, 1 );
+        hb_db_new_document( &db_project_subversion_handler, handles, 1, oid );
     }
     else
     {
+        hb_db_value_handle_t db_script_sha1_handle;
+        hb_db_get_value( &db_projects_handle, in_data.puid, "script_sha1", &db_script_sha1_handle );
 
+        hb_db_value_handle_t handles[2];
+        hb_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
+        hb_make_binary_value( "prev", ~0U, db_script_sha1_handle.value_binary, db_script_sha1_handle.length_binary, handles + 1 );
+
+        hb_db_new_document( &db_project_subversion_handler, handles, 2, oid );
+
+        hb_db_destroy_values( &db_script_sha1_handle, 1 );
     }
 
+    hb_db_value_handle_t db_project_handles[2];
+    hb_make_binary_value( "script_sha1", ~0U, sha1, 20, db_project_handles + 0 );
+    hb_make_oid_value( "script_subversion", ~0U, oid, db_project_handles + 1 );
+
+    hb_db_update_values( &db_projects_handle, in_data.puid, db_project_handles, 2 );
 
     hb_storage_finalize();
 
+    hb_db_destroy_collection( &db_files_handle );
+    hb_db_destroy_collection( &db_projects_handle );
+    hb_db_destroy_collection( &db_project_subversion_handler );
+
     hb_db_finalize();
 
+    hb_node_upload_out_t out_data;
+
     hb_sharedmemory_rewind( &sharedmemory_handle );
-    hb_sharedmemory_write( &sharedmemory_handle, "OK", 2 );
+    hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );
     hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();

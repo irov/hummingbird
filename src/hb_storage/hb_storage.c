@@ -1,7 +1,6 @@
 #include "hb_storage.h"
 
 #include "hb_log/hb_log.h"
-#include "hb_db/hb_db.h"
 #include "hb_archive/hb_archive.h"
 #include "hb_file/hb_file.h"
 #include "hb_utils/hb_sha1.h"
@@ -16,30 +15,22 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_storage_settings_t
 {
-    char user[25];
-
     hb_db_collection_handle_t db_collection;
 } hb_storage_settings_t;
 //////////////////////////////////////////////////////////////////////////
 static hb_storage_settings_t * g_storage_settings;
 //////////////////////////////////////////////////////////////////////////
-int hb_storage_initialize( const char * _user, const char * _db, const char * _collection )
+int hb_storage_initialize( const hb_db_collection_handle_t * _collection )
 {
     g_storage_settings = HB_NEW( hb_storage_settings_t );
-    strcpy( g_storage_settings->user, _user );
 
-    if( hb_db_get_collection( _db, _collection, &g_storage_settings->db_collection ) == 0 )
-    {
-        return 0;
-    }
+    g_storage_settings->db_collection = *_collection;
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_storage_finalize()
-{
-    hb_db_collection_destroy( &g_storage_settings->db_collection );
-    
+{   
     HB_DELETE( g_storage_settings );
     g_storage_settings = HB_NULLPTR;
 }

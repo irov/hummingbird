@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////
 hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
-extern int __hb_script_server_GetCurrentUserData( lua_State * L );
+extern int __hb_script_server_GetCurrentUserPublicData( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
@@ -42,7 +42,7 @@ static const struct luaL_Reg globalLib[] = {
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    { "GetCurrentUserData", &__hb_script_server_GetCurrentUserData },
+    { "GetCurrentUserData", &__hb_script_server_GetCurrentUserPublicData },
 { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     return;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_initialize( size_t _memorylimit, size_t _calllimit )
+int hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, const uint8_t * _uuid, const uint8_t * _puid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
     
@@ -156,11 +156,20 @@ int hb_script_initialize( size_t _memorylimit, size_t _calllimit )
 
     g_script_handle->L = L;
 
+    g_script_handle->db_user_collection = *_ucollection;
+    g_script_handle->db_project_collection = *_pcollection;
+
+    memcpy( g_script_handle->uuid, _uuid, 12 );
+    memcpy( g_script_handle->puid, _puid, 12 );
+
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
+    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
+    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
+
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
@@ -175,27 +184,7 @@ void hb_script_finalize()
     g_script_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_user_initialize( const char * _user, const char * _db, const char * _collection )
-{
-    strcpy( g_script_handle->user, _user );
-
-    if( hb_db_get_collection( _db, _collection, &g_script_handle->db_collection ) == 0 )
-    {
-        return 0;
-    }
-
-    return 1;
-}
-//////////////////////////////////////////////////////////////////////////
-void hb_script_user_finalize()
-{
-    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
-    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
-
-    hb_db_collection_destroy( &g_script_handle->db_collection );
-}
-//////////////////////////////////////////////////////////////////////////
-int hb_script_user_load( const void * _buffer, size_t _size )
+int hb_script_load( const void * _buffer, size_t _size )
 {
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
@@ -233,7 +222,7 @@ int hb_script_user_load( const void * _buffer, size_t _size )
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_user_call( const char * _method, size_t _methodsize, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
+int hb_script_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
 {
     HB_UNUSED( _capacity );
 
@@ -248,11 +237,7 @@ int hb_script_user_call( const char * _method, size_t _methodsize, const char * 
 
     lua_getglobal( L, "api" );
 
-    char lua_method[64];
-    strncpy( lua_method, _method, _methodsize );
-    lua_method[_methodsize] = '\0';
-
-    lua_getfield( L, -1, lua_method );
+    lua_getfield( L, -1, _method );
     
     char lua_data[2048] = {"return "};
     strncat( lua_data, _data, _datasize );

@@ -107,3 +107,15 @@ int hb_json_dumpb_value( hb_json_handle_t * _handle, const char * _key, char * _
 
     return 1;
 }
+//////////////////////////////////////////////////////////////////////////
+int hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
+{
+    json_t * jroot = (json_t *)_handle->handle;
+
+    size_t size = json_dumpb( jroot, _buffer, _capacity, JSON_COMPACT | JSON_ESCAPE_SLASH );
+
+    *_size = size;
+
+    return 1;
+}
+//////////////////////////////////////////////////////////////////////////

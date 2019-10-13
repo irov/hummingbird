@@ -1,6 +1,7 @@
-#include "hb_grid.h"
+#include "hb_grid_request.h"
 
 #include "hb_node_newproject/hb_node_newproject.h"
+
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
 
@@ -10,31 +11,16 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    hb_node_newproject_in_t in;
+    hb_node_newproject_in_t in_data;
 
-    const char * mongodb_uri = "mongodb://localhost:27017";
-    strcpy( in.db_uri, mongodb_uri );
+    strcpy( in_data.db_uri, handle->db_uri );
 
-    hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_newproject_in_t ) );
+    hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) );
 
-    enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
-    HB_UNUSED( command_type );
-
-    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
-    HB_UNUSED( headers );
-
-    const char * content_type = evhttp_find_header( headers, "Content-Type" );
-    HB_UNUSED( content_type );
-
-    struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
-    HB_UNUSED( input_buffer );
-
-    size_t length = evbuffer_get_length( input_buffer );
-
-    uint8_t copyout_buffer[2048];
-    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
-
-    hb_sharedmemory_write( &handle->sharedmemory, copyout_buffer, copyout_buffer_size );
+    uint32_t multipart_params_count;
+    multipart_params_handle_t multipart_params[8];
+    int multipart_parse_error = hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count );
+    HB_UNUSED( multipart_parse_error );
 
     char process_command[64];
     sprintf( process_command, "--sm %s"
@@ -46,8 +32,8 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    hb_node_newproject_out_t out;
-    hb_sharedmemory_read( &handle->sharedmemory, &out, sizeof( hb_node_newproject_out_t ), HB_NULLPTR );
+    hb_node_newproject_out_t out_data;
+    hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 
@@ -58,7 +44,7 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 
     size_t puid64_size;
     char puid64[25];
-    hb_base64_encode( out.puid, 12, puid64, 25, &puid64_size );
+    hb_base64_encode( out_data.puid, 12, puid64, 25, &puid64_size );
     puid64[puid64_size] = '\0';
 
     char request[256];

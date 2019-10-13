@@ -21,7 +21,10 @@ src
     hb_multipart.c
 
 	hb_strstre.h
-	hb_strstre.c    
+	hb_strstre.c
+    
+    hb_time.h
+    hb_time.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

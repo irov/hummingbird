@@ -5,7 +5,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_multipart_parse( const void * _boundary, size_t _boundarysize, multipart_params_handle_t * _params, size_t _capacity, const void * _buffer, size_t _buffersize, uint32_t * _count )
+int hb_multipart_parse( const void * _boundary, size_t _boundarysize, const void * _buffer, size_t _buffersize, multipart_params_handle_t * _params, size_t _capacity, uint32_t * _count )
 {
     uint32_t count = 0;
 
