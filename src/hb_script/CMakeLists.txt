@@ -9,7 +9,7 @@ src
     
     hb_script_handle.h
     
-    hb_script_server_GetCurrentUserData.c
+    hb_script_server_GetCurrentUserPublicData.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)

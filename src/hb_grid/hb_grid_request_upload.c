@@ -1,4 +1,4 @@
-#include "hb_grid.h"
+#include "hb_grid_request.h"
 
 #include "hb_node_upload/hb_node_upload.h"
 #include "hb_process/hb_process.h"
@@ -12,34 +12,12 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    hb_node_upload_in_t in;
-    strcpy( in.db_uri, handle->db_uri );
-
-    enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
-    HB_UNUSED( command_type );
-
-    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
-    HB_UNUSED( headers );
-
-    const char * content_type = evhttp_find_header( headers, "Content-Type" );
-    HB_UNUSED( content_type );
-
-    const char * content_type_boundary = hb_strstre( content_type, "boundary=" );
-
-    char boundary[64];
-    int boundary_size = sprintf( boundary, "--%s", content_type_boundary );
-
-    struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
-    
-    size_t multipart_length = evbuffer_get_length( input_buffer );
-
-    char multipart[10240];
-    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
-    HB_UNUSED( copyout_buffer_size );
+    hb_node_upload_in_t in_data;
+    strcpy( in_data.db_uri, handle->db_uri );
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
-    int multipart_parse_error = hb_multipart_parse( boundary, boundary_size, multipart_params, 8, multipart, multipart_length, &multipart_params_count );
+    int multipart_parse_error = hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count );
     HB_UNUSED( multipart_parse_error );
 
     size_t params_puid_size;
@@ -47,17 +25,17 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     int multipart_get_puid_error = hb_multipart_get_value( multipart_params, multipart_params_count, "puid", &params_puid, &params_puid_size );
     HB_UNUSED( multipart_get_puid_error );
 
-    hb_base64_decode( params_puid, params_puid_size, in.puid, 12, HB_NULLPTR );
+    hb_base64_decode( params_puid, params_puid_size, in_data.puid, 12, HB_NULLPTR );
 
     size_t params_data_size;
     const void * params_data;
     int multipart_get_data_error = hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size );
     HB_UNUSED( multipart_get_data_error );
 
-    memcpy( in.data, params_data, params_data_size );
-    in.data_size = params_data_size;
+    memcpy( in_data.data, params_data, params_data_size );
+    in_data.data_size = params_data_size;
 
-    if( hb_sharedmemory_write( &handle->sharedmemory, &in, sizeof( hb_node_upload_in_t ) ) == 0 )
+    if( hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) ) == 0 )
     {
         evhttp_send_reply( _request, HTTP_INTERNAL, "", HB_NULLPTR );
 
@@ -73,8 +51,8 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    hb_node_upload_out_t out;
-    hb_sharedmemory_read( &handle->sharedmemory, &out, sizeof( hb_node_upload_out_t ), HB_NULLPTR );
+    hb_node_upload_out_t out_data;
+    hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 

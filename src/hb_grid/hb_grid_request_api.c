@@ -1,30 +1,43 @@
-#include "hb_grid.h"
+#include "hb_grid_request.h"
+
+#include "hb_node_api/hb_node_api.h"
 
 #include "hb_process/hb_process.h"
+#include "hb_utils/hb_base64.h"
 
 void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
 {    
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
-    enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
-    HB_UNUSED( command_type );
+    hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
-    HB_UNUSED( headers );
+    hb_node_api_in_t in_data;
 
-    const char * content_type = evhttp_find_header( headers, "Content-Type" );
-    HB_UNUSED( content_type );
+    strcpy( in_data.db_uri, handle->db_uri );
 
-    struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
-    HB_UNUSED( input_buffer );
+    const char * token;
+    if( hb_grid_get_request_header( _request, "X-Token", &token ) == 0 )
+    {
+        return;
+    }
 
-    size_t length = evbuffer_get_length( input_buffer );
+    hb_base64_decode( token, strlen( token ), in_data.token, 12, HB_NULLPTR );
 
-    uint8_t copyout_buffer[2048];
-    ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, copyout_buffer, length );
+    const char * method;
+    if( hb_grid_get_request_header( _request, "X-Method", &method ) == 0 )
+    {
+        return;
+    }
+
+    strcpy( in_data.method, method );
+
+    if( hb_grid_get_request_data( _request, in_data.data, 10240, &in_data.data_size ) == 0 )
+    {
+        return;
+    }
+
+    hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) );
     
-    hb_sharedmemory_write( &handle->sharedmemory, copyout_buffer, copyout_buffer_size );
-
     char process_command[64];
     sprintf( process_command, "--sm %s"
         , handle->sharedmemory.name
@@ -34,9 +47,8 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
-    size_t process_result_size;
-    char process_result[2048];
-    hb_sharedmemory_read( &handle->sharedmemory, process_result, 2048, &process_result_size );
+    hb_node_api_out_t out_data;
+    hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
     
@@ -45,7 +57,7 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    evbuffer_add( output_buffer, process_result, process_result_size );
+    evbuffer_add( output_buffer, out_data.result, out_data.result_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

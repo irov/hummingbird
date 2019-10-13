@@ -23,9 +23,11 @@ typedef struct hb_script_handle_t
     uint32_t call_used;
     uint32_t call_limit;
 
-    char user[32];
+    hb_db_collection_handle_t db_user_collection;
+    hb_db_collection_handle_t db_project_collection;
 
-    hb_db_collection_handle_t db_collection;
+    uint8_t uuid[12];
+    uint8_t puid[12];
 } hb_script_handle_t;
 
 #endif
