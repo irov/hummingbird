@@ -94,7 +94,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    int64_t script_revision = db_script_revision_handle[0].value_int64;
+    int64_t script_revision = db_script_revision_handle[0].int64_value;
     
     hb_db_destroy_values( db_script_revision_handle, 1 );
 
@@ -109,7 +109,7 @@ int main( int _argc, char * _argv[] )
     if( script_revision == 0 )
     {
         hb_db_value_handle_t handles[1];
-        hb_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
+        hb_db_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
 
         hb_db_new_document( &db_project_subversion_handler, handles, 1, oid );
     }
@@ -119,8 +119,8 @@ int main( int _argc, char * _argv[] )
         hb_db_get_value( &db_projects_handle, in_data.puid, "script_sha1", &db_script_sha1_handle );
 
         hb_db_value_handle_t handles[2];
-        hb_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
-        hb_make_binary_value( "prev", ~0U, db_script_sha1_handle.value_binary, db_script_sha1_handle.length_binary, handles + 1 );
+        hb_db_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
+        hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.binary_value, db_script_sha1_handle.binary_length, handles + 1 );
 
         hb_db_new_document( &db_project_subversion_handler, handles, 2, oid );
 
@@ -128,8 +128,8 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_db_value_handle_t db_project_handles[2];
-    hb_make_binary_value( "script_sha1", ~0U, sha1, 20, db_project_handles + 0 );
-    hb_make_oid_value( "script_subversion", ~0U, oid, db_project_handles + 1 );
+    hb_db_make_binary_value( "script_sha1", ~0U, sha1, 20, db_project_handles + 0 );
+    hb_db_make_oid_value( "script_subversion", ~0U, oid, db_project_handles + 1 );
 
     hb_db_update_values( &db_projects_handle, in_data.puid, db_project_handles, 2 );
 

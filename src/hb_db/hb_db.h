@@ -33,25 +33,25 @@ typedef struct hb_db_value_handle_t
     hb_db_value_type_e type;
 
     const char * field;
-    size_t length_field;
+    size_t field_length;
     
-    const char * value_string;
-    size_t length_string;
+    const char * string_value;
+    size_t string_length;
 
-    const void * value_binary;
-    size_t length_binary;
+    const void * binary_value;
+    size_t binary_length;
 
-    int64_t value_int64;
-    hb_time_t value_time;
+    int64_t int64_value;
+    hb_time_t time_value;
 
-    const uint8_t * value_oid;
+    const uint8_t * oid_value;
 } hb_db_value_handle_t;
 
-void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle );
-void hb_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
-void hb_make_binary_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
-void hb_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
-void hb_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
+void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle );
+void hb_db_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
+void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
+void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
+void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
 
 int hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] );
 

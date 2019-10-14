@@ -15,6 +15,6 @@ if(WIN32)
     ADD_DEFINITIONS(-DLZ4_FORCE_MEMORY_ACCESS=2)
 endif()
 
-include_directories(${SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIRECTORY}/lib)
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})

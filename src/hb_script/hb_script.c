@@ -42,7 +42,7 @@ static const struct luaL_Reg globalLib[] = {
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    { "GetCurrentUserData", &__hb_script_server_GetCurrentUserPublicData },
+    { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData },
 { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
