@@ -54,7 +54,7 @@ int main( int _argc, char * _argv[] )
     hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
 
     hb_db_value_handle_t new_value[1];
-    hb_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
+    hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
     uint8_t oid[12];
     hb_db_new_document( &db_projects_handle, new_value, 1, oid );

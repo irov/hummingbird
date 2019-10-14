@@ -60,12 +60,12 @@ int main( int _argc, char * _argv[] )
     uint8_t login_sha1[20];
     hb_sha1( in_data.login, strlen( in_data.login ), login_sha1 );
 
-    hb_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 0 );
+    hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 0 );
 
     uint8_t password_sha1[20];
     hb_sha1( in_data.password, strlen( in_data.password ), password_sha1 );
 
-    hb_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
+    hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
 
     uint8_t authentication_oid[12];
     uint32_t authentication_exist;
@@ -83,12 +83,12 @@ int main( int _argc, char * _argv[] )
         hb_db_get_collection( "hb", "hb_token", &db_token_handle );
 
         hb_db_value_handle_t token_handles[3];
-        hb_make_oid_value( "uuid", ~0U, authentication_oid, token_handles + 0 );
+        hb_db_make_oid_value( "uuid", ~0U, authentication_oid, token_handles + 0 );
         hb_db_get_value( &db_users_handle, authentication_oid, "puid", token_handles + 1 );
 
         hb_time_t t;
         hb_time( &t );
-        hb_make_time_value( "loginAt", ~0U, t, token_handles + 2 );
+        hb_db_make_time_value( "loginAt", ~0U, t, token_handles + 2 );
 
         uint8_t token_oid[12];
         hb_db_new_document( &db_token_handle, token_handles, 3, token_oid );

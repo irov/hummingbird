@@ -110,26 +110,26 @@ static int __hb_db_append_values( bson_t * _bson, const hb_db_value_handle_t * _
         {
         case e_hb_db_int64:
             {
-                bson_append_int64( _bson, handle->field, handle->length_field, handle->value_int64 );
+                bson_append_int64( _bson, handle->field, handle->field_length, handle->int64_value );
             }break;
         case e_hb_db_string:
             {
-                bson_append_symbol( _bson, handle->field, handle->length_field, handle->value_string, handle->length_string );
+                bson_append_symbol( _bson, handle->field, handle->field_length, handle->string_value, handle->string_length );
             }break;
         case e_hb_db_binary:
             {
-                bson_append_binary( _bson, handle->field, handle->length_field, BSON_SUBTYPE_BINARY, handle->value_binary, handle->length_binary );
+                bson_append_binary( _bson, handle->field, handle->field_length, BSON_SUBTYPE_BINARY, handle->binary_value, handle->binary_length );
             }break;
         case e_hb_db_time:
             {
-                bson_append_time_t( _bson, handle->field, handle->length_field, (time_t)handle->value_time );
+                bson_append_time_t( _bson, handle->field, handle->field_length, (time_t)handle->time_value );
             }break;
         case e_hb_db_oid:
             {
                 bson_oid_t oid;
-                bson_oid_init_from_data( &oid, handle->value_oid );
+                bson_oid_init_from_data( &oid, handle->oid_value );
 
-                bson_append_oid( _bson, handle->field, handle->length_field, &oid );
+                bson_append_oid( _bson, handle->field, handle->field_length, &oid );
             }break;
         default:
             {
@@ -168,51 +168,51 @@ int hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_val
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle )
+void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_int64;
     _handle->field = _field;
-    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->value_int64 = _value;
+    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->int64_value = _value;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
+void hb_db_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_string;
     _handle->field = _field;
-    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->value_string = _value;
-    _handle->length_string = _valuelength == ~0U ? strlen( _value ) : _valuelength;
+    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->string_value = _value;
+    _handle->string_length = _valuelength == ~0U ? strlen( _value ) : _valuelength;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_make_binary_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
+void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_binary;
     _handle->field = _field;
-    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->value_binary = _value;
-    _handle->length_binary = _valuelength;
+    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->binary_value = _value;
+    _handle->binary_length = _valuelength;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle )
+void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_time;
     _handle->field = _field;
-    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->value_time = _time;
+    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->time_value = _time;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle )
+void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_oid;
     _handle->field = _field;
-    _handle->length_field = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->value_oid = _oid;
+    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->oid_value = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
 int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], uint32_t * _exist )
@@ -328,7 +328,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
         const char * field = _fields[index];
 
         handle->field = field;
-        handle->length_field = strlen( field );
+        handle->field_length = strlen( field );
 
         if( bson_iter_find( &iter, field ) == false )
         {
@@ -345,7 +345,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
             {
                 handle->type = e_hb_db_int64;
 
-                handle->value_int64 = bson_iter_int64( &iter );
+                handle->int64_value = bson_iter_int64( &iter );
             }break;
         case BSON_TYPE_SYMBOL:
             {
@@ -354,8 +354,8 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
                 uint32_t utf8_length;
                 const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
 
-                handle->length_string = utf8_length;
-                handle->value_string = utf8_value;
+                handle->string_length = utf8_length;
+                handle->string_value = utf8_value;
             }break;
         case BSON_TYPE_BINARY:
             {
@@ -366,14 +366,14 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
                 const uint8_t * binary_value;
                 bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_value );
 
-                handle->length_binary = binary_length;
-                handle->value_binary = binary_value;
+                handle->binary_length = binary_length;
+                handle->binary_value = binary_value;
             }break;
         case BSON_TYPE_DATE_TIME:
             {
                 handle->type = e_hb_db_time;
 
-                handle->value_time = bson_iter_time_t( &iter );
+                handle->time_value = bson_iter_time_t( &iter );
             }break;
         case BSON_TYPE_OID:
             {
@@ -381,7 +381,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
 
                 const bson_oid_t * value_oid = bson_iter_oid( &iter );
 
-                handle->value_oid = value_oid->bytes;
+                handle->oid_value = value_oid->bytes;
             }break;
         default:
             {

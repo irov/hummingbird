@@ -38,7 +38,7 @@ int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
     lua_pushboolean( L, 1 );
 
     hb_json_handle_t json_data;
-    hb_json_create( handler[0].value_string, handler[0].length_string, &json_data );
+    hb_json_create( handler[0].string_value, handler[0].string_length, &json_data );
 
     for( uint32_t index = 0; index != field_iterator; ++index )
     {

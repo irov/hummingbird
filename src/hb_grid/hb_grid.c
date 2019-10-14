@@ -1,6 +1,7 @@
 #include "hb_grid.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
 #include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_getopt.h"
@@ -74,10 +75,6 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    //char const server_address[] = "127.0.0.1";
-    //char const server_address[] = "0.0.0.0";
-    //ev_uint16_t server_port = 5555;
-
     const uint32_t max_thread = 16;
 
     WORD wVersionRequested = MAKEWORD( 2, 2 );
@@ -108,6 +105,8 @@ int main( int _argc, char * _argv[] )
         hb_sharedmemory_create( sharedmemory_name, 65536, &process_handle->sharedmemory );
 
         strcpy( process_handle->db_uri, "mongodb://localhost:27017" );
+        strcpy( process_handle->cache_uri, "127.0.0.1" );
+        process_handle->cache_port = 6379;
 
         hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread );
 
