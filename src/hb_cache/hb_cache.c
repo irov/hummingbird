@@ -17,7 +17,7 @@ redisContext * g_redis_context = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
 int hb_cache_initialze( const char * _uri, uint32_t _port )
 {
-    redisContext * c = redisConnect( _uri, _port ); //
+    redisContext * c = redisConnect( _uri, _port ); //6379
 
     g_redis_context = c;
 
@@ -30,7 +30,7 @@ void hb_cache_finalize()
     g_redis_context = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_set_binary_value( const char * _key, const void * _value, size_t _size )
+int hb_cache_set_value( const char * _key, const void * _value, size_t _size )
 {
     redisReply * reply = redisCommand( g_redis_context, "SET %s %b", _key, _value, _size );
     freeReplyObject( reply );
@@ -38,25 +38,22 @@ int hb_cache_set_binary_value( const char * _key, const void * _value, size_t _s
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_set_string_value( const char * _key, const char * _value, size_t _size )
+int hb_cache_expire_value( const char * _key, uint32_t _seconds )
 {
-    redisReply * reply = redisCommand( g_redis_context, "SET %s %b", _key, _value, _size );
+    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %s %u", _key, _seconds );
     freeReplyObject( reply );
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_set_int64_value( const char * _key, int64_t _value )
-{
-    redisReply * reply = redisCommand( g_redis_context, "SET %s %" PRIX64, _key, _value );
-    freeReplyObject( reply );
-
-    return 1;
-}
-//////////////////////////////////////////////////////////////////////////
-int hb_cache_get_binary_value( const char * _key, void * _value, size_t _capacity, size_t * _size )
+int hb_cache_get_value( const char * _key, void * _value, size_t _capacity, size_t * _size )
 {
     redisReply * reply = redisCommand( g_redis_context, "GET %s", _key );
+
+    if( reply->type == REDIS_REPLY_NIL )
+    {
+        return 0;
+    }
 
     if( reply->len > _capacity )
     {
@@ -67,38 +64,12 @@ int hb_cache_get_binary_value( const char * _key, void * _value, size_t _capacit
 
     memcpy( _value, reply->str, reply->len );
 
-    *_size = reply->len;
-
-    freeReplyObject( reply );
-
-    return 1;
-}
-//////////////////////////////////////////////////////////////////////////
-int hb_cache_get_string_value( const char * _key, char * _value, size_t _capacity, size_t * _size )
-{
-    redisReply * reply = redisCommand( g_redis_context, "GET %s", _key );
-
-    if( reply->len > _capacity )
+    if( _size != HB_NULLPTR )
     {
-        freeReplyObject( reply );
-
-        return 0;
+        *_size = reply->len;
     }
 
-    memcpy( _value, reply->str, reply->len );
-
-    *_size = reply->len;
-
     freeReplyObject( reply );
-
-    return 1;
-}
-//////////////////////////////////////////////////////////////////////////
-int hb_cache_get_int64_value( const char * _key, int64_t * _value )
-{
-    redisReply * reply = redisCommand( g_redis_context, "GET %s", _key );
-
-    *_value = reply->integer;
 
     return 1;
 }
