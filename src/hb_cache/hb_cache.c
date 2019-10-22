@@ -2,15 +2,10 @@
 
 #include "hb_config/hb_config.h"
 #include "hb_log/hb_log.h"
-#include "hb_utils/hb_sha1.h"
-#include "hb_utils/hb_base64.h"
 
 #include "hiredis.h"
 
 #include <string.h>
-
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
 
 //////////////////////////////////////////////////////////////////////////
 redisContext * g_redis_context = HB_NULLPTR;
@@ -30,25 +25,25 @@ void hb_cache_finalize()
     g_redis_context = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_set_value( const char * _key, const void * _value, size_t _size )
+int hb_cache_set_value( const void * _key, size_t _keysize, const void * _value, size_t _size )
 {
-    redisReply * reply = redisCommand( g_redis_context, "SET %s %b", _key, _value, _size );
+    redisReply * reply = redisCommand( g_redis_context, "SET %b %b", _key, _keysize, _value, _size );
     freeReplyObject( reply );
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_expire_value( const char * _key, uint32_t _seconds )
+int hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t _seconds )
 {
-    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %s %u", _key, _seconds );
+    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %b %u", _key, _keysize, _seconds );
     freeReplyObject( reply );
 
     return 1;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_cache_get_value( const char * _key, void * _value, size_t _capacity, size_t * _size )
+int hb_cache_get_value( const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
 {
-    redisReply * reply = redisCommand( g_redis_context, "GET %s", _key );
+    redisReply * reply = redisCommand( g_redis_context, "GET %b", _key, _keysize );
 
     if( reply->type == REDIS_REPLY_NIL )
     {
