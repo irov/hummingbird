@@ -73,10 +73,10 @@ int main( int _argc, char * _argv[] )
     }
 
     uint8_t uuid[12];
-    memcpy( uuid, db_uid_handle[0].oid_value, 12 );
+    memcpy( uuid, db_uid_handle[0].u.oid, 12 );
 
     uint8_t puid[12];
-    memcpy( puid, db_uid_handle[1].oid_value, 12 );
+    memcpy( puid, db_uid_handle[1].u.oid, 12 );
     
     hb_db_destroy_values( db_uid_handle, 2 );
 
@@ -122,7 +122,7 @@ int main( int _argc, char * _argv[] )
     }
 
     uint8_t script_sha1[20];
-    memcpy( script_sha1, db_script_sha1_handle[0].binary_value, 20 );
+    memcpy( script_sha1, db_script_sha1_handle[0].u.binary.buffer, 20 );
 
     hb_db_destroy_values( db_script_sha1_handle, 1 );
 
