@@ -50,7 +50,31 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( in_data.magic_number != hb_node_newuser_magic_number )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( in_data.version_number != hb_node_newuser_version_number )
+    {
+        return EXIT_FAILURE;
+    }
+
     if( hb_db_initialze( "hb_node_newuser", in_data.db_uri ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
+    hb_db_collection_handle_t db_projects_handle;
+    hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
+
+    hb_db_value_handle_t project_handles[1];
+
+    hb_db_make_int32_value( "pid", ~0U, in_data.pid, project_handles + 0 );
+
+    uint8_t puid[12];
+    hb_result_t project_exist;
+    if( hb_db_find_oid( &db_projects_handle, project_handles, 1, puid, &project_exist ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -78,12 +102,14 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_node_newuser_out_t out_data;
+    out_data.magic_number = hb_node_newuser_magic_number;
+    out_data.version_number = hb_node_newuser_version_number;
     out_data.exist = authentication_exist;
 
     if( authentication_exist == HB_FAILURE )
     {
         hb_db_value_handle_t user_handles[3];
-        hb_db_make_oid_value( "puid", ~0U, in_data.puid, user_handles + 0 );
+        hb_db_make_int32_value( "pid", ~0U, in_data.pid, user_handles + 0 );
         hb_db_make_binary_value( "login", ~0U, login_sha1, 20, user_handles + 1 );
         hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_handles + 2 );
 
@@ -95,7 +121,7 @@ int main( int _argc, char * _argv[] )
 
         hb_db_value_handle_t token_handles[3];
         hb_db_make_oid_value( "uuid", ~0U, user_oid, token_handles + 0 );
-        hb_db_make_oid_value( "puid", ~0U, in_data.puid, token_handles + 1 );
+        hb_db_make_oid_value( "puid", ~0U, puid, token_handles + 1 );
 
         hb_time_t t;
         hb_time( &t );

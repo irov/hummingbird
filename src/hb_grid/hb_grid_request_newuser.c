@@ -4,6 +4,7 @@
 
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_base16.h"
 
 void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
 {
@@ -12,6 +13,8 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
     hb_node_newuser_in_t in_data;
+    in_data.magic_number = hb_node_newuser_magic_number;
+    in_data.version_number = hb_node_newuser_version_number;
 
     strcpy( in_data.db_uri, handle->db_uri );
 
@@ -22,9 +25,9 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    size_t params_puid_size;
-    const void * params_puid;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "puid", &params_puid, &params_puid_size ) == 0 )
+    size_t params_pid_size;
+    const void * params_pid;
+    if( hb_multipart_get_value( multipart_params, multipart_params_count, "pid", &params_pid, &params_pid_size ) == 0 )
     {
         return;
     }
@@ -43,7 +46,7 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         return;
     }
     
-    hb_base64_decode( params_puid, params_puid_size, in_data.puid, 12, HB_NULLPTR );
+    hb_base16_decode( params_pid, params_pid_size, &in_data.pid, 2, HB_NULLPTR );
 
     memcpy( in_data.login, params_login, params_login_size );
     in_data.login[params_login_size] = '\0';
@@ -65,6 +68,16 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
 
     hb_node_newuser_out_t out_data;
     hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
+
+    if( out_data.magic_number != hb_node_newuser_magic_number )
+    {
+        return;
+    }
+
+    if( out_data.version_number != hb_node_newuser_version_number )
+    {
+        return;
+    }
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 

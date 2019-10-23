@@ -8,7 +8,7 @@ typedef struct multipart_params_handle_t
     const char * key;
     size_t key_size;
 
-    const void * data;
+    const char * data;
     size_t data_size;
 } multipart_params_handle_t;
 
