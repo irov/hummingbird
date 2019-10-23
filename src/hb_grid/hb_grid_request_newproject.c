@@ -27,7 +27,7 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    int process_result = hb_process_run( "hb_node_newproject.exe", process_command );
+    hb_result_t process_result = hb_process_run( "hb_node_newproject.exe", process_command );
     HB_UNUSED( process_result );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
@@ -47,12 +47,12 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     hb_base64_encode( out_data.puid, 12, puid64, 25, &puid64_size );
     puid64[puid64_size] = '\0';
 
-    char request[256];
-    size_t request_size = sprintf( request, "{\"puid\"=\"%s\"}"
+    char request_data[HB_GRID_REQUEST_MAX_SIZE];
+    size_t request_data_size = sprintf( request_data, "{\"puid\"=\"%s\"}"
         , puid64
     );
 
-    evbuffer_add( output_buffer, request, request_size );
+    evbuffer_add( output_buffer, request_data, request_data_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

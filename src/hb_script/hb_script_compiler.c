@@ -38,7 +38,7 @@ static int writer( lua_State * L, const void * p, size_t size, void * u )
     return LUA_OK;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_compiler( const void * _source, size_t _size, void * _code, size_t _capacity, size_t * _compilesize )
+hb_result_t hb_script_compiler( const void * _source, size_t _size, void * _code, size_t _capacity, size_t * _compilesize )
 {
     lua_State * L = luaL_newstate();
 
@@ -48,7 +48,7 @@ int hb_script_compiler( const void * _source, size_t _size, void * _code, size_t
     {
         luaL_error( L, "invalid load source" );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     const Proto * f = getproto( L->top - 1 );
@@ -64,5 +64,6 @@ int hb_script_compiler( const void * _source, size_t _size, void * _code, size_t
     
     *_compilesize = desc.carriage;
     
-    return 1;
+    return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////

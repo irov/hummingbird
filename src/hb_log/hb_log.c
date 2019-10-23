@@ -30,12 +30,12 @@ typedef struct hb_log_service_t
 //////////////////////////////////////////////////////////////////////////
 hb_log_service_t * g_log_service = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-int hb_log_initialize()
+hb_result_t hb_log_initialize()
 {
     g_log_service = HB_NEW( hb_log_service_t );
     g_log_service->observer_count = 0;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_log_finalize()
@@ -47,11 +47,11 @@ void hb_log_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_log_add_observer( const char * _category, int _level, hb_log_observer_t _observer )
+hb_result_t hb_log_add_observer( const char * _category, int _level, hb_log_observer_t _observer )
 {
     if( g_log_service->observer_count == HB_LOG_MAX_OBSERVER )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     hb_log_service_observer_desc_t desc;
@@ -70,10 +70,10 @@ int hb_log_add_observer( const char * _category, int _level, hb_log_observer_t _
 
     g_log_service->observers[g_log_service->observer_count++] = desc;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_log_remove_observer( hb_log_observer_t _observer )
+hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
 {
     for( int i = 0; i != HB_LOG_MAX_OBSERVER; ++i )
     {
@@ -86,10 +86,10 @@ int hb_log_remove_observer( hb_log_observer_t _observer )
 
         g_log_service->observers[i] = g_log_service->observers[g_log_service->observer_count - 1];
 
-        return 1;
+        return HB_SUCCESSFUL;
     }
 
-    return 0;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_message_args( const char * _category, int _level, const char * _message )

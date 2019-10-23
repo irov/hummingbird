@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-int hb_httpopt( const char * _http, size_t _size, const char * _name, const char ** _value, size_t * _valuesize )
+hb_result_t hb_httpopt( const char * _http, size_t _size, const char * _name, const char ** _value, size_t * _valuesize )
 {
     const char * base = _http;
 
@@ -39,8 +39,8 @@ int hb_httpopt( const char * _http, size_t _size, const char * _name, const char
             *_valuesize = chr_amp - chr_equal - 1;
         }
 
-        return 1;
+        return HB_SUCCESSFUL;
     }
 
-    return 0;
+    return HB_FAILURE;
 }

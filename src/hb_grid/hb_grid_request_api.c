@@ -43,7 +43,8 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    hb_process_run( "hb_node_api.exe", process_command );
+    hb_result_t result = hb_process_run( "hb_node_api.exe", process_command );
+    HB_UNUSED( result );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 

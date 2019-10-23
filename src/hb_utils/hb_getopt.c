@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-int hb_getopt( int argc, char * argv[], const char * _name, const char ** _value )
+hb_result_t hb_getopt( int argc, char * argv[], const char * _name, const char ** _value )
 {
     for( int index = 1; index != argc; ++index )
     {
@@ -13,13 +13,13 @@ int hb_getopt( int argc, char * argv[], const char * _name, const char ** _value
 
         if( index + 1 == argc )
         {
-            return 0;
+            return HB_FAILURE;
         }
 
         *_value = argv[index + 1];
 
-        return 1;
+        return HB_SUCCESSFUL;
     }
 
-    return 0;
+    return HB_FAILURE;
 }

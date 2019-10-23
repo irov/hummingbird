@@ -3,6 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-int hb_httpopt( const char * _http, size_t _size, const char * _name, const char ** _value, size_t * _valuesize );
+hb_result_t hb_httpopt( const char * _http, size_t _size, const char * _name, const char ** _value, size_t * _valuesize );
 
 #endif

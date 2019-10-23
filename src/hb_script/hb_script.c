@@ -104,7 +104,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     return;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, const uint8_t * _uuid, const uint8_t * _puid )
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, const uint8_t * _uuid, const uint8_t * _puid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
     
@@ -112,7 +112,7 @@ int hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_co
     {
         /* recovered from panic. log and return */
 
-        return 0;
+        return HB_FAILURE;
     }
 
     g_script_handle->memory_base = 0;
@@ -162,7 +162,7 @@ int hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_co
     memcpy( g_script_handle->uuid, _uuid, 12 );
     memcpy( g_script_handle->puid, _puid, 12 );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
@@ -184,13 +184,13 @@ void hb_script_finalize()
     g_script_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_load( const void * _buffer, size_t _size )
+hb_result_t hb_script_load( const void * _buffer, size_t _size )
 {
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
 
-        return 0;
+        return HB_FAILURE;
     }
 
     lua_State * L = g_script_handle->L;
@@ -204,7 +204,7 @@ int hb_script_load( const void * _buffer, size_t _size )
 
         lua_pop( L, 1 );  /* pop error message from the stack */
 
-        return 0;
+        return HB_FAILURE;
     }
 
     int ret = lua_pcallk( L, 0, 0, 0, 0, HB_NULLPTR );
@@ -216,13 +216,13 @@ int hb_script_load( const void * _buffer, size_t _size )
 
         lua_pop( L, 1 );  /* pop error message from the stack */
 
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_script_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
+hb_result_t hb_script_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
 {
     HB_UNUSED( _capacity );
 
@@ -230,7 +230,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _datasize, 
     {
         /* recovered from panic. log and return */
 
-        return 0;
+        return HB_FAILURE;
     }
 
     lua_State * L = g_script_handle->L;
@@ -252,7 +252,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _datasize, 
             , error_msg 
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     int status2 = lua_pcallk( L, 0, 1, 0, 0, HB_NULLPTR );
@@ -267,7 +267,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _datasize, 
             , error_msg
         );
 
-        return 0;
+        return HB_FAILURE;
     }
     
     int status = lua_pcallk( L, 1, 2, 0, 0, HB_NULLPTR );
@@ -282,7 +282,7 @@ int hb_script_call( const char * _method, const char * _data, size_t _datasize, 
             , error_msg
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     int successful = lua_toboolean( L, -2 );
@@ -341,8 +341,8 @@ int hb_script_call( const char * _method, const char * _data, size_t _datasize, 
 
     if( successful == 0 )
     {
-        return -1;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }

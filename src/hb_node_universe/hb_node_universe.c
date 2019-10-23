@@ -32,29 +32,32 @@ int main( int _argc, char * _argv[] )
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
 
     const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
+    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_node_universe_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    hb_db_initialze( "hb_node_universe", in_data.db_uri );
+    if( hb_db_initialze( "hb_node_universe", in_data.db_uri ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_collection_handle_t db_users_handle;
     hb_db_get_collection( "hb", "hb_token", &db_users_handle );
 
-    if( hb_db_set_collection_expire( &db_users_handle, "loginAt", in_data.token_expire_time ) == 0 )
+    if( hb_db_set_collection_expire( &db_users_handle, "loginAt", in_data.token_expire_time ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

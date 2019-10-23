@@ -5,7 +5,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_multipart_parse( const void * _boundary, size_t _boundarysize, const void * _buffer, size_t _buffersize, multipart_params_handle_t * _params, size_t _capacity, uint32_t * _count )
+hb_result_t hb_multipart_parse( const void * _boundary, size_t _boundarysize, const void * _buffer, size_t _buffersize, multipart_params_handle_t * _params, size_t _capacity, uint32_t * _count )
 {
     uint32_t count = 0;
 
@@ -53,10 +53,10 @@ int hb_multipart_parse( const void * _boundary, size_t _boundarysize, const void
 
     *_count = count;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_multipart_get_value( multipart_params_handle_t * _handles, uint32_t _count, const char * _key, const void ** _data, size_t * _size )
+hb_result_t hb_multipart_get_value( multipart_params_handle_t * _handles, uint32_t _count, const char * _key, const void ** _data, size_t * _size )
 {
     for( uint32_t index = 0; index != _count; ++index )
     {
@@ -70,8 +70,8 @@ int hb_multipart_get_value( multipart_params_handle_t * _handles, uint32_t _coun
         *_data = handle->data;
         *_size = handle->data_size;
 
-        return 1;
+        return HB_SUCCESSFUL;
     }
 
-    return 0;
+    return HB_FAILURE;
 }
