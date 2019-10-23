@@ -1,5 +1,7 @@
 #include "hb_file.h"
 
+#include "hb_log/hb_log.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -18,31 +20,36 @@ typedef struct hb_file_settings_t
 //////////////////////////////////////////////////////////////////////////
 static hb_file_settings_t * g_file_settings;
 //////////////////////////////////////////////////////////////////////////
-int hb_file_initialize( const char * _folder )
+hb_result_t hb_file_initialize( const char * _folder )
 {
     g_file_settings = HB_NEW( hb_file_settings_t );
     strcpy( g_file_settings->folder, _folder );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_file_finialize()
+void hb_file_finalize()
 {
     HB_DELETE( g_file_settings );
     g_file_settings = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_available()
+hb_result_t hb_file_available()
 {
-    if( g_file_settings->folder[0] == '\0' )
+    if( g_file_settings == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    if( g_file_settings->folder[0] == '\0' )
+    {
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
+hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
 {
     char fullpath[256];
     strcpy( fullpath, g_file_settings->folder );
@@ -56,9 +63,10 @@ int hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
 
     if( f == NULL )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
+    strcpy( _handle->path, _path );
     _handle->handle = f;
 
     fseek( f, 0L, SEEK_END );
@@ -67,23 +75,23 @@ int hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
 
     _handle->length = (size_t)sz;    
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static int __hb_file_make_directory( const char * _path )
+static hb_result_t __hb_file_make_directory( const char * _path )
 {
     struct stat sb;
     if( stat( _path, &sb ) == 0 && S_ISREG( sb.st_mode ) )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     _mkdir( _path );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
+hb_result_t hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
 {
     char fullpath[256];
     strcpy( fullpath, g_file_settings->folder );
@@ -104,43 +112,44 @@ int hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
 
     FILE * f = fopen( fullpath, "wb" );
 
-    if( f == NULL )
+    if( f == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
+    strcpy( _handle->path, _path );
     _handle->handle = f;
     _handle->length = 0;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _capacity )
+hb_result_t hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _capacity )
 {
     FILE * f = (FILE *)_handle->handle;
     size_t sz = _handle->length;
 
     if( sz == 0 )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     if( _capacity < sz )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     size_t r = fread( _buffer, sz, 1, f );
 
     if( r != 1 )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _size )
+hb_result_t hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _size )
 {
     FILE * f = (FILE *)_handle->handle;
 
@@ -148,13 +157,13 @@ int hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _siz
 
     if( r != 1 )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_file_close( hb_file_handle_t * _handle )
+void hb_file_close( hb_file_handle_t * _handle )
 {
     FILE * f = (FILE *)_handle->handle;
 
@@ -162,8 +171,9 @@ int hb_file_close( hb_file_handle_t * _handle )
 
     if( res != 0 )
     {
-        return 0;
+        hb_log_message( "file", HB_LOG_WARNING, "invalid close file '%s' error [%d]"
+            , _handle->path
+            , res
+        );
     }
-
-    return 1;
 }

@@ -30,30 +30,39 @@ int main( int _argc, char * _argv[] )
     MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
-    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
+    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
+    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_node_loginuser_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    hb_db_initialze( "hb_node_loginuser", in_data.db_uri );
+    if( hb_db_initialze( "hb_node_loginuser", in_data.db_uri ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_collection_handle_t db_users_handle;
-    hb_db_get_collection( "hb", "hb_users", &db_users_handle );
+    if( hb_db_get_collection( "hb", "hb_users", &db_users_handle ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_value_handle_t authentication_handles[2];
 
@@ -68,8 +77,8 @@ int main( int _argc, char * _argv[] )
     hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
 
     uint8_t authentication_oid[12];
-    uint32_t authentication_exist;
-    if( hb_db_find_oid( &db_users_handle, authentication_handles, 2, authentication_oid, &authentication_exist ) == 0 )
+    hb_result_t authentication_exist;
+    if( hb_db_find_oid( &db_users_handle, authentication_handles, 2, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -77,7 +86,7 @@ int main( int _argc, char * _argv[] )
     hb_node_loginuser_out_t out_data;
     out_data.exist = authentication_exist;
 
-    if( authentication_exist == 1 )
+    if( authentication_exist == HB_SUCCESSFUL )
     {   
         hb_db_collection_handle_t db_token_handle;
         hb_db_get_collection( "hb", "hb_token", &db_token_handle );

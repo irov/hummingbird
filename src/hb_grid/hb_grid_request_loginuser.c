@@ -49,7 +49,7 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    int process_result = hb_process_run( "hb_node_loginuser.exe", process_command );
+    hb_result_t process_result = hb_process_run( "hb_node_loginuser.exe", process_command );
     HB_UNUSED( process_result );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
@@ -80,10 +80,10 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
     }
     else
     {
-        char request[256];
-        size_t request_size = sprintf( request, "{\"error\"=\"1\"}" );
+        char request_data[HB_GRID_REQUEST_MAX_SIZE];
+        size_t request_data_size = sprintf( request_data, "{\"error\"=\"1\"}" );
 
-        evbuffer_add( output_buffer, request, request_size );
+        evbuffer_add( output_buffer, request_data, request_data_size );
     }    
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );

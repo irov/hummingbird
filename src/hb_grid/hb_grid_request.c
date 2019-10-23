@@ -4,7 +4,7 @@
 #include "hb_utils/hb_strstre.h"
 
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_get_request_params( struct evhttp_request * _request, multipart_params_handle_t * _params, uint32_t _capacity, uint32_t * _count )
+hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multipart_params_handle_t * _params, uint32_t _capacity, uint32_t * _count )
 {
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
@@ -17,7 +17,7 @@ int hb_grid_get_request_params( struct evhttp_request * _request, multipart_para
 
     if( content_type == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     const char * content_type_boundary = hb_strstre( content_type, "boundary=" );
@@ -35,13 +35,13 @@ int hb_grid_get_request_params( struct evhttp_request * _request, multipart_para
 
     if( hb_multipart_parse( boundary, boundary_size, multipart, multipart_length, _params, _capacity, _count ) == 0 )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_grid_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
 {
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
@@ -52,22 +52,22 @@ int hb_grid_get_request_data( struct evhttp_request * _request, void * _buffer, 
 
     if( multipart_length > _capacity )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, _buffer, multipart_length );
 
     if( copyout_buffer_size < 0 )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     *_size = copyout_buffer_size;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_get_request_header( struct evhttp_request * _request, const char * _header, const char ** _value )
+hb_result_t hb_grid_get_request_header( struct evhttp_request * _request, const char * _header, const char ** _value )
 {
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
@@ -78,10 +78,10 @@ int hb_grid_get_request_header( struct evhttp_request * _request, const char * _
 
     if( value == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     *_value = value;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }

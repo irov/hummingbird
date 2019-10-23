@@ -13,7 +13,7 @@ size_t hb_archive_bound( size_t _size )
     return (size_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_archive_compress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _compressSize )
+hb_result_t hb_archive_compress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _compressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
@@ -28,15 +28,15 @@ int hb_archive_compress( void * _buffer, size_t _capacity, const void * _source,
             , compressSize
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     *_compressSize = (size_t)compressSize;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_archive_decompress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _decompressSize )
+hb_result_t hb_archive_decompress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _decompressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
@@ -49,10 +49,10 @@ int hb_archive_decompress( void * _buffer, size_t _capacity, const void * _sourc
             , decompressSize
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     *_decompressSize = (size_t)decompressSize;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }

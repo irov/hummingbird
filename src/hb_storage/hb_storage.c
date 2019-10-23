@@ -2,7 +2,7 @@
 
 #include "hb_log/hb_log.h"
 #include "hb_archive/hb_archive.h"
-#include "hb_file/hb_file.h"
+#include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_base64.h"
 
@@ -20,13 +20,13 @@ typedef struct hb_storage_settings_t
 //////////////////////////////////////////////////////////////////////////
 static hb_storage_settings_t * g_storage_settings;
 //////////////////////////////////////////////////////////////////////////
-int hb_storage_initialize( const hb_db_collection_handle_t * _collection )
+hb_result_t hb_storage_initialize( const hb_db_collection_handle_t * _collection )
 {
     g_storage_settings = HB_NEW( hb_storage_settings_t );
 
     g_storage_settings->db_collection = *_collection;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_storage_finalize()
@@ -35,89 +35,73 @@ void hb_storage_finalize()
     g_storage_settings = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_storage_set( const void * _data, size_t _size, uint8_t * _sha1 )
+hb_result_t hb_storage_set( const void * _data, size_t _size, uint8_t _sha1[20] )
 {
     size_t bound_size = hb_archive_bound( _size );
 
     if( bound_size >= HB_STORAGE_MAX_SIZE )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     size_t compressSize;
 
     uint8_t buffer[HB_STORAGE_MAX_SIZE];
-    if( hb_archive_compress( buffer, HB_STORAGE_MAX_SIZE, _data, _size, &compressSize ) == 0 )
+    if( hb_archive_compress( buffer, HB_STORAGE_MAX_SIZE, _data, _size, &compressSize ) == HB_FAILURE )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     hb_sha1( buffer, compressSize, _sha1 );
 
-    if( hb_db_upload_file( &g_storage_settings->db_collection, _sha1, buffer, compressSize ) == 0 )
+    if( hb_db_upload_file( &g_storage_settings->db_collection, _sha1, buffer, compressSize ) == HB_FAILURE )
     {
         return 0;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_storage_get( const uint8_t * _sha1, void * _data, size_t _capacity, size_t * _size )
+hb_result_t hb_storage_get( const uint8_t _sha1[20], void * _data, size_t _capacity, size_t * _size )
 {
-    size_t sha1hex_size;
-    char sha1hex[41];
+    hb_result_t cache_available = hb_cache_available();
 
-    int file_available = hb_file_available();
-
-    if( file_available == 1 )
+    if( cache_available == HB_SUCCESSFUL )
     {
-        hb_base64_encode( _sha1, 20, sha1hex, 41, &sha1hex_size );
-
-        hb_file_handle_t read_file_handle;
-        if( hb_file_open_read( sha1hex, &read_file_handle ) == 1 )
+        size_t cache_data_size;
+        uint8_t cache_data[HB_STORAGE_MAX_SIZE];
+        if( hb_cache_get_value( _sha1, 20, cache_data, HB_STORAGE_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
         {
-            uint8_t compress_data[HB_STORAGE_MAX_SIZE];
-            if( hb_file_read( &read_file_handle, compress_data, _capacity ) == 0 )
+            if( hb_archive_decompress( _data, _capacity, cache_data, cache_data_size, _size ) == HB_SUCCESSFUL )
             {
-                hb_file_close( &read_file_handle );
-
-                return 0;
+                return HB_SUCCESSFUL;
             }
-
-            hb_file_close( &read_file_handle );
-
-            hb_archive_decompress( _data, _capacity, compress_data, read_file_handle.length, _size );            
-
-            return 1;
         }
     }
 
     hb_db_file_handle_t db_file_handle;
-    if( hb_db_load_file( &g_storage_settings->db_collection, _sha1, &db_file_handle ) == 0 )
+    if( hb_db_load_file( &g_storage_settings->db_collection, _sha1, &db_file_handle ) == HB_FAILURE )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
-    if( file_available )
+    if( cache_available == HB_SUCCESSFUL )
     {
-        hb_file_handle_t write_file_handle;
-        if( hb_file_open_write( sha1hex, &write_file_handle ) == 1 )
+        if( hb_cache_set_value( _sha1, 20, db_file_handle.buffer, db_file_handle.length ) == HB_FAILURE )
         {
-            if( hb_file_write( &write_file_handle, db_file_handle.buffer, db_file_handle.length ) == 0 )
-            {
-                hb_file_close( &write_file_handle );
-
-                return 0;
-            }
-
-            hb_file_close( &write_file_handle );
+            hb_log_message( "storage", HB_LOG_ERROR, "invalid cache value ['%.20s']"
+                , _sha1
+            );
         }
     }
 
-    hb_archive_decompress( _data, _capacity, db_file_handle.buffer, db_file_handle.length, _size );
+    if( hb_archive_decompress( _data, _capacity, db_file_handle.buffer, db_file_handle.length, _size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_db_close_file( &db_file_handle );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////

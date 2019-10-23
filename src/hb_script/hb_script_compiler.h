@@ -3,6 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-int hb_script_compiler( const void * _buffer, size_t _size, void * _compile, size_t _capacity, size_t * _compilesize );
+hb_result_t hb_script_compiler( const void * _buffer, size_t _size, void * _compile, size_t _capacity, size_t * _compilesize );
 
 #endif

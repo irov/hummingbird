@@ -6,7 +6,6 @@
 #include "hb_script/hb_script_compiler.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
-#include "hb_file/hb_file.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
@@ -32,39 +31,42 @@ int main( int _argc, char * _argv[] )
 
     MessageBox( NULL, "Test", "Test", MB_OK );
 
-    if( hb_log_initialize() == 0 )
+    if( hb_log_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
+    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
+    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_node_upload_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     size_t code_size;
     uint8_t code_buffer[10240];
-    if( hb_script_compiler( in_data.data, in_data.data_size, code_buffer, 10240, &code_size ) == 0 )
+    if( hb_script_compiler( in_data.data, in_data.data_size, code_buffer, 10240, &code_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_db_initialze( "hb_node_upload", in_data.db_uri ) == 0 )
+    if( hb_db_initialze( "hb_node_upload", in_data.db_uri ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -72,13 +74,13 @@ int main( int _argc, char * _argv[] )
     hb_db_collection_handle_t db_files_handle;
     hb_db_get_collection( "hb", "hb_files", &db_files_handle );
 
-    if( hb_storage_initialize( &db_files_handle ) == 0 )
+    if( hb_storage_initialize( &db_files_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     uint8_t sha1[20];
-    if( hb_storage_set( code_buffer, code_size, sha1 ) == 0 )
+    if( hb_storage_set( code_buffer, code_size, sha1 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -89,7 +91,7 @@ int main( int _argc, char * _argv[] )
     const char * db_projects_fields[] = { "script_revision" };
 
     hb_db_value_handle_t db_script_revision_handle[1];
-    if( hb_db_get_values( &db_projects_handle, in_data.puid, db_projects_fields, 1, db_script_revision_handle ) == 0 )
+    if( hb_db_get_values( &db_projects_handle, in_data.puid, db_projects_fields, 1, db_script_revision_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -99,7 +101,7 @@ int main( int _argc, char * _argv[] )
     hb_db_destroy_values( db_script_revision_handle, 1 );
 
     hb_db_collection_handle_t db_project_subversion_handler;
-    if( hb_db_get_collection( "hb", "hb_project_subversion", &db_project_subversion_handler ) == 0 )
+    if( hb_db_get_collection( "hb", "hb_project_subversion", &db_project_subversion_handler ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

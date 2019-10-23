@@ -35,7 +35,7 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
     return _buflen;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_create( const void * _data, size_t _size, hb_json_handle_t * _handle )
+hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t * _handle )
 {
     hb_json_load_data_t jd;
     jd.buffer = (const uint8_t *)(_data);
@@ -55,12 +55,12 @@ int hb_json_create( const void * _data, size_t _size, hb_json_handle_t * _handle
             , er.text
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     _handle->handle = jroot;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_json_destroy( hb_json_handle_t * _handle )
@@ -70,7 +70,7 @@ void hb_json_destroy( hb_json_handle_t * _handle )
     json_decref( jroot );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_get_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size )
+hb_result_t hb_json_get_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size )
 {
     json_t * jroot = (json_t *)_handle->handle;
 
@@ -78,7 +78,7 @@ int hb_json_get_string( hb_json_handle_t * _handle, const char * _key, const cha
 
     if( jvalue == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     const char * value = json_string_value( jvalue );
@@ -87,10 +87,10 @@ int hb_json_get_string( hb_json_handle_t * _handle, const char * _key, const cha
     *_value = value;
     *_size = size;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_dumpb_value( hb_json_handle_t * _handle, const char * _key, char * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_json_dumpb_value( hb_json_handle_t * _handle, const char * _key, char * _buffer, size_t _capacity, size_t * _size )
 {
     json_t * jroot = (json_t *)_handle->handle;
 
@@ -98,17 +98,17 @@ int hb_json_dumpb_value( hb_json_handle_t * _handle, const char * _key, char * _
 
     if( jvalue == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     size_t size = json_dumpb( jvalue, _buffer, _capacity, JSON_COMPACT | JSON_ESCAPE_SLASH );
 
     *_size = size;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
 {
     json_t * jroot = (json_t *)_handle->handle;
 
@@ -116,6 +116,6 @@ int hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity,
 
     *_size = size;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////

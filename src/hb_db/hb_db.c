@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////
 mongoc_client_t * g_mongo_client = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-int hb_db_initialze( const char * _name, const char * _uri )
+hb_result_t hb_db_initialze( const char * _name, const char * _uri )
 {
     mongoc_init();
 
@@ -25,7 +25,7 @@ int hb_db_initialze( const char * _name, const char * _uri )
             _uri,
             uri_error.message );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     mongoc_client_t * client = mongoc_client_new_from_uri( uri );
@@ -34,7 +34,7 @@ int hb_db_initialze( const char * _name, const char * _uri )
     {
         mongoc_uri_destroy( uri );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     mongoc_uri_destroy( uri );
@@ -43,7 +43,7 @@ int hb_db_initialze( const char * _name, const char * _uri )
 
     g_mongo_client = client;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_finalize()
@@ -54,13 +54,13 @@ void hb_db_finalize()
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection )
+hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection )
 {
     mongoc_collection_t * collection = mongoc_client_get_collection( g_mongo_client, _db, _name );
 
     _collection->handle = collection;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_destroy_collection( hb_db_collection_handle_t * _collection )
@@ -70,7 +70,7 @@ void hb_db_destroy_collection( hb_db_collection_handle_t * _collection )
     mongoc_collection_destroy( mongo_collection );
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire )
+hb_result_t hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -92,15 +92,15 @@ int hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const 
             mongoc_collection_get_name( mongo_collection ),
             error.message );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     bson_destroy( &keys );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static int __hb_db_append_values( bson_t * _bson, const hb_db_value_handle_t * _handles, uint32_t _count )
+static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_handle_t * _handles, uint32_t _count )
 {
     for( uint32_t index = 0; index != _count; ++index )
     {
@@ -133,15 +133,15 @@ static int __hb_db_append_values( bson_t * _bson, const hb_db_value_handle_t * _
             }break;
         default:
             {
-                return 0;
+                return HB_FAILURE;
             }break;
         }
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] )
+hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -158,14 +158,14 @@ int hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_val
     bson_error_t error;
     if( mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error ) == false )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     bson_destroy( &query );
 
     memcpy( _newoid, oid.bytes, 12 );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle )
@@ -215,7 +215,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->oid_value = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], uint32_t * _exist )
+hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], hb_result_t * _exist )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -239,9 +239,9 @@ int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_h
     {
         mongoc_cursor_destroy( cursor );
 
-        *_exist = 0;
+        *_exist = HB_FAILURE;
 
-        return 1;
+        return HB_SUCCESSFUL;
     }
 
     bson_iter_t iter;
@@ -249,14 +249,14 @@ int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_h
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     if( bson_iter_find( &iter, "_id" ) == false )
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     const bson_oid_t * oid = bson_iter_oid( &iter );
@@ -265,21 +265,21 @@ int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_h
 
     mongoc_cursor_destroy( cursor );
 
-    *_exist = 1;
+    *_exist = HB_SUCCESSFUL;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles )
 {
     const char ** fields = &_field;
 
-    int error = hb_db_get_values( _collection, _oid, fields, 1, _handles );
+    hb_result_t result = hb_db_get_values( _collection, _oid, fields, 1, _handles );
 
-    return error;
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -308,7 +308,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     bson_iter_t iter;
@@ -316,7 +316,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     for( uint32_t index = 0; index != _count; ++index )
@@ -334,7 +334,7 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
         {
             mongoc_cursor_destroy( cursor );
 
-            return 0;
+            return HB_FAILURE;
         }
 
         bson_type_t type = bson_iter_type( &iter );
@@ -385,15 +385,15 @@ int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oi
             }break;
         default:
             {
-                return 0;
+                return HB_FAILURE;
             }break;
         }
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count )
+hb_result_t hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -417,13 +417,13 @@ int hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t 
     bson_error_t error;
     if( mongoc_collection_update_one( mongo_collection, &query, &update, HB_NULLPTR, HB_NULLPTR, &error ) == false )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     bson_destroy( &query );
     bson_destroy( &update );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_destroy_values( hb_db_value_handle_t * _values, uint32_t _count )
@@ -443,7 +443,7 @@ void hb_db_destroy_values( hb_db_value_handle_t * _values, uint32_t _count )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
+hb_result_t hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -480,7 +480,7 @@ int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * 
                 sha1hex,
                 insert_error.message );
 
-            return 0;
+            return HB_FAILURE;
         }
 
         bson_destroy( &document );
@@ -488,10 +488,10 @@ int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * 
 
     mongoc_cursor_destroy( cursor );
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle )
+hb_result_t hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -511,14 +511,14 @@ int hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _s
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     if( bson_iter_find( &iter, "data" ) == false )
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     bson_subtype_t subtype;
@@ -530,21 +530,20 @@ int hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _s
     {
         mongoc_cursor_destroy( cursor );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     _handle->handle = cursor;
     _handle->length = length;
     _handle->buffer = buffer;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_db_close_file( hb_db_file_handle_t * _handle )
+void hb_db_close_file( hb_db_file_handle_t * _handle )
 {
     mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handle->handle;
 
     mongoc_cursor_destroy( cursor );
-
-    return 1;
 }
+//////////////////////////////////////////////////////////////////////////

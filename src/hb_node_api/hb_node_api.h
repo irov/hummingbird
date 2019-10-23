@@ -18,7 +18,7 @@ typedef struct hb_node_api_in_t
 
 typedef struct hb_node_api_out_t
 {
-    char result[10240];
+    char result[HB_GRID_REQUEST_MAX_SIZE];
     size_t result_size;
 
 } hb_node_api_out_t;

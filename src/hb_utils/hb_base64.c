@@ -46,13 +46,13 @@ size_t hb_base64_decode_size( size_t _size )
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_base64_encode( const uint8_t * _data, size_t _size, char * _base64, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_encode( const uint8_t * _data, size_t _size, char * _base64, size_t _capacity, size_t * _outsize )
 {
     size_t totalsize = hb_base64_encode_size( _size );
 
     if( totalsize > _capacity )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     const char base64_encode_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -83,16 +83,16 @@ int hb_base64_encode( const uint8_t * _data, size_t _size, char * _base64, size_
         *_outsize = totalsize;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_base64_decode( const char * _base64, size_t _size, uint8_t * _data, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_decode( const char * _base64, size_t _size, uint8_t * _data, size_t _capacity, size_t * _outsize )
 {
     size_t totalsize = hb_base64_decode_size( _size );
 
     if( totalsize > _capacity )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     for( uint32_t i = 0, j = 0; i != _size;)
@@ -114,5 +114,5 @@ int hb_base64_decode( const char * _base64, size_t _size, uint8_t * _data, size_
         *_outsize = totalsize;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }

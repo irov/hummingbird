@@ -11,20 +11,20 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
+hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
 {
     HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, _name );
 
-    if( hMapFile == NULL )
+    if( hMapFile == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     LPVOID pBuf = MapViewOfFile( hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, (SIZE_T)_size );
     
-    if( pBuf == NULL )
+    if( pBuf == HB_NULLPTR )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     strcpy( _handle->name, _name );
@@ -33,10 +33,10 @@ int hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_ha
     _handle->handle = (void *)hMapFile;
     _handle->buffer = (void *)pBuf;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
+hb_result_t hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
 {
     LPVOID pBuf = (LPVOID)_handle->buffer;
     HANDLE hMapFile = (HANDLE)_handle->handle;    
@@ -49,21 +49,21 @@ int hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
     _handle->handle = HB_NULLPTR;
     _handle->buffer = HB_NULLPTR;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_rewind( hb_sharedmemory_handle_t * _handle )
+hb_result_t hb_sharedmemory_rewind( hb_sharedmemory_handle_t * _handle )
 {
     _handle->carriage = 0;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const void * _buffer, size_t _size )
+hb_result_t hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const void * _buffer, size_t _size )
 {
     if( _handle->carriage + sizeof( uint32_t ) + _size > _handle->size )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     uint32_t u32_size = (uint32_t)_size;
@@ -78,23 +78,23 @@ int hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const void * _buf
 
     _handle->carriage += _size;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
+hb_result_t hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
 {
     HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, _name );
     
     if( hMapFile == NULL )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     LPVOID pBuf = MapViewOfFile( hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, _size );
 
     if( pBuf == NULL )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     strcpy( _handle->name, _name );
@@ -103,14 +103,14 @@ int hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_hand
     _handle->handle = (void *)hMapFile;
     _handle->buffer = (void *)pBuf;
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, size_t _capacity, size_t * _size )
 {
     if( _handle->carriage + sizeof( uint32_t ) > _handle->size )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     uint8_t * pBufSize = (uint8_t *)_handle->buffer + _handle->carriage;
@@ -120,14 +120,14 @@ int hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, si
 
     if( _capacity < u32_size )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     _handle->carriage += sizeof( uint32_t );
 
     if( _handle->carriage + u32_size > _handle->size )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     uint8_t * pBufData = (uint8_t *)_handle->buffer + _handle->carriage;
@@ -141,5 +141,6 @@ int hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _buffer, si
         *_size = u32_size;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////

@@ -47,7 +47,8 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    hb_process_run( "hb_node_upload.exe", process_command );
+    hb_result_t result_process = hb_process_run( "hb_node_upload.exe", process_command );
+    HB_UNUSED( result_process );
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
@@ -61,10 +62,10 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    char result[256];
-    size_t result_size = sprintf( result, "{}" );
+    char request_data[HB_GRID_REQUEST_MAX_SIZE];
+    size_t request_data_size = sprintf( request_data, "{}" );
 
-    evbuffer_add( output_buffer, result, result_size );
+    evbuffer_add( output_buffer, request_data, request_data_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

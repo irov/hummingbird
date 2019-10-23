@@ -31,27 +31,33 @@ int main( int _argc, char * _argv[] )
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
 
     const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == HB_FAILURE )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == 0 )
+    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
     hb_node_newproject_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == 0 )
+    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
-    hb_db_initialze( "hb_node_newproject", in_data.db_uri );
+    if( hb_db_initialze( "hb_node_newproject", in_data.db_uri ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_collection_handle_t db_projects_handle;
-    hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
+    if( hb_db_get_collection( "hb", "hb_projects", &db_projects_handle ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_value_handle_t new_value[1];
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );

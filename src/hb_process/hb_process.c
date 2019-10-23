@@ -11,11 +11,11 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_process_run( const char * _name, const char * _command )
+hb_result_t hb_process_run( const char * _name, const char * _command )
 {
     wchar_t unicode_name[MAX_PATH] = {'\0'};
 
-    int32_t unicode_name_size = MultiByteToWideChar(
+    int unicode_name_size = MultiByteToWideChar(
         CP_UTF8
         , MB_ERR_INVALID_CHARS
         , _name
@@ -28,7 +28,7 @@ int hb_process_run( const char * _name, const char * _command )
 
     wchar_t unicode_command[2048] = {L" "};
 
-    int32_t unicode_command_size = MultiByteToWideChar(
+    int unicode_command_size = MultiByteToWideChar(
         CP_UTF8
         , MB_ERR_INVALID_CHARS
         , _command
@@ -71,7 +71,7 @@ int hb_process_run( const char * _name, const char * _command )
             , le
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
     WaitForSingleObject( processInfo.hProcess, INFINITE );
@@ -89,8 +89,8 @@ int hb_process_run( const char * _name, const char * _command )
             , unicode_command
         );
 
-        return 0;
+        return HB_FAILURE;
     }
 
-    return 1;
+    return HB_SUCCESSFUL;
 }

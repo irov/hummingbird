@@ -5,7 +5,7 @@
 
 #include "hb_utils/hb_time.h"
 
-int hb_db_initialze( const char * _name, const char * _uri );
+hb_result_t hb_db_initialze( const char * _name, const char * _uri );
 void hb_db_finalize();
 
 typedef struct hb_db_collection_handle_t
@@ -13,10 +13,10 @@ typedef struct hb_db_collection_handle_t
     void * handle;
 } hb_db_collection_handle_t;
 
-int hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection );
+hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection );
 void hb_db_destroy_collection( hb_db_collection_handle_t * _collection );
 
-int hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire );
+hb_result_t hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire );
 
 typedef enum hb_db_value_type_e
 {    
@@ -53,15 +53,15 @@ void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const vo
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
 void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
 
-int hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] );
+hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] );
 
-int hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], uint32_t * _exist );
-int hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles );
-int hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _field, uint32_t _count, hb_db_value_handle_t * _handles );
-int hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count );
+hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], hb_result_t * _exist );
+hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles );
+hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _field, uint32_t _count, hb_db_value_handle_t * _handles );
+hb_result_t hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count );
 void hb_db_destroy_values( hb_db_value_handle_t * _values, uint32_t _count );
 
-int hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size );
+hb_result_t hb_db_upload_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size );
 
 typedef struct hb_db_file_handle_t
 {
@@ -70,7 +70,7 @@ typedef struct hb_db_file_handle_t
     const uint8_t * buffer;
 } hb_db_file_handle_t;
 
-int hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle );
-int hb_db_close_file( hb_db_file_handle_t * _handle );
+hb_result_t hb_db_load_file( hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle );
+void hb_db_close_file( hb_db_file_handle_t * _handle );
 
 #endif
