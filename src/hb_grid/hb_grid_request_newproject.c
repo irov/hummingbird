@@ -4,6 +4,7 @@
 
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_base16.h"
 
 void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 {
@@ -54,12 +55,12 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    char pid64[8] = {0};
-    hb_base64_encode( &out_data.pid, 4, pid64, 6, HB_NULLPTR );
+    char pid16[4] = {0};
+    hb_base16_encode( &out_data.pid, 2, pid16, 4, HB_NULLPTR );
 
     char request_data[HB_GRID_REQUEST_MAX_SIZE];
-    size_t request_data_size = sprintf( request_data, "{\"pid\"=\"%.6s\"}"
-        , pid64
+    size_t request_data_size = sprintf( request_data, "{\"pid\"=\"%.4s\"}"
+        , pid16
     );
 
     evbuffer_add( output_buffer, request_data, request_data_size );
