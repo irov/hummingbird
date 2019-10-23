@@ -8,6 +8,9 @@ src
     hb_rand.h
     hb_rand.c
     
+    hb_base16.h
+    hb_base16.c
+    
     hb_base64.h
     hb_base64.c
     

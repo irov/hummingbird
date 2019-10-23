@@ -79,17 +79,16 @@ int main( int _argc, char * _argv[] )
     uint8_t oid[12];
     hb_db_new_document( &db_projects_handle, new_value, 1, oid );
 
-    int32_t pid = -1;
+    uint16_t pid = 0;
     uint32_t founds = 0;
     for( ; founds != 1; )
     {
-        pid = hb_rand_time();
+        pid = (uint16_t)hb_rand_time();
 
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "id", ~0U, pid, handles + 0 );
 
         hb_db_update_values( &db_projects_handle, oid, handles, 1 );
-
         
         hb_db_count_values( &db_projects_handle, handles, 1, &founds );
     }

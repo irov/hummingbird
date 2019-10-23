@@ -17,7 +17,7 @@ typedef struct hb_node_newproject_out_t
 {
     uint32_t magic_number;
     uint32_t version_number;
-    int32_t pid;
+    uint16_t pid;
 } hb_node_newproject_out_t;
 
 #endif

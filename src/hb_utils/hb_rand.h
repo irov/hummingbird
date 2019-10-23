@@ -3,7 +3,7 @@
 
 #include "hb_config/hb_config.h"
 
-int32_t hb_rand( uint32_t _seed );
-int32_t hb_rand_time();
+uint32_t hb_rand( uint32_t _seed );
+uint32_t hb_rand_time();
 
 #endif

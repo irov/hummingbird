@@ -77,7 +77,7 @@ int main( int _argc, char * _argv[] )
 
     const uint32_t max_thread = 16;
 
-    WORD wVersionRequested = MAKEWORD( 2, 2 );
+    const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
     int err = WSAStartup( wVersionRequested, &wsaData );
