@@ -41,7 +41,7 @@ hb_result_t hb_multipart_parse( const void * _boundary, size_t _boundarysize, co
         multipart_params_handle_t * handle = _params + count;
         handle->key = data_name;
         handle->key_size = key_size;
-        handle->data = (const void *)begin_data;
+        handle->data = begin_data;
 
         size_t data_size = hb_memsize( begin_data, boundary_iterator_end );
         handle->data_size = data_size - 2;
