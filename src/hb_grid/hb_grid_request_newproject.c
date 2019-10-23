@@ -12,6 +12,8 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
     hb_node_newproject_in_t in_data;
+    in_data.magic_number = hb_node_newproject_magic_number;
+    in_data.version_number = hb_node_newproject_version_number;
 
     strcpy( in_data.db_uri, handle->db_uri );
 
@@ -35,6 +37,16 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     hb_node_newproject_out_t out_data;
     hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
+    if( out_data.magic_number != hb_node_newproject_magic_number )
+    {
+        return;
+    }
+
+    if( out_data.version_number != hb_node_newproject_version_number )
+    {
+        return;
+    }
+
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 
     if( output_buffer == HB_NULLPTR )
@@ -42,14 +54,12 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    size_t puid64_size;
-    char puid64[25];
-    hb_base64_encode( out_data.puid, 12, puid64, 25, &puid64_size );
-    puid64[puid64_size] = '\0';
+    char pid64[8] = {0};
+    hb_base64_encode( &out_data.pid, 4, pid64, 6, HB_NULLPTR );
 
     char request_data[HB_GRID_REQUEST_MAX_SIZE];
-    size_t request_data_size = sprintf( request_data, "{\"puid\"=\"%s\"}"
-        , puid64
+    size_t request_data_size = sprintf( request_data, "{\"pid\"=\"%.6s\"}"
+        , pid64
     );
 
     evbuffer_add( output_buffer, request_data, request_data_size );

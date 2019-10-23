@@ -5,6 +5,9 @@ src
 	hb_sha1.h
 	hb_sha1.c
     
+    hb_rand.h
+    hb_rand.c
+    
     hb_base64.h
     hb_base64.c
     
@@ -25,6 +28,9 @@ src
     
     hb_time.h
     hb_time.c
+    
+    hb_oid.h
+    hb_oid.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

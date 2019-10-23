@@ -7,6 +7,8 @@
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
+#include "hb_utils/hb_rand.h"
+#include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,6 +28,8 @@ int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
+
+    MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
@@ -48,6 +52,16 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( in_data.magic_number != hb_node_newproject_magic_number )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( in_data.version_number != hb_node_newproject_version_number )
+    {
+        return EXIT_FAILURE;
+    }
+
     if( hb_db_initialze( "hb_node_newproject", in_data.db_uri ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -65,10 +79,27 @@ int main( int _argc, char * _argv[] )
     uint8_t oid[12];
     hb_db_new_document( &db_projects_handle, new_value, 1, oid );
 
+    int32_t pid = -1;
+    uint32_t founds = 0;
+    for( ; founds != 1; )
+    {
+        pid = hb_rand_time();
+
+        hb_db_value_handle_t handles[1];
+        hb_db_make_int32_value( "id", ~0U, pid, handles + 0 );
+
+        hb_db_update_values( &db_projects_handle, oid, handles, 1 );
+
+        
+        hb_db_count_values( &db_projects_handle, handles, 1, &founds );
+    }
+
     hb_db_finalize();
 
     hb_node_newproject_out_t out_data;
-    memcpy( out_data.puid, oid, 12 );
+    out_data.magic_number = hb_node_newproject_magic_number;
+    out_data.version_number = hb_node_newproject_version_number;
+    out_data.pid = pid;
 
     hb_sharedmemory_rewind( &sharedmemory_handle );
     hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );

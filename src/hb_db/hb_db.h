@@ -19,9 +19,10 @@ void hb_db_destroy_collection( hb_db_collection_handle_t * _collection );
 hb_result_t hb_db_set_collection_expire( hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire );
 
 typedef enum hb_db_value_type_e
-{    
+{   
+    e_hb_db_int32,
     e_hb_db_int64,
-    e_hb_db_string,
+    e_hb_db_utf8,
     e_hb_db_binary,
     e_hb_db_time,
     e_hb_db_oid,
@@ -34,30 +35,42 @@ typedef struct hb_db_value_handle_t
 
     const char * field;
     size_t field_length;
-    
-    const char * string_value;
-    size_t string_length;
 
-    const void * binary_value;
-    size_t binary_length;
+    union
+    {
+        struct
+        {
+            const char * buffer;
+            size_t length;
+        } utf8;
 
-    int64_t int64_value;
-    hb_time_t time_value;
+        struct
+        {
+            const void * buffer;
+            size_t length;
+        } binary;
 
-    const uint8_t * oid_value;
+        int32_t i32;
+        int64_t i64;
+        hb_time_t time;
+
+        const uint8_t * oid;
+    } u;
 } hb_db_value_handle_t;
 
+void hb_db_make_int32_value( const char * _field, size_t _fieldlength, int32_t _value, hb_db_value_handle_t * _handle );
 void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle );
-void hb_db_make_string_value( const char * _field, size_t _fieldlength, const char * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
-void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _value, size_t _valuelength, hb_db_value_handle_t * _handle );
+void hb_db_make_utf8_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
+void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
 void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
 
-hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] );
+hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint8_t _newoid[12] );
 
-hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _oid[12], hb_result_t * _exist );
+hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint8_t _oid[12], hb_result_t * _exist );
+hb_result_t hb_db_count_values( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint32_t * _founds );
 hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles );
-hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _field, uint32_t _count, hb_db_value_handle_t * _handles );
+hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles );
 hb_result_t hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count );
 void hb_db_destroy_values( hb_db_value_handle_t * _values, uint32_t _count );
 

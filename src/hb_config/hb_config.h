@@ -42,4 +42,8 @@ void hb_free( void * _ptr );
 #define HB_GRID_REQUEST_MAX_SIZE 1024
 #endif
 
+#ifndef HB_MAGIC_NUMBER
+#define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
+#endif
+
 #endif

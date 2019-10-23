@@ -46,7 +46,7 @@ size_t hb_base64_decode_size( size_t _size )
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base64_encode( const uint8_t * _data, size_t _size, char * _base64, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_encode( const void * _data, size_t _size, char * _base64, size_t _capacity, size_t * _outsize )
 {
     size_t totalsize = hb_base64_encode_size( _size );
 
@@ -64,18 +64,20 @@ hb_result_t hb_base64_encode( const uint8_t * _data, size_t _size, char * _base6
         'w', 'x', 'y', 'z', '0', '1', '2', '3',
         '4', '5', '6', '7', '8', '9', '*', '+'};
 
+    const uint8_t * data = (const uint8_t *)_data;
+
     for( size_t i = 0, j = 0; i != _size;)
     {
-        uint32_t octet_a = i != _size ? _data[i++] : 0;
-        uint32_t octet_b = i != _size ? _data[i++] : 0;
-        uint32_t octet_c = i != _size ? _data[i++] : 0;
+        uint32_t octet_a = i != _size ? data[i++] : 0;
+        uint32_t octet_b = i != _size ? data[i++] : 0;
+        uint32_t octet_c = i != _size ? data[i++] : 0;
 
         uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
 
-        _base64[j++] = base64_encode_table[(triple >> 3 * 6) & 0x3F];
-        _base64[j++] = base64_encode_table[(triple >> 2 * 6) & 0x3F];
-        _base64[j++] = base64_encode_table[(triple >> 1 * 6) & 0x3F];
-        _base64[j++] = base64_encode_table[(triple >> 0 * 6) & 0x3F];
+        if( j < totalsize ) _base64[j++] = base64_encode_table[(triple >> 3 * 6) & 0x3F];
+        if( j < totalsize ) _base64[j++] = base64_encode_table[(triple >> 2 * 6) & 0x3F];
+        if( j < totalsize ) _base64[j++] = base64_encode_table[(triple >> 1 * 6) & 0x3F];
+        if( j < totalsize ) _base64[j++] = base64_encode_table[(triple >> 0 * 6) & 0x3F];
     }
 
     if( _outsize != HB_NULLPTR )
@@ -86,7 +88,7 @@ hb_result_t hb_base64_encode( const uint8_t * _data, size_t _size, char * _base6
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base64_decode( const char * _base64, size_t _size, uint8_t * _data, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_decode( const char * _base64, size_t _size, void * _data, size_t _capacity, size_t * _outsize )
 {
     size_t totalsize = hb_base64_decode_size( _size );
 
@@ -94,6 +96,8 @@ hb_result_t hb_base64_decode( const char * _base64, size_t _size, uint8_t * _dat
     {
         return HB_FAILURE;
     }
+
+    uint8_t * data = (uint8_t *)_data;
 
     for( uint32_t i = 0, j = 0; i != _size;)
     {
@@ -104,9 +108,9 @@ hb_result_t hb_base64_decode( const char * _base64, size_t _size, uint8_t * _dat
 
         uint32_t triple = (sextet_a << 3 * 6) + (sextet_b << 2 * 6) + (sextet_c << 1 * 6) + (sextet_d << 0 * 6);
 
-        if( j != totalsize ) _data[j++] = (triple >> 2 * 8) & 0xFF;
-        if( j != totalsize ) _data[j++] = (triple >> 1 * 8) & 0xFF;
-        if( j != totalsize ) _data[j++] = (triple >> 0 * 8) & 0xFF;
+        if( j != totalsize ) data[j++] = (triple >> 2 * 8) & 0xFF;
+        if( j != totalsize ) data[j++] = (triple >> 1 * 8) & 0xFF;
+        if( j != totalsize ) data[j++] = (triple >> 0 * 8) & 0xFF;
     }
 
     if( _outsize != HB_NULLPTR )

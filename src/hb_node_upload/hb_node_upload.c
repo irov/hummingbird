@@ -96,7 +96,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    int64_t script_revision = db_script_revision_handle[0].int64_value;
+    int64_t script_revision = db_script_revision_handle[0].u.i64;
     
     hb_db_destroy_values( db_script_revision_handle, 1 );
 
@@ -122,7 +122,7 @@ int main( int _argc, char * _argv[] )
 
         hb_db_value_handle_t handles[2];
         hb_db_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
-        hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.binary_value, db_script_sha1_handle.binary_length, handles + 1 );
+        hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.u.binary.buffer, db_script_sha1_handle.u.binary.length, handles + 1 );
 
         hb_db_new_document( &db_project_subversion_handler, handles, 2, oid );
 
