@@ -34,9 +34,6 @@ src
     
     hb_oid.h
     hb_oid.c
-    
-    hb_token.h
-    hb_token.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
