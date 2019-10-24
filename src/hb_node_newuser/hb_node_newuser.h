@@ -11,6 +11,9 @@ typedef struct hb_node_newuser_in_t
     uint32_t magic_number;
     uint32_t version_number;
 
+    char cache_uri[128];
+    uint32_t cache_port;
+
     char db_uri[128];
 
     uint16_t pid;
@@ -25,7 +28,7 @@ typedef struct hb_node_newuser_out_t
     uint32_t magic_number;
     uint32_t version_number;
 
-    uint8_t token[12];
+    hb_token_t token;
 
     uint32_t exist;
 } hb_node_newuser_out_t;

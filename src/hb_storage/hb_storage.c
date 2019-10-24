@@ -8,10 +8,6 @@
 
 #include <string.h>
 
-#ifndef HB_STORAGE_MAX_SIZE
-#define HB_STORAGE_MAX_SIZE 10240
-#endif
-
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_storage_settings_t
 {
@@ -35,19 +31,19 @@ void hb_storage_finalize()
     g_storage_settings = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const void * _data, size_t _size, uint8_t _sha1[20] )
+hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 )
 {
     size_t bound_size = hb_archive_bound( _size );
 
-    if( bound_size >= HB_STORAGE_MAX_SIZE )
+    if( bound_size >= HB_DATA_MAX_SIZE )
     {
         return HB_FAILURE;
     }
 
     size_t compressSize;
 
-    uint8_t buffer[HB_STORAGE_MAX_SIZE];
-    if( hb_archive_compress( buffer, HB_STORAGE_MAX_SIZE, _data, _size, &compressSize ) == HB_FAILURE )
+    uint8_t buffer[HB_DATA_MAX_SIZE];
+    if( hb_archive_compress( buffer, HB_DATA_MAX_SIZE, _data, _size, &compressSize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -62,15 +58,15 @@ hb_result_t hb_storage_set( const void * _data, size_t _size, uint8_t _sha1[20] 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_get( const uint8_t _sha1[20], void * _data, size_t _capacity, size_t * _size )
+hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacity, size_t * _size )
 {
     hb_result_t cache_available = hb_cache_available();
 
     if( cache_available == HB_SUCCESSFUL )
     {
         size_t cache_data_size;
-        uint8_t cache_data[HB_STORAGE_MAX_SIZE];
-        if( hb_cache_get_value( _sha1, 20, cache_data, HB_STORAGE_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
+        uint8_t cache_data[HB_DATA_MAX_SIZE];
+        if( hb_cache_get_value( _sha1, 20, cache_data, HB_DATA_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
         {
             if( hb_archive_decompress( _data, _capacity, cache_data, cache_data_size, _size ) == HB_SUCCESSFUL )
             {

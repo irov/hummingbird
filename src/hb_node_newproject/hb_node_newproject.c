@@ -76,7 +76,7 @@ int main( int _argc, char * _argv[] )
     hb_db_value_handle_t new_value[1];
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
-    uint8_t oid[12];
+    hb_oid_t oid;
     hb_db_new_document( &db_projects_handle, new_value, 1, oid );
 
     uint16_t pid = 0;
@@ -86,7 +86,7 @@ int main( int _argc, char * _argv[] )
         pid = (uint16_t)hb_rand_time();
 
         hb_db_value_handle_t handles[1];
-        hb_db_make_int32_value( "id", ~0U, pid, handles + 0 );
+        hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );
 
         hb_db_update_values( &db_projects_handle, oid, handles, 1 );
         

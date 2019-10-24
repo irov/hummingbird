@@ -60,8 +60,8 @@ int main( int _argc, char * _argv[] )
     }
 
     size_t code_size;
-    uint8_t code_buffer[10240];
-    if( hb_script_compiler( in_data.data, in_data.data_size, code_buffer, 10240, &code_size ) == HB_FAILURE )
+    hb_data_t code_buffer;
+    if( hb_script_compiler( in_data.data, in_data.data_size, code_buffer, HB_DATA_MAX_SIZE, &code_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -79,7 +79,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    uint8_t sha1[20];
+    hb_sha1_t sha1;
     if( hb_storage_set( code_buffer, code_size, sha1 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -106,7 +106,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    uint8_t oid[12];
+    hb_oid_t oid;
     
     if( script_revision == 0 )
     {

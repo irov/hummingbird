@@ -2,11 +2,14 @@
 
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
-#include "hb_storage/hb_storage.h"
+#include "hb_cache/hb_cache.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_time.h"
+#include "hb_utils/hb_rand.h"
+#include "hb_utils/hb_token.h"
+#include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,6 +63,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     if( hb_db_initialze( "hb_node_newuser", in_data.db_uri ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -72,7 +80,7 @@ int main( int _argc, char * _argv[] )
 
     hb_db_make_int32_value( "pid", ~0U, in_data.pid, project_handles + 0 );
 
-    uint8_t puid[12];
+    hb_oid_t puid;
     hb_result_t project_exist;
     if( hb_db_find_oid( &db_projects_handle, project_handles, 1, puid, &project_exist ) == HB_FAILURE )
     {
@@ -84,17 +92,14 @@ int main( int _argc, char * _argv[] )
 
     hb_db_value_handle_t authentication_handles[2];
 
-    uint8_t login_sha1[20];
+    hb_db_make_int32_value( "pid", ~0U, in_data.pid, authentication_handles + 0 );
+
+    hb_sha1_t login_sha1;
     hb_sha1( in_data.login, strlen( in_data.login ), login_sha1 );
 
-    hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 0 );
+    hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 1 );
 
-    uint8_t password_sha1[20];
-    hb_sha1( in_data.password, strlen( in_data.password ), password_sha1 );
-
-    hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
-
-    uint8_t authentication_oid[12];
+    hb_oid_t authentication_oid;
     hb_result_t authentication_exist;
     if( hb_db_find_oid( &db_users_handle, authentication_handles, 2, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
@@ -108,31 +113,37 @@ int main( int _argc, char * _argv[] )
 
     if( authentication_exist == HB_FAILURE )
     {
+        hb_sha1_t password_sha1;
+        hb_sha1( in_data.password, strlen( in_data.password ), password_sha1 );
+
         hb_db_value_handle_t user_handles[3];
         hb_db_make_int32_value( "pid", ~0U, in_data.pid, user_handles + 0 );
         hb_db_make_binary_value( "login", ~0U, login_sha1, 20, user_handles + 1 );
         hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_handles + 2 );
 
-        uint8_t user_oid[12];
+        hb_oid_t user_oid;
         hb_db_new_document( &db_users_handle, user_handles, 3, user_oid );
 
-        hb_db_collection_handle_t db_token_handle;
-        hb_db_get_collection( "hb", "hb_token", &db_token_handle );
+        uint32_t rand_time = hb_rand_time();
+        rand_time &= 0x0000ffff;
 
-        hb_db_value_handle_t token_handles[3];
-        hb_db_make_oid_value( "uuid", ~0U, user_oid, token_handles + 0 );
-        hb_db_make_oid_value( "puid", ~0U, puid, token_handles + 1 );
+        uint64_t token_index;
+        hb_cache_incrby_value( "token_enumerator", ~0U, rand_time, &token_index );
 
-        hb_time_t t;
-        hb_time( &t );
-        hb_db_make_time_value( "loginAt", ~0U, t, token_handles + 2 );
+        hb_token_t token;
+        hb_token_generate( token_index, token );
 
-        uint8_t token_oid[12];
-        hb_db_new_document( &db_token_handle, token_handles, 3, token_oid );
+        hb_token_handle_t token_handle;
+        hb_oid_copy( token_handle.user, user_oid );
+        hb_oid_copy( token_handle.project, puid );
 
-        memcpy( out_data.token, token_oid, 12 );
+        hb_cache_set_value( token, sizeof( token ), &token_handle, sizeof( token_handle ) );
+        hb_cache_expire_value( token, sizeof( token ), 1800 );
+
+        hb_token_copy( out_data.token, token );
     }
-    
+ 
+    hb_db_finalize();
     hb_db_finalize();
 
     hb_sharedmemory_rewind( &sharedmemory_handle );

@@ -29,7 +29,7 @@ hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multip
 
     size_t multipart_length = evbuffer_get_length( input_buffer );
 
-    char multipart[10240];
+    hb_data_t multipart;
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
     HB_UNUSED( copyout_buffer_size );
 

@@ -145,7 +145,7 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_hand
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, uint8_t _newoid[12] )
+hb_result_t hb_db_new_document( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, hb_oid_t _newoid )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -228,7 +228,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint8_t _oid[12], hb_result_t * _exist )
+hb_result_t hb_db_find_oid( hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_result_t * _exist )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -307,7 +307,7 @@ hb_result_t hb_db_count_values( hb_db_collection_handle_t * _collection, const h
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char * _field, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _handles )
 {
     const char ** fields = &_field;
 
@@ -316,7 +316,7 @@ hb_result_t hb_db_get_value( hb_db_collection_handle_t * _collection, const uint
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -378,6 +378,12 @@ hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uin
 
         switch( type )
         {
+        case BSON_TYPE_INT32:
+            {
+                handle->type = e_hb_db_int32;
+
+                handle->u.i32 = bson_iter_int32( &iter );
+            }break;
         case BSON_TYPE_INT64:
             {
                 handle->type = e_hb_db_int64;
@@ -430,7 +436,7 @@ hb_result_t hb_db_get_values( hb_db_collection_handle_t * _collection, const uin
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values( hb_db_collection_handle_t * _collection, const uint8_t _oid[12], const hb_db_value_handle_t * _handles, uint32_t _count )
+hb_result_t hb_db_update_values( hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _handles, uint32_t _count )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 

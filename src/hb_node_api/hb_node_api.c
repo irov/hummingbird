@@ -72,10 +72,10 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    uint8_t uuid[12];
+    hb_oid_t uuid;
     memcpy( uuid, db_uid_handle[0].u.oid, 12 );
 
-    uint8_t puid[12];
+    hb_oid_t puid;
     memcpy( puid, db_uid_handle[1].u.oid, 12 );
     
     hb_db_destroy_values( db_uid_handle, 2 );
@@ -86,7 +86,7 @@ int main( int _argc, char * _argv[] )
     hb_db_collection_handle_t db_project_data_handle;
     hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle );
 
-    if( hb_script_initialize( 10240, 10240, &db_user_data_handle, &db_project_data_handle, uuid, puid ) == HB_FAILURE )
+    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, uuid, puid ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -121,14 +121,14 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    uint8_t script_sha1[20];
+    hb_sha1_t script_sha1;
     memcpy( script_sha1, db_script_sha1_handle[0].u.binary.buffer, 20 );
 
     hb_db_destroy_values( db_script_sha1_handle, 1 );
 
     size_t json_data_size;
-    char json_data[10240];
-    if( hb_storage_get( script_sha1, json_data, 10240, &json_data_size ) == HB_FAILURE )
+    hb_data_t json_data;
+    if( hb_storage_get( script_sha1, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -145,8 +145,8 @@ int main( int _argc, char * _argv[] )
     }
 
     size_t script_data_size;
-    char script_data[10240];
-    if( hb_json_dumpb( &json_handle, script_data, 10240, &script_data_size ) == HB_FAILURE )
+    char script_data[HB_DATA_MAX_SIZE];
+    if( hb_json_dumpb( &json_handle, script_data, HB_DATA_MAX_SIZE, &script_data_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
