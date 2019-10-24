@@ -3,12 +3,12 @@
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_cache/hb_cache.h"
+#include "hb_token/hb_token.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_time.h"
 #include "hb_utils/hb_rand.h"
-#include "hb_utils/hb_token.h"
 #include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
@@ -124,21 +124,12 @@ int main( int _argc, char * _argv[] )
         hb_oid_t user_oid;
         hb_db_new_document( &db_users_handle, user_handles, 3, user_oid );
 
-        uint32_t rand_time = hb_rand_time();
-        rand_time &= 0x0000ffff;
-
-        uint64_t token_index;
-        hb_cache_incrby_value( "token_enumerator", ~0U, rand_time, &token_index );
-
-        hb_token_t token;
-        hb_token_generate( token_index, token );
-
         hb_token_handle_t token_handle;
         hb_oid_copy( token_handle.user, user_oid );
         hb_oid_copy( token_handle.project, puid );
 
-        hb_cache_set_value( token, sizeof( token ), &token_handle, sizeof( token_handle ) );
-        hb_cache_expire_value( token, sizeof( token ), 1800 );
+        hb_token_t token;
+        hb_token_generate( "user_token", &token_handle, sizeof( token_handle ), 1800, token );
 
         hb_token_copy( out_data.token, token );
     }
