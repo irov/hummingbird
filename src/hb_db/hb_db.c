@@ -48,8 +48,11 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri )
 //////////////////////////////////////////////////////////////////////////
 void hb_db_finalize()
 {
-    mongoc_client_destroy( g_mongo_client );
-    g_mongo_client = HB_NULLPTR;
+    if( g_mongo_client != HB_NULLPTR )
+    {
+        mongoc_client_destroy( g_mongo_client );
+        g_mongo_client = HB_NULLPTR;
+    }
 
     mongoc_cleanup();
 }
