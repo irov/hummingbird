@@ -27,7 +27,7 @@ typedef struct hb_script_handle_t
     hb_db_collection_handle_t db_project_collection;
 
     uint8_t uuid[12];
-    uint8_t puid[12];
+    hb_oid_t puid;
 } hb_script_handle_t;
 
 #endif

@@ -11,6 +11,22 @@ typedef enum hb_result_e
 
 typedef hb_result_e hb_result_t;
 
+typedef uint8_t hb_oid_t[12];
+typedef uint8_t hb_sha1_t[20];
+typedef uint8_t hb_token_t[12];
+
+typedef struct hb_token_handle_t
+{
+    hb_oid_t user;
+    hb_oid_t project;
+} hb_token_handle_t;
+
+#ifndef HB_DATA_MAX_SIZE
+#define HB_DATA_MAX_SIZE 10240
+#endif
+
+typedef uint8_t hb_data_t[HB_DATA_MAX_SIZE];
+
 #ifndef HB_UNUSED
 #define HB_UNUSED(X) (void)(X)
 #endif

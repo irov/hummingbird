@@ -9,7 +9,7 @@ typedef struct hb_node_upload_in_t
 
     uint8_t puid[12];
 
-    uint8_t data[10240];
+    hb_data_t data;
     size_t data_size;
     
 } hb_node_upload_in_t;

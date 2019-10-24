@@ -66,17 +66,17 @@ int main( int _argc, char * _argv[] )
 
     hb_db_value_handle_t authentication_handles[2];
 
-    uint8_t login_sha1[20];
+    hb_sha1_t login_sha1;
     hb_sha1( in_data.login, strlen( in_data.login ), login_sha1 );
 
     hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 0 );
 
-    uint8_t password_sha1[20];
+    hb_sha1_t password_sha1;
     hb_sha1( in_data.password, strlen( in_data.password ), password_sha1 );
 
     hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
 
-    uint8_t authentication_oid[12];
+    hb_oid_t authentication_oid;
     hb_result_t authentication_exist;
     if( hb_db_find_oid( &db_users_handle, authentication_handles, 2, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
@@ -99,7 +99,7 @@ int main( int _argc, char * _argv[] )
         hb_time( &t );
         hb_db_make_time_value( "loginAt", ~0U, t, token_handles + 2 );
 
-        uint8_t token_oid[12];
+        hb_oid_t token_oid;
         hb_db_new_document( &db_token_handle, token_handles, 3, token_oid );
 
         memcpy( out_data.token, token_oid, 12 );
