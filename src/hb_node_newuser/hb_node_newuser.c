@@ -134,7 +134,7 @@ int main( int _argc, char * _argv[] )
         hb_token_copy( out_data.token, token );
     }
  
-    hb_db_finalize();
+    hb_cache_finalize();
     hb_db_finalize();
 
     hb_sharedmemory_rewind( &sharedmemory_handle );
