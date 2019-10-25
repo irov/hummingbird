@@ -17,7 +17,6 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
     hb_node_newuser_in_t in_data;
