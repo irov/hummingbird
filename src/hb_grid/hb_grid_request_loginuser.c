@@ -3,15 +3,27 @@
 #include "hb_node_loginuser/hb_node_loginuser.h"
 
 #include "hb_process/hb_process.h"
-#include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_base16.h"
 
 void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
 {
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
+
+    if( output_buffer == HB_NULLPTR )
+    {
+        return;
+    }
+
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
     hb_node_loginuser_in_t in_data;
+    in_data.magic_number = hb_node_loginuser_magic_number;
+    in_data.version_number = hb_node_loginuser_version_number;
+
+    strcpy( in_data.cache_uri, handle->cache_uri );
+    in_data.cache_port = handle->cache_port;
 
     strcpy( in_data.db_uri, handle->db_uri );
 
@@ -57,26 +69,31 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
     hb_node_loginuser_out_t out_data;
     hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-
-    if( output_buffer == HB_NULLPTR )
+    if( out_data.magic_number != hb_node_loginuser_magic_number )
     {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    if( out_data.version_number != hb_node_loginuser_version_number )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
         return;
     }
 
     if( out_data.exist == 1 )
     {
-        size_t token64_size;
-        char token64[25];
-        hb_base64_encode( out_data.token, 12, token64, 25, &token64_size );
-        token64[token64_size] = '\0';
+        char token16[24];
+        hb_base16_encode( out_data.token, 12, token16, 24, HB_NULLPTR );
 
-        char request[256];
-        size_t request_size = sprintf( request, "{\"token\"=\"%s\"}"
-            , token64
+        char request_data[HB_GRID_REQUEST_MAX_SIZE];
+        size_t request_data_size = sprintf( request_data, "{\"token\"=\"%.24s\"}"
+            , token16
         );
 
-        evbuffer_add( output_buffer, request, request_size );
+        evbuffer_add( output_buffer, request_data, request_data_size );
     }
     else
     {
