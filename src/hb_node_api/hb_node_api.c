@@ -53,56 +53,44 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( in_data.magic_number != hb_node_api_magic_number )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( in_data.version_number != hb_node_api_version_number )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     if( hb_db_initialze( "hb_node_api", in_data.db_uri ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    hb_db_collection_handle_t db_token_handle;
-    if( hb_db_get_collection( "hb", "hb_token", &db_token_handle ) == HB_FAILURE )
+    hb_token_handle_t token_handle;
+    if( hb_cache_get_value( "user_token", in_data.token, 12, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
-    
-    const char * db_token_fields[] = { "uuid", "puid" };
-
-    hb_db_value_handle_t db_uid_handle[2];
-    if( hb_db_get_values( &db_token_handle, in_data.token, db_token_fields, 2, db_uid_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_oid_t uuid;
-    memcpy( uuid, db_uid_handle[0].u.oid, 12 );
-
-    hb_oid_t puid;
-    memcpy( puid, db_uid_handle[1].u.oid, 12 );
-    
-    hb_db_destroy_values( db_uid_handle, 2 );
 
     hb_db_collection_handle_t db_user_data_handle;
     hb_db_get_collection( "hb", "hb_users_data", &db_user_data_handle );
 
     hb_db_collection_handle_t db_project_data_handle;
-    hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle );
+    if( hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle ) == HB_FAILURE );
 
-    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, uuid, puid ) == HB_FAILURE )
+    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, token_handle.uoid, token_handle.poid ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    hb_db_collection_handle_t db_files_handle;
-    if( hb_db_get_collection( "hb", "hb_files", &db_files_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_storage_initialize( &db_files_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_cache_initialize( "127.0.0.1", 6379 ) == HB_FAILURE )
+    if( hb_storage_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -115,16 +103,16 @@ int main( int _argc, char * _argv[] )
 
     const char * db_projects_fields[] = { "script_sha1" };
 
-    hb_db_value_handle_t db_script_sha1_handle[1];
-    if( hb_db_get_values( &db_projects_handle, puid, db_projects_fields, 1, db_script_sha1_handle ) == HB_FAILURE )
+    hb_db_value_handle_t db_script_sha1_handles[1];
+    if( hb_db_get_values( &db_projects_handle, token_handle.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_sha1_t script_sha1;
-    memcpy( script_sha1, db_script_sha1_handle[0].u.binary.buffer, 20 );
+    memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, 20 );
 
-    hb_db_destroy_values( db_script_sha1_handle, 1 );
+    hb_db_destroy_values( db_script_sha1_handles, 1 );
 
     size_t json_data_size;
     hb_data_t json_data;
