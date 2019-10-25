@@ -71,10 +71,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_db_collection_handle_t db_files_handle;
-    hb_db_get_collection( "hb", "hb_files", &db_files_handle );
-
-    if( hb_storage_initialize( &db_files_handle ) == HB_FAILURE )
+    if( hb_storage_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -137,7 +134,6 @@ int main( int _argc, char * _argv[] )
 
     hb_storage_finalize();
 
-    hb_db_destroy_collection( &db_files_handle );
     hb_db_destroy_collection( &db_projects_handle );
     hb_db_destroy_collection( &db_project_subversion_handler );
 

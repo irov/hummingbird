@@ -3,9 +3,7 @@
 
 #include "hb_config/hb_config.h"
 
-#include "hb_db/hb_db.h"
-
-hb_result_t hb_storage_initialize( const hb_db_collection_handle_t * _collection );
+hb_result_t hb_storage_initialize();
 void hb_storage_finalize();
 
 hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 );

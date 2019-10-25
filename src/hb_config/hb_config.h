@@ -17,8 +17,8 @@ typedef uint8_t hb_token_t[12];
 
 typedef struct hb_token_handle_t
 {
-    hb_oid_t user;
-    hb_oid_t project;
+    hb_oid_t uoid;
+    hb_oid_t poid;
 } hb_token_handle_t;
 
 #ifndef HB_DATA_MAX_SIZE

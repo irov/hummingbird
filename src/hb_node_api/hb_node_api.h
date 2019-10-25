@@ -3,13 +3,22 @@
 
 #include "hb_config/hb_config.h"
 
+static const uint32_t hb_node_api_magic_number = HB_MAGIC_NUMBER( 'U', 'A', 'P', 'I' );
+static const uint32_t hb_node_api_version_number = 1;
+
 typedef struct hb_node_api_in_t
 {
+    uint32_t magic_number;
+    uint32_t version_number;
+
+    char cache_uri[128];
+    uint32_t cache_port;
+
     char db_uri[128];
 
-    uint8_t token[12];
+    hb_token_t token;
 
-    char method[128];
+    char method[32];
     
     hb_data_t data;
     size_t data_size;
@@ -18,6 +27,9 @@ typedef struct hb_node_api_in_t
 
 typedef struct hb_node_api_out_t
 {
+    uint32_t magic_number;
+    uint32_t version_number;
+
     char result[HB_GRID_REQUEST_MAX_SIZE];
     size_t result_size;
 

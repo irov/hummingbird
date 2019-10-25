@@ -1,6 +1,7 @@
 #include "hb_storage.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_db/hb_db.h"
 #include "hb_archive/hb_archive.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_sha1.h"
@@ -16,19 +17,30 @@ typedef struct hb_storage_settings_t
 //////////////////////////////////////////////////////////////////////////
 static hb_storage_settings_t * g_storage_settings;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_initialize( const hb_db_collection_handle_t * _collection )
+hb_result_t hb_storage_initialize()
 {
+    hb_db_collection_handle_t db_collection;
+    if( hb_db_get_collection( "hb", "hb_files", &db_collection ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
     g_storage_settings = HB_NEW( hb_storage_settings_t );
 
-    g_storage_settings->db_collection = *_collection;
+    g_storage_settings->db_collection = db_collection;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_storage_finalize()
 {   
-    HB_DELETE( g_storage_settings );
-    g_storage_settings = HB_NULLPTR;
+    if( g_storage_settings != HB_NULLPTR )
+    {
+        hb_db_destroy_collection( &g_storage_settings->db_collection );
+
+        HB_DELETE( g_storage_settings );
+        g_storage_settings = HB_NULLPTR;
+    }
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 )

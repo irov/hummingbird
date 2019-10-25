@@ -125,8 +125,8 @@ int main( int _argc, char * _argv[] )
         hb_db_new_document( &db_users_handle, user_handles, 3, user_oid );
 
         hb_token_handle_t token_handle;
-        hb_oid_copy( token_handle.user, user_oid );
-        hb_oid_copy( token_handle.project, puid );
+        hb_oid_copy( token_handle.uoid, user_oid );
+        hb_oid_copy( token_handle.poid, puid );
 
         hb_token_t token;
         hb_token_generate( "user_token", &token_handle, sizeof( token_handle ), 1800, token );
