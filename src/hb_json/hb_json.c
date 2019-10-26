@@ -85,7 +85,11 @@ hb_result_t hb_json_get_string( hb_json_handle_t * _handle, const char * _key, c
     size_t size = json_string_length( jvalue );
 
     *_value = value;
-    *_size = size;
+
+    if( _size != HB_NULLPTR )
+    {
+        *_size = size;
+    }
 
     return HB_SUCCESSFUL;
 }

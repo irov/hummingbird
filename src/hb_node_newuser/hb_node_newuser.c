@@ -30,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    MessageBox( NULL, "Test", "Test", MB_OK );
+    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
@@ -80,9 +80,9 @@ int main( int _argc, char * _argv[] )
 
     hb_db_make_int32_value( "pid", ~0U, in_data.pid, project_handles + 0 );
 
-    hb_oid_t puid;
+    hb_oid_t project_oid;
     hb_result_t project_exist;
-    if( hb_db_find_oid( &db_projects_handle, project_handles, 1, puid, &project_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( &db_projects_handle, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -126,7 +126,7 @@ int main( int _argc, char * _argv[] )
 
         hb_token_handle_t token_handle;
         hb_oid_copy( token_handle.uoid, user_oid );
-        hb_oid_copy( token_handle.poid, puid );
+        hb_oid_copy( token_handle.poid, project_oid );
 
         hb_token_t token;
         hb_token_generate( "user_token", &token_handle, sizeof( token_handle ), 1800, token );

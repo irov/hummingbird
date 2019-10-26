@@ -28,6 +28,12 @@ hb_result_t hb_multipart_parse( const void * _boundary, size_t _boundarysize, co
 
         const char data_name_mask[] = "Content-Disposition: form-data; name=\"";
         const char * data_name = strstr( (const char *)boundary_iterator_begin, data_name_mask );
+
+        if( data_name == HB_NULLPTR )
+        {
+            return HB_FAILURE;
+        }
+
         data_name += sizeof( data_name_mask ) - 1;
 
         const char * data_end = strchr( data_name, '"' );

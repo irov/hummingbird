@@ -54,12 +54,16 @@ void hb_free( void * _ptr );
 #define HB_MAX_PATH 250
 #endif
 
-#ifndef HB_GRID_REQUEST_MAX_SIZE
-#define HB_GRID_REQUEST_MAX_SIZE 1024
+#ifndef HB_GRID_REQUEST_DATA_MAX_SIZE
+#define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
 #endif
 
 #ifndef HB_MAGIC_NUMBER
 #define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
+#endif
+
+#ifndef HB_SHAREDMEMORY_SIZE
+#define HB_SHAREDMEMORY_SIZE 65536
 #endif
 
 #endif

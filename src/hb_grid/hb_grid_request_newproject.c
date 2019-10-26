@@ -8,6 +8,13 @@
 
 void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 {
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
+
+    if( output_buffer == HB_NULLPTR )
+    {
+        return;
+    }
+
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
@@ -19,11 +26,6 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     strcpy( in_data.db_uri, handle->db_uri );
 
     hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) );
-
-    uint32_t multipart_params_count;
-    multipart_params_handle_t multipart_params[8];
-    int multipart_parse_error = hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count );
-    HB_UNUSED( multipart_parse_error );
 
     char process_command[64];
     sprintf( process_command, "--sm %s"
@@ -48,22 +50,15 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-
-    if( output_buffer == HB_NULLPTR )
-    {
-        return;
-    }
-
     char pid16[4] = {0};
     hb_base16_encode( &out_data.pid, 2, pid16, 4, HB_NULLPTR );
 
-    char request_data[HB_GRID_REQUEST_MAX_SIZE];
-    size_t request_data_size = sprintf( request_data, "{\"pid\"=\"%.4s\"}"
+    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"pid\": \"%.4s\"}"
         , pid16
     );
 
-    evbuffer_add( output_buffer, request_data, request_data_size );
+    evbuffer_add( output_buffer, response_data, response_data_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

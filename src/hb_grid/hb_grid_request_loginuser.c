@@ -3,12 +3,11 @@
 #include "hb_node_loginuser/hb_node_loginuser.h"
 
 #include "hb_process/hb_process.h"
+#include "hb_json/hb_json.h"
 #include "hb_utils/hb_base16.h"
 
 void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
 {
-    hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
-
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 
     if( output_buffer == HB_NULLPTR )
@@ -16,9 +15,53 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
         return;
     }
 
+    hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
+
     hb_sharedmemory_rewind( &handle->sharedmemory );
 
     hb_node_loginuser_in_t in_data;
+
+    size_t request_data_size;
+    char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+    if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == 0 )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    hb_json_handle_t json_handle;
+    if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    const char * pid;
+    if( hb_json_get_string( &json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    const char * login;
+    if( hb_json_get_string( &json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    const char * password;
+    if( hb_json_get_string( &json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
     in_data.magic_number = hb_node_loginuser_magic_number;
     in_data.version_number = hb_node_loginuser_version_number;
 
@@ -27,32 +70,10 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
 
     strcpy( in_data.db_uri, handle->db_uri );
 
-    uint32_t multipart_params_count;
-    multipart_params_handle_t multipart_params[8];
-    if( hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == 0 )
-    {
-        return;
-    }
+    hb_base16_decode( pid, ~0U, &in_data.pid, 2, HB_NULLPTR );
 
-    size_t params_login_size;
-    const void * params_login;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "login", &params_login, &params_login_size ) == 0 )
-    {
-        return;
-    }
-
-    size_t params_password_size;
-    const void * params_password;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "password", &params_password, &params_password_size ) == 0 )
-    {
-        return;
-    }    
-
-    memcpy( in_data.login, params_login, params_login_size );
-    in_data.login[params_login_size] = '\0';
-
-    memcpy( in_data.password, params_password, params_password_size );
-    in_data.password[params_password_size] = '\0';
+    strcpy( in_data.login, login );
+    strcpy( in_data.password, password );
 
     hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) );
 
@@ -88,19 +109,19 @@ void hb_grid_request_loginuser( struct evhttp_request * _request, void * _ud )
         char token16[24];
         hb_base16_encode( out_data.token, 12, token16, 24, HB_NULLPTR );
 
-        char request_data[HB_GRID_REQUEST_MAX_SIZE];
-        size_t request_data_size = sprintf( request_data, "{\"token\"=\"%.24s\"}"
+        char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+        size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"token\": \"%.24s\"}"
             , token16
         );
 
-        evbuffer_add( output_buffer, request_data, request_data_size );
+        evbuffer_add( output_buffer, response_data, response_data_size );
     }
     else
     {
-        char request_data[HB_GRID_REQUEST_MAX_SIZE];
-        size_t request_data_size = sprintf( request_data, "{\"error\"=\"1\"}" );
+        char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+        size_t response_data_size = sprintf( response_data, "{\"code\": 1}" );
 
-        evbuffer_add( output_buffer, request_data, request_data_size );
+        evbuffer_add( output_buffer, response_data, response_data_size );
     }    
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );

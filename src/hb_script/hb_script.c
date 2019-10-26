@@ -335,7 +335,10 @@ hb_result_t hb_script_call( const char * _method, const char * _data, size_t _da
 
     strcat( _result, "}" );
 
-    *_resultsize = strlen( _result );
+    if( _resultsize != HB_NULLPTR )
+    {
+        *_resultsize = strlen( _result );
+    }
 
     lua_pop( L, 2 );
 

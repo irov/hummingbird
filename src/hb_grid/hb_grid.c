@@ -21,7 +21,6 @@ extern void hb_grid_request_upload( struct evhttp_request *, void * );
 extern void hb_grid_request_newproject( struct evhttp_request *, void * );
 extern void hb_grid_request_newuser( struct evhttp_request *, void * );
 extern void hb_grid_request_loginuser( struct evhttp_request *, void * );
-extern void hb_grid_request_universe( struct evhttp_request *, void * );
 //////////////////////////////////////////////////////////////////////////
 static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 {
@@ -40,7 +39,6 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
     evhttp_set_cb( http_server, "/newproject", &hb_grid_request_newproject, handle );
     evhttp_set_cb( http_server, "/newuser", &hb_grid_request_newuser, handle );
     evhttp_set_cb( http_server, "/loginuser", &hb_grid_request_loginuser, handle );
-    evhttp_set_cb( http_server, "/universe", &hb_grid_request_universe, handle );
 
     if( *handle->ev_socket == -1 )
     {

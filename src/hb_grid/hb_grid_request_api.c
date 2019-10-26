@@ -7,6 +7,13 @@
 
 void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
 {    
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
+
+    if( output_buffer == HB_NULLPTR )
+    {
+        return;
+    }
+
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     hb_sharedmemory_rewind( &handle->sharedmemory );
@@ -51,14 +58,22 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     hb_node_api_out_t out_data;
     hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
 
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-    
-    if( output_buffer == HB_NULLPTR )
+    if( out_data.magic_number != hb_node_api_magic_number )
     {
         return;
     }
 
-    evbuffer_add( output_buffer, out_data.result, out_data.result_size );
+    if( out_data.version_number != hb_node_api_version_number )
+    {
+        return;
+    }
+
+    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"data\": \"%s\"}"
+        , out_data.data
+    );
+
+    evbuffer_add( output_buffer, response_data, response_data_size );
 
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }

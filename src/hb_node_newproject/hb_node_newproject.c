@@ -29,7 +29,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    MessageBox( NULL, "Test", "Test", MB_OK );
+    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
@@ -76,8 +76,8 @@ int main( int _argc, char * _argv[] )
     hb_db_value_handle_t new_value[1];
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
-    hb_oid_t oid;
-    hb_db_new_document( &db_projects_handle, new_value, 1, oid );
+    hb_oid_t project_oid;
+    hb_db_new_document( &db_projects_handle, new_value, 1, project_oid );
 
     uint16_t pid = 0;
     uint32_t founds = 0;
@@ -88,7 +88,7 @@ int main( int _argc, char * _argv[] )
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );
 
-        hb_db_update_values( &db_projects_handle, oid, handles, 1 );
+        hb_db_update_values( &db_projects_handle, project_oid, handles, 1 );
         
         hb_db_count_values( &db_projects_handle, handles, 1, &founds );
     }
