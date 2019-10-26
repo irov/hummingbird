@@ -29,7 +29,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    MessageBox( NULL, "Test", "Test", MB_OK );
+    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     if( hb_log_initialize() == HB_FAILURE )
     {
@@ -55,6 +55,16 @@ int main( int _argc, char * _argv[] )
 
     hb_node_upload_in_t in_data;
     if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( in_data.magic_number != hb_node_upload_magic_number )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( in_data.version_number != hb_node_upload_version_number )
     {
         return EXIT_FAILURE;
     }
@@ -85,10 +95,21 @@ int main( int _argc, char * _argv[] )
     hb_db_collection_handle_t db_projects_handle;
     hb_db_get_collection( "hb", "hb_projects", &db_projects_handle );
 
+    hb_db_value_handle_t project_handles[1];
+
+    hb_db_make_int32_value( "pid", ~0U, in_data.pid, project_handles + 0 );
+
+    hb_oid_t project_oid;
+    hb_result_t project_exist;
+    if( hb_db_find_oid( &db_projects_handle, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     const char * db_projects_fields[] = { "script_revision" };
 
     hb_db_value_handle_t db_script_revision_handle[1];
-    if( hb_db_get_values( &db_projects_handle, in_data.puid, db_projects_fields, 1, db_script_revision_handle ) == HB_FAILURE )
+    if( hb_db_get_values( &db_projects_handle, project_oid, db_projects_fields, 1, db_script_revision_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -103,34 +124,36 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_oid_t oid;
+    hb_oid_t project_subversion_oid;
     
     if( script_revision == 0 )
     {
         hb_db_value_handle_t handles[1];
         hb_db_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
 
-        hb_db_new_document( &db_project_subversion_handler, handles, 1, oid );
+        hb_db_new_document( &db_project_subversion_handler, handles, 1, project_subversion_oid );
     }
     else
     {
         hb_db_value_handle_t db_script_sha1_handle;
-        hb_db_get_value( &db_projects_handle, in_data.puid, "script_sha1", &db_script_sha1_handle );
+        hb_db_get_value( &db_projects_handle, project_oid, "script_sha1", &db_script_sha1_handle );
 
         hb_db_value_handle_t handles[2];
         hb_db_make_binary_value( "sha1", ~0U, sha1, 20, handles + 0 );
         hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.u.binary.buffer, db_script_sha1_handle.u.binary.length, handles + 1 );
 
-        hb_db_new_document( &db_project_subversion_handler, handles, 2, oid );
+        hb_db_new_document( &db_project_subversion_handler, handles, 2, project_subversion_oid );
 
         hb_db_destroy_values( &db_script_sha1_handle, 1 );
     }
 
-    hb_db_value_handle_t db_project_handles[2];
+    hb_db_value_handle_t db_project_handles[3];
     hb_db_make_binary_value( "script_sha1", ~0U, sha1, 20, db_project_handles + 0 );
-    hb_db_make_oid_value( "script_subversion", ~0U, oid, db_project_handles + 1 );
+    hb_db_make_oid_value( "script_subversion", ~0U, project_subversion_oid, db_project_handles + 1 );
+    hb_db_make_int64_value( "script_revision", ~0U, script_revision + 1, db_project_handles + 2 );
+    
 
-    hb_db_update_values( &db_projects_handle, in_data.puid, db_project_handles, 2 );
+    hb_db_update_values( &db_projects_handle, project_oid, db_project_handles, 3 );
 
     hb_storage_finalize();
 
@@ -140,6 +163,9 @@ int main( int _argc, char * _argv[] )
     hb_db_finalize();
 
     hb_node_upload_out_t out_data;
+    out_data.magic_number = hb_node_upload_magic_number;
+    out_data.version_number = hb_node_upload_version_number;
+    out_data.revision = script_revision;
 
     hb_sharedmemory_rewind( &sharedmemory_handle );
     hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );

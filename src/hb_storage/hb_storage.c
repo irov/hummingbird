@@ -64,7 +64,7 @@ hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 )
 
     if( hb_db_upload_file( &g_storage_settings->db_collection, _sha1, buffer, compressSize ) == HB_FAILURE )
     {
-        return 0;
+        return HB_FAILURE;
     }
 
     return HB_SUCCESSFUL;

@@ -13,7 +13,6 @@ src
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c
     hb_grid_request_newproject.c    
-    hb_grid_request_universe.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
@@ -27,6 +26,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_config)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_sharedmemory)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_process)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_json)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_thread)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_cache)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_db)

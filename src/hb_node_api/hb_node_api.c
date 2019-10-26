@@ -1,5 +1,6 @@
 #include "hb_node_api.h"
 
+#include "hb_node/hb_node.h"
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
@@ -35,30 +36,14 @@ int main( int _argc, char * _argv[] )
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
 
-    const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
-    {
-        return EXIT_FAILURE;
-    }
-
     hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
+    if( hb_node_open_sharedmemory( _argc, _argv, &sharedmemory_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_node_api_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.magic_number != hb_node_api_magic_number )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.version_number != hb_node_api_version_number )
+    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( hb_node_api_in_t ), hb_node_api_magic_number, hb_node_api_version_number ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -79,11 +64,19 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( hb_cache_expire_value( "user_token", in_data.token, 12, 1800 ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     hb_db_collection_handle_t db_user_data_handle;
     hb_db_get_collection( "hb", "hb_users_data", &db_user_data_handle );
 
     hb_db_collection_handle_t db_project_data_handle;
-    if( hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle ) == HB_FAILURE );
+    if( hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, token_handle.uoid, token_handle.poid ) == HB_FAILURE )
     {
@@ -139,9 +132,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    size_t scriptr_result_size;
-    char scriptr_result[2048];
-    if( hb_script_call( in_data.method, script_data, script_data_size, scriptr_result, 2048, &scriptr_result_size ) == HB_FAILURE )
+    hb_node_api_out_t out_data;
+    out_data.magic_number = hb_node_api_magic_number;
+    out_data.version_number = hb_node_api_version_number;
+
+    if( hb_script_call( in_data.method, script_data, script_data_size, out_data.data, HB_GRID_REQUEST_DATA_MAX_SIZE, HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -152,7 +147,7 @@ int main( int _argc, char * _argv[] )
     hb_db_finalize();
 
     hb_sharedmemory_rewind( &sharedmemory_handle );
-    hb_sharedmemory_write( &sharedmemory_handle, scriptr_result, scriptr_result_size );
+    hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );
     hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();

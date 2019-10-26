@@ -30,8 +30,7 @@ typedef struct hb_node_api_out_t
     uint32_t magic_number;
     uint32_t version_number;
 
-    char result[HB_GRID_REQUEST_MAX_SIZE];
-    size_t result_size;
+    char data[HB_GRID_REQUEST_DATA_MAX_SIZE];
 
 } hb_node_api_out_t;
 

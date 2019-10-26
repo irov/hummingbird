@@ -33,7 +33,7 @@ hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multip
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
     HB_UNUSED( copyout_buffer_size );
 
-    if( hb_multipart_parse( boundary, boundary_size, multipart, multipart_length, _params, _capacity, _count ) == 0 )
+    if( hb_multipart_parse( boundary, boundary_size, multipart, multipart_length, _params, _capacity, _count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
