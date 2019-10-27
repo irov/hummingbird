@@ -13,7 +13,8 @@ typedef hb_result_e hb_result_t;
 
 typedef uint8_t hb_oid_t[12];
 typedef uint8_t hb_sha1_t[20];
-typedef uint8_t hb_token_t[12];
+typedef uint8_t hb_token_t[14];
+typedef char hb_token16_t[28];
 
 typedef struct hb_token_handle_t
 {

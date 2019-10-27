@@ -1,6 +1,5 @@
 #include "hb_node_api.h"
 
-#include "hb_node/hb_node.h"
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
@@ -43,7 +42,7 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_node_api_in_t in_data;
-    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( hb_node_api_in_t ), hb_node_api_magic_number, hb_node_api_version_number ) == HB_FAILURE )
+    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( in_data ), hb_node_api_magic_number, hb_node_api_version_number ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -59,12 +58,12 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_token_handle_t token_handle;
-    if( hb_cache_get_value( "user_token", in_data.token, 12, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_value( in_data.token, sizeof( hb_token_t ), &token_handle, sizeof( hb_token_handle_t ), HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_expire_value( "user_token", in_data.token, 12, 1800 ) == HB_FAILURE )
+    if( hb_cache_expire_value( in_data.token, sizeof( hb_token_t ), 1800 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -103,7 +102,7 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_sha1_t script_sha1;
-    memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, 20 );
+    memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, sizeof( hb_sha1_t ) );
 
     hb_db_destroy_values( db_script_sha1_handles, 1 );
 
@@ -133,10 +132,8 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_node_api_out_t out_data;
-    out_data.magic_number = hb_node_api_magic_number;
-    out_data.version_number = hb_node_api_version_number;
 
-    if( hb_script_call( in_data.method, script_data, script_data_size, out_data.data, HB_GRID_REQUEST_DATA_MAX_SIZE, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_script_server_call( in_data.method, script_data, script_data_size, out_data.data, HB_GRID_REQUEST_DATA_MAX_SIZE, HB_NULLPTR ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -146,8 +143,7 @@ int main( int _argc, char * _argv[] )
     hb_storage_finalize();
     hb_db_finalize();
 
-    hb_sharedmemory_rewind( &sharedmemory_handle );
-    hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );
+    hb_node_write_out_data( &sharedmemory_handle, &out_data, sizeof( out_data ), hb_node_api_magic_number, hb_node_api_version_number );
     hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();

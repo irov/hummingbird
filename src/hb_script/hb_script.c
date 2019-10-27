@@ -11,6 +11,7 @@
 hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 extern int __hb_script_server_GetCurrentUserPublicData( lua_State * L );
+extern int __hb_script_server_SetCurrentUserPublicData( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
@@ -37,13 +38,14 @@ static int __hb_lua_print( lua_State * L )
 }
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg globalLib[] = {
-    {"print", &__hb_lua_print},
-{NULL, NULL} /* end of array */
+    { "print", &__hb_lua_print }
+    , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData },
-{ NULL, NULL } /* end of array */
+    { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData }
+    , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
+    , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_panic( lua_State * L )
@@ -104,7 +106,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     return;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, const uint8_t * _uuid, const uint8_t * _puid )
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, hb_oid_t _uuid, hb_oid_t _puid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
     
@@ -156,11 +158,11 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     g_script_handle->L = L;
 
-    g_script_handle->db_user_collection = *_ucollection;
-    g_script_handle->db_project_collection = *_pcollection;
+    g_script_handle->db_user_collection = _ucollection;
+    g_script_handle->db_project_collection = _pcollection;
 
-    memcpy( g_script_handle->uuid, _uuid, 12 );
-    memcpy( g_script_handle->puid, _puid, 12 );
+    memcpy( g_script_handle->user_oid, _uuid, sizeof( hb_oid_t ) );
+    memcpy( g_script_handle->project_oid, _puid, sizeof( hb_oid_t ) );
 
     return HB_SUCCESSFUL;
 }
@@ -222,7 +224,7 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
+hb_result_t hb_script_server_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
 {
     HB_UNUSED( _capacity );
 
@@ -261,8 +263,9 @@ hb_result_t hb_script_call( const char * _method, const char * _data, size_t _da
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
             , _method
+            , _datasize
             , _data
             , error_msg
         );
@@ -276,8 +279,9 @@ hb_result_t hb_script_call( const char * _method, const char * _data, size_t _da
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%s' with error: %s"
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
             , _method
+            , _datasize
             , _data
             , error_msg
         );
@@ -349,3 +353,73 @@ hb_result_t hb_script_call( const char * _method, const char * _data, size_t _da
 
     return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_event_call( const char * _event, const char * _data, size_t _datasize )
+{
+    if( setjmp( g_script_handle->panic_jump ) == 1 )
+    {
+        /* recovered from panic. log and return */
+
+        return HB_FAILURE;
+    }
+
+    lua_State * L = g_script_handle->L;
+
+    lua_getglobal( L, "event" );
+
+    if( lua_getfield( L, -1, _event ) != LUA_OK )
+    {
+        return HB_SUCCESSFUL;
+    }
+
+    char lua_data[2048] = { "return " };
+    strncat( lua_data, _data, _datasize );
+
+    int res = luaL_loadbufferx( L, lua_data, _datasize + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
+
+    if( res != LUA_OK )
+    {
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
+
+        hb_log_message( "script", HB_LOG_ERROR, "%s"
+            , error_msg
+        );
+
+        return HB_FAILURE;
+    }
+
+    int status2 = lua_pcallk( L, 0, 1, 0, 0, HB_NULLPTR );
+
+    if( status2 != LUA_OK )
+    {
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
+
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
+            , _event
+            , _datasize
+            , _data
+            , error_msg
+        );
+
+        return HB_FAILURE;
+    }
+
+    int status = lua_pcallk( L, 1, 0, 0, 0, HB_NULLPTR );
+
+    if( status != LUA_OK )
+    {
+        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
+
+        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
+            , _event
+            , _datasize
+            , _data
+            , error_msg
+        );
+
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////

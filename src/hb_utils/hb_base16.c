@@ -1,5 +1,7 @@
 #include "hb_base16.h"
 
+#include <string.h>
+
 //////////////////////////////////////////////////////////////////////////
 static const uint8_t base16_decode_table[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //15
@@ -72,6 +74,11 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_base16_decode( const char * _base16, size_t _size, void * _data, size_t _capacity, size_t * _outsize )
 {
+    if( _size == ~0U )
+    {
+        _size = strlen( _base16 );
+    }
+
     size_t totalsize = hb_base16_decode_size( _size );
 
     if( totalsize > _capacity )

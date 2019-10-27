@@ -2,6 +2,7 @@
 
 #include "hb_node_newuser/hb_node_newuser.h"
 
+#include "hb_token/hb_token.h"
 #include "hb_process/hb_process.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_base64.h"
@@ -47,7 +48,7 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     }
 
     const char * pid;
-    if( hb_json_get_string( &json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_json_get_field_string( &json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
@@ -55,7 +56,7 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     }
     
     const char * login;
-    if( hb_json_get_string( &json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_json_get_field_string( &json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
@@ -63,14 +64,14 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     }
 
     const char * password;
-    if( hb_json_get_string( &json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_json_get_field_string( &json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
         return;
     }
     
-    hb_base16_decode( pid, ~0U, &in_data.pid, 2, HB_NULLPTR );
+    hb_base16_decode( pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     strcpy( in_data.login, login );
     strcpy( in_data.password, password );
@@ -106,11 +107,12 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
 
     if( out_data.exist == 0 )
     {
-        char token16[24];
-        hb_base16_encode( out_data.token, 12, token16, 24, HB_NULLPTR );
+        hb_token16_t token16;
+        hb_token_base16_encode( out_data.token, token16 );
 
         char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"token\": \"%.24s\"}"
+        size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"token\": \"%.*s\"}"
+            , sizeof( token16 )
             , token16
         );
 

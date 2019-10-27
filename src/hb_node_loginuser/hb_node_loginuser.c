@@ -30,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    //MessageBox( NULL, "Test", "Test", MB_OK );
+    MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer ) == HB_FAILURE )
@@ -90,6 +90,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( project_exist == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     hb_db_collection_handle_t db_users_handle;
     if( hb_db_get_collection( "hb", "hb_users", &db_users_handle ) == HB_FAILURE )
     {
@@ -136,10 +141,7 @@ int main( int _argc, char * _argv[] )
         hb_oid_copy( token_handle.uoid, user_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 
-        hb_token_t token;
-        hb_token_generate( "user_token", &token_handle, sizeof( token_handle ), 1800, token );
-
-        hb_token_copy( out_data.token, token );
+        hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data.token );
     }
     
     hb_cache_finalize();

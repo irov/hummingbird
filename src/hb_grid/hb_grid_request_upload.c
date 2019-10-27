@@ -46,7 +46,7 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    hb_base16_decode( params_pid, params_pid_size, &in_data.pid, 2, HB_NULLPTR );
+    hb_base16_decode( params_pid, params_pid_size, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     size_t params_data_size;
     const void * params_data;

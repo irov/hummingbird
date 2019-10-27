@@ -1,0 +1,10 @@
+#ifndef HB_SCRIPT_JSON_H_
+#define HB_SCRIPT_JSON_H_
+
+#include "hb_config/hb_config.h"
+
+#include "lua.h"
+
+hb_result_t hb_script_json_dumps( lua_State * L, char * _buffer, size_t _capacity, size_t * _size );
+
+#endif

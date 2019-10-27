@@ -1,5 +1,5 @@
-#ifndef HB_SCRIPT_SETTINGS_H_
-#define HB_SCRIPT_SETTINGS_H_
+#ifndef HB_SCRIPT_HANDLE_H_
+#define HB_SCRIPT_HANDLE_H_
 
 #include "hb_db/hb_db.h"
 
@@ -23,11 +23,11 @@ typedef struct hb_script_handle_t
     uint32_t call_used;
     uint32_t call_limit;
 
-    hb_db_collection_handle_t db_user_collection;
-    hb_db_collection_handle_t db_project_collection;
+    const hb_db_collection_handle_t * db_user_collection;
+    const hb_db_collection_handle_t * db_project_collection;
 
-    uint8_t uuid[12];
-    hb_oid_t puid;
+    hb_oid_t user_oid;
+    hb_oid_t project_oid;
 } hb_script_handle_t;
 
 #endif
