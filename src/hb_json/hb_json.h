@@ -26,6 +26,8 @@ typedef enum hb_json_type_t
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t * _out );
 hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle );
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size );
+hb_result_t hb_json_to_integer( hb_json_handle_t * _handle, int64_t * _value );
+hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value );
 
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size );
 

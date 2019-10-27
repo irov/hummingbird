@@ -1,5 +1,7 @@
 #include "hb_script_json.h"
 
+#include "hb_json/hb_json.h"
+
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,6 +70,74 @@ hb_result_t hb_script_json_dumps( lua_State * L, char * _buffer, size_t _capacit
     }
 
     *_size = offset;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _size, const char ** _fields, uint32_t _fieldcount )
+{
+    hb_json_handle_t json_data;
+    hb_json_create( _buffer, _size, &json_data );
+
+    for( uint32_t index = 0; index != _fieldcount; ++index )
+    {
+        const char * field = _fields[index];
+
+        hb_json_handle_t json_field;
+        hb_json_get_field( &json_data, field, &json_field );
+
+        hb_json_type_t json_field_type = hb_json_get_type( &json_field );
+
+        switch( json_field_type )
+        {
+        case e_hb_json_object:
+            {
+                //ToDo
+            }break;
+        case e_hb_json_array:
+            {
+                //ToDo
+            }break;
+        case e_hb_json_string:
+            {
+                size_t length;
+                const char * value;
+                hb_json_to_string( &json_field, &value, &length );
+
+                lua_pushlstring( L, value, length );
+            }break;
+        case e_hb_json_integer:
+            {
+                int64_t value;
+                hb_json_to_integer( &json_field, &value );
+
+                lua_pushinteger( L, (lua_Integer)value );
+            }break;
+        case e_hb_json_real:
+            {
+                double value;
+                hb_json_to_real( &json_field, &value );
+
+                lua_pushnumber( L, (lua_Number)value );
+            }break;
+        case e_hb_json_true:
+            {
+                lua_pushboolean( L, 1 );
+            }break;
+        case e_hb_json_false:
+            {
+                lua_pushboolean( L, 0 );
+            }break;
+        case e_hb_json_null:
+            {
+                lua_pushnil( L );
+            }break;
+        default:
+            break;
+        }
+    }
+
+    hb_json_destroy( &json_data );
 
     return HB_SUCCESSFUL;
 }
