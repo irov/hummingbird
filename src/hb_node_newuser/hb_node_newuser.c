@@ -128,10 +128,7 @@ int main( int _argc, char * _argv[] )
         hb_oid_copy( token_handle.uoid, user_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 
-        hb_token_t token;
-        hb_token_generate( "user_token", &token_handle, sizeof( token_handle ), 1800, token );
-
-        hb_token_copy( out_data.token, token );
+        hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data.token );
     }
  
     hb_cache_finalize();

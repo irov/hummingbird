@@ -78,7 +78,7 @@ hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacit
     {
         size_t cache_data_size;
         uint8_t cache_data[HB_DATA_MAX_SIZE];
-        if( hb_cache_get_value( "storage", _sha1, 20, cache_data, HB_DATA_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
+        if( hb_cache_get_value( _sha1, 20, cache_data, HB_DATA_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
         {
             if( hb_archive_decompress( _data, _capacity, cache_data, cache_data_size, _size ) == HB_SUCCESSFUL )
             {
@@ -95,7 +95,7 @@ hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacit
 
     if( cache_available == HB_SUCCESSFUL )
     {
-        if( hb_cache_set_value( "storage", _sha1, 20, db_file_handle.buffer, db_file_handle.length ) == HB_FAILURE )
+        if( hb_cache_set_value( _sha1, 20, db_file_handle.buffer, db_file_handle.length ) == HB_FAILURE )
         {
             hb_log_message( "storage", HB_LOG_ERROR, "invalid cache value ['%.20s']"
                 , _sha1

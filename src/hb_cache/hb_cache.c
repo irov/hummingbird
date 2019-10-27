@@ -40,27 +40,27 @@ void hb_cache_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_set_value( const char * _prefix, const void * _key, size_t _keysize, const void * _value, size_t _size )
+hb_result_t hb_cache_set_value(  const void * _key, size_t _keysize, const void * _value, size_t _size )
 {
     if( _keysize == ~0U )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "SET %s%b %b", _prefix, _key, _keysize, _value, _size );
+    redisReply * reply = redisCommand( g_redis_context, "SET %b %b", _key, _keysize, _value, _size );
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_get_value( const char * _prefix, const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
+hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
 {
     if( _keysize == ~0U )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "GET %s%b", _prefix, _key, _keysize );
+    redisReply * reply = redisCommand( g_redis_context, "GET %b", _key, _keysize );
 
     if( reply->type == REDIS_REPLY_NIL )
     {
@@ -88,14 +88,14 @@ hb_result_t hb_cache_get_value( const char * _prefix, const void * _key, size_t 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_incrby_value( const char * _prefix, const void * _key, size_t _keysize, uint64_t _increment, uint64_t * _value )
+hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t _increment, uint64_t * _value )
 {
     if( _keysize == ~0U )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "INCRBY %s%b %" SCNu64, _prefix, _key, _keysize, _increment );
+    redisReply * reply = redisCommand( g_redis_context, "INCRBY %b %" SCNu64, _key, _keysize, _increment );
 
     if( reply->type != REDIS_REPLY_INTEGER )
     {
@@ -111,14 +111,14 @@ hb_result_t hb_cache_incrby_value( const char * _prefix, const void * _key, size
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_expire_value( const char * _prefix, const void * _key, size_t _keysize, uint32_t _seconds )
+hb_result_t hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t _seconds )
 {
     if( _keysize == ~0U )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %s%b %u", _prefix, _key, _keysize, _seconds );
+    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %b %u", _key, _keysize, _seconds );
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;

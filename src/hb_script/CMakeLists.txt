@@ -6,10 +6,13 @@ src
 	hb_script.c
     hb_script_compiler.h
     hb_script_compiler.c
+    hb_script_json.h
+    hb_script_json.c
     
     hb_script_handle.h
     
     hb_script_server_GetCurrentUserPublicData.c
+    hb_script_server_SetCurrentUserPublicData.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)
