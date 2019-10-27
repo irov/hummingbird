@@ -132,6 +132,28 @@ hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_integer( hb_json_handle_t * _handle, int64_t * _value )
+{
+    json_t * jvalue = (json_t *)_handle->handle;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (int64_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
+{
+    json_t * jvalue = (json_t *)_handle->handle;
+
+    double value = json_real_value( jvalue );
+
+    *_value = (double)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size )
 {
     hb_json_handle_t field;

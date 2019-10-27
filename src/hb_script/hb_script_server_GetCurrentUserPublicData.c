@@ -1,4 +1,5 @@
 #include "hb_script_handle.h"
+#include "hb_script_json.h"
 
 #include "hb_json/hb_json.h"
 
@@ -37,60 +38,10 @@ int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
 
     lua_pushboolean( L, 1 );
 
-    hb_json_handle_t json_data;
-    hb_json_create( handler[0].u.utf8.buffer, handler[0].u.utf8.length, &json_data );
-
-    for( uint32_t index = 0; index != field_iterator; ++index )
+    if( hb_script_json_loads( L, handler[0].u.utf8.buffer, handler[0].u.utf8.length, fields, field_iterator ) == HB_FAILURE )
     {
-        const char * field = fields[index];
-
-        hb_json_handle_t json_field;
-        hb_json_get_field( &json_data, field, &json_field );
-
-        hb_json_type_t json_field_type = hb_json_get_type( &json_field );
-
-        switch( json_field_type )
-        {
-        case e_hb_json_object:
-            {
-
-            }break;
-        case e_hb_json_array:
-            {
-
-            }break;
-        case e_hb_json_string:
-            {
-                size_t length;
-                const char * value;
-                hb_json_to_string( &json_field, &value, &length );
-
-                lua_pushlstring( L, value, length );
-            }break;
-        case e_hb_json_integer:
-            {
-
-            }break;
-        case e_hb_json_real:
-            {
-
-            }break;
-        case e_hb_json_true:
-            {
-
-            }break;
-        case e_hb_json_false:
-            {
-
-            }break;
-        case e_hb_json_null:
-            {
-
-            }break;
-        default:
-            break;
-        }
-    }
+        return -1;
+    }    
 
     hb_db_destroy_values( handler, 1 );
 
