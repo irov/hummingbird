@@ -57,6 +57,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( hb_storage_initialize() == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     hb_token_handle_t token_handle;
     if( hb_cache_get_value( in_data.token, sizeof( hb_token_t ), &token_handle, sizeof( hb_token_handle_t ), HB_NULLPTR ) == HB_FAILURE )
     {
@@ -69,7 +74,10 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_db_collection_handle_t db_user_data_handle;
-    hb_db_get_collection( "hb", "hb_users_data", &db_user_data_handle );
+    if( hb_db_get_collection( "hb", "hb_users_data", &db_user_data_handle ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     hb_db_collection_handle_t db_project_data_handle;
     if( hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle ) == HB_FAILURE )
@@ -78,11 +86,6 @@ int main( int _argc, char * _argv[] )
     }
 
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, token_handle.uoid, token_handle.poid ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_storage_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -133,9 +136,24 @@ int main( int _argc, char * _argv[] )
 
     hb_node_api_out_t out_data;
 
-    if( hb_script_server_call( in_data.method, script_data, script_data_size, out_data.data, HB_GRID_REQUEST_DATA_MAX_SIZE, HB_NULLPTR ) == HB_FAILURE )
+    switch( in_data.category )
     {
-        return EXIT_FAILURE;
+    case e_hb_node_api:
+        {
+            if( hb_script_server_call( in_data.method, in_data.data, in_data.data_size, out_data.response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data.response_size ) == HB_FAILURE )
+            {
+                return EXIT_FAILURE;
+            }
+        }break;
+    case e_hb_node_event:
+        {
+            if( hb_script_event_call( in_data.method, in_data.data, in_data.data_size ) == HB_FAILURE )
+            {
+                return EXIT_FAILURE;
+            }
+
+            out_data.response_size = 0;
+        }
     }
 
     hb_script_finalize();
