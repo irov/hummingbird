@@ -44,6 +44,7 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         return;
     }
 
+    in_data.category = e_hb_node_api;
     strcpy( in_data.method, method );
 
     if( hb_grid_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == 0 )
@@ -74,8 +75,9 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     }
 
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"data\": \"%s\"}"
-        , out_data.data
+    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"data\": \"%.*s\"}"
+        , out_data.response_size
+        , out_data.response_data        
     );
 
     evbuffer_add( output_buffer, response_data, response_data_size );

@@ -24,6 +24,7 @@ typedef enum hb_json_type_t
 } hb_json_type_t;
 
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t * _out );
+uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle );
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size );
 hb_result_t hb_json_to_integer( hb_json_handle_t * _handle, int64_t * _value );
@@ -31,8 +32,10 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value );
 
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size );
 
-
 hb_result_t hb_json_dumpb_value( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size );
 hb_result_t hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size );
+
+typedef void(*hb_json_visitor_t)(const char * _key, hb_json_handle_t * _value, void * _ud);
+void hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud );
 
 #endif

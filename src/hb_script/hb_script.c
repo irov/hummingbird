@@ -1,4 +1,5 @@
 #include "hb_script.h"
+#include "hb_script_json.h"
 
 #include "hb_log/hb_log.h"
 
@@ -224,7 +225,7 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_server_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
+hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
 {
     HB_UNUSED( _capacity );
 
@@ -239,40 +240,13 @@ hb_result_t hb_script_server_call( const char * _method, const char * _data, siz
 
     lua_getglobal( L, "api" );
 
-    lua_getfield( L, -1, _method );
-    
-    char lua_data[2048] = {"return "};
-    strncat( lua_data, _data, _datasize );
-
-    int res = luaL_loadbufferx( L, lua_data, _datasize + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
-
-    if( res != LUA_OK )
+    if( lua_getfield( L, -1, _method ) != LUA_OK )
     {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        hb_log_message( "script", HB_LOG_ERROR, "%s"
-            , error_msg 
-        );
-
         return HB_FAILURE;
     }
 
-    int status2 = lua_pcallk( L, 0, 1, 0, 0, HB_NULLPTR );
+    hb_script_json_loads( L, _data, _datasize );
 
-    if( status2 != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
-            , _method
-            , _datasize
-            , _data
-            , error_msg
-        );
-
-        return HB_FAILURE;
-    }
-    
     int status = lua_pcallk( L, 1, 2, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
@@ -291,58 +265,7 @@ hb_result_t hb_script_server_call( const char * _method, const char * _data, siz
 
     int successful = lua_toboolean( L, -2 );
 
-    strcpy( _result, "{" );
-
-    lua_pushnil( L );
-    int it = lua_next( L, -2 );
-    while( it != 0 )
-    {
-        const char * key = lua_tostring( L, -2 );
-
-        if( lua_isinteger( L, -1 ) == 1 )
-        {
-            const char * value = lua_tostring( L, -1 );
-
-            strcat( _result, key );
-            strcat( _result, "=" );
-            strcat( _result, value );
-        }
-        else if( lua_isnumber( L, -1 ) == 1 )
-        {
-            const char * value = lua_tostring( L, -1 );
-
-            strcat( _result, key );
-            strcat( _result, "=" );
-            strcat( _result, value );
-        }
-        else if( lua_isstring( L, -1 ) == 1 )
-        {
-            const char * value = lua_tostring( L, -1 );
-
-            strcat( _result, key );
-            strcat( _result, "=\"" );
-            strcat( _result, value );
-            strcat( _result, "\"" );
-        }
-
-        lua_pop( L, 1 );
-
-        it = lua_next( L, -2 );
-
-        if( it == 0 )
-        {
-            break;
-        }
-
-        strcat( _result, "," );
-    }
-
-    strcat( _result, "}" );
-
-    if( _resultsize != HB_NULLPTR )
-    {
-        *_resultsize = strlen( _result );
-    }
+    hb_script_json_dumps( L, _result, HB_GRID_REQUEST_DATA_MAX_SIZE, _resultsize );
 
     lua_pop( L, 2 );
 
@@ -354,7 +277,7 @@ hb_result_t hb_script_server_call( const char * _method, const char * _data, siz
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_event_call( const char * _event, const char * _data, size_t _datasize )
+hb_result_t hb_script_event_call( const char * _event, const void * _data, size_t _datasize )
 {
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
@@ -371,38 +294,7 @@ hb_result_t hb_script_event_call( const char * _event, const char * _data, size_
     {
         return HB_SUCCESSFUL;
     }
-
-    char lua_data[2048] = { "return " };
-    strncat( lua_data, _data, _datasize );
-
-    int res = luaL_loadbufferx( L, lua_data, _datasize + sizeof( "return " ) - 1, HB_NULLPTR, HB_NULLPTR );
-
-    if( res != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        hb_log_message( "script", HB_LOG_ERROR, "%s"
-            , error_msg
-        );
-
-        return HB_FAILURE;
-    }
-
-    int status2 = lua_pcallk( L, 0, 1, 0, 0, HB_NULLPTR );
-
-    if( status2 != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
-            , _event
-            , _datasize
-            , _data
-            , error_msg
-        );
-
-        return HB_FAILURE;
-    }
+    hb_script_json_loads( L, _data, _datasize );
 
     int status = lua_pcallk( L, 1, 0, 0, 0, HB_NULLPTR );
 

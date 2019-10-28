@@ -9,7 +9,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 void hb_script_finalize();
 
 hb_result_t hb_script_load( const void * _buffer, size_t _size );
-hb_result_t hb_script_server_call( const char * _method, const char * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize );
-hb_result_t hb_script_event_call( const char * _event, const char * _data, size_t _datasize );
+hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize );
+hb_result_t hb_script_event_call( const char * _method, const void * _data, size_t _datasize );
 
 #endif
