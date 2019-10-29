@@ -144,6 +144,9 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     lua_setglobal( L, "api" );
 
     lua_newtable( L );
+    lua_setglobal( L, "event" );
+
+    lua_newtable( L );
     lua_setglobal( L, "server" );
 
     lua_getglobal( L, "server" );
@@ -225,10 +228,8 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize )
+hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful )
 {
-    HB_UNUSED( _capacity );
-
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
@@ -240,7 +241,7 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
 
     lua_getglobal( L, "api" );
 
-    if( lua_getfield( L, -1, _method ) != LUA_OK )
+    if( lua_getfield( L, -1, _method ) != LUA_TFUNCTION )
     {
         return HB_FAILURE;
     }
@@ -264,15 +265,19 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
     }
 
     int successful = lua_toboolean( L, -2 );
-
-    hb_script_json_dumps( L, _result, HB_GRID_REQUEST_DATA_MAX_SIZE, _resultsize );
+    
+    if( lua_type( L, -1 ) == LUA_TTABLE )
+    {
+        hb_script_json_dumps( L, _result, _capacity, _resultsize );
+    }
+    else
+    {
+        sprintf( _result, "{}" );
+    }
 
     lua_pop( L, 2 );
 
-    if( successful == 0 )
-    {
-        return HB_FAILURE;
-    }
+    *_successful = (hb_bool_t)successful;
 
     return HB_SUCCESSFUL;
 }
@@ -290,7 +295,7 @@ hb_result_t hb_script_event_call( const char * _event, const void * _data, size_
 
     lua_getglobal( L, "event" );
 
-    if( lua_getfield( L, -1, _event ) != LUA_OK )
+    if( lua_getfield( L, -1, _event ) != LUA_TFUNCTION )
     {
         return HB_SUCCESSFUL;
     }

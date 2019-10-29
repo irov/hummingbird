@@ -65,8 +65,6 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, char * _buffer, 
         return HB_FAILURE;
     }
 
-    lua_pop( L, 1 );
-
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////

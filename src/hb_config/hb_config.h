@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+typedef uint32_t hb_bool_t;
+
+static const hb_bool_t HB_TRUE = 1;
+static const hb_bool_t HB_FALSE = 0;
+
 typedef enum hb_result_e
 {
     HB_FAILURE,

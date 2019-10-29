@@ -125,11 +125,13 @@ def api(url, token, method, **params):
     j = json.load(r)
     return j
     pass
-    
+   
+print("----newproject----")
 jnewproject = post("http://localhost:5555/newproject")
 print("newproject: ", jnewproject)
 pid = jnewproject["pid"]
-   
+
+print("----upload---- pid: {0}".format(pid))
 jupload = upload("http://localhost:5555/upload", "server.lua", pid = pid)
 print("jupload: ", jupload)
 
@@ -139,13 +141,17 @@ password = "test"
 print("login: ", login)
 print("password: ", password)
 
+print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
 jnewuser = post("http://localhost:5555/newuser", pid = pid, login = login, password = password)
 print("jnewuser: ", jnewuser)
 
+print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
 jloginuser = post("http://localhost:5555/loginuser", pid = pid, login = login, password = password)
 print("jloginuser: ", jloginuser)
 
-japi = api("http://localhost:5555/api", jloginuser["token"], "test", a=1, b=2, c="testc")
+token = jloginuser["token"]
+method = "test"
+data = dict(a=1, b=2, c="testc")
+print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
+japi = api("http://localhost:5555/api", token, method, **data)
 print("api: ", japi)
-
-

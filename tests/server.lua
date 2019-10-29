@@ -1,6 +1,6 @@
 event.onCreateUser = function(data)
     local public_data = {a = 1, b = "test"}
-    local status = server.SetCurrentUserPublicData(public_data)    
+    local status = server.SetCurrentUserPublicData(public_data)
 end
 
 api.test = function(data)

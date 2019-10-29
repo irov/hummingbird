@@ -127,20 +127,13 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    size_t script_data_size;
-    char script_data[HB_DATA_MAX_SIZE];
-    if( hb_json_dumpb( &json_handle, script_data, HB_DATA_MAX_SIZE, &script_data_size ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
     hb_node_api_out_t out_data;
 
     switch( in_data.category )
     {
     case e_hb_node_api:
         {
-            if( hb_script_server_call( in_data.method, in_data.data, in_data.data_size, out_data.response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data.response_size ) == HB_FAILURE )
+            if( hb_script_server_call( in_data.method, in_data.data, in_data.data_size, out_data.response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data.response_size, &out_data.successful ) == HB_FAILURE )
             {
                 return EXIT_FAILURE;
             }
@@ -152,6 +145,7 @@ int main( int _argc, char * _argv[] )
                 return EXIT_FAILURE;
             }
 
+            out_data.successful = HB_TRUE;
             out_data.response_size = 0;
         }
     }
