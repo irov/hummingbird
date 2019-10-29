@@ -30,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    MessageBox( NULL, "Test", "Test", MB_OK );
+    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );

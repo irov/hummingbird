@@ -30,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    MessageBox( NULL, "Test", "Test", MB_OK );
+    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer ) == HB_FAILURE )
@@ -51,17 +51,7 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_node_loginuser_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.magic_number != hb_node_loginuser_magic_number )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.version_number != hb_node_loginuser_version_number )
+    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( in_data ), hb_node_loginuser_magic_number, hb_node_loginuser_version_number ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -84,13 +74,13 @@ int main( int _argc, char * _argv[] )
     hb_db_make_int32_value( "pid", ~0U, in_data.pid, project_handles + 0 );
 
     hb_oid_t project_oid;
-    hb_result_t project_exist;
+    hb_bool_t project_exist;
     if( hb_db_find_oid( &db_projects_handle, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    if( project_exist == HB_FAILURE )
+    if( project_exist == HB_FALSE )
     {
         return EXIT_FAILURE;
     }
@@ -116,15 +106,13 @@ int main( int _argc, char * _argv[] )
     hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 2 );
 
     hb_oid_t authentication_oid;
-    hb_result_t authentication_exist;
+    hb_bool_t authentication_exist;
     if( hb_db_find_oid( &db_users_handle, authentication_handles, 3, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_node_loginuser_out_t out_data;
-    out_data.magic_number = hb_node_loginuser_magic_number;
-    out_data.version_number = hb_node_loginuser_version_number;
     out_data.exist = authentication_exist;
 
     if( authentication_exist == HB_SUCCESSFUL )
@@ -147,8 +135,7 @@ int main( int _argc, char * _argv[] )
     hb_cache_finalize();
     hb_db_finalize();
 
-    hb_sharedmemory_rewind( &sharedmemory_handle );
-    hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );
+    hb_node_write_out_data( &sharedmemory_handle, &out_data, sizeof( out_data ), hb_node_loginuser_magic_number, hb_node_loginuser_version_number );
     hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();

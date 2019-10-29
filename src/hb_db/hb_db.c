@@ -231,7 +231,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_result_t * _exist )
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -255,7 +255,7 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const
     {
         mongoc_cursor_destroy( cursor );
 
-        *_exist = HB_FAILURE;
+        *_exist = HB_FALSE;
 
         return HB_SUCCESSFUL;
     }
@@ -281,7 +281,7 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const
 
     mongoc_cursor_destroy( cursor );
 
-    *_exist = HB_SUCCESSFUL;
+    *_exist = HB_TRUE;
 
     return HB_SUCCESSFUL;
 }

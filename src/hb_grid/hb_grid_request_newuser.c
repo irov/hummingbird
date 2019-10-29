@@ -19,11 +19,7 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
 
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
-    hb_sharedmemory_rewind( &handle->sharedmemory );
-
     hb_node_newuser_in_t in_data;
-    in_data.magic_number = hb_node_newuser_magic_number;
-    in_data.version_number = hb_node_newuser_version_number;
 
     strcpy( in_data.cache_uri, handle->cache_uri );
     in_data.cache_port = handle->cache_port;
@@ -76,7 +72,12 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     strcpy( in_data.login, login );
     strcpy( in_data.password, password );
 
-    hb_sharedmemory_write( &handle->sharedmemory, &in_data, sizeof( in_data ) );
+    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), hb_node_newuser_magic_number, hb_node_newuser_version_number ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
 
     char process_command[64];
     sprintf( process_command, "--sm %s"
@@ -86,19 +87,8 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     hb_result_t process_result = hb_process_run( "hb_node_newuser.exe", process_command );
     HB_UNUSED( process_result );
 
-    hb_sharedmemory_rewind( &handle->sharedmemory );
-
     hb_node_newuser_out_t out_data;
-    hb_sharedmemory_read( &handle->sharedmemory, &out_data, sizeof( out_data ), HB_NULLPTR );
-
-    if( out_data.magic_number != hb_node_newuser_magic_number )
-    {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
-    }
-
-    if( out_data.version_number != hb_node_newuser_version_number )
+    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_newuser_magic_number, hb_node_newuser_version_number ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 

@@ -64,6 +64,9 @@ void hb_free( void * _ptr );
 #define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
 #endif
 
+typedef uint32_t hb_magic_t;
+typedef uint32_t hb_version_t;
+
 #ifndef HB_MAGIC_NUMBER
 #define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
 #endif
