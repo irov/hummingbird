@@ -67,7 +67,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
 
 hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _newoid );
 
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_result_t * _exist );
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist );
 hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint32_t * _founds );
 hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _handles );
 hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles );

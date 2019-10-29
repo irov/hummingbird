@@ -47,17 +47,7 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_node_newproject_in_t in_data;
-    if( hb_sharedmemory_read( &sharedmemory_handle, &in_data, sizeof( in_data ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.magic_number != hb_node_newproject_magic_number )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( in_data.version_number != hb_node_newproject_version_number )
+    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( in_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -96,12 +86,9 @@ int main( int _argc, char * _argv[] )
     hb_db_finalize();
 
     hb_node_newproject_out_t out_data;
-    out_data.magic_number = hb_node_newproject_magic_number;
-    out_data.version_number = hb_node_newproject_version_number;
     out_data.pid = pid;
 
-    hb_sharedmemory_rewind( &sharedmemory_handle );
-    hb_sharedmemory_write( &sharedmemory_handle, &out_data, sizeof( out_data ) );
+    hb_node_write_out_data( &sharedmemory_handle, &out_data, sizeof( out_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number );
     hb_sharedmemory_destroy( &sharedmemory_handle );
 
     hb_log_finalize();

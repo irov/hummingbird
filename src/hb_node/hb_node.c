@@ -61,8 +61,10 @@ hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemor
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, uint32_t _magic, uint32_t _version )
+hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
 {
+    hb_sharedmemory_rewind( _sharedmemory );
+
     hb_node_header_t header;
     __hb_node_create_header_in( &header, _magic, _version );
 
@@ -79,8 +81,10 @@ hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, con
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, uint32_t _magic, uint32_t _version )
+hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
 {
+    hb_sharedmemory_rewind( _sharedmemory );
+
     hb_node_header_t header;
     if( hb_sharedmemory_read( _sharedmemory, &header, sizeof( header ), HB_NULLPTR ) == HB_FAILURE )
     {
@@ -100,7 +104,7 @@ hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, uint32_t _magic, uint32_t _version )
+hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
@@ -120,8 +124,10 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, uint32_t _magic, uint32_t _version )
+hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
 {
+    hb_sharedmemory_rewind( _sharedmemory );
+
     hb_node_header_t header;
     if( hb_sharedmemory_read( _sharedmemory, &header, sizeof( header ), HB_NULLPTR ) == HB_FAILURE )
     {
