@@ -75,9 +75,10 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     }
 
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"data\": \"%.*s\"}"
+    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"successful\": %u, \"data\": %.*s}"
+        , out_data.successful
         , out_data.response_size
-        , out_data.response_data        
+        , out_data.response_data
     );
 
     evbuffer_add( output_buffer, response_data, response_data_size );
