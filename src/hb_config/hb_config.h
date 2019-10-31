@@ -16,6 +16,8 @@ typedef enum hb_result_e
 
 typedef hb_result_e hb_result_t;
 
+typedef uint32_t hb_pid_t;
+typedef char hb_pid16_t[8];
 typedef uint8_t hb_oid_t[12];
 typedef uint8_t hb_sha1_t[20];
 typedef uint8_t hb_token_t[14];

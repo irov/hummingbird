@@ -22,7 +22,7 @@ typedef struct hb_grid_process_handle_t
     char db_uri[128];
 
     char cache_uri[128];
-    uint32_t cache_port;
+    uint16_t cache_port;
 } hb_grid_process_handle_t;
 
 #endif

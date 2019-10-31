@@ -59,8 +59,20 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    hb_result_t result = hb_process_run( "hb_node_api.exe", process_command );
-    HB_UNUSED( result );
+    hb_bool_t process_successful;
+    if( hb_process_run( "hb_node_api.exe", process_command, &process_successful ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    if( process_successful == HB_FALSE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
 
     hb_node_api_out_t out_data;
     if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_api_magic_number, hb_node_api_version_number ) == HB_FAILURE )

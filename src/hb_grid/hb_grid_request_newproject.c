@@ -33,8 +33,20 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    hb_result_t process_result = hb_process_run( "hb_node_newproject.exe", process_command );
-    HB_UNUSED( process_result );
+    hb_bool_t process_successful;
+    if( hb_process_run( "hb_node_newproject.exe", process_command, &process_successful ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    if( process_successful == HB_FALSE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
 
     hb_node_newproject_out_t out_data;
     if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number ) == HB_FAILURE )
@@ -44,11 +56,12 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    char pid16[4] = {0};
+    hb_pid16_t pid16;
     hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16, sizeof( pid16 ), HB_NULLPTR );
 
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"pid\": \"%.4s\"}"
+    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"pid\": \"%.*s\"}"
+        , sizeof( pid16 )
         , pid16
     );
 

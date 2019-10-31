@@ -5,5 +5,6 @@
 
 uint32_t hb_rand_seed( uint32_t _seed );
 uint32_t hb_rand_time();
+void hb_rand_hex_generate( const char * _vocabulary, size_t _count, char * _hex, size_t _size );
 
 #endif

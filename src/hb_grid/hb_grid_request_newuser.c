@@ -84,8 +84,20 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         , handle->sharedmemory.name
     );
 
-    hb_result_t process_result = hb_process_run( "hb_node_newuser.exe", process_command );
-    HB_UNUSED( process_result );
+    hb_bool_t process_successful;
+    if( hb_process_run( "hb_node_newuser.exe", process_command, &process_successful ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    if( process_successful == HB_FALSE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
 
     hb_node_newuser_out_t out_data;
     if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_newuser_magic_number, hb_node_newuser_version_number ) == HB_FAILURE )

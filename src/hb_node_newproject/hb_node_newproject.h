@@ -13,7 +13,7 @@ typedef struct hb_node_newproject_in_t
 
 typedef struct hb_node_newproject_out_t
 {
-    uint16_t pid;
+    hb_pid_t pid;
 } hb_node_newproject_out_t;
 
 #endif

@@ -9,7 +9,7 @@ static const hb_version_t hb_node_loginuser_version_number = 1;
 typedef struct hb_node_loginuser_in_t
 {
     char cache_uri[128];
-    uint32_t cache_port;
+    uint16_t cache_port;
 
     char db_uri[128];
 
