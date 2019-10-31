@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_process_run( const char * _name, const char * _command )
+hb_result_t hb_process_run( const char * _name, const char * _command, hb_bool_t * _successful )
 {
     wchar_t unicode_name[MAX_PATH] = {'\0'};
 
@@ -90,6 +90,15 @@ hb_result_t hb_process_run( const char * _name, const char * _command )
         );
 
         return HB_FAILURE;
+    }
+
+    if( exitCode == 0 )
+    {
+        *_successful = HB_TRUE;
+    }
+    else
+    {
+        *_successful = HB_FALSE;
     }
 
     return HB_SUCCESSFUL;

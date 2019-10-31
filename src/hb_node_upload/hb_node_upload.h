@@ -13,7 +13,7 @@ typedef struct hb_node_upload_in_t
     uint16_t pid;
 
     hb_data_t data;
-    size_t data_size;    
+    size_t data_size;
 } hb_node_upload_in_t;
 
 typedef struct hb_node_upload_out_t

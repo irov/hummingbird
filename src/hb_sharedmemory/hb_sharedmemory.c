@@ -1,7 +1,5 @@
 #include "hb_sharedmemory.h"
 
-#include "hb_config/hb_config.h"
-
 #define WIN32_LEAN_AND_MEAN
 
 #ifndef NOMINMAX

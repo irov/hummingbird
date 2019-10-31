@@ -17,11 +17,11 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, int _level, const char * _message )
+static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
 {    
-    const char * ls[] = {"info", "warning", "error", "critical"};
+    const char * ls = hb_log_level_string[_level];
 
-    printf( "[%s] %s: %s\n", _category, ls[_level], _message );
+    printf( "[%s] %s: %s\n", _category, ls, _message );
 }
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
@@ -69,11 +69,11 @@ int main( int _argc, char * _argv[] )
     hb_oid_t project_oid;
     hb_db_new_document( &db_projects_handle, new_value, 1, project_oid );
 
-    uint16_t pid = 0;
+    hb_pid_t pid;
     uint32_t founds = 0;
     for( ; founds != 1; )
     {
-        pid = (uint16_t)hb_rand_time();
+        pid = hb_rand_time();
 
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );

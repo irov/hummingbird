@@ -15,7 +15,7 @@ typedef enum hb_node_api_category_e
 typedef struct hb_node_api_in_t
 {
     char cache_uri[128];
-    uint32_t cache_port;
+    uint16_t cache_port;
 
     char db_uri[128];
 

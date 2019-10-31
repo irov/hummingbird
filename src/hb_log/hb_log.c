@@ -1,7 +1,5 @@
 #include "hb_log.h"
 
-#include "hb_config/hb_config.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,39 +15,39 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_observer_desc_t
 {
-    int level;
+    hb_log_level_e level;
     char category[32];
     hb_log_observer_t observer;
 }hb_log_service_observer_desc_t;
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_log_service_t
+typedef struct hb_log_service_handle_t
 {
-    int observer_count;
+    int32_t observer_count;
     hb_log_service_observer_desc_t observers[HB_LOG_MAX_OBSERVER];
-}hb_log_service_t;
+}hb_log_service_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_log_service_t * g_log_service = HB_NULLPTR;
+static hb_log_service_handle_t * g_log_service_handle = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_initialize()
 {
-    g_log_service = HB_NEW( hb_log_service_t );
-    g_log_service->observer_count = 0;
+    g_log_service_handle = HB_NEW( hb_log_service_handle_t );
+    g_log_service_handle->observer_count = 0;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_log_finalize()
 {
-    if( g_log_service != HB_NULLPTR )
+    if( g_log_service_handle != HB_NULLPTR )
     {
-        HB_DELETE( g_log_service );
-        g_log_service = HB_NULLPTR;
+        HB_DELETE( g_log_service_handle );
+        g_log_service_handle = HB_NULLPTR;
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_log_add_observer( const char * _category, int _level, hb_log_observer_t _observer )
+hb_result_t hb_log_add_observer( const char * _category, hb_log_level_e _level, hb_log_observer_t _observer )
 {
-    if( g_log_service->observer_count == HB_LOG_MAX_OBSERVER )
+    if( g_log_service_handle->observer_count == HB_LOG_MAX_OBSERVER )
     {
         return HB_FAILURE;
     }
@@ -68,7 +66,7 @@ hb_result_t hb_log_add_observer( const char * _category, int _level, hb_log_obse
 
     desc.observer = _observer;
 
-    g_log_service->observers[g_log_service->observer_count++] = desc;
+    g_log_service_handle->observers[g_log_service_handle->observer_count++] = desc;
 
     return HB_SUCCESSFUL;
 }
@@ -77,14 +75,14 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
 {
     for( int i = 0; i != HB_LOG_MAX_OBSERVER; ++i )
     {
-        hb_log_service_observer_desc_t * desc = g_log_service->observers + i;
+        hb_log_service_observer_desc_t * desc = g_log_service_handle->observers + i;
 
         if( desc->observer != _observer )
         {
             continue;
         }
 
-        g_log_service->observers[i] = g_log_service->observers[g_log_service->observer_count - 1];
+        g_log_service_handle->observers[i] = g_log_service_handle->observers[g_log_service_handle->observer_count - 1];
 
         return HB_SUCCESSFUL;
     }
@@ -92,13 +90,13 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
     return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_message_args( const char * _category, int _level, const char * _message )
+static void __hb_log_message_args( const char * _category, hb_log_level_e _level, const char * _message )
 {
-    int count = g_log_service->observer_count;
+    int count = g_log_service_handle->observer_count;
 
     for( int i = 0; i != count; ++i )
     {
-        hb_log_service_observer_desc_t * desc = g_log_service->observers + i;
+        hb_log_service_observer_desc_t * desc = g_log_service_handle->observers + i;
 
         if( desc->level > _level )
         {

@@ -8,13 +8,12 @@
 #include "hb_utils/hb_base64.h"
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, int _level, const char * _message )
+static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
 {
-    const char * ls[] = { "info", "warning", "error", "critical" };
+    const char * ls = hb_log_level_string[_level];
 
-    printf( "[%s] %s: %s\n", _category, ls[_level], _message );
+    printf( "[%s] %s: %s\n", _category, ls, _message );
 }
-
 //////////////////////////////////////////////////////////////////////////
 extern void hb_grid_request_api( struct evhttp_request *, void * );
 extern void hb_grid_request_upload( struct evhttp_request *, void * );

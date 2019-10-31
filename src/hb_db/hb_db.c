@@ -1,6 +1,5 @@
 #include "hb_db.h"
 
-#include "hb_config/hb_config.h"
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_base64.h"
