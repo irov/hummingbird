@@ -1,6 +1,7 @@
 #include "hb_grid.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
 #include "hb_utils/hb_multipart.h"
@@ -64,13 +65,17 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argv );
 
     hb_log_initialize();
-    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
+
+    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
 
     const char * id;
     if( hb_getopt( _argc, _argv, "--id", &id ) == 0 )
     {
         return EXIT_FAILURE;
-    }
+    }    
 
     const uint32_t max_thread = 16;
 
@@ -80,6 +85,11 @@ int main( int _argc, char * _argv[] )
     int err = WSAStartup( wVersionRequested, &wsaData );
 
     if( err != 0 )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( hb_log_tcp_initialize( "127.0.0.1", 5044 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

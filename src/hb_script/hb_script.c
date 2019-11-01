@@ -1,9 +1,9 @@
 #include "hb_script.h"
 #include "hb_script_json.h"
+#include "hb_script_handle.h"
 
 #include "hb_log/hb_log.h"
-
-#include "hb_script_handle.h"
+#include "hb_utils/hb_oid.h"
 
 #include <malloc.h>
 #include <string.h>
@@ -165,8 +165,8 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     g_script_handle->db_user_collection = _ucollection;
     g_script_handle->db_project_collection = _pcollection;
 
-    memcpy( g_script_handle->user_oid, _uuid, sizeof( hb_oid_t ) );
-    memcpy( g_script_handle->project_oid, _puid, sizeof( hb_oid_t ) );
+    hb_oid_copy( g_script_handle->user_oid, _uuid );
+    hb_oid_copy( g_script_handle->project_oid, _puid );
 
     return HB_SUCCESSFUL;
 }
@@ -246,7 +246,10 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
         return HB_FAILURE;
     }
 
-    hb_script_json_loads( L, _data, _datasize );
+    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     int status = lua_pcallk( L, 1, 2, 0, 0, HB_NULLPTR );
 
@@ -299,7 +302,11 @@ hb_result_t hb_script_event_call( const char * _event, const void * _data, size_
     {
         return HB_SUCCESSFUL;
     }
-    hb_script_json_loads( L, _data, _datasize );
+
+    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     int status = lua_pcallk( L, 1, 0, 0, 0, HB_NULLPTR );
 

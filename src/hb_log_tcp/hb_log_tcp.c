@@ -32,6 +32,16 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_e _level
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 {
+    const WORD wVersionRequested = MAKEWORD( 2, 2 );
+
+    WSADATA wsaData;
+    int err = WSAStartup( wVersionRequested, &wsaData );
+
+    if( err != 0 )
+    {
+        return EXIT_FAILURE;
+    }
+
     struct hostent * h = gethostbyname( _url );
 
     if( !h )
@@ -93,4 +103,6 @@ void hb_log_tcp_finalize()
         HB_DELETE( g_log_tcp_handle );
         g_log_tcp_handle = HB_NULLPTR;
     }
+
+    WSACleanup();
 }

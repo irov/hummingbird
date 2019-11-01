@@ -1,6 +1,7 @@
 #include "hb_node_upload.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_db/hb_db.h"
 #include "hb_script/hb_script.h"
 #include "hb_script/hb_script_compiler.h"
@@ -29,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    //MessageBox( NULL, "Test", "Test", MB_OK );
+    MessageBox( NULL, "Test", "Test", MB_OK );
 
     if( hb_log_initialize() == HB_FAILURE )
     {

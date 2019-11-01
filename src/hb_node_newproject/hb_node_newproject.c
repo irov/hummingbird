@@ -74,6 +74,7 @@ int main( int _argc, char * _argv[] )
     for( ; founds != 1; )
     {
         pid = hb_rand_time();
+        pid &= 0x7fffffff;
 
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );

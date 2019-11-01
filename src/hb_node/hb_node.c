@@ -116,6 +116,13 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
         return HB_FAILURE;
     }
 
+    uint32_t code = 0;
+
+    if( hb_sharedmemory_write( _sharedmemory, &code, sizeof( code ) ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
     if( hb_sharedmemory_write( _sharedmemory, _data, _size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -124,7 +131,32 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
+hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, uint32_t _code, hb_magic_t _magic, hb_version_t _version )
+{
+    if( _code == 0 )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_sharedmemory_rewind( _sharedmemory );
+
+    hb_node_header_t header;
+    __hb_node_create_header_out( &header, _magic, _version );
+
+    if( hb_sharedmemory_write( _sharedmemory, &header, sizeof( header ) ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_write( _sharedmemory, &_code, sizeof( _code ) ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version, uint32_t * _code )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
@@ -137,6 +169,16 @@ hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, voi
     if( __hb_node_test_header_out( &header, _magic, _version ) == HB_FAILURE )
     {
         return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_read( _sharedmemory, _code, sizeof( uint32_t ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    } 
+
+    if( *_code != 0 )
+    {
+        return HB_SUCCESSFUL;
     }
 
     if( hb_sharedmemory_read( _sharedmemory, _data, _size, HB_NULLPTR ) == HB_FAILURE )

@@ -14,6 +14,7 @@ hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemor
 hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version );
 hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version );
 hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version );
-hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version );
+hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, uint32_t _code, hb_magic_t _magic, hb_version_t _version );
+hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version, uint32_t * _code );
 
 #endif

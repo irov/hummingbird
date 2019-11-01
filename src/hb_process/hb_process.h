@@ -3,6 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-hb_result_t hb_process_run( const char * _name, const char * _command, hb_bool_t * _successful );
+hb_result_t hb_process_run( const char * _name, const char * _sharedmemory, hb_bool_t * _successful );
 
 #endif
