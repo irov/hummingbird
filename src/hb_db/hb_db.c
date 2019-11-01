@@ -118,9 +118,9 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_hand
             {
                 bson_append_int64( _bson, handle->field, handle->field_length, handle->u.i64 );
             }break;
-        case e_hb_db_utf8:
+        case e_hb_db_symbol:
             {
-                bson_append_symbol( _bson, handle->field, handle->field_length, handle->u.utf8.buffer, handle->u.utf8.length );
+                bson_append_symbol( _bson, handle->field, handle->field_length, handle->u.symbol.buffer, handle->u.symbol.length );
             }break;
         case e_hb_db_binary:
             {
@@ -192,14 +192,14 @@ void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _
     _handle->u.i64 = _value;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_make_utf8_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle )
+void hb_db_make_symbol_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
-    _handle->type = e_hb_db_utf8;
+    _handle->type = e_hb_db_symbol;
     _handle->field = _field;
     _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
-    _handle->u.utf8.buffer = _buffer;
-    _handle->u.utf8.length = _bufferlength == ~0U ? strlen( _buffer ) : _bufferlength;
+    _handle->u.symbol.buffer = _buffer;
+    _handle->u.symbol.length = _bufferlength == ~0U ? strlen( _buffer ) : _bufferlength;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle )
@@ -392,7 +392,7 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, con
 
                 handle->u.i64 = bson_iter_int64( &iter );
             }break;
-        case BSON_TYPE_SYMBOL:
+        case BSON_TYPE_UTF8:
             {
                 handle->type = e_hb_db_utf8;
 
@@ -401,6 +401,16 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, con
 
                 handle->u.utf8.length = utf8_length;
                 handle->u.utf8.buffer = utf8_value;
+            }break;
+        case BSON_TYPE_SYMBOL:
+            {
+                handle->type = e_hb_db_symbol;
+
+                uint32_t symbol_length;
+                const char * symbol_value = bson_iter_symbol( &iter, &symbol_length );
+
+                handle->u.symbol.length = symbol_length;
+                handle->u.symbol.buffer = symbol_value;
             }break;
         case BSON_TYPE_BINARY:
             {

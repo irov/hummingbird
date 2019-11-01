@@ -10,7 +10,7 @@ typedef struct hb_node_upload_in_t
 {
     char db_uri[128];
 
-    uint16_t pid;
+    hb_pid_t pid;
 
     hb_data_t data;
     size_t data_size;

@@ -9,6 +9,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+#include <WinSock2.h>
+
 //////////////////////////////////////////////////////////////////////////
 redisContext * g_redis_context = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
@@ -22,9 +24,18 @@ hb_result_t hb_cache_available()
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port )
+hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout )
 {
-    redisContext * c = redisConnect( _uri, _port ); //6379
+    struct timeval timeout;
+    timeout.tv_sec = _timeout;
+    timeout.tv_usec = 0;
+
+    redisContext * c = redisConnectWithTimeout( _uri, _port, timeout ); //6379
+
+    if( c == HB_NULLPTR )
+    {
+        return HB_FAILURE;
+    }
 
     g_redis_context = c;
 

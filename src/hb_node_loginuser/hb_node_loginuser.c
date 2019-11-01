@@ -56,7 +56,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port ) == HB_FAILURE )
+    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port, 5 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -117,16 +117,8 @@ int main( int _argc, char * _argv[] )
 
     if( authentication_exist == HB_SUCCESSFUL )
     {
-        hb_db_value_handle_t user_handles[3];
-        hb_db_make_int32_value( "pid", ~0U, in_data.pid, user_handles + 0 );
-        hb_db_make_binary_value( "login", ~0U, login_sha1, 20, user_handles + 1 );
-        hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_handles + 2 );
-
-        hb_oid_t user_oid;
-        hb_db_new_document( &db_users_handle, user_handles, 3, user_oid );
-
         hb_token_handle_t token_handle;
-        hb_oid_copy( token_handle.uoid, user_oid );
+        hb_oid_copy( token_handle.uoid, authentication_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 
         hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data.token );

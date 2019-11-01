@@ -13,7 +13,7 @@ typedef struct hb_node_loginuser_in_t
 
     char db_uri[128];
 
-    uint16_t pid;
+    hb_pid_t pid;
 
     char login[128];
     char password[128];

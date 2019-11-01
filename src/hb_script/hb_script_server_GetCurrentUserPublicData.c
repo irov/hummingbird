@@ -4,7 +4,7 @@
 #include "hb_json/hb_json.h"
 
 //////////////////////////////////////////////////////////////////////////
-extern struct hb_script_handle_t * g_script_handle;
+extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
 {
@@ -38,7 +38,7 @@ int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
 
     lua_pushboolean( L, 1 );
 
-    if( hb_script_json_load_fields( L, handler[0].u.utf8.buffer, handler[0].u.utf8.length, fields, field_iterator ) == HB_FAILURE )
+    if( hb_script_json_load_fields( L, handler[0].u.symbol.buffer, handler[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
     {
         return -1;
     }    

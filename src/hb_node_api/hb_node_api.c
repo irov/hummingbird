@@ -30,7 +30,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    //MessageBox( NULL, "Test", "Test", MB_OK );
+    MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_log_initialize();
     hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
@@ -47,7 +47,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port ) == HB_FAILURE )
+    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port, 5 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -74,13 +74,13 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_db_collection_handle_t db_user_data_handle;
-    if( hb_db_get_collection( "hb", "hb_users_data", &db_user_data_handle ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_users", &db_user_data_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
     hb_db_collection_handle_t db_project_data_handle;
-    if( hb_db_get_collection( "hb", "hb_projects_data", &db_project_data_handle ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_projects", &db_project_data_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -109,20 +109,14 @@ int main( int _argc, char * _argv[] )
 
     hb_db_destroy_values( db_script_sha1_handles, 1 );
 
-    size_t json_data_size;
-    hb_data_t json_data;
-    if( hb_storage_get( script_sha1, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
+    size_t script_data_size;
+    hb_data_t script_data;
+    if( hb_storage_get( script_sha1, script_data, HB_DATA_MAX_SIZE, &script_data_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
 
-    if( hb_script_load( json_data, json_data_size ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_json_handle_t json_handle;
-    if( hb_json_create( in_data.data, in_data.data_size, &json_handle ) == HB_FAILURE )
+    if( hb_script_load( script_data, script_data_size ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

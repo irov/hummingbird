@@ -22,6 +22,7 @@ typedef enum hb_db_value_type_e
 {   
     e_hb_db_int32,
     e_hb_db_int64,
+    e_hb_db_symbol,
     e_hb_db_utf8,
     e_hb_db_binary,
     e_hb_db_time,
@@ -38,6 +39,12 @@ typedef struct hb_db_value_handle_t
 
     union
     {
+        struct
+        {
+            const char * buffer;
+            size_t length;
+        } symbol;
+
         struct
         {
             const char * buffer;
@@ -60,7 +67,7 @@ typedef struct hb_db_value_handle_t
 
 void hb_db_make_int32_value( const char * _field, size_t _fieldlength, int32_t _value, hb_db_value_handle_t * _handle );
 void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _value, hb_db_value_handle_t * _handle );
-void hb_db_make_utf8_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
+void hb_db_make_symbol_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
 void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
 void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );

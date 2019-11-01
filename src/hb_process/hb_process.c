@@ -10,8 +10,10 @@
 
 #include <Windows.h>
 
+#include <stdio.h>
+
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_process_run( const char * _name, const char * _command, hb_bool_t * _successful )
+hb_result_t hb_process_run( const char * _name, const char * _sharedmemory, hb_bool_t * _successful )
 {
     wchar_t unicode_name[MAX_PATH] = {'\0'};
 
@@ -26,13 +28,18 @@ hb_result_t hb_process_run( const char * _name, const char * _command, hb_bool_t
 
     unicode_name[unicode_name_size] = L'\0';
 
+    char command[64];
+    int command_size = sprintf( command, "--sm %s"
+        , _sharedmemory
+    );
+
     wchar_t unicode_command[2048] = {L" "};
 
     int unicode_command_size = MultiByteToWideChar(
         CP_UTF8
         , MB_ERR_INVALID_CHARS
-        , _command
-        , strlen( _command )
+        , command
+        , command_size
         , unicode_command + 1
         , MAX_PATH
     );

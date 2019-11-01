@@ -53,7 +53,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port ) == HB_FAILURE )
+    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port, 5 ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

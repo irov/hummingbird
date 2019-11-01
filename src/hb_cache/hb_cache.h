@@ -5,7 +5,7 @@
 
 hb_result_t hb_cache_available();
 
-hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port );
+hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout );
 void hb_cache_finalize();
 
 hb_result_t hb_cache_set_value( const void * _key, size_t _keysize, const void * _value, size_t _size );
