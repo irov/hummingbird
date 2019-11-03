@@ -9,38 +9,34 @@
 //////////////////////////////////////////////////////////////////////////
 mongoc_client_t * g_mongo_client = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_initialze( const char * _name, const char * _uri )
+hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _port )
 {
     mongoc_init();
 
-    bson_error_t uri_error;
-    mongoc_uri_t * uri = mongoc_uri_new_with_error( _uri, &uri_error );
+    mongoc_uri_t * mongoc_uri = mongoc_uri_new_for_host_port( _uri, _port );
 
-    if( uri == HB_NULLPTR )
+    if( mongoc_uri == HB_NULLPTR )
     {
-        hb_log_message( "db", HB_LOG_ERROR,
-            "failed to parse URI: %s\n"
-            "error message:       %s\n",
-            _uri,
-            uri_error.message );
+        hb_log_message( "db", HB_LOG_ERROR, "failed to use URI: %s:%u"
+            , _uri
+            , _port
+        );
 
         return HB_FAILURE;
     }
 
-    mongoc_client_t * client = mongoc_client_new_from_uri( uri );
+    mongoc_client_t * mongoc_client = mongoc_client_new_from_uri( mongoc_uri );
 
-    if( client == HB_NULLPTR )
+    mongoc_uri_destroy( mongoc_uri );
+
+    if( mongoc_client == HB_NULLPTR )
     {
-        mongoc_uri_destroy( uri );
-
         return HB_FAILURE;
     }
 
-    mongoc_uri_destroy( uri );
+    mongoc_client_set_appname( mongoc_client, _name );
 
-    mongoc_client_set_appname( client, _name );
-
-    g_mongo_client = client;
+    g_mongo_client = mongoc_client;
 
     return HB_SUCCESSFUL;
 }
@@ -498,7 +494,7 @@ void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_upload_file( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size )
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -517,8 +513,9 @@ hb_result_t hb_db_upload_file( const hb_db_collection_handle_t * _collection, co
     {
         bson_t document;
         bson_init( &document );
-        BSON_APPEND_BINARY( &document, "sha1", BSON_SUBTYPE_BINARY, _sha1, 20 );
-        BSON_APPEND_BINARY( &document, "data", BSON_SUBTYPE_BINARY, _buffer, _size );
+        bson_append_binary( &document, "sha1", strlen( "sha1" ), BSON_SUBTYPE_BINARY, _sha1, 20 );
+        bson_append_binary( &document, "script_code", strlen( "script_code" ), BSON_SUBTYPE_BINARY, _code, _codesize );
+        bson_append_utf8( &document, "script_source", strlen( "script_source" ), _source, _sourcesize );
 
         bson_error_t insert_error;
         if( mongoc_collection_insert_one( mongo_collection, &document, HB_NULLPTR, HB_NULLPTR, &insert_error ) == false )
@@ -546,7 +543,7 @@ hb_result_t hb_db_upload_file( const hb_db_collection_handle_t * _collection, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_load_file( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle )
+hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_script_handle_t * _handle )
 {
     mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
 
@@ -569,7 +566,7 @@ hb_result_t hb_db_load_file( const hb_db_collection_handle_t * _collection, cons
         return HB_FAILURE;
     }
 
-    if( bson_iter_find( &iter, "data" ) == false )
+    if( bson_iter_find( &iter, "script_code" ) == false )
     {
         mongoc_cursor_destroy( cursor );
 
@@ -577,9 +574,9 @@ hb_result_t hb_db_load_file( const hb_db_collection_handle_t * _collection, cons
     }
 
     bson_subtype_t subtype;
-    uint32_t length;
-    const uint8_t * buffer;
-    bson_iter_binary( &iter, &subtype, &length, &buffer );
+    uint32_t script_code_length;
+    const uint8_t * script_code_buffer;
+    bson_iter_binary( &iter, &subtype, &script_code_length, &script_code_buffer );
 
     if( subtype != BSON_SUBTYPE_BINARY )
     {
@@ -589,13 +586,13 @@ hb_result_t hb_db_load_file( const hb_db_collection_handle_t * _collection, cons
     }
 
     _handle->handle = cursor;
-    _handle->length = length;
-    _handle->buffer = buffer;
+    _handle->script_code_length = script_code_length;
+    _handle->script_code_buffer = script_code_buffer;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_close_file( hb_db_file_handle_t * _handle )
+void hb_db_close_script( hb_db_script_handle_t * _handle )
 {
     mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handle->handle;
 

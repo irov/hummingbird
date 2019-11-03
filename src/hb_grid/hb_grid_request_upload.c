@@ -21,7 +21,6 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     hb_node_upload_in_t in_data;
-    strcpy( in_data.db_uri, handle->db_uri );
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
@@ -59,10 +58,10 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    memcpy( in_data.data, params_data, params_data_size );
-    in_data.data_size = params_data_size;
+    memcpy( in_data.script_source, params_data, params_data_size );
+    in_data.script_source_size = params_data_size;
 
-    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), hb_node_upload_magic_number, hb_node_upload_version_number ) == 0 )
+    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == 0 )
     {
         evhttp_send_reply( _request, HTTP_INTERNAL, "hb_node_write_in_data", HB_NULLPTR );
 
@@ -85,15 +84,15 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     }
 
     hb_node_upload_out_t out_data;
-    uint32_t out_code;
-    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_upload_magic_number, hb_node_upload_version_number, &out_code ) == HB_FAILURE )
+    hb_node_code_t out_code;
+    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_node_read_out_data", output_buffer );
 
         return;
     }
 
-    if( out_code != 0 )
+    if( out_code != e_node_ok )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 

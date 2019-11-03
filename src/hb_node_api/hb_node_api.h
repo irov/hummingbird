@@ -1,10 +1,7 @@
 #ifndef HB_NODE_API_H_
 #define HB_NODE_API_H_
 
-#include "hb_node/hb_node.h"
-
-static const uint32_t hb_node_api_magic_number = HB_MAGIC_NUMBER( 'U', 'A', 'P', 'I' );
-static const uint32_t hb_node_api_version_number = 1;
+#include "hb_node_main/hb_node_main.h"
 
 typedef enum hb_node_api_category_e
 {
@@ -14,11 +11,6 @@ typedef enum hb_node_api_category_e
 
 typedef struct hb_node_api_in_t
 {
-    char cache_uri[128];
-    uint16_t cache_port;
-
-    char db_uri[128];
-
     hb_token_t token;
 
     hb_node_api_category_e category;

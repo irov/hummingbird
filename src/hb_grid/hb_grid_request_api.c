@@ -19,11 +19,6 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
 
     hb_node_api_in_t in_data;
 
-    strcpy( in_data.cache_uri, handle->cache_uri );
-    in_data.cache_port = handle->cache_port;
-
-    strcpy( in_data.db_uri, handle->db_uri );
-
     const char * token;
     if( hb_grid_get_request_header( _request, "X-Token", &token ) == 0 )
     {
@@ -52,7 +47,12 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), hb_node_api_magic_number, hb_node_api_version_number );
+    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
     
     hb_bool_t process_successful;
     if( hb_process_run( "hb_node_api.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
@@ -70,8 +70,8 @@ void hb_grid_request_api( struct evhttp_request * _request, void * _ud )
     }
 
     hb_node_api_out_t out_data;
-    uint32_t out_code;
-    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_api_magic_number, hb_node_api_version_number, &out_code ) == HB_FAILURE )
+    hb_node_code_t out_code;
+    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 

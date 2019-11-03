@@ -19,9 +19,7 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 
     hb_node_newproject_in_t in_data;
 
-    strcpy( in_data.db_uri, handle->db_uri );
-
-    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number ) == HB_FAILURE )
+    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
@@ -44,15 +42,15 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
     }
 
     hb_node_newproject_out_t out_data;
-    uint32_t out_code;
-    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number, &out_code ) == HB_FAILURE )
+    hb_node_code_t out_code;
+    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
         return;
     }
 
-    if( out_code != 0 )
+    if( out_code != e_node_ok )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 

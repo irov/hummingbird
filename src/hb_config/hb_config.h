@@ -33,6 +33,7 @@ typedef struct hb_token_handle_t
 #define HB_DATA_MAX_SIZE 10240
 #endif
 
+typedef char hb_source_t[HB_DATA_MAX_SIZE];
 typedef uint8_t hb_data_t[HB_DATA_MAX_SIZE];
 
 #ifndef HB_UNUSED
@@ -64,13 +65,6 @@ void hb_free( void * _ptr );
 
 #ifndef HB_GRID_REQUEST_DATA_MAX_SIZE
 #define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
-#endif
-
-typedef uint32_t hb_magic_t;
-typedef uint32_t hb_version_t;
-
-#ifndef HB_MAGIC_NUMBER
-#define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
 #endif
 
 #ifndef HB_SHAREDMEMORY_SIZE
