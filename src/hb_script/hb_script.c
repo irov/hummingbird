@@ -107,7 +107,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     return;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, hb_oid_t _uuid, hb_oid_t _puid )
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uoid, const hb_oid_t _poid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
     
@@ -162,17 +162,31 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     g_script_handle->L = L;
 
-    g_script_handle->db_user_collection = _ucollection;
-    g_script_handle->db_project_collection = _pcollection;
+    if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_users_collection ) == HB_FAILURE )
+    {
+        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_users'" );
 
-    hb_oid_copy( g_script_handle->user_oid, _uuid );
-    hb_oid_copy( g_script_handle->project_oid, _puid );
+        return HB_FAILURE;
+    }
+
+    if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_projects_collection ) == HB_FAILURE )
+    {
+        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_projects'" );
+
+        return HB_FAILURE;
+    }
+
+    hb_oid_copy( g_script_handle->user_oid, _uoid );
+    hb_oid_copy( g_script_handle->project_oid, _poid );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
+    hb_db_destroy_collection( &g_script_handle->db_users_collection );
+    hb_db_destroy_collection( &g_script_handle->db_projects_collection );
+
     hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
     hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
 
@@ -188,6 +202,12 @@ void hb_script_finalize()
 
     HB_DELETE( g_script_handle );
     g_script_handle = HB_NULLPTR;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_script_stat( hb_script_stat_t * _stat )
+{
+    _stat->memory_used = g_script_handle->memory_peak - g_script_handle->memory_base;
+    _stat->call_used = g_script_handle->call_used;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_load( const void * _buffer, size_t _size )

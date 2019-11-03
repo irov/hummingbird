@@ -1,28 +1,51 @@
 #include "hb_node.h"
 
+#include "hb_db/hb_db.h"
+#include "hb_log/hb_log.h"
+#include "hb_storage/hb_storage.h"
+#include "hb_script/hb_script.h"
+
 #include "hb_utils/hb_getopt.h"
 
-//////////////////////////////////////////////////////////////////////////
-static void __hb_node_create_header_in( hb_node_header_t * _header, uint32_t _magic, uint32_t _version )
+#include <memory.h>
+
+typedef uint32_t hb_magic_t;
+typedef uint32_t hb_version_t;
+
+#ifndef HB_MAGIC_NUMBER
+#define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
+#endif
+
+static const uint32_t hb_node_magic_number = HB_MAGIC_NUMBER( 'N', 'O', 'D', 'E' );
+static const uint32_t hb_node_version_number = 1;
+
+typedef struct hb_node_header_t
 {
-    _header->magic_number = _magic;
-    _header->version_number = _version;
+    hb_magic_t magic_number;
+    hb_version_t version_number;
+} hb_node_header_t;
+
+//////////////////////////////////////////////////////////////////////////
+static void __hb_node_create_header_in( hb_node_header_t * _header )
+{
+    _header->magic_number = hb_node_magic_number;
+    _header->version_number = hb_node_version_number;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_node_create_header_out( hb_node_header_t * _header, uint32_t _magic, uint32_t _version )
+static void __hb_node_create_header_out( hb_node_header_t * _header )
 {
-    _header->magic_number = ~_magic;
-    _header->version_number = _version;
+    _header->magic_number = ~hb_node_magic_number;
+    _header->version_number = hb_node_version_number;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_node_test_header_in( const hb_node_header_t * _header, uint32_t _magic, uint32_t _version )
+static hb_result_t __hb_node_test_header_in( const hb_node_header_t * _header )
 {
-    if( _header->magic_number != _magic )
+    if( _header->magic_number != hb_node_magic_number )
     {
         return HB_FAILURE;
     }
 
-    if( _header->version_number != _version )
+    if( _header->version_number != hb_node_version_number )
     {
         return HB_FAILURE;
     }
@@ -30,14 +53,14 @@ static hb_result_t __hb_node_test_header_in( const hb_node_header_t * _header, u
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_node_test_header_out( const hb_node_header_t * _header, uint32_t _magic, uint32_t _version )
+static hb_result_t __hb_node_test_header_out( const hb_node_header_t * _header )
 {
-    if( _header->magic_number != ~_magic )
+    if( _header->magic_number != ~hb_node_magic_number )
     {
         return HB_FAILURE;
     }
 
-    if( _header->version_number != _version )
+    if( _header->version_number != hb_node_version_number )
     {
         return HB_FAILURE;
     }
@@ -61,14 +84,19 @@ hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemor
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
+hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_node_config_t * _config )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
     hb_node_header_t header;
-    __hb_node_create_header_in( &header, _magic, _version );
+    __hb_node_create_header_in( &header );
 
     if( hb_sharedmemory_write( _sharedmemory, &header, sizeof( header ) ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_write( _sharedmemory, _config, sizeof( hb_node_config_t ) ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -81,7 +109,7 @@ hb_result_t hb_node_write_in_data( hb_sharedmemory_handle_t * _sharedmemory, con
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
+hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, hb_node_config_t * _config, void * _data, size_t _capacity )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
@@ -91,12 +119,17 @@ hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void
         return HB_FAILURE;
     }
 
-    if( __hb_node_test_header_in( &header, _magic, _version ) == HB_FAILURE )
+    if( __hb_node_test_header_in( &header ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_sharedmemory_read( _sharedmemory, _data, _size, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_sharedmemory_read( _sharedmemory, _config, sizeof( hb_node_config_t ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_read( _sharedmemory, _data, _capacity, HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -104,19 +137,19 @@ hb_result_t hb_node_read_in_data( hb_sharedmemory_handle_t * _sharedmemory, void
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version )
+hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, const void * _data, size_t _size )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
     hb_node_header_t header;
-    __hb_node_create_header_out( &header, _magic, _version );
+    __hb_node_create_header_out( &header );
 
     if( hb_sharedmemory_write( _sharedmemory, &header, sizeof( header ) ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    uint32_t code = 0;
+    uint32_t code = e_node_ok;
 
     if( hb_sharedmemory_write( _sharedmemory, &code, sizeof( code ) ) == HB_FAILURE )
     {
@@ -131,7 +164,7 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, uint32_t _code, hb_magic_t _magic, hb_version_t _version )
+hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, hb_node_code_t _code )
 {
     if( _code == 0 )
     {
@@ -141,14 +174,15 @@ hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, 
     hb_sharedmemory_rewind( _sharedmemory );
 
     hb_node_header_t header;
-    __hb_node_create_header_out( &header, _magic, _version );
+    __hb_node_create_header_out( &header );
 
     if( hb_sharedmemory_write( _sharedmemory, &header, sizeof( header ) ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_sharedmemory_write( _sharedmemory, &_code, sizeof( _code ) ) == HB_FAILURE )
+    uint32_t u32_code = _code;
+    if( hb_sharedmemory_write( _sharedmemory, &u32_code, sizeof( u32_code ) ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -156,7 +190,7 @@ hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_magic_t _magic, hb_version_t _version, uint32_t * _code )
+hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_node_code_t * _code )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
@@ -166,15 +200,18 @@ hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, voi
         return HB_FAILURE;
     }
 
-    if( __hb_node_test_header_out( &header, _magic, _version ) == HB_FAILURE )
+    if( __hb_node_test_header_out( &header ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_sharedmemory_read( _sharedmemory, _code, sizeof( uint32_t ), HB_NULLPTR ) == HB_FAILURE )
+    uint32_t u32_code;
+    if( hb_sharedmemory_read( _sharedmemory, &u32_code, sizeof( u32_code ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
-    } 
+    }
+
+    *_code = u32_code;
 
     if( *_code != 0 )
     {

@@ -111,9 +111,14 @@ int main( int _argc, char * _argv[] )
 
         hb_sharedmemory_create( sharedmemory_name, 65536, &process_handle->sharedmemory );
 
-        strcpy( process_handle->db_uri, "mongodb://localhost:27017" );
-        strcpy( process_handle->cache_uri, "127.0.0.1" );
-        process_handle->cache_port = 6379;
+        strcpy( process_handle->config.db_uri, "127.0.0.1" );
+        process_handle->config.db_port = 27017;
+
+        strcpy( process_handle->config.cache_uri, "127.0.0.1" );
+        process_handle->config.cache_port = 6379;
+
+        strcpy( process_handle->config.log_uri, "127.0.0.1" );        
+        process_handle->config.log_port = 5044;
 
         hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread );
 

@@ -17,57 +17,32 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
-{    
-    const char * ls = hb_log_level_string[_level];
-
-    printf( "[%s] %s: %s\n", _category, ls, _message );
-}
+uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db;
 //////////////////////////////////////////////////////////////////////////
-int main( int _argc, char * _argv[] )
+hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 {
-    HB_UNUSED( _argc );
-    HB_UNUSED( _argv );
+    const hb_node_newproject_in_t * in_data = (const hb_node_newproject_in_t *)_data;
+    hb_node_newproject_out_t * out_data = (hb_node_newproject_out_t *)_out;
+    *_size = sizeof( hb_node_newproject_out_t );
+
+    HB_UNUSED( in_data );
 
     //MessageBox( NULL, "Test", "Test", MB_OK );
 
-    hb_log_initialize();
-    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
-
-    const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == HB_FAILURE )
+    hb_db_collection_handle_t db_collection_projects;
+    if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
-    }
-
-    hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_sharedmemory_open( sm_name, 65536, &sharedmemory_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_node_newproject_in_t in_data;
-    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( in_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_db_initialze( "hb_node_newproject", in_data.db_uri ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_db_collection_handle_t db_projects_handle;
-    if( hb_db_get_collection( "hb", "hb_projects", &db_projects_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
+        return HB_FAILURE;
     }
 
     hb_db_value_handle_t new_value[1];
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
     hb_oid_t project_oid;
-    hb_db_new_document( &db_projects_handle, new_value, 1, project_oid );
+    if( hb_db_new_document( &db_collection_projects, new_value, 1, project_oid ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_pid_t pid;
     uint32_t founds = 0;
@@ -79,20 +54,20 @@ int main( int _argc, char * _argv[] )
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );
 
-        hb_db_update_values( &db_projects_handle, project_oid, handles, 1 );
+        if( hb_db_update_values( &db_collection_projects, project_oid, handles, 1 ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
         
-        hb_db_count_values( &db_projects_handle, handles, 1, &founds );
+        if( hb_db_count_values( &db_collection_projects, handles, 1, &founds ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
     }
 
-    hb_db_finalize();
+    hb_db_destroy_collection( &db_collection_projects );
 
-    hb_node_newproject_out_t out_data;
-    out_data.pid = pid;
+    out_data->pid = pid;
 
-    hb_node_write_out_data( &sharedmemory_handle, &out_data, sizeof( out_data ), hb_node_newproject_magic_number, hb_node_newproject_version_number );
-    hb_sharedmemory_destroy( &sharedmemory_handle );
-
-    hb_log_finalize();
-
-    return EXIT_SUCCESS;
+    return HB_SUCCESSFUL;
 }

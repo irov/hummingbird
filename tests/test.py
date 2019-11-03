@@ -13,7 +13,7 @@ def post(url, **params):
     r = request.Request(url)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
-    response = request.urlopen(r, data)
+    response = request.urlopen(r, timeout=60, data=data)
     reader = codecs.getreader("utf-8")
     r = reader(response)
     j = json.load(r)
@@ -104,7 +104,7 @@ def upload(url, filename, **fields):
     r = request.Request(url, data=data)
     r.add_header('Content-type', form.get_content_type())
     r.add_header('Content-length', len(data))
-    response = request.urlopen(r)
+    response = request.urlopen(r, timeout=60)
     reader = codecs.getreader("utf-8")
     r = reader(response)
     j = json.load(r)
@@ -119,7 +119,7 @@ def api(url, token, method, **params):
     r.add_header('X-Method', method)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
-    response = request.urlopen(r, data)
+    response = request.urlopen(r, timeout=60, data=data)
     reader = codecs.getreader("utf-8")
     r = reader(response)
     j = json.load(r)
@@ -128,30 +128,27 @@ def api(url, token, method, **params):
    
 print("----newproject----")
 jnewproject = post("http://localhost:5555/newproject")
-print("newproject: ", jnewproject)
+print("response: ", jnewproject)
 pid = jnewproject["pid"]
 
 print("----upload---- pid: {0}".format(pid))
 jupload = upload("http://localhost:5555/upload", "server.lua", pid = pid)
-print("jupload: ", jupload)
+print("response: ", jupload)
 
 login = uuid.uuid4().hex
 password = "test"
 
-print("login: ", login)
-print("password: ", password)
-
 print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
 jnewuser = post("http://localhost:5555/newuser", pid = pid, login = login, password = password)
-print("jnewuser: ", jnewuser)
+print("response: ", jnewuser)
 
 print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
 jloginuser = post("http://localhost:5555/loginuser", pid = pid, login = login, password = password)
-print("jloginuser: ", jloginuser)
+print("response: ", jloginuser)
 
 token = jloginuser["token"]
 method = "test"
 data = dict(a=1, b=2, c="testc")
 print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
 japi = api("http://localhost:5555/api", token, method, **data)
-print("api: ", japi)
+print("response: ", japi)

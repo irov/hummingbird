@@ -5,7 +5,7 @@
 
 #include "hb_utils/hb_time.h"
 
-hb_result_t hb_db_initialze( const char * _name, const char * _uri );
+hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _port );
 void hb_db_finalize();
 
 typedef struct hb_db_collection_handle_t
@@ -81,16 +81,16 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, con
 hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _handles, uint32_t _count );
 void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count );
 
-hb_result_t hb_db_upload_file( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _buffer, size_t _size );
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
 
-typedef struct hb_db_file_handle_t
+typedef struct hb_db_script_handle_t
 {
     const void * handle;
-    size_t length;
-    const uint8_t * buffer;
-} hb_db_file_handle_t;
+    size_t script_code_length;
+    const uint8_t * script_code_buffer;
+} hb_db_script_handle_t;
 
-hb_result_t hb_db_load_file( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_file_handle_t * _handle );
-void hb_db_close_file( hb_db_file_handle_t * _handle );
+hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_script_handle_t * _handle );
+void hb_db_close_script( hb_db_script_handle_t * _handle );
 
 #endif

@@ -23,8 +23,8 @@ typedef struct hb_script_handle_t
     uint32_t call_used;
     uint32_t call_limit;
 
-    const hb_db_collection_handle_t * db_user_collection;
-    const hb_db_collection_handle_t * db_project_collection;
+    hb_db_collection_handle_t db_users_collection;
+    hb_db_collection_handle_t db_projects_collection;
 
     hb_oid_t user_oid;
     hb_oid_t project_oid;

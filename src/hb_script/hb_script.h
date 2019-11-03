@@ -5,8 +5,17 @@
 
 #include "hb_db/hb_db.h"
 
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_db_collection_handle_t * _ucollection, const hb_db_collection_handle_t * _pcollection, hb_oid_t _uuid, hb_oid_t _puid );
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uuid, const hb_oid_t _puid );
 void hb_script_finalize();
+
+typedef struct hb_script_stat_t
+{
+    size_t memory_used;
+    uint32_t call_used;
+
+}hb_script_stat_t;
+
+void hb_script_stat( hb_script_stat_t * _stat );
 
 hb_result_t hb_script_load( const void * _buffer, size_t _size );
 hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful );

@@ -66,17 +66,12 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     {
         hb_node_newuser_in_t in_data;
 
-        strcpy( in_data.cache_uri, handle->cache_uri );
-        in_data.cache_port = handle->cache_port;
-
-        strcpy( in_data.db_uri, handle->db_uri );
-
         hb_base16_decode( pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
         strcpy( in_data.login, login );
         strcpy( in_data.password, password );
 
-        if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), hb_node_newuser_magic_number, hb_node_newuser_version_number ) == HB_FAILURE )
+        if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == HB_FAILURE )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
@@ -98,15 +93,15 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
             return;
         }
 
-        uint32_t out_code;
-        if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), hb_node_newuser_magic_number, hb_node_newuser_version_number, &out_code ) == HB_FAILURE )
+        hb_node_code_t out_code;
+        if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
             return;
         }
 
-        if( out_code != 0 )
+        if( out_code != e_node_ok )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
@@ -117,11 +112,6 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
     {
         hb_node_api_in_t api_in_data;
 
-        strcpy( api_in_data.cache_uri, handle->cache_uri );
-        api_in_data.cache_port = handle->cache_port;
-
-        strcpy( api_in_data.db_uri, handle->db_uri );
-
         api_in_data.data_size = 0;
 
         hb_token_copy( api_in_data.token, out_data.token );
@@ -129,7 +119,7 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         api_in_data.category = e_hb_node_event;
         strcpy( api_in_data.method, "onCreateUser" );
 
-        hb_node_write_in_data( &handle->sharedmemory, &api_in_data, sizeof( api_in_data ), hb_node_api_magic_number, hb_node_api_version_number );
+        hb_node_write_in_data( &handle->sharedmemory, &api_in_data, sizeof( api_in_data ), &handle->config );
 
         hb_bool_t process_successful;
         if( hb_process_run( "hb_node_api.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
@@ -147,15 +137,15 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         }
 
         hb_node_api_out_t api_out_data;
-        uint32_t out_code;
-        if( hb_node_read_out_data( &handle->sharedmemory, &api_out_data, sizeof( api_out_data ), hb_node_api_magic_number, hb_node_api_version_number, &out_code ) == HB_FAILURE )
+        hb_node_code_t out_code;
+        if( hb_node_read_out_data( &handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code ) == HB_FAILURE )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
             return;
         }
 
-        if( out_code != 0 )
+        if( out_code != e_node_ok )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 

@@ -2,7 +2,7 @@
 #define HB_GRID_H_
 
 #include "hb_config/hb_config.h"
-
+#include "hb_node/hb_node.h"
 #include "hb_thread/hb_thread.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 
@@ -19,10 +19,7 @@ typedef struct hb_grid_process_handle_t
     hb_thread_handle_t thread;
     hb_sharedmemory_handle_t sharedmemory;
 
-    char db_uri[128];
-
-    char cache_uri[128];
-    uint16_t cache_port;
+    hb_node_config_t config;
 } hb_grid_process_handle_t;
 
 #endif

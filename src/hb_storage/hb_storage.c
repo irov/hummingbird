@@ -20,7 +20,7 @@ static hb_storage_settings_t * g_storage_settings;
 hb_result_t hb_storage_initialize()
 {
     hb_db_collection_handle_t db_collection;
-    if( hb_db_get_collection( "hb", "hb_files", &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -43,26 +43,25 @@ void hb_storage_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 )
+hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t _sha1 )
 {
-    size_t bound_size = hb_archive_bound( _size );
+    size_t bound_size = hb_archive_bound( _codesize );
 
     if( bound_size >= HB_DATA_MAX_SIZE )
     {
         return HB_FAILURE;
     }
 
-    size_t compressSize;
-
-    uint8_t buffer[HB_DATA_MAX_SIZE];
-    if( hb_archive_compress( buffer, HB_DATA_MAX_SIZE, _data, _size, &compressSize ) == HB_FAILURE )
+    size_t archive_script_code_size;
+    uint8_t archive_script_code_buffer[HB_DATA_MAX_SIZE];
+    if( hb_archive_compress( archive_script_code_buffer, HB_DATA_MAX_SIZE, _code, _codesize, &archive_script_code_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_sha1( buffer, compressSize, _sha1 );
+    hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
-    if( hb_db_upload_file( &g_storage_settings->db_collection, _sha1, buffer, compressSize ) == HB_FAILURE )
+    if( hb_db_upload_script( &g_storage_settings->db_collection, _sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -70,7 +69,7 @@ hb_result_t hb_storage_set( const void * _data, size_t _size, hb_sha1_t _sha1 )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacity, size_t * _size )
+hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _capacity, size_t * _size )
 {
     hb_result_t cache_available = hb_cache_available();
 
@@ -80,22 +79,22 @@ hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacit
         uint8_t cache_data[HB_DATA_MAX_SIZE];
         if( hb_cache_get_value( _sha1, 20, cache_data, HB_DATA_MAX_SIZE, &cache_data_size ) == HB_SUCCESSFUL )
         {
-            if( hb_archive_decompress( _data, _capacity, cache_data, cache_data_size, _size ) == HB_SUCCESSFUL )
+            if( hb_archive_decompress( _buffer, _capacity, cache_data, cache_data_size, _size ) == HB_SUCCESSFUL )
             {
                 return HB_SUCCESSFUL;
             }
         }
     }
 
-    hb_db_file_handle_t db_file_handle;
-    if( hb_db_load_file( &g_storage_settings->db_collection, _sha1, &db_file_handle ) == HB_FAILURE )
+    hb_db_script_handle_t db_script_handle;
+    if( hb_db_load_script( &g_storage_settings->db_collection, _sha1, &db_script_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     if( cache_available == HB_SUCCESSFUL )
     {
-        if( hb_cache_set_value( _sha1, 20, db_file_handle.buffer, db_file_handle.length ) == HB_FAILURE )
+        if( hb_cache_set_value( _sha1, 20, db_script_handle.script_code_buffer, db_script_handle.script_code_length ) == HB_FAILURE )
         {
             hb_log_message( "storage", HB_LOG_ERROR, "invalid cache value ['%.20s']"
                 , _sha1
@@ -103,12 +102,12 @@ hb_result_t hb_storage_get( const hb_sha1_t _sha1, void * _data, size_t _capacit
         }
     }
 
-    if( hb_archive_decompress( _data, _capacity, db_file_handle.buffer, db_file_handle.length, _size ) == HB_FAILURE )
+    if( hb_archive_decompress( _buffer, _capacity, db_script_handle.script_code_buffer, db_script_handle.script_code_length, _size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_db_close_file( &db_file_handle );
+    hb_db_close_script( &db_script_handle );
 
     return HB_SUCCESSFUL;
 }

@@ -18,141 +18,114 @@
 #include <Windows.h>
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
-{    
-    const char * ls = hb_log_level_string[_level];
-
-    printf( "[%s] %s: %s\n", _category, ls, _message );
-}
+uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db | e_hb_component_storage;
 //////////////////////////////////////////////////////////////////////////
-int main( int _argc, char * _argv[] )
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
 {
-    HB_UNUSED( _argc );
-    HB_UNUSED( _argv );
-
-    MessageBox( NULL, "Test", "Test", MB_OK );
-
-    hb_log_initialize();
-    hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer );
-
-    hb_sharedmemory_handle_t sharedmemory_handle;
-    if( hb_node_open_sharedmemory( _argc, _argv, &sharedmemory_handle ) == HB_FAILURE )
+    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token.uoid, _token.poid ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
+        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script" );
+
+        return HB_FAILURE;
     }
 
-    hb_node_api_in_t in_data;
-    if( hb_node_read_in_data( &sharedmemory_handle, &in_data, sizeof( in_data ), hb_node_api_magic_number, hb_node_api_version_number ) == HB_FAILURE )
+    hb_db_collection_handle_t db_collection_projects;
+    if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
-    }
+        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_projects'" );
 
-    if( hb_cache_initialize( in_data.cache_uri, in_data.cache_port, 5 ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_db_initialze( "hb_node_api", in_data.db_uri ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_storage_initialize() == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_token_handle_t token_handle;
-    if( hb_cache_get_value( in_data.token, sizeof( hb_token_t ), &token_handle, sizeof( hb_token_handle_t ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_cache_expire_value( in_data.token, sizeof( hb_token_t ), 1800 ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_db_collection_handle_t db_user_data_handle;
-    if( hb_db_get_collection( "hb", "hb_users", &db_user_data_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_db_collection_handle_t db_project_data_handle;
-    if( hb_db_get_collection( "hb", "hb_projects", &db_project_data_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, &db_user_data_handle, &db_project_data_handle, token_handle.uoid, token_handle.poid ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-
-    hb_db_collection_handle_t db_projects_handle;
-    if( hb_db_get_collection( "hb", "hb_projects", &db_projects_handle ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
+        return HB_FAILURE;
     }
 
     const char * db_projects_fields[] = { "script_sha1" };
 
     hb_db_value_handle_t db_script_sha1_handles[1];
-    if( hb_db_get_values( &db_projects_handle, token_handle.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
+    if( hb_db_get_values( &db_collection_projects, _token.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
+        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: collection 'hb_projects' not found 'script_sha1'" );
+
+        return HB_FAILURE;
+    }
+
+    if( db_script_sha1_handles[0].u.binary.length != sizeof( hb_sha1_t ) )
+    {
+        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid data 'script_sha1'" );
+
+        return HB_FAILURE;
     }
 
     hb_sha1_t script_sha1;
     memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, sizeof( hb_sha1_t ) );
 
     hb_db_destroy_values( db_script_sha1_handles, 1 );
+    hb_db_destroy_collection( &db_collection_projects );
 
     size_t script_data_size;
     hb_data_t script_data;
-    if( hb_storage_get( script_sha1, script_data, HB_DATA_MAX_SIZE, &script_data_size ) == HB_FAILURE )
+    if( hb_storage_get_code( script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
+        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid get data from storage" );
+
+        return HB_FAILURE;
     }
 
     if( hb_script_load( script_data, script_data_size ) == HB_FAILURE )
     {
-        return EXIT_FAILURE;
+        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid load data" );
+
+        return HB_FAILURE;
+    }    
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
+{
+    const hb_node_api_in_t * in_data = (const hb_node_api_in_t *)_data;
+    hb_node_api_out_t * out_data = (hb_node_api_out_t *)_out;
+    *_size = sizeof( hb_node_api_out_t );
+
+    //MessageBox( NULL, "Test", "Test", MB_OK );
+    
+    if( hb_cache_expire_value( in_data->token, sizeof( in_data->token ), 1800 ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
     }
 
-    hb_node_api_out_t out_data;
+    hb_token_handle_t token_handle;
+    if( hb_cache_get_value( in_data->token, sizeof( in_data->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-    switch( in_data.category )
+    if( __node_initialize_script( token_handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    switch( in_data->category )
     {
     case e_hb_node_api:
         {
-            if( hb_script_server_call( in_data.method, in_data.data, in_data.data_size, out_data.response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data.response_size, &out_data.successful ) == HB_FAILURE )
+            if( hb_script_server_call( in_data->method, in_data->data, in_data->data_size, out_data->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data->response_size, &out_data->successful ) == HB_FAILURE )
             {
-                return EXIT_FAILURE;
+                return HB_FAILURE;
             }
         }break;
     case e_hb_node_event:
         {
-            if( hb_script_event_call( in_data.method, in_data.data, in_data.data_size ) == HB_FAILURE )
+            if( hb_script_event_call( in_data->method, in_data->data, in_data->data_size ) == HB_FAILURE )
             {
-                return EXIT_FAILURE;
+                return HB_FAILURE;
             }
 
-            out_data.successful = HB_TRUE;
-            out_data.response_size = 0;
+            out_data->successful = HB_TRUE;
+            out_data->response_size = 0;
         }
     }
 
     hb_script_finalize();
-    hb_cache_finalize();
-    hb_storage_finalize();
-    hb_db_finalize();
-
-    hb_node_write_out_data( &sharedmemory_handle, &out_data, sizeof( out_data ), hb_node_api_magic_number, hb_node_api_version_number );
-    hb_sharedmemory_destroy( &sharedmemory_handle );
-
-    hb_log_finalize();
 
     return EXIT_SUCCESS;
 }

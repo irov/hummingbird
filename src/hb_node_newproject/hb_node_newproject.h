@@ -1,14 +1,11 @@
 #ifndef HB_NODE_NEWPROJECT_H_
 #define HB_NODE_NEWPROJECT_H_
 
-#include "hb_node/hb_node.h"
-
-static const hb_magic_t hb_node_newproject_magic_number = HB_MAGIC_NUMBER( 'N', 'N', 'P', 'J' );
-static const hb_version_t hb_node_newproject_version_number = 1;
+#include "hb_node_main/hb_node_main.h"
 
 typedef struct hb_node_newproject_in_t
 {
-    char db_uri[128];
+    uint8_t dummy;
 } hb_node_newproject_in_t;
 
 typedef struct hb_node_newproject_out_t
