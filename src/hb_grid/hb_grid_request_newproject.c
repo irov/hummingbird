@@ -68,5 +68,11 @@ void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
 
     evbuffer_add( output_buffer, response_data, response_data_size );
 
+    struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
+
+    evhttp_add_header( output_headers, "Access-Control-Allow-Origin", "*" );
+    evhttp_add_header( output_headers, "Access-Control-Allow-Headers", "*" );
+    evhttp_add_header( output_headers, "Access-Control-Allow-Methods", "POST" );
+
     evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 }
