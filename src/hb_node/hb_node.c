@@ -15,16 +15,15 @@ typedef uint32_t hb_version_t;
 #ifndef HB_MAGIC_NUMBER
 #define HB_MAGIC_NUMBER(A,B,C,D) ((A << 0) + (B << 8) + (C << 16) + (D << 24))
 #endif
-
+//////////////////////////////////////////////////////////////////////////
 static const uint32_t hb_node_magic_number = HB_MAGIC_NUMBER( 'N', 'O', 'D', 'E' );
 static const uint32_t hb_node_version_number = 1;
-
+//////////////////////////////////////////////////////////////////////////
 typedef struct hb_node_header_t
 {
     hb_magic_t magic_number;
     hb_version_t version_number;
 } hb_node_header_t;
-
 //////////////////////////////////////////////////////////////////////////
 static void __hb_node_create_header_in( hb_node_header_t * _header )
 {

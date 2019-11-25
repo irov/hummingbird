@@ -20,6 +20,8 @@ typedef struct hb_node_config_t
     char db_uri[128];
     uint16_t db_port;
 
+    char log_file[128];
+
     char log_uri[128];
     uint16_t log_port;
 } hb_node_config_t;

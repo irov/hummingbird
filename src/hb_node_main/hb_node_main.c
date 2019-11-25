@@ -1,6 +1,7 @@
 #include "hb_node_main.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_log_file/hb_log_file.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_db/hb_db.h"
@@ -45,6 +46,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    if( hb_log_file_initialize( config.log_file ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+    
     if( hb_log_tcp_initialize( config.log_uri, config.log_port ) == HB_FAILURE )
     {
         return EXIT_FAILURE;

@@ -76,6 +76,10 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     bufferevent_enable( bev_cnn, EV_WRITE );
     bufferevent_disable( bev_cnn, EV_READ );
 
+    g_log_tcp_handle = HB_NEW( hb_log_tcp_handle_t );
+    g_log_tcp_handle->base = base;
+    g_log_tcp_handle->bev_cnn = bev_cnn;    
+
     if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ERROR, &__hb_log_tcp_observer ) == HB_FAILURE )
     {
         bufferevent_free( bev_cnn );
@@ -83,10 +87,6 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 
         return HB_FAILURE;
     }
-
-    g_log_tcp_handle = HB_NEW( hb_log_tcp_handle_t );
-    g_log_tcp_handle->base = base;
-    g_log_tcp_handle->bev_cnn = bev_cnn;    
 
     return HB_SUCCESSFUL;
 }
