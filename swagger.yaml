@@ -71,7 +71,7 @@ paths:
       - application/json
       parameters:
       - in: body
-        name: body
+        name: data
         description: new user data
         schema:
           type: object
@@ -101,21 +101,22 @@ paths:
       consumes:
       - application/json
       parameters:
-      - name: pid
-        in: path
-        description: Project ID
-        required: true
-        type: string
-      - name: login
-        in: path
-        description: login
-        required: true
-        type: string
-      - name: password
-        in: path
-        description: password
-        required: true
-        type: string
+      - in: body
+        name: data
+        description: login user data
+        schema:
+          type: object
+          required:
+            - pid
+            - login
+            - password
+          properties:
+            pid:
+              type: string
+            login:
+              type: string
+            password:
+              type: string
       responses:
         200:
           description: successful operation
@@ -127,27 +128,27 @@ paths:
     post:
       tags:
       - api
-      summary: "call user api"
+      summary: call user api
       description: ""
       consumes:
       - application/json
       parameters:
-      - name: "X-Token"
-        in: "header"
+      - name: X-Token
+        in: header
         description: user token
         required: true
-        type: "string"
-      - name: "X-Method"
-        in: "header"
+        type: string
+      - name: X-Method
+        in: header
         description: api method
         required: true
-        type: "string"
-      - name: "data"
-        in: "body"
-        description: api method
+        type: string
+      - in: body
+        name: data
+        description: login user data
         required: true
         schema:
-          $ref: "#/definitions/API_data"        
+          type: object       
       responses:
         200:
           description: successful operation
