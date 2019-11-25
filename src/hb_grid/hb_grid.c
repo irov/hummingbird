@@ -49,7 +49,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     hb_grid_request_handle_t * handle = (hb_grid_request_handle_t *)_ud;
 
-    size_t response_data_size = 3;
+    size_t response_data_size = 2;
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
 
     strcpy( response_data, "{}" );

@@ -40,6 +40,13 @@ hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _ti
         return HB_FAILURE;
     }
 
+    if( redisEnableKeepAlive( c ) != REDIS_OK )
+    {
+        redisFree( c );
+
+        return HB_FAILURE;
+    }
+
     g_redis_context = c;
 
     return HB_SUCCESSFUL;
@@ -62,6 +69,16 @@ hb_result_t hb_cache_set_value(  const void * _key, size_t _keysize, const void 
     }
 
     redisReply * reply = redisCommand( g_redis_context, "SET %b %b", _key, _keysize, _value, _size );
+
+    if( reply == HB_NULLPTR )
+    {
+        hb_log_message( "cache", HB_LOG_ERROR, "redis command set with error: '%s'"
+            , g_redis_context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
@@ -75,6 +92,15 @@ hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _valu
     }
 
     redisReply * reply = redisCommand( g_redis_context, "GET %b", _key, _keysize );
+
+    if( reply == HB_NULLPTR )
+    {
+        hb_log_message( "cache", HB_LOG_ERROR, "redis command get with error: '%s'"
+            , g_redis_context->errstr
+        );
+
+        return HB_FAILURE;
+    }
 
     if( reply->type == REDIS_REPLY_NIL )
     {
@@ -111,6 +137,15 @@ hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t 
 
     redisReply * reply = redisCommand( g_redis_context, "INCRBY %b %" SCNu64, _key, _keysize, _increment );
 
+    if( reply == HB_NULLPTR )
+    {
+        hb_log_message( "cache", HB_LOG_ERROR, "redis command incrby with error: '%s'"
+            , g_redis_context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
     if( reply->type != REDIS_REPLY_INTEGER )
     {
         freeReplyObject( reply );
@@ -133,6 +168,16 @@ hb_result_t hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t 
     }
 
     redisReply * reply = redisCommand( g_redis_context, "EXPIRE %b %u", _key, _keysize, _seconds );
+
+    if( reply == HB_NULLPTR )
+    {
+        hb_log_message( "cache", HB_LOG_ERROR, "redis command expire with error: '%s'"
+            , g_redis_context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
