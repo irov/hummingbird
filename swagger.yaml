@@ -1,0 +1,203 @@
+swagger: "2.0"
+host: localhost:5555
+info:
+  description: This is a hummingbird server
+  version: "0.1.0"
+  title: Hummingbird
+  contact:
+    email: "irov13@mail.ru"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+tags:
+- name: newproject
+  description: projects
+- name: upload
+  description: upload
+- name: newuser
+  description: newuser
+- name: loginuser
+  description: login
+- name: api
+  description: api
+schemes:
+- http
+paths:
+  /newproject:
+    post:
+      tags:
+      - newproject
+      summary: create new project
+      consumes:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: "#/definitions/Project"
+        400:
+          description: invalid operation
+  /upload:
+    post:
+      tags:
+      - upload
+      summary: upload script to project
+      consumes:
+      - multipart/form-data
+      parameters:
+      - name: pid
+        in: formData
+        description: Project ID
+        required: true
+        type: string
+      - name: data
+        in: formData
+        description: file data
+        required: true
+        type: file
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: "#/definitions/Script"          
+        400:
+          description: invalid operation
+  /newuser:
+    post:
+      tags:
+      - newuser
+      summary: create new user project
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: new user data
+        schema:
+          type: object
+          required:
+            - pid
+            - login
+            - password
+          properties:
+            pid:
+              type: string
+            login:
+              type: string
+            password:
+              type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: invalid operation
+  /loginuser:
+    post:
+      tags:
+      - loginuser
+      summary: login user project
+      consumes:
+      - application/json
+      parameters:
+      - name: pid
+        in: path
+        description: Project ID
+        required: true
+        type: string
+      - name: login
+        in: path
+        description: login
+        required: true
+        type: string
+      - name: password
+        in: path
+        description: password
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: invalid operation
+  /api:
+    post:
+      tags:
+      - api
+      summary: "call user api"
+      description: ""
+      consumes:
+      - application/json
+      parameters:
+      - name: "X-Token"
+        in: "header"
+        description: user token
+        required: true
+        type: "string"
+      - name: "X-Method"
+        in: "header"
+        description: api method
+        required: true
+        type: "string"
+      - name: "data"
+        in: "body"
+        description: api method
+        required: true
+        schema:
+          $ref: "#/definitions/API_data"        
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: "#/definitions/API_call"          
+        400:
+          description: invalid operation
+definitions:
+  Project:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      pid:
+        type: "string"
+    xml:
+      name: "Project"
+  Script:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      revision:
+        type: "integer"
+        format: "int64"
+    xml:
+      name: "Script"      
+  User:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      token:
+        type: "string"
+    xml:
+      name: "User"
+  API_call:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      successful:
+        type: "boolean"
+      data:
+        type: "object"
+    xml:
+      name: "API"
+  API_data:
+    type: object
