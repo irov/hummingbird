@@ -9,6 +9,16 @@
 #include "evhttp.h"
 #include "event2/thread.h"
 
+struct hb_grid_process_handle_t;
+
+typedef int (*hb_grid_request_t)(struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size);
+
+typedef struct hb_grid_request_handle_t
+{
+    hb_grid_request_t request;
+    struct hb_grid_process_handle_t * process;
+} hb_grid_request_handle_t;
+
 typedef struct hb_grid_process_handle_t
 {
     char server_address[64];
@@ -20,6 +30,8 @@ typedef struct hb_grid_process_handle_t
     hb_sharedmemory_handle_t sharedmemory;
 
     hb_node_config_t config;
+
+    hb_grid_request_handle_t requests[8];
 } hb_grid_process_handle_t;
 
 #endif

@@ -9,35 +9,22 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
+int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
 {
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-
-    if( output_buffer == HB_NULLPTR )
-    {
-        return;
-    }
-
-    hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
-
     hb_node_upload_in_t in_data;
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
     if( hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_grid_get_request_params", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     size_t params_pid_size;
     const void * params_pid;
     if( hb_multipart_get_value( multipart_params, multipart_params_count, "pid", &params_pid, &params_pid_size ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_multipart_get_value", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_base16_decode( params_pid, params_pid_size, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
@@ -46,63 +33,48 @@ void hb_grid_request_upload( struct evhttp_request * _request, void * _ud )
     const void * params_data;
     if( hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_multipart_get_value", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     if( params_data_size > HB_DATA_MAX_SIZE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "params_data_size > HB_DATA_MAX_SIZE", HB_NULLPTR );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     memcpy( in_data.script_source, params_data, params_data_size );
     in_data.script_source_size = params_data_size;
 
-    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == 0 )
+    if( hb_node_write_in_data( &_handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == 0 )
     {
-        evhttp_send_reply( _request, HTTP_INTERNAL, "hb_node_write_in_data", HB_NULLPTR );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_upload.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( "hb_node_upload.exe", _handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_process_run", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     if( process_successful == HB_FALSE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "process_successful", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_node_upload_out_t out_data;
     hb_node_code_t out_code;
-    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+    if( hb_node_read_out_data( &_handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "hb_node_read_out_data", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     if( out_code != e_node_ok )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
-    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"revision\": %" SCNu64 "}", out_data.revision );
+    size_t response_data_size = sprintf( _response, "{\"code\": 0, \"revision\": %" SCNu64 "}", out_data.revision );
 
-    evbuffer_add( output_buffer, response_data, response_data_size );
+    *_size = response_data_size;
 
-    evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
+    return HTTP_OK;
 }

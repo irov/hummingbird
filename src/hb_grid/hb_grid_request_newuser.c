@@ -9,56 +9,37 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
-void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
+int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
 {
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-
-    if( output_buffer == HB_NULLPTR )
-    {
-        return;
-    }
-
-    hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
-
     size_t request_data_size;
     char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == 0 )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_json_handle_t json_handle;
     if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     const char * pid;
     if( hb_json_get_field_string( &json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
     
     const char * login;
     if( hb_json_get_field_string( &json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     const char * password;
     if( hb_json_get_field_string( &json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_node_newuser_out_t out_data;
@@ -71,41 +52,31 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         strcpy( in_data.login, login );
         strcpy( in_data.password, password );
 
-        if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == HB_FAILURE )
+        if( hb_node_write_in_data( &_handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         hb_bool_t process_successful;
-        if( hb_process_run( "hb_node_newuser.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
+        if( hb_process_run( "hb_node_newuser.exe", _handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         if( process_successful == HB_FALSE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         hb_node_code_t out_code;
-        if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+        if( hb_node_read_out_data( &_handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         if( out_code != e_node_ok )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
     }
 
@@ -119,37 +90,29 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         api_in_data.category = e_hb_node_event;
         strcpy( api_in_data.method, "onCreateUser" );
 
-        hb_node_write_in_data( &handle->sharedmemory, &api_in_data, sizeof( api_in_data ), &handle->config );
+        hb_node_write_in_data( &_handle->sharedmemory, &api_in_data, sizeof( api_in_data ), &_handle->config );
 
         hb_bool_t process_successful;
-        if( hb_process_run( "hb_node_api.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
+        if( hb_process_run( "hb_node_api.exe", _handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         if( process_successful == HB_FALSE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         hb_node_api_out_t api_out_data;
         hb_node_code_t out_code;
-        if( hb_node_read_out_data( &handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code ) == HB_FAILURE )
+        if( hb_node_read_out_data( &_handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code ) == HB_FAILURE )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
 
         if( out_code != e_node_ok )
         {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
+            return HTTP_BADREQUEST;
         }
     }
 
@@ -158,21 +121,19 @@ void hb_grid_request_newuser( struct evhttp_request * _request, void * _ud )
         hb_token16_t token16;
         hb_token_base16_encode( out_data.token, token16 );
 
-        char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"token\": \"%.*s\"}"
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\"}"
             , sizeof( token16 )
             , token16
         );
 
-        evbuffer_add( output_buffer, response_data, response_data_size );
+        *_size = response_data_size;
     }
     else
     {
-        char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        size_t response_data_size = sprintf( response_data, "{\"code\": 1}" );
+        size_t response_data_size = sprintf( _response, "{\"code\": 1}" );
 
-        evbuffer_add( output_buffer, response_data, response_data_size );
+        *_size = response_data_size;
     }
 
-    evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
+    return HTTP_OK;
 }
