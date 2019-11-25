@@ -60,7 +60,7 @@ void hb_free( void * _ptr );
 #endif
 
 #ifndef HB_MAX_PATH
-#define HB_MAX_PATH 250
+#define HB_MAX_PATH 260
 #endif
 
 #ifndef HB_GRID_REQUEST_DATA_MAX_SIZE

@@ -31,6 +31,9 @@ src
     
     hb_time.h
     hb_time.c
+
+    hb_date.h
+    hb_date.c
     
     hb_oid.h
     hb_oid.c

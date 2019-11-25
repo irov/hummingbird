@@ -2,11 +2,13 @@
 
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
+#include "hb_log_file/hb_log_file.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
 #include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_date.h"
 
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
@@ -159,6 +161,23 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    hb_date_t date;
+    hb_date( &date );
+
+    char logfile[HB_MAX_PATH];
+    sprintf( logfile, "hb_grid_log_%u_%u_%u_%u_%u_%u.log"
+        , date.year
+        , date.mon
+        , date.mday
+        , date.hour
+        , date.min
+        , date.sec );
+
+    if( hb_log_file_initialize( logfile ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
     evutil_socket_t ev_socket = -1;
@@ -181,6 +200,16 @@ int main( int _argc, char * _argv[] )
 
         strcpy( process_handle->config.cache_uri, "127.0.0.1" );
         process_handle->config.cache_port = 6379;
+
+        sprintf( process_handle->config.log_file, "hb_%s_log_%03u_%u_%u_%u_%u_%u_%u.log"
+            , id
+            , i
+            , date.year
+            , date.mon
+            , date.mday
+            , date.hour
+            , date.min
+            , date.sec );
 
         strcpy( process_handle->config.log_uri, "127.0.0.1" );        
         process_handle->config.log_port = 5044;
