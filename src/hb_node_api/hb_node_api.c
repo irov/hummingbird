@@ -15,8 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <Windows.h>
-
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db | e_hb_component_storage;
 //////////////////////////////////////////////////////////////////////////
@@ -85,8 +83,6 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     const hb_node_api_in_t * in_data = (const hb_node_api_in_t *)_data;
     hb_node_api_out_t * out_data = (hb_node_api_out_t *)_out;
     *_size = sizeof( hb_node_api_out_t );
-
-    //MessageBox( NULL, "Test", "Test", MB_OK );
     
     if( hb_cache_expire_value( in_data->token, sizeof( in_data->token ), 1800 ) == HB_FAILURE )
     {

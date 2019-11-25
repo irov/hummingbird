@@ -15,8 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <Windows.h>
-
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db;
 //////////////////////////////////////////////////////////////////////////
@@ -25,8 +23,6 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     const hb_node_newuser_in_t * in_data = (const hb_node_newuser_in_t *)_data;
     hb_node_newuser_out_t * out_data = (hb_node_newuser_out_t *)_out;
     *_size = sizeof( hb_node_newuser_out_t );
-
-    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_db_collection_handle_t db_collection_projects;
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )

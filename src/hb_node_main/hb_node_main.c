@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <Windows.h>
-
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
 {
@@ -23,8 +21,6 @@ static void __hb_log_observer( const char * _category, hb_log_level_e _level, co
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
 {
-    //MessageBox( NULL, "Test", "Test", MB_OK );
-
     if( hb_log_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
