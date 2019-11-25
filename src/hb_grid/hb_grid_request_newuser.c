@@ -80,6 +80,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
         }
     }
 
+    if( out_data.exist == HB_FALSE )
     {
         hb_node_api_in_t api_in_data;
 
@@ -116,7 +117,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
         }
     }
 
-    if( out_data.exist == 0 )
+    if( out_data.exist == HB_FALSE )
     {
         hb_token16_t token16;
         hb_token_base16_encode( out_data.token, token16 );

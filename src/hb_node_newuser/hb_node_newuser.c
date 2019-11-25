@@ -69,10 +69,14 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_bool_t authentication_exist;
     if( hb_db_find_oid( &db_collection_users, authentication_handles, 2, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
-        return HB_FAILURE;
+        hb_db_destroy_collection( &db_collection_users );
+
+        out_data->exist = HB_FALSE;
+
+        return HB_SUCCESSFUL;
     }
 
-    out_data->exist = authentication_exist;
+    out_data->exist = HB_TRUE;
 
     if( authentication_exist == HB_FALSE )
     {
