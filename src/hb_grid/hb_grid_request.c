@@ -43,9 +43,6 @@ hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multip
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
 {
-    enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
-    HB_UNUSED( command_type );
-
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
 
     size_t multipart_length = evbuffer_get_length( input_buffer );
