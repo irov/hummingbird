@@ -16,11 +16,41 @@ static void __hb_log_observer( const char * _category, hb_log_level_e _level, co
     printf( "[%s] %s: %s\n", _category, ls, _message );
 }
 //////////////////////////////////////////////////////////////////////////
-extern void hb_grid_request_api( struct evhttp_request *, void * );
-extern void hb_grid_request_upload( struct evhttp_request *, void * );
-extern void hb_grid_request_newproject( struct evhttp_request *, void * );
-extern void hb_grid_request_newuser( struct evhttp_request *, void * );
-extern void hb_grid_request_loginuser( struct evhttp_request *, void * );
+extern int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+////////////////////////////////////////////////////////////////////////
+static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
+{
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
+
+    if( output_buffer == HB_NULLPTR )
+    {
+        return;
+    }
+
+    hb_grid_request_handle_t * handle = (hb_grid_request_handle_t *)_ud;
+
+    size_t response_data_size = 3;
+    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+
+    strcpy( response_data, "{}" );
+
+    int32_t code = (*handle->request)(_request, handle->process, response_data, &response_data_size);
+
+    evbuffer_add( output_buffer, response_data, response_data_size );
+
+    struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
+
+    evhttp_add_header( output_headers, "Access-Control-Allow-Origin", "*" );
+    evhttp_add_header( output_headers, "Access-Control-Allow-Headers", "*" );
+    evhttp_add_header( output_headers, "Access-Control-Allow-Methods", "POST" );
+    evhttp_add_header( output_headers, "Content-Type", "application/json" );
+
+    evhttp_send_reply( _request, code, "", output_buffer );
+}
 //////////////////////////////////////////////////////////////////////////
 static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 {
@@ -34,11 +64,28 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
     struct evhttp * http_server = evhttp_new( base );
     HB_UNUSED( http_server );
 
-    evhttp_set_cb( http_server, "/api", &hb_grid_request_api, handle );
-    evhttp_set_cb( http_server, "/upload", &hb_grid_request_upload, handle );
-    evhttp_set_cb( http_server, "/newproject", &hb_grid_request_newproject, handle );
-    evhttp_set_cb( http_server, "/newuser", &hb_grid_request_newuser, handle );
-    evhttp_set_cb( http_server, "/loginuser", &hb_grid_request_loginuser, handle );
+    evhttp_set_allowed_methods( http_server, EVHTTP_REQ_POST | EVHTTP_REQ_OPTIONS );
+
+    handle->requests[0].request = &hb_grid_request_api;
+    handle->requests[0].process = handle;
+
+    handle->requests[1].request = &hb_grid_request_upload;
+    handle->requests[1].process = handle;
+
+    handle->requests[2].request = &hb_grid_request_newproject;
+    handle->requests[2].process = handle;
+
+    handle->requests[3].request = &hb_grid_request_newuser;
+    handle->requests[3].process = handle;
+
+    handle->requests[4].request = &hb_grid_request_loginuser;
+    handle->requests[4].process = handle;
+
+    evhttp_set_cb( http_server, "/api", &__hb_grid_request, handle->requests + 0 );
+    evhttp_set_cb( http_server, "/upload", &__hb_grid_request, handle->requests + 1 );
+    evhttp_set_cb( http_server, "/newproject", &__hb_grid_request, handle->requests + 2 );
+    evhttp_set_cb( http_server, "/newuser", &__hb_grid_request, handle->requests + 3 );
+    evhttp_set_cb( http_server, "/loginuser", &__hb_grid_request, handle->requests + 4 );
 
     if( *handle->ev_socket == -1 )
     {
@@ -74,6 +121,8 @@ int main( int _argc, char * _argv[] )
     const char * id;
     if( hb_getopt( _argc, _argv, "--id", &id ) == 0 )
     {
+        hb_log_message( "grid", HB_LOG_CRITICAL, "run without id [miss --id argument]" );
+
         return EXIT_FAILURE;
     }    
 

@@ -6,73 +6,49 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
-void hb_grid_request_newproject( struct evhttp_request * _request, void * _ud )
+int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
 {
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
-
-    if( output_buffer == HB_NULLPTR )
-    {
-        return;
-    }
-
-    hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
+    HB_UNUSED( _request );
 
     hb_node_newproject_in_t in_data;
 
-    if( hb_node_write_in_data( &handle->sharedmemory, &in_data, sizeof( in_data ), &handle->config ) == HB_FAILURE )
+    if( hb_node_write_in_data( &_handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_newproject.exe", handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( "hb_node_newproject.exe", _handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     if( process_successful == HB_FALSE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_node_newproject_out_t out_data;
     hb_node_code_t out_code;
-    if( hb_node_read_out_data( &handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+    if( hb_node_read_out_data( &_handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     if( out_code != e_node_ok )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-        return;
+        return HTTP_BADREQUEST;
     }
 
     hb_pid16_t pid16;
     hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16, sizeof( pid16 ), HB_NULLPTR );
 
-    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_data_size = sprintf( response_data, "{\"code\": 0, \"pid\": \"%.*s\"}"
+    size_t response_data_size = sprintf( _response, "{\"code\": 0, \"pid\": \"%.*s\"}"
         , sizeof( pid16 )
         , pid16
     );
 
-    evbuffer_add( output_buffer, response_data, response_data_size );
+    *_size = response_data_size;
 
-    struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
-
-    evhttp_add_header( output_headers, "Access-Control-Allow-Origin", "*" );
-    evhttp_add_header( output_headers, "Access-Control-Allow-Headers", "*" );
-    evhttp_add_header( output_headers, "Access-Control-Allow-Methods", "POST" );
-
-    evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
+    return HTTP_OK;
 }
