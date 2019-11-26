@@ -112,7 +112,7 @@ static void __hb_log_message_args( const char * _category, hb_log_level_e _level
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_log_message( const char * _category, int _level, const char * _format, ... )
+void hb_log_message( const char * _category, hb_log_level_e _level, const char * _format, ... )
 {
     va_list args;
     va_start( args, _format );
