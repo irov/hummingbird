@@ -2,6 +2,7 @@
 #define HB_CONFIG_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef uint32_t hb_bool_t;
 
