@@ -1,12 +1,6 @@
 #include "hb_sharedmemory.h"
 
-#define WIN32_LEAN_AND_MEAN
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
-#include <Windows.h>
+#include "hb_platform/hb_platform_windows.h"
 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
