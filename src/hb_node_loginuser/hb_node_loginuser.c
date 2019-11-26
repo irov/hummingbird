@@ -27,7 +27,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     //MessageBox( NULL, "Test", "Test", MB_OK );
 
-    hb_db_collection_handle_t db_collection_projects;
+    hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
 
     hb_db_value_handle_t project_handles[1];
@@ -35,19 +35,19 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     hb_oid_t project_oid;
     hb_bool_t project_exist;
-    if( hb_db_find_oid( &db_collection_projects, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_projects, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_db_destroy_collection( &db_collection_projects );
+    hb_db_destroy_collection( db_collection_projects );
 
     if( project_exist == HB_FALSE )
     {
         return HB_FAILURE;
     }
 
-    hb_db_collection_handle_t db_collection_users;
+    hb_db_collection_handle_t * db_collection_users;
     if( hb_db_get_collection( "hb", "hb_users", &db_collection_users ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -69,12 +69,12 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( &db_collection_users, authentication_handles, 3, authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_users, authentication_handles, 3, authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_db_destroy_collection( &db_collection_users );
+    hb_db_destroy_collection( db_collection_users );
 
     out_data->exist = authentication_exist;
 

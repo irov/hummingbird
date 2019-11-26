@@ -8,6 +8,7 @@
 #include "hb_utils/hb_getopt.h"
 
 #include <memory.h>
+#include <stdio.h>
 
 typedef uint32_t hb_magic_t;
 typedef uint32_t hb_version_t;
@@ -67,15 +68,21 @@ static hb_result_t __hb_node_test_header_out( const hb_node_header_t * _header )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemory_handle_t * _sharedmemory )
+hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemory_handle_t ** _sharedmemory )
 {
-    const char * sm_name;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_name ) == 0 )
+    const char * sm_id;
+    if( hb_getopt( _argc, _argv, "--sm", &sm_id ) == 0 )
     {
         return HB_FAILURE;
     }
 
-    if( hb_sharedmemory_open( sm_name, HB_SHAREDMEMORY_SIZE, _sharedmemory ) == HB_FAILURE )
+    uint32_t id;
+    if( sscanf( sm_id, "%u", &id ) == 0 )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_open( id, HB_SHAREDMEMORY_SIZE, _sharedmemory ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

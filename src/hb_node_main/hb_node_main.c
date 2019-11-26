@@ -32,7 +32,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_sharedmemory_handle_t sharedmemory_handle;
+    hb_sharedmemory_handle_t * sharedmemory_handle;
     if( hb_node_open_sharedmemory( _argc, _argv, &sharedmemory_handle ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -41,7 +41,7 @@ int main( int _argc, char * _argv[] )
     hb_node_config_t config;
 
     uint8_t in_data[20480];
-    if( hb_node_read_in_data( &sharedmemory_handle, &config, &in_data, sizeof( in_data ) ) == HB_FAILURE )
+    if( hb_node_read_in_data( sharedmemory_handle, &config, &in_data, sizeof( in_data ) ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -68,7 +68,7 @@ int main( int _argc, char * _argv[] )
                 , config.cache_port
             );
 
-            hb_node_write_error_data( &sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
 
             return EXIT_SUCCESS;
         }
@@ -84,7 +84,7 @@ int main( int _argc, char * _argv[] )
                 , config.db_port
             );
 
-            hb_node_write_error_data( &sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
 
             return EXIT_SUCCESS;
         }
@@ -98,7 +98,7 @@ int main( int _argc, char * _argv[] )
                 , config.name
             );
 
-            hb_node_write_error_data( &sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
 
             return EXIT_SUCCESS;
         }
@@ -109,8 +109,8 @@ int main( int _argc, char * _argv[] )
 
     hb_node_process( in_data, out_data, &out_data_size );
 
-    hb_node_write_out_data( &sharedmemory_handle, out_data, out_data_size );
-    hb_sharedmemory_destroy( &sharedmemory_handle );
+    hb_node_write_out_data( sharedmemory_handle, out_data, out_data_size );
+    hb_sharedmemory_destroy( sharedmemory_handle );
 
     if( components & e_hb_component_storage )
     {

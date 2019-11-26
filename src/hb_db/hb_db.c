@@ -7,6 +7,11 @@
 #include "mongoc/mongoc.h"
 
 //////////////////////////////////////////////////////////////////////////
+typedef struct hb_db_collection_handle_t
+{
+    mongoc_collection_t * collection;
+} hb_db_collection_handle_t;
+//////////////////////////////////////////////////////////////////////////
 mongoc_client_t * g_mongo_client = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _port )
@@ -52,25 +57,31 @@ void hb_db_finalize()
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t * _collection )
+hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t ** _handle )
 {
     mongoc_collection_t * collection = mongoc_client_get_collection( g_mongo_client, _db, _name );
 
-    _collection->handle = collection;
+    hb_db_collection_handle_t * handle = HB_NEW( hb_db_collection_handle_t );
+
+    handle->collection = collection;
+
+    *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_destroy_collection( const hb_db_collection_handle_t * _collection )
+void hb_db_destroy_collection( hb_db_collection_handle_t * _handle )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     mongoc_collection_destroy( mongo_collection );
+
+    HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire )
+hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _handle, const char * _field, uint32_t _expire )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     mongoc_index_opt_t opt;
     mongoc_index_opt_init( &opt );
@@ -143,9 +154,9 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_hand
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handle, uint32_t _count, hb_oid_t _newoid )
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t _newoid )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_oid_t oid;
     bson_oid_init( &oid, HB_NULLPTR );
@@ -155,7 +166,7 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
 
     BSON_APPEND_OID( &query, "_id", &oid );
 
-    __hb_db_append_values( &query, _handle, _count );
+    __hb_db_append_values( &query, _values, _count );
 
     bson_error_t error;
     if( mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error ) == false )
@@ -226,9 +237,9 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t query;
     bson_init( &query );
@@ -281,9 +292,9 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _handles, uint32_t _count, uint32_t * _founds )
+hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, uint32_t * _founds )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t filter;
     bson_init( &filter );
@@ -305,18 +316,18 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _collection, c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _handles )
 {
     const char ** fields = &_field;
 
-    hb_result_t result = hb_db_get_values( _collection, _oid, fields, 1, _handles );
+    hb_result_t result = hb_db_get_values( _handle, _oid, fields, 1, _handles );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_oid_t oid;
     bson_oid_init_from_data( &oid, _oid );
@@ -444,9 +455,9 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, con
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _handles, uint32_t _count )
+hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const hb_db_value_handle_t * _handles, uint32_t _count )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_oid_t oid;
     bson_oid_init_from_data( &oid, _oid );
@@ -494,9 +505,9 @@ void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t query;
     bson_init( &query );
@@ -543,9 +554,16 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_script_handle_t * _handle )
+typedef struct hb_db_script_handle_t
 {
-    mongoc_collection_t * mongo_collection = (mongoc_collection_t *)_collection->handle;
+    mongoc_cursor_t * cursor;
+    const uint8_t * buffer;
+    size_t size;    
+} hb_db_script_handle_t;
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const uint8_t * _sha1, hb_db_script_handle_t ** _script )
+{
+    mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t query;
     bson_init( &query );
@@ -585,17 +603,32 @@ hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, co
         return HB_FAILURE;
     }
 
-    _handle->handle = cursor;
-    _handle->script_code_length = script_code_length;
-    _handle->script_code_buffer = script_code_buffer;
+    hb_db_script_handle_t * script = HB_NEW( hb_db_script_handle_t );
+
+    script->cursor = cursor;
+    script->size = script_code_length;
+    script->buffer = script_code_buffer;
+
+    *_script = script;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_close_script( hb_db_script_handle_t * _handle )
+const uint8_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size )
 {
-    mongoc_cursor_t * cursor = (mongoc_cursor_t *)_handle->handle;
+    *_size = _script->size;
+
+    const uint8_t * buffer = _script->buffer;
+
+    return buffer;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_db_close_script( hb_db_script_handle_t * _script )
+{
+    mongoc_cursor_t * cursor = _script->cursor;
 
     mongoc_cursor_destroy( cursor );
+
+    HB_DELETE( _script );
 }
 //////////////////////////////////////////////////////////////////////////

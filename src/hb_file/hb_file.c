@@ -7,10 +7,18 @@
 #include <sys/stat.h>
 #include <direct.h>
 
+//////////////////////////////////////////////////////////////////////////
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
+//////////////////////////////////////////////////////////////////////////
+typedef struct hb_file_handle_t
+{
+    char path[HB_MAX_PATH];
+    FILE * f;
+    size_t length;
 
+} hb_file_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_file_settings_t
 {
@@ -67,7 +75,7 @@ hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
     }
 
     strcpy( _handle->path, _path );
-    _handle->handle = f;
+    _handle->f = f;
 
     fseek( f, 0L, SEEK_END );
     long sz = ftell( f );
@@ -118,7 +126,7 @@ hb_result_t hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
     }
 
     strcpy( _handle->path, _path );
-    _handle->handle = f;
+    _handle->f = f;
     _handle->length = 0;
 
     return HB_SUCCESSFUL;
@@ -126,7 +134,7 @@ hb_result_t hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _capacity )
 {
-    FILE * f = (FILE *)_handle->handle;
+    FILE * f = (FILE *)_handle->f;
     size_t sz = _handle->length;
 
     if( sz == 0 )
@@ -151,7 +159,7 @@ hb_result_t hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _ca
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _size )
 {
-    FILE * f = (FILE *)_handle->handle;
+    FILE * f = (FILE *)_handle->f;
 
     size_t r = fwrite( _buffer, _size, 1, f );
 
@@ -165,7 +173,7 @@ hb_result_t hb_file_write( hb_file_handle_t * _handle, const void * _buffer, siz
 //////////////////////////////////////////////////////////////////////////
 void hb_file_close( hb_file_handle_t * _handle )
 {
-    FILE * f = (FILE *)_handle->handle;
+    FILE * f = (FILE *)_handle->f;
 
     int res = fclose( f );
 

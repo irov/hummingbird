@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_process_run( const char * _name, const char * _sharedmemory, hb_bool_t * _successful )
+hb_result_t hb_process_run( const char * _name, hb_sharedmemory_handle_t * _handle, hb_bool_t * _successful )
 {
     wchar_t unicode_name[MAX_PATH] = {'\0'};
 
@@ -22,9 +22,11 @@ hb_result_t hb_process_run( const char * _name, const char * _sharedmemory, hb_b
 
     unicode_name[unicode_name_size] = L'\0';
 
+    uint32_t sharedmemory_id = hb_sharedmemory_get_id( _handle );
+
     char command[64];
-    int command_size = sprintf( command, "--sm %s"
-        , _sharedmemory
+    int command_size = sprintf( command, "--sm %u"
+        , sharedmemory_id
     );
 
     wchar_t unicode_command[2048] = {L" "};

@@ -184,8 +184,8 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
-    hb_db_destroy_collection( &g_script_handle->db_users_collection );
-    hb_db_destroy_collection( &g_script_handle->db_projects_collection );
+    hb_db_destroy_collection( g_script_handle->db_users_collection );
+    hb_db_destroy_collection( g_script_handle->db_projects_collection );
 
     hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
     hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
