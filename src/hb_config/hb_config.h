@@ -15,8 +15,9 @@ static const hb_bool_t HB_FALSE = 0;
 
 typedef enum hb_result_e
 {
-    HB_FAILURE,
     HB_SUCCESSFUL,
+    HB_FAILURE,
+    HB_RESULT_NOT_FOUND,
 } hb_result_e;
 
 typedef hb_result_e hb_result_t;

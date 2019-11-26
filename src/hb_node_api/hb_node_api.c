@@ -104,10 +104,21 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     {
     case e_hb_node_api:
         {
-            if( hb_script_server_call( in_data->method, in_data->data, in_data->data_size, out_data->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data->response_size, &out_data->successful ) == HB_FAILURE )
+            hb_result_t result = hb_script_server_call( in_data->method, in_data->data, in_data->data_size, out_data->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data->response_size, &out_data->successful );
+
+            if( result == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
+
+            if( result == HB_RESULT_NOT_FOUND )
+            {
+                out_data->response_size = 0;
+                out_data->successful = HB_FALSE;
+                out_data->method_found = HB_FALSE;
+            }
+
+            out_data->method_found = HB_TRUE;
         }break;
     case e_hb_node_event:
         {
@@ -118,8 +129,15 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
             out_data->successful = HB_TRUE;
             out_data->response_size = 0;
+            out_data->method_found = HB_TRUE;
         }
     }
+
+    hb_script_stat_t stat;
+    hb_script_stat( &stat );
+
+    out_data->memory_used = stat.memory_used;
+    out_data->call_used = stat.call_used;
 
     hb_script_finalize();
 

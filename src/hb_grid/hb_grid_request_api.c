@@ -60,13 +60,25 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": %u, \"data\": %.*s}"
-        , out_data.successful
-        , out_data.response_size
-        , out_data.response_data
-    );
+    if( out_data.successful == HB_TRUE )
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": true, \"data\": %.*s, \"stat\": {\"memory_used\":%u, \"call_used\":%u}}"
+            , out_data.response_size
+            , out_data.response_data
+            , out_data.memory_used
+            , out_data.call_used
+        );
 
-    *_size = response_data_size;
+        *_size = response_data_size;
+    }
+    else
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": false, \"method_found\": %s}"
+            , out_data.method_found == HB_TRUE ? "true" : "false"
+        );
+
+        *_size = response_data_size;
+    }
 
     return HTTP_OK;
 }

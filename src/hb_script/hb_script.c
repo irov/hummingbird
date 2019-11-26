@@ -263,7 +263,7 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
 
     if( lua_getfield( L, -1, _method ) != LUA_TFUNCTION )
     {
-        return HB_FAILURE;
+        return HB_RESULT_NOT_FOUND;
     }
 
     if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
