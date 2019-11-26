@@ -8,7 +8,6 @@
 #include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_sha1.h"
-#include "hb_utils/hb_time.h"
 #include "hb_utils/hb_oid.h"
 
 #include "hb_platform/hb_platform_windows.h"
