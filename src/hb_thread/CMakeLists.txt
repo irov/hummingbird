@@ -1,15 +1,15 @@
 PROJECT(hb_thread C)
 
 IF(WIN32)
-    SET(PLATFORM_SOURCES hb_thread_win32.c)
+    SET(hb_thread_platform hb_thread_win32.c)
 ELSEIF(UNIX)
-    SET(PLATFORM_SOURCES hb_thread_unix.c)
+    SET(hb_thread_platform hb_thread_unix.c)
 ENDIF()
 
 ADD_FILTER(
 src
 	hb_thread.h
-	${PLATFORM_SOURCES}
+	${hb_thread_platform}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

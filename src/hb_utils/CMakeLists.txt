@@ -1,5 +1,12 @@
 PROJECT(hb_utils C)
 
+IF(WIN32)
+    SET(hb_time_platform hb_time_win32.c)
+ELSEIF(UNIX)
+    SET(hb_time_platform hb_time_unix.c)
+ENDIF()
+
+
 ADD_FILTER(
 src
 	hb_sha1.h
@@ -30,7 +37,7 @@ src
 	hb_strstre.c
     
     hb_time.h
-    hb_time.c
+    ${hb_time_platform}
 
     hb_date.h
     hb_date.c
