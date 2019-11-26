@@ -24,9 +24,13 @@ typedef struct hb_node_api_in_t
 typedef struct hb_node_api_out_t
 {
     hb_bool_t successful;
+    hb_bool_t method_found;
 
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     size_t response_size;
+
+    size_t memory_used;
+    uint32_t call_used;
 
 } hb_node_api_out_t;
 
