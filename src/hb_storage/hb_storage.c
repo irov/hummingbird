@@ -71,9 +71,9 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _capacity, size_t * _size )
 {
-    hb_result_t cache_available = hb_cache_available();
+    hb_bool_t cache_available = hb_cache_available();
 
-    if( cache_available == HB_SUCCESSFUL )
+    if( cache_available == HB_TRUE )
     {
         size_t cache_data_size;
         uint8_t cache_data[HB_DATA_MAX_SIZE];
@@ -95,7 +95,7 @@ hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _
     size_t script_data_size;
     const uint8_t * script_data_buffer = hb_db_get_script_data( db_script_data, &script_data_size );
 
-    if( cache_available == HB_SUCCESSFUL )
+    if( cache_available == HB_TRUE )
     {
         if( hb_cache_set_value( _sha1, 20, script_data_buffer, script_data_size ) == HB_FAILURE )
         {

@@ -42,19 +42,19 @@ void hb_file_finalize()
     g_file_settings = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_file_available()
+hb_bool_t hb_file_available()
 {
     if( g_file_settings == HB_NULLPTR )
     {
-        return HB_FAILURE;
+        return HB_FALSE;
     }
 
     if( g_file_settings->folder[0] == '\0' )
     {
-        return HB_FAILURE;
+        return HB_FALSE;
     }
 
-    return HB_SUCCESSFUL;
+    return HB_TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle )

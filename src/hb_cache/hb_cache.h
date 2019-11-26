@@ -3,7 +3,7 @@
 
 #include "hb_config/hb_config.h"
 
-hb_result_t hb_cache_available();
+hb_bool_t hb_cache_available();
 
 hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout );
 void hb_cache_finalize();

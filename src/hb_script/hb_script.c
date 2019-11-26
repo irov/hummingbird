@@ -248,11 +248,13 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful )
+hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_e * _code )
 {
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
+
+        *_code = HB_ERROR_INTERNAL;
 
         return HB_FAILURE;
     }
@@ -263,11 +265,15 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
 
     if( lua_getfield( L, -1, _method ) != LUA_TFUNCTION )
     {
-        return HB_RESULT_NOT_FOUND;
+        *_code = HB_ERROR_NOT_FOUND;
+
+        return HB_FAILURE;
     }
 
     if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
     {
+        *_code = HB_ERROR_INTERNAL;
+
         return HB_FAILURE;
     }
 
@@ -283,6 +289,8 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
             , _data
             , error_msg
         );
+
+        *_code = HB_ERROR_INTERNAL;
 
         return HB_FAILURE;
     }

@@ -8,7 +8,7 @@ typedef struct hb_file_handle_t hb_file_handle_t;
 hb_result_t hb_file_initialize( const char * _folder );
 void hb_file_finalize();
 
-hb_result_t hb_file_available();
+hb_bool_t hb_file_available();
 
 hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle );
 hb_result_t hb_file_open_write( const char * _path, hb_file_handle_t * _handle );

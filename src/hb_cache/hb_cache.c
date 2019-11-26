@@ -17,14 +17,14 @@
 //////////////////////////////////////////////////////////////////////////
 redisContext * g_redis_context = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_available()
+hb_bool_t hb_cache_available()
 {
     if( g_redis_context == HB_NULLPTR )
     {
-        return HB_FAILURE;
+        return HB_FALSE;
     }
 
-    return HB_SUCCESSFUL;
+    return HB_TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout )

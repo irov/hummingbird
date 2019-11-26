@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <Windows.h>
+
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
 {
@@ -22,6 +24,8 @@ static void __hb_log_observer( const char * _category, hb_log_level_e _level, co
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
 {
+    MessageBoxA( NULL, "gdfg", "fsd", MB_OK );
+
     if( hb_log_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -41,7 +45,7 @@ int main( int _argc, char * _argv[] )
     hb_node_config_t config;
 
     uint8_t in_data[20480];
-    if( hb_node_read_in_data( sharedmemory_handle, &config, &in_data, sizeof( in_data ) ) == HB_FAILURE )
+    if( hb_node_read_in_data( sharedmemory_handle, &config, in_data, sizeof( in_data ) ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }

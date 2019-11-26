@@ -90,6 +90,8 @@ hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb
         return HB_FAILURE;
     }
 
+    json_incref( jvalue );
+
     hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
     handle->jroot = jvalue;
 

@@ -71,13 +71,13 @@ static hb_result_t __hb_node_test_header_out( const hb_node_header_t * _header )
 hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemory_handle_t ** _sharedmemory )
 {
     const char * sm_id;
-    if( hb_getopt( _argc, _argv, "--sm", &sm_id ) == 0 )
+    if( hb_getopt( _argc, _argv, "--sm", &sm_id ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     uint32_t id;
-    if( sscanf( sm_id, "%u", &id ) == 0 )
+    if( sscanf( sm_id, "%u", &id ) != 1 )
     {
         return HB_FAILURE;
     }
@@ -172,7 +172,7 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, hb_node_code_t _code )
 {
-    if( _code == 0 )
+    if( _code == e_node_ok )
     {
         return HB_FAILURE;
     }

@@ -11,7 +11,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
     hb_node_api_in_t in_data;
 
     const char * token;
-    if( hb_grid_get_request_header( _request, "X-Token", &token ) == 0 )
+    if( hb_grid_get_request_header( _request, "X-Token", &token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -19,7 +19,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
     hb_token_base16_decode( token, in_data.token );
 
     const char * method;
-    if( hb_grid_get_request_header( _request, "X-Method", &method ) == 0 )
+    if( hb_grid_get_request_header( _request, "X-Method", &method ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -27,7 +27,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
     in_data.category = e_hb_node_api;
     strcpy( in_data.method, method );
 
-    if( hb_grid_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == 0 )
+    if( hb_grid_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
