@@ -23,7 +23,6 @@ if(HUMMINGBIRD_DEPENDENCE_JANSSON)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/jansson/jansson.h ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/jansson/include/jansson.h COPYONLY)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/jansson/jansson_config.h ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/jansson/include/jansson_config.h COPYONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/jansson/dump.c ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/jansson/src/dump.c COPYONLY)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/jansson/CMakeLists.txt ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/jansson/CMakeLists.txt COPYONLY)
 

@@ -193,28 +193,6 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_dumpb_value( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
-{
-    json_t * jvalue = _handle->jroot;
-
-    size_t size = json_dumpb( jvalue, _buffer, _capacity, JSON_COMPACT | JSON_ESCAPE_SLASH );
-
-    *_size = size;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_dumpb( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
-{
-    json_t * jvalue = _handle->jroot;
-
-    size_t size = json_dumpb( jvalue, _buffer, _capacity, JSON_COMPACT | JSON_ESCAPE_SLASH );
-
-    *_size = size;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
 void hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
 {
     json_t * jvalue = _handle->jroot;

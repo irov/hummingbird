@@ -1,6 +1,10 @@
 #ifndef HB_CONFIG_H_
 #define HB_CONFIG_H_
 
+#define HB_VERSION_MAJOR 0
+#define HB_VERSION_MINOR 1
+#define HB_VERSION_PATCH 0
+
 #include <stdint.h>
 #include <stddef.h>
 
