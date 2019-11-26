@@ -13,47 +13,49 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
 {
     size_t request_data_size;
     char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == 0 )
+    if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_json_handle_t * json_handle;
-    if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    const char * pid;
-    if( hb_json_get_field_string( json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-    
-    const char * login;
-    if( hb_json_get_field_string( json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    const char * password;
-    if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    hb_json_destroy( json_handle );
-
-    hb_node_newuser_out_t out_data;
+    hb_node_newuser_in_t in_data;
 
     {
-        hb_node_newuser_in_t in_data;
+        hb_json_handle_t * json_handle;
+        if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        const char * pid;
+        if( hb_json_get_field_string( json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        const char * login;
+        if( hb_json_get_field_string( json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        const char * password;
+        if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
 
         hb_base16_decode( pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
         strcpy( in_data.login, login );
         strcpy( in_data.password, password );
 
+        hb_json_destroy( json_handle );
+    }
+
+    hb_node_newuser_out_t out_data;
+
+    {
         if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;

@@ -26,7 +26,7 @@ void hb_token_base16_decode( const hb_token16_t _token16, hb_token_t _token )
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_token_generate( const char _prefix[2], const void * _value, size_t _size, uint32_t _expire, hb_token_t _token )
 {
-    if( hb_cache_available() == HB_FAILURE )
+    if( hb_cache_available() == HB_FALSE )
     {
         return HB_FAILURE;
     }

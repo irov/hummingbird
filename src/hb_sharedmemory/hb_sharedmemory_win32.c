@@ -11,15 +11,20 @@ typedef struct hb_sharedmemory_handle_t
     char name[64];
     size_t size;
     size_t carriage;
-    void * handle;
-    void * buffer;
+    HANDLE hMapFile;
+    LPVOID pBuf;
 
 } hb_sharedmemory_handle_t;
+//////////////////////////////////////////////////////////////////////////
+static void __hb_write_name( char * _name, uint32_t _id )
+{
+    sprintf( _name, "hb_sm_%03u", _id );
+}
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
     char name[64];
-    sprintf( name, "hb_sm_%03u", _id );
+    __hb_write_name( name, _id );
 
     HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, name );
 
@@ -41,8 +46,8 @@ hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_
     strcpy( handle->name, name );
     handle->size = _size;
     handle->carriage = 0;
-    handle->handle = (void *)hMapFile;
-    handle->buffer = (void *)pBuf;
+    handle->hMapFile = hMapFile;
+    handle->pBuf = pBuf;
 
     *_handle = handle;
 
@@ -52,7 +57,7 @@ hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_
 hb_result_t hb_sharedmemory_open( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
     char name[64];
-    sprintf( name, "hb_sm_%03u", _id );
+    __hb_write_name( name, _id );
 
     HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, name );
 
@@ -74,8 +79,8 @@ hb_result_t hb_sharedmemory_open( uint32_t _id, size_t _size, hb_sharedmemory_ha
     strcpy( handle->name, name );
     handle->size = _size;
     handle->carriage = 0;
-    handle->handle = (void *)hMapFile;
-    handle->buffer = (void *)pBuf;
+    handle->hMapFile = hMapFile;
+    handle->pBuf = pBuf;
 
     *_handle = handle;
 
@@ -84,16 +89,16 @@ hb_result_t hb_sharedmemory_open( uint32_t _id, size_t _size, hb_sharedmemory_ha
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
 {
-    LPVOID pBuf = (LPVOID)_handle->buffer;
-    HANDLE hMapFile = (HANDLE)_handle->handle;    
+    LPVOID pBuf = _handle->pBuf;
+    HANDLE hMapFile = _handle->hMapFile;
 
     UnmapViewOfFile( pBuf );
     CloseHandle( hMapFile );
 
     _handle->size = 0;
     _handle->carriage = 0;
-    _handle->handle = HB_NULLPTR;
-    _handle->buffer = HB_NULLPTR;
+    _handle->hMapFile = INVALID_HANDLE_VALUE;
+    _handle->pBuf = HB_NULLPTR;
 
     HB_DELETE( _handle );
 
@@ -121,13 +126,13 @@ hb_result_t hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const voi
 
     uint32_t u32_size = (uint32_t)_size;
 
-    uint8_t * pBufSize = (uint8_t *)_handle->buffer + _handle->carriage;
-    CopyMemory( (PVOID)pBufSize, &u32_size, sizeof( uint32_t ) );
+    PVOID pBufSize = (uint8_t *)_handle->pBuf + _handle->carriage;
+    CopyMemory( pBufSize, &u32_size, sizeof( uint32_t ) );
 
     _handle->carriage += sizeof( uint32_t );
 
-    uint8_t * pBufData = (uint8_t *)_handle->buffer + _handle->carriage;
-    CopyMemory( (PVOID)pBufData, _buffer, _size );
+    PVOID pBufData = (uint8_t *)_handle->pBuf + _handle->carriage;
+    CopyMemory( pBufData, _buffer, _size );
 
     _handle->carriage += _size;
 
@@ -141,7 +146,7 @@ hb_result_t hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _bu
         return HB_FAILURE;
     }
 
-    uint8_t * pBufSize = (uint8_t *)_handle->buffer + _handle->carriage;
+    PVOID pBufSize = (uint8_t *)_handle->pBuf + _handle->carriage;
 
     uint32_t u32_size;
     CopyMemory( &u32_size, pBufSize, sizeof( uint32_t ) );
@@ -158,7 +163,7 @@ hb_result_t hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _bu
         return HB_FAILURE;
     }
 
-    uint8_t * pBufData = (uint8_t *)_handle->buffer + _handle->carriage;
+    PVOID pBufData = (uint8_t *)_handle->pBuf + _handle->carriage;
 
     CopyMemory( _buffer, pBufData, u32_size );
 

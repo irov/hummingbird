@@ -44,7 +44,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
     memcpy( in_data.script_source, params_data, params_data_size );
     in_data.script_source_size = params_data_size;
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == 0 )
+    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
