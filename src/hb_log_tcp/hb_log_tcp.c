@@ -32,6 +32,7 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_e _level
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 {
+#ifdef WIN32
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
@@ -41,6 +42,7 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     {
         return EXIT_FAILURE;
     }
+#endif
 
     struct hostent * h = gethostbyname( _url );
 
@@ -104,5 +106,7 @@ void hb_log_tcp_finalize()
         g_log_tcp_handle = HB_NULLPTR;
     }
 
+#ifdef WIN32
     WSACleanup();
+#endif
 }
