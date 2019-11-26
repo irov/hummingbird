@@ -2,10 +2,26 @@
 
 #include "hb_platform/hb_platform_windows.h"
 
+#include <stdio.h>
+
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
+typedef struct hb_sharedmemory_handle_t
 {
-    HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, _name );
+    uint32_t id;
+    char name[64];
+    size_t size;
+    size_t carriage;
+    void * handle;
+    void * buffer;
+
+} hb_sharedmemory_handle_t;
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
+{
+    char name[64];
+    sprintf( name, "hb_sm_%03u", _id );
+
+    HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, name );
 
     if( hMapFile == HB_NULLPTR )
     {
@@ -19,11 +35,49 @@ hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedm
         return HB_FAILURE;
     }
 
-    strcpy( _handle->name, _name );
-    _handle->size = _size;
-    _handle->carriage = 0;
-    _handle->handle = (void *)hMapFile;
-    _handle->buffer = (void *)pBuf;
+    hb_sharedmemory_handle_t * handle = HB_NEW( hb_sharedmemory_handle_t );
+
+    handle->id = _id;
+    strcpy( handle->name, name );
+    handle->size = _size;
+    handle->carriage = 0;
+    handle->handle = (void *)hMapFile;
+    handle->buffer = (void *)pBuf;
+
+    *_handle = handle;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_sharedmemory_open( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
+{
+    char name[64];
+    sprintf( name, "hb_sm_%03u", _id );
+
+    HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, name );
+
+    if( hMapFile == NULL )
+    {
+        return HB_FAILURE;
+    }
+
+    LPVOID pBuf = MapViewOfFile( hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, _size );
+
+    if( pBuf == NULL )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_sharedmemory_handle_t * handle = HB_NEW( hb_sharedmemory_handle_t );
+
+    handle->id = _id;
+    strcpy( handle->name, name );
+    handle->size = _size;
+    handle->carriage = 0;
+    handle->handle = (void *)hMapFile;
+    handle->buffer = (void *)pBuf;
+
+    *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
@@ -41,7 +95,14 @@ hb_result_t hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
     _handle->handle = HB_NULLPTR;
     _handle->buffer = HB_NULLPTR;
 
+    HB_DELETE( _handle );
+
     return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+uint32_t hb_sharedmemory_get_id( hb_sharedmemory_handle_t * _handle )
+{
+    return _handle->id;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_rewind( hb_sharedmemory_handle_t * _handle )
@@ -69,31 +130,6 @@ hb_result_t hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const voi
     CopyMemory( (PVOID)pBufData, _buffer, _size );
 
     _handle->carriage += _size;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_sharedmemory_open( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
-{
-    HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, _name );
-    
-    if( hMapFile == NULL )
-    {
-        return HB_FAILURE;
-    }
-
-    LPVOID pBuf = MapViewOfFile( hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, _size );
-
-    if( pBuf == NULL )
-    {
-        return HB_FAILURE;
-    }
-
-    strcpy( _handle->name, _name );
-    _handle->size = _size;
-    _handle->carriage = 0;
-    _handle->handle = (void *)hMapFile;
-    _handle->buffer = (void *)pBuf;
 
     return HB_SUCCESSFUL;
 }

@@ -3,12 +3,9 @@
 
 #include "hb_config/hb_config.h"
 
-typedef struct hb_json_handle_t
-{
-    void * handle;
-}hb_json_handle_t;
+typedef struct hb_json_handle_t hb_json_handle_t;
 
-hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t * _handle );
+hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle );
 void hb_json_destroy( hb_json_handle_t * _handle );
 
 typedef enum hb_json_type_t
@@ -23,7 +20,7 @@ typedef enum hb_json_type_t
     e_hb_json_null,
 } hb_json_type_t;
 
-hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t * _out );
+hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out );
 uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle );
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size );

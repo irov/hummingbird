@@ -25,7 +25,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     HB_UNUSED( in_data );
 
-    hb_db_collection_handle_t db_collection_projects;
+    hb_db_collection_handle_t * db_collection_projects;
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -35,7 +35,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
     hb_oid_t project_oid;
-    if( hb_db_new_document( &db_collection_projects, new_value, 1, project_oid ) == HB_FAILURE )
+    if( hb_db_new_document( db_collection_projects, new_value, 1, project_oid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -50,18 +50,18 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_db_value_handle_t handles[1];
         hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );
 
-        if( hb_db_update_values( &db_collection_projects, project_oid, handles, 1 ) == HB_FAILURE )
+        if( hb_db_update_values( db_collection_projects, project_oid, handles, 1 ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
         
-        if( hb_db_count_values( &db_collection_projects, handles, 1, &founds ) == HB_FAILURE )
+        if( hb_db_count_values( db_collection_projects, handles, 1, &founds ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
     }
 
-    hb_db_destroy_collection( &db_collection_projects );
+    hb_db_destroy_collection( db_collection_projects );
 
     out_data->pid = pid;
 

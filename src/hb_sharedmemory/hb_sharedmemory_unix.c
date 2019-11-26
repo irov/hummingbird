@@ -1,25 +1,16 @@
 #include "hb_sharedmemory.h"
 
-#define WIN32_LEAN_AND_MEAN
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
-#include <Windows.h>
+#include <sys/mman.h>
 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedmemory_handle_t * _handle )
 {
-    HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, _name );
+    int protection = PROT_READ | PROT_WRITE;
 
-    if( hMapFile == HB_NULLPTR )
-    {
-        return HB_FAILURE;
-    }
+    int visibility = MAP_SHARED | MAP_ANONYMOUS;
 
-    LPVOID pBuf = MapViewOfFile( hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, (SIZE_T)_size );
-    
+    void * pBuf = mmap( HB_NULLPTR, _size, protection, visibility, -1, 0 );
+
     if( pBuf == HB_NULLPTR )
     {
         return HB_FAILURE;
@@ -28,7 +19,7 @@ hb_result_t hb_sharedmemory_create( const char * _name, size_t _size, hb_sharedm
     strcpy( _handle->name, _name );
     _handle->size = _size;
     _handle->carriage = 0;
-    _handle->handle = (void *)hMapFile;
+    _handle->handle = HB_NULLPTR;
     _handle->buffer = (void *)pBuf;
 
     return HB_SUCCESSFUL;

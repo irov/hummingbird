@@ -32,13 +32,13 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    if( hb_node_write_in_data( &_handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
+    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
-    
+
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_api.exe", _handle->sharedmemory.name, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( "hb_node_api.exe", _handle->sharedmemory, &process_successful ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -50,7 +50,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
 
     hb_node_api_out_t out_data;
     hb_node_code_t out_code;
-    if( hb_node_read_out_data( &_handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+    if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

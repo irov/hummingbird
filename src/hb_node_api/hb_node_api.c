@@ -28,7 +28,7 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
         return HB_FAILURE;
     }
 
-    hb_db_collection_handle_t db_collection_projects;
+    hb_db_collection_handle_t * db_collection_projects;
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
         hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_projects'" );
@@ -39,7 +39,7 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
     const char * db_projects_fields[] = { "script_sha1" };
 
     hb_db_value_handle_t db_script_sha1_handles[1];
-    if( hb_db_get_values( &db_collection_projects, _token.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
+    if( hb_db_get_values( db_collection_projects, _token.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
     {
         hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: collection 'hb_projects' not found 'script_sha1'" );
 
@@ -57,7 +57,7 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
     memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, sizeof( hb_sha1_t ) );
 
     hb_db_destroy_values( db_script_sha1_handles, 1 );
-    hb_db_destroy_collection( &db_collection_projects );
+    hb_db_destroy_collection( db_collection_projects );
 
     size_t script_data_size;
     hb_data_t script_data;

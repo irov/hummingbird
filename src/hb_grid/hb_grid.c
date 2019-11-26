@@ -192,10 +192,7 @@ int main( int _argc, char * _argv[] )
 
         process_handle->ev_socket = &ev_socket;
 
-        char sharedmemory_name[64];
-        sprintf( sharedmemory_name, "hb_%s_sm_%03u", id, i );
-
-        hb_sharedmemory_create( sharedmemory_name, 65536, &process_handle->sharedmemory );
+        hb_sharedmemory_create( i, 65536, &process_handle->sharedmemory );
 
         strcpy( process_handle->config.db_uri, "127.0.0.1" );
         process_handle->config.db_port = 27017;
@@ -225,15 +222,15 @@ int main( int _argc, char * _argv[] )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
-        hb_thread_join( &process_handle->thread );
+        hb_thread_join( process_handle->thread );
     }
 
     for( uint32_t i = 0; i != max_thread; ++i )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
-        hb_thread_destroy( &process_handle->thread );
-        hb_sharedmemory_destroy( &process_handle->sharedmemory );
+        hb_thread_destroy( process_handle->thread );
+        hb_sharedmemory_destroy( process_handle->sharedmemory );
     }
 
     HB_DELETE( process_handles );

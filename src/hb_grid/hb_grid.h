@@ -26,8 +26,8 @@ typedef struct hb_grid_process_handle_t
 
     evutil_socket_t * ev_socket;
 
-    hb_thread_handle_t thread;
-    hb_sharedmemory_handle_t sharedmemory;
+    hb_thread_handle_t * thread;
+    hb_sharedmemory_handle_t * sharedmemory;
 
     hb_node_config_t config;
 
