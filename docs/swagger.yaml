@@ -34,7 +34,13 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: "#/definitions/Project"
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              pid:
+                type: "string"
         400:
           description: invalid operation
   /upload:
@@ -59,7 +65,14 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: "#/definitions/Script"          
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              revision:
+                type: "integer"
+                format: "int64"          
         400:
           description: invalid operation
   /newuser:
@@ -90,7 +103,13 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: "#/definitions/User"
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              token:
+                type: "string"
         400:
           description: invalid operation
   /loginuser:
@@ -121,7 +140,13 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: "#/definitions/User"
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              token:
+                type: "string"
         400:
           description: invalid operation
   /api:
@@ -153,52 +178,14 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: "#/definitions/API_call"          
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              successful:
+                type: "boolean"
+              data:
+                type: "object"      
         400:
           description: invalid operation
-definitions:
-  Project:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      pid:
-        type: "string"
-    xml:
-      name: "Project"
-  Script:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      revision:
-        type: "integer"
-        format: "int64"
-    xml:
-      name: "Script"      
-  User:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      token:
-        type: "string"
-    xml:
-      name: "User"
-  API_call:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      successful:
-        type: "boolean"
-      data:
-        type: "object"
-    xml:
-      name: "API"
-  API_data:
-    type: object
