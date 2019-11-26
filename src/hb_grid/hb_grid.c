@@ -146,6 +146,7 @@ int main( int _argc, char * _argv[] )
 
     const uint32_t max_thread = 16;
 
+#ifdef WIN32
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
@@ -155,6 +156,7 @@ int main( int _argc, char * _argv[] )
     {
         return EXIT_FAILURE;
     }
+#endif
 
     if( hb_log_tcp_initialize( "127.0.0.1", 5044 ) == HB_FAILURE )
     {
@@ -236,7 +238,9 @@ int main( int _argc, char * _argv[] )
 
     HB_DELETE( process_handles );
 
+#ifdef WIN32
     WSACleanup();
+#endif
 
     hb_log_finalize();
 
