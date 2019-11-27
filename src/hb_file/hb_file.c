@@ -16,8 +16,7 @@ typedef struct hb_file_handle_t
 {
     char path[HB_MAX_PATH];
     FILE * f;
-    size_t length;
-
+    size_t size;
 } hb_file_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_file_settings_t
@@ -57,9 +56,9 @@ hb_bool_t hb_file_available()
     return HB_TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
+hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t ** _handle )
 {
-    char fullpath[256];
+    char fullpath[HB_MAX_PATH];
     strcpy( fullpath, g_file_settings->folder );
     strncat( fullpath, _path, 2 );
     strcat( fullpath, "/" );
@@ -74,14 +73,18 @@ hb_result_t hb_file_open_read( const char * _path, hb_file_handle_t * _handle )
         return HB_FAILURE;
     }
 
-    strcpy( _handle->path, _path );
-    _handle->f = f;
+    hb_file_handle_t * handle = HB_NEW( hb_file_handle_t );
+
+    strcpy( handle->path, _path );
+    handle->f = f;
 
     fseek( f, 0L, SEEK_END );
     long sz = ftell( f );
     rewind( f );
 
-    _handle->length = (size_t)sz;    
+    handle->size = (size_t)sz;
+
+    *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
@@ -127,15 +130,15 @@ hb_result_t hb_file_open_write( const char * _path, hb_file_handle_t * _handle )
 
     strcpy( _handle->path, _path );
     _handle->f = f;
-    _handle->length = 0;
+    _handle->size = 0;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _capacity )
 {
-    FILE * f = (FILE *)_handle->f;
-    size_t sz = _handle->length;
+    FILE * f = _handle->f;
+    size_t sz = _handle->size;
 
     if( sz == 0 )
     {
@@ -159,7 +162,7 @@ hb_result_t hb_file_read( hb_file_handle_t * _handle, void * _buffer, size_t _ca
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_write( hb_file_handle_t * _handle, const void * _buffer, size_t _size )
 {
-    FILE * f = (FILE *)_handle->f;
+    FILE * f = _handle->f;
 
     size_t r = fwrite( _buffer, _size, 1, f );
 
@@ -171,9 +174,14 @@ hb_result_t hb_file_write( hb_file_handle_t * _handle, const void * _buffer, siz
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+size_t hb_file_get_size( hb_file_handle_t * _handle )
+{
+    return _handle->size;
+}
+//////////////////////////////////////////////////////////////////////////
 void hb_file_close( hb_file_handle_t * _handle )
 {
-    FILE * f = (FILE *)_handle->f;
+    FILE * f = _handle->f;
 
     int res = fclose( f );
 
@@ -184,4 +192,6 @@ void hb_file_close( hb_file_handle_t * _handle )
             , res
         );
     }
+
+    HB_DELETE( _handle );
 }

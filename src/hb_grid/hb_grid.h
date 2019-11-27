@@ -21,15 +21,15 @@ typedef struct hb_grid_request_handle_t
 
 typedef struct hb_grid_process_handle_t
 {
-    char server_address[64];
-    ev_uint16_t server_port;
+    char grid_uri[128];
+    ev_uint16_t grid_port;
 
     evutil_socket_t * ev_socket;
 
     hb_thread_handle_t * thread;
     hb_sharedmemory_handle_t * sharedmemory;
 
-    hb_node_config_t config;
+    hb_node_config_t * config;
 
     hb_grid_request_handle_t requests[8];
 } hb_grid_process_handle_t;

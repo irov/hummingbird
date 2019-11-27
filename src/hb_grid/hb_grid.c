@@ -3,6 +3,7 @@
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
+#include "hb_json/hb_json.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
 #include "hb_utils/hb_multipart.h"
@@ -107,7 +108,7 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
 
     if( *handle->ev_socket == -1 )
     {
-        struct evhttp_bound_socket * bound_socket = evhttp_bind_socket_with_handle( http_server, handle->server_address, handle->server_port );
+        struct evhttp_bound_socket * bound_socket = evhttp_bind_socket_with_handle( http_server, handle->grid_uri, handle->grid_port );
         HB_UNUSED( bound_socket );
 
         *handle->ev_socket = evhttp_bound_socket_get_fd( bound_socket );
@@ -136,16 +137,6 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    const char * id;
-    if( hb_getopt( _argc, _argv, "--id", &id ) == HB_FAILURE )
-    {
-        hb_log_message( "grid", HB_LOG_CRITICAL, "run without id [miss --id argument]" );
-
-        return EXIT_FAILURE;
-    }    
-
-    const uint32_t max_thread = 16;
-
 #ifdef WIN32
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
@@ -163,11 +154,12 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+#ifdef HB_DEBUG
     hb_date_t date;
     hb_date( &date );
 
     char logfile[HB_MAX_PATH];
-    sprintf( logfile, "hb_grid_log_%u_%u_%u_%u_%u_%u.log"
+    sprintf( logfile, "log_grid_%u_%u_%u_%u_%u_%u.log"
         , date.year
         , date.mon
         , date.mday
@@ -178,6 +170,107 @@ int main( int _argc, char * _argv[] )
     if( hb_log_file_initialize( logfile ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
+    }
+#endif
+
+    const char * config_file = HB_NULLPTR;
+    hb_getopt( _argc, _argv, "--config", &config_file );
+
+    hb_node_config_t * config = HB_NEW( hb_node_config_t );
+
+    uint32_t max_thread = 16;
+
+    char grid_uri[128];
+    strcpy( grid_uri, "127.0.0.1" );
+    uint16_t grid_port = 5555;
+
+    strcpy( config->name, "hb" );
+    strcpy( config->cache_uri, "127.0.0.1" );
+    config->cache_port = 6379;
+    config->cache_timeout = 2000;
+    strcpy( config->db_uri, "127.0.0.1" );
+    config->db_port = 27017;
+    strcpy( config->log_uri, "127.0.0.1" );
+    config->log_port = 5044;
+
+    if( config_file != HB_NULLPTR )
+    {
+        FILE * f = fopen( config_file, "rb" );
+
+        if( f == HB_NULLPTR )
+        {
+            hb_log_message( "grid", HB_LOG_CRITICAL, "config file '%s' not found"
+                , config_file
+            );
+
+            return EXIT_FAILURE;
+        }
+
+        fseek( f, 0L, SEEK_END );
+        long sz = ftell( f );
+        rewind( f );
+
+        char config_buffer[10240];
+        size_t r = fread( config_buffer, sz, 1, f );
+        HB_UNUSED( r );
+
+        fclose( f );
+
+        hb_json_handle_t * json_handle;
+        if( hb_json_create( config_buffer, sz, &json_handle ) == HB_FAILURE )
+        {
+            hb_log_message( "grid", HB_LOG_CRITICAL, "config file '%s' wrong json"
+                , config_file
+            );
+
+            return EXIT_FAILURE;
+        }
+
+        int64_t config_max_thread;
+        hb_json_get_field_integer( json_handle, "max_thread", &config_max_thread, max_thread );
+        max_thread = (uint32_t)config_max_thread;
+
+        const char * config_grid_uri;
+        hb_json_get_field_string( json_handle, "grid_uri", &config_grid_uri, HB_NULLPTR, grid_uri );
+        strcpy( grid_uri, config_grid_uri );
+
+        int64_t config_grid_port;
+        hb_json_get_field_integer( json_handle, "grid_port", &config_grid_port, grid_port );
+        grid_port = (uint16_t)config_grid_port;
+
+        const char * name;
+        hb_json_get_field_string( json_handle, "name", &name, HB_NULLPTR, config->name );
+        strcpy( config->name, name );
+
+        const char * cache_uri;
+        hb_json_get_field_string( json_handle, "cache_uri", &cache_uri, HB_NULLPTR, config->cache_uri );
+        strcpy( config->cache_uri, cache_uri );
+
+        int64_t cache_port;
+        hb_json_get_field_integer( json_handle, "cache_port", &cache_port, config->cache_port );
+        config->cache_port = (uint16_t)cache_port;
+
+        int64_t cache_timeout;
+        hb_json_get_field_integer( json_handle, "cache_timeout", &cache_timeout, config->cache_timeout );
+        config->cache_timeout = (uint16_t)cache_timeout;        
+
+        const char * db_uri;
+        hb_json_get_field_string( json_handle, "db_uri", &db_uri, HB_NULLPTR, config->db_uri );
+        strcpy( config->db_uri, db_uri );
+
+        int64_t db_port;
+        hb_json_get_field_integer( json_handle, "db_port", &db_port, config->db_port );
+        config->db_port = (uint16_t)db_port;
+
+        const char * log_uri;
+        hb_json_get_field_string( json_handle, "log_uri", &log_uri, HB_NULLPTR, config->log_uri );
+        strcpy( config->log_uri, log_uri );
+
+        int64_t log_port;
+        hb_json_get_field_integer( json_handle, "log_port", &log_port, config->log_port );
+        config->log_port = (uint16_t)log_port;
+
+        hb_json_destroy( json_handle );
     }
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
@@ -192,29 +285,12 @@ int main( int _argc, char * _argv[] )
             continue;
         }
 
-        strcpy( process_handle->server_address, "127.0.0.1" );
-        process_handle->server_port = 5555;
+        strcpy( process_handle->grid_uri, grid_uri );
+        process_handle->grid_port = grid_port;
 
         process_handle->ev_socket = &ev_socket;
 
-        strcpy( process_handle->config.db_uri, "127.0.0.1" );
-        process_handle->config.db_port = 27017;
-
-        strcpy( process_handle->config.cache_uri, "127.0.0.1" );
-        process_handle->config.cache_port = 6379;
-
-        sprintf( process_handle->config.log_file, "hb_%s_log_%03u_%u_%u_%u_%u_%u_%u.log"
-            , id
-            , i
-            , date.year
-            , date.mon
-            , date.mday
-            , date.hour
-            , date.min
-            , date.sec );
-
-        strcpy( process_handle->config.log_uri, "127.0.0.1" );        
-        process_handle->config.log_port = 5044;
+        process_handle->config = config;
 
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
         {
@@ -236,13 +312,21 @@ int main( int _argc, char * _argv[] )
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
         hb_thread_destroy( process_handle->thread );
-        hb_sharedmemory_destroy( process_handle->sharedmemory );
+        hb_sharedmemory_destroy( process_handle->sharedmemory );        
     }
 
     HB_DELETE( process_handles );
 
+    HB_DELETE( config );
+
 #ifdef WIN32
     WSACleanup();
+#endif
+
+    hb_log_remove_observer( &__hb_log_observer );
+
+#ifdef HB_DEBUG
+    hb_log_file_finalize();
 #endif
 
     hb_log_finalize();

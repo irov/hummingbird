@@ -12,7 +12,7 @@ int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid
 
     hb_node_newproject_in_t in_data;
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
+    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

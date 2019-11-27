@@ -8,6 +8,7 @@
 #include "hb_storage/hb_storage.h"
 
 #include "hb_utils/hb_oid.h"
+#include "hb_utils/hb_date.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,10 +47,29 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_log_file_initialize( config.log_file ) == HB_FAILURE )
+    hb_date_t date;
+    hb_date( &date );
+
+#ifdef HB_DEBUG
+    uint32_t sharedmemory_id = hb_sharedmemory_get_id( sharedmemory_handle );
+
+    char log_file[HB_MAX_PATH];
+    sprintf( log_file, "%s[%u]_log_%u_%u_%u_%u_%u_%u.log"
+        , config.name
+        , sharedmemory_id
+        , date.year
+        , date.mon
+        , date.mday
+        , date.hour
+        , date.min
+        , date.sec
+    );
+
+    if( hb_log_file_initialize( log_file ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
+#endif
     
     if( hb_log_tcp_initialize( config.log_uri, config.log_port ) == HB_FAILURE )
     {
@@ -60,7 +80,7 @@ int main( int _argc, char * _argv[] )
 
     if( components & e_hb_component_cache )
     {
-        if( hb_cache_initialize( config.cache_uri, config.cache_port, 5 ) == HB_FAILURE )
+        if( hb_cache_initialize( config.cache_uri, config.cache_port, config.cache_timeout ) == HB_FAILURE )
         {
             hb_log_message( "node", HB_LOG_ERROR, "node '%s' invalid initialize [cache] component [uri %s:%u]"
                 , config.name
@@ -128,6 +148,8 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_log_tcp_finalize();
+
+    hb_log_remove_observer( &__hb_log_observer );
 
     hb_log_finalize();
 
