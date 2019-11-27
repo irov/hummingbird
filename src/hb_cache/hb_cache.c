@@ -5,7 +5,7 @@
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 #include "hiredis.h"
-#pragma warning(pop)
+#pragma warning( pop )
 
 #include <string.h>
 

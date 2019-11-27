@@ -248,7 +248,7 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_e * _code )
+hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_t * _code )
 {
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {

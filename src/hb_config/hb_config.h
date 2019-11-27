@@ -30,6 +30,7 @@ typedef enum hb_error_code_e
 } hb_error_code_e;
 
 typedef hb_result_e hb_result_t;
+typedef hb_error_code_e hb_error_code_t;
 
 typedef uint32_t hb_pid_t;
 typedef char hb_pid16_t[8];

@@ -6,8 +6,11 @@
 #include "hb_thread/hb_thread.h"
 #include "hb_sharedmemory/hb_sharedmemory.h"
 
+#pragma warning( push )
+#pragma warning( disable : 4706 )
 #include "evhttp.h"
 #include "event2/thread.h"
+#pragma warning( pop )
 
 struct hb_grid_process_handle_t;
 

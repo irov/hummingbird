@@ -10,8 +10,6 @@
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_oid.h"
 
-#include "hb_platform/hb_platform_windows.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -24,8 +22,6 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     const hb_node_loginuser_in_t * in_data = (const hb_node_loginuser_in_t *)_data;
     hb_node_loginuser_out_t * out_data = (hb_node_loginuser_out_t *)_out;
     *_size = sizeof( hb_node_loginuser_out_t );
-
-    //MessageBox( NULL, "Test", "Test", MB_OK );
 
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
