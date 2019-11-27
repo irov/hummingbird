@@ -4,7 +4,10 @@
 
 #include "hb_utils/hb_time.h"
 
+#pragma warning( push )
+#pragma warning( disable : 4706 )
 #include "evhttp.h"
+#pragma warning( pop )
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
