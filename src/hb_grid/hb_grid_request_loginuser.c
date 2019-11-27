@@ -26,19 +26,19 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
         }
 
         const char * pid;
-        if( hb_json_get_field_string( json_handle, "pid", &pid, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field_string( json_handle, "pid", &pid, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         const char * login;
-        if( hb_json_get_field_string( json_handle, "login", &login, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field_string( json_handle, "login", &login, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         const char * password;
-        if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
@@ -51,7 +51,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
         hb_json_destroy( json_handle );
     }
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
+    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

@@ -177,15 +177,44 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size )
+hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        return HB_FAILURE;
+        if( _default != HB_NULLPTR )
+        {
+            *_value = _default;
+
+            return HB_SUCCESSFUL;
+        }
+        else
+        {
+            return HB_FAILURE;
+        }
     }
 
     if( hb_json_to_string( field, _value, _size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_integer( field, _value ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

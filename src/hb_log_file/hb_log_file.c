@@ -52,6 +52,8 @@ void hb_log_file_finalize()
 {
     if( g_log_file_handle != HB_NULLPTR )
     {
+        hb_log_remove_observer( &__hb_log_file_observer );
+
         fclose( g_log_file_handle->f );
         g_log_file_handle->f = HB_NULLPTR;
 

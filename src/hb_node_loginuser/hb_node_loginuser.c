@@ -84,7 +84,10 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_oid_copy( token_handle.uoid, authentication_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 
-        hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data->token );
+        if( hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data->token ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
     }
     
     return HB_SUCCESSFUL;

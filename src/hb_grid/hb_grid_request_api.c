@@ -32,7 +32,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), &_handle->config ) == HB_FAILURE )
+    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

@@ -29,14 +29,26 @@ hb_bool_t hb_cache_available()
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout )
 {
-    struct timeval timeout;
-    timeout.tv_sec = _timeout;
-    timeout.tv_usec = 0;
+    struct timeval tv_timeout;
+    tv_timeout.tv_sec = _timeout / 1000;
+    tv_timeout.tv_usec = (_timeout % 1000) * 1000;
 
-    redisContext * c = redisConnectWithTimeout( _uri, _port, timeout ); //6379
+    redisContext * c = redisConnectWithTimeout( _uri, _port, tv_timeout ); //6379
 
     if( c == HB_NULLPTR )
     {
+        return HB_FAILURE;
+    }
+
+    if( c->err != REDIS_OK )
+    {
+        hb_log_message( "cache", HB_LOG_ERROR, "connect url:'%s' port: %u get error [%s:%d]"
+            , _uri
+            , _port
+            , c->errstr
+            , c->err
+        );
+
         return HB_FAILURE;
     }
 

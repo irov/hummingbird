@@ -83,6 +83,11 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     const hb_node_api_in_t * in_data = (const hb_node_api_in_t *)_data;
     hb_node_api_out_t * out_data = (hb_node_api_out_t *)_out;
     *_size = sizeof( hb_node_api_out_t );
+
+    if( hb_cache_available() == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
     
     if( hb_cache_expire_value( in_data->token, sizeof( in_data->token ), 1800 ) == HB_FAILURE )
     {

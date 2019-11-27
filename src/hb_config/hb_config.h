@@ -1,12 +1,16 @@
 #ifndef HB_CONFIG_H_
 #define HB_CONFIG_H_
 
+#include <stdint.h>
+#include <stddef.h>
+
 #define HB_VERSION_MAJOR 0
 #define HB_VERSION_MINOR 1
 #define HB_VERSION_PATCH 0
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef NDEBUG
+#define HB_DEBUG
+#endif
 
 typedef uint32_t hb_bool_t;
 
