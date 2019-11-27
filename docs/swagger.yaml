@@ -5,10 +5,11 @@ info:
   version: "0.1.0"
   title: Hummingbird
   contact:
+    url: https://github.com/irov/hummingbird
     email: "irov13@mail.ru"
   license:
     name: "MIT"
-    url: "https://opensource.org/licenses/MIT"
+    url: https://opensource.org/licenses/MIT
 tags:
 - name: newproject
   description: projects
