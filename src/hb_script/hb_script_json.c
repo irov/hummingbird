@@ -187,8 +187,11 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
     {
         const char * field = _fields[index];
 
-        hb_json_handle_t * json_field;
-        hb_json_get_field( json_data, field, &json_field );
+        hb_json_handle_t * json_field = HB_NULLPTR;
+        if( hb_json_get_field( json_data, field, &json_field ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
 
         hb_json_type_t json_field_type = hb_json_get_type( json_field );
 

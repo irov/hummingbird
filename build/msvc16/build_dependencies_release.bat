@@ -1,0 +1,1 @@
+call build_dependencies.bat Release

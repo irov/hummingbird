@@ -46,7 +46,16 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
 
     if( ret_loadbuffer != LUA_OK )
     {
-        luaL_error( L, "invalid load source" );
+        const char * error_msg = lua_tostring( L, -1 );
+        
+        hb_log_message( "script", HB_LOG_ERROR, "invalid compile script: %s [%d]"
+            , error_msg
+            , ret_loadbuffer
+        );
+
+        lua_pop( L, 1 );
+
+        lua_close( L );
 
         return HB_FAILURE;
     }
@@ -58,7 +67,23 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     desc.capacity = _capacity;
     desc.buffer = _code;
 
-    luaU_dump( L, f, &s_writer, &desc, 1 );
+    int ret_dump = luaU_dump( L, f, &s_writer, &desc, 1 );
+
+    if( ret_dump != LUA_OK )
+    {
+        const char * error_msg = lua_tostring( L, -1 );
+
+        hb_log_message( "script", HB_LOG_ERROR, "invalid dump code: %s [%d]"
+            , error_msg
+            , ret_loadbuffer
+        );
+
+        lua_pop( L, 1 );
+
+        lua_close( L );
+
+        return HB_FAILURE;
+    }
 
     lua_close( L );
     
