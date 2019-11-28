@@ -103,8 +103,6 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     {
         luaL_error( L, "call limit" );
     }
-
-    return;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uoid, const hb_oid_t _poid )

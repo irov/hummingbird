@@ -226,47 +226,47 @@ int main( int _argc, char * _argv[] )
             return EXIT_FAILURE;
         }
 
-        int64_t config_max_thread;
+        int64_t config_max_thread = 0;
         hb_json_get_field_integer( json_handle, "max_thread", &config_max_thread, max_thread );
         max_thread = (uint32_t)config_max_thread;
 
-        const char * config_grid_uri;
+        const char * config_grid_uri = HB_NULLPTR;
         hb_json_get_field_string( json_handle, "grid_uri", &config_grid_uri, HB_NULLPTR, grid_uri );
         strcpy( grid_uri, config_grid_uri );
 
-        int64_t config_grid_port;
+        int64_t config_grid_port = 0;
         hb_json_get_field_integer( json_handle, "grid_port", &config_grid_port, grid_port );
         grid_port = (uint16_t)config_grid_port;
 
-        const char * name;
+        const char * name = HB_NULLPTR;
         hb_json_get_field_string( json_handle, "name", &name, HB_NULLPTR, config->name );
         strcpy( config->name, name );
 
-        const char * cache_uri;
+        const char * cache_uri = HB_NULLPTR;
         hb_json_get_field_string( json_handle, "cache_uri", &cache_uri, HB_NULLPTR, config->cache_uri );
         strcpy( config->cache_uri, cache_uri );
 
-        int64_t cache_port;
+        int64_t cache_port = 0;
         hb_json_get_field_integer( json_handle, "cache_port", &cache_port, config->cache_port );
         config->cache_port = (uint16_t)cache_port;
 
-        int64_t cache_timeout;
+        int64_t cache_timeout = 0;
         hb_json_get_field_integer( json_handle, "cache_timeout", &cache_timeout, config->cache_timeout );
-        config->cache_timeout = (uint16_t)cache_timeout;        
+        config->cache_timeout = (uint16_t)cache_timeout;
 
-        const char * db_uri;
+        const char * db_uri = HB_NULLPTR;
         hb_json_get_field_string( json_handle, "db_uri", &db_uri, HB_NULLPTR, config->db_uri );
         strcpy( config->db_uri, db_uri );
 
-        int64_t db_port;
+        int64_t db_port = 0;
         hb_json_get_field_integer( json_handle, "db_port", &db_port, config->db_port );
         config->db_port = (uint16_t)db_port;
 
-        const char * log_uri;
+        const char * log_uri = HB_NULLPTR;
         hb_json_get_field_string( json_handle, "log_uri", &log_uri, HB_NULLPTR, config->log_uri );
         strcpy( config->log_uri, log_uri );
 
-        int64_t log_port;
+        int64_t log_port = 0;
         hb_json_get_field_integer( json_handle, "log_port", &log_port, config->log_port );
         config->log_port = (uint16_t)log_port;
 
