@@ -2,10 +2,7 @@
 
 #include "hb_log/hb_log.h"
 
-#pragma warning( push )
-#pragma warning( disable : 4244 )
 #include "hiredis.h"
-#pragma warning( pop )
 
 #include <string.h>
 
