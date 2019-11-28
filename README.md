@@ -2,6 +2,8 @@
 fast game server
 
 [![Build status](https://ci.appveyor.com/api/projects/status/mc9j9w88oh24n0ve?svg=true)](https://ci.appveyor.com/project/irov/hummingbird)
+[![APM](https://img.shields.io/apm/l/vim-mode)](https://en.wikipedia.org/wiki/MIT_License)
+[![C](https://img.shields.io/badge/language-C-red.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 
 ## Windows [Sandbox]
 
