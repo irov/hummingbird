@@ -18,13 +18,22 @@ typedef struct hb_log_tcp_handle_t
 //////////////////////////////////////////////////////////////////////////
 static hb_log_tcp_handle_t * g_log_tcp_handle = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_tcp_observer( const char * _category, hb_log_level_e _level, const char * _message )
+static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
+    HB_UNUSED( _file );
+    HB_UNUSED( _line );
+
     hb_time_t t;
     hb_time( &t );
 
     char message[2048];
+
+#ifdef HB_DEBUG
+    int message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"file\":\"%s\", \"line\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _file, _line, _message );
+#else
     int message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
+#endif
+    
     bufferevent_write( g_log_tcp_handle->bev_cnn, message, message_size );
 
     event_base_dispatch( g_log_tcp_handle->base );

@@ -99,7 +99,7 @@ hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _
     {
         if( hb_cache_set_value( _sha1, 20, script_data_buffer, script_data_size ) == HB_FAILURE )
         {
-            hb_log_message( "storage", HB_LOG_ERROR, "invalid cache value ['%.20s']"
+            HB_LOG_MESSAGE_ERROR( "storage", "invalid cache value ['%.20s']"
                 , _sha1
             );
         }

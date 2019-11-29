@@ -42,7 +42,7 @@ hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _ti
 
     if( c->err != REDIS_OK )
     {
-        hb_log_message( "cache", HB_LOG_ERROR, "connect url:'%s' port: %u get error [%s:%d]"
+        HB_LOG_MESSAGE_ERROR( "cache", "connect url:'%s' port: %u get error [%s:%d]"
             , _uri
             , _port
             , c->errstr
@@ -84,7 +84,7 @@ hb_result_t hb_cache_set_value(  const void * _key, size_t _keysize, const void 
 
     if( reply == HB_NULLPTR )
     {
-        hb_log_message( "cache", HB_LOG_ERROR, "redis command set with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command set with error: '%s'"
             , g_redis_context->errstr
         );
 
@@ -107,7 +107,7 @@ hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _valu
 
     if( reply == HB_NULLPTR )
     {
-        hb_log_message( "cache", HB_LOG_ERROR, "redis command get with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command get with error: '%s'"
             , g_redis_context->errstr
         );
 
@@ -151,7 +151,7 @@ hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t 
 
     if( reply == HB_NULLPTR )
     {
-        hb_log_message( "cache", HB_LOG_ERROR, "redis command incrby with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command incrby with error: '%s'"
             , g_redis_context->errstr
         );
 
@@ -183,7 +183,7 @@ hb_result_t hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t 
 
     if( reply == HB_NULLPTR )
     {
-        hb_log_message( "cache", HB_LOG_ERROR, "redis command expire with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command expire with error: '%s'"
             , g_redis_context->errstr
         );
 

@@ -48,7 +48,7 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     {
         const char * error_msg = lua_tostring( L, -1 );
         
-        hb_log_message( "script", HB_LOG_ERROR, "invalid compile script: %s [%d]"
+        HB_LOG_MESSAGE_ERROR( "script", "invalid compile script: %s [%d]"
             , error_msg
             , ret_loadbuffer
         );
@@ -73,7 +73,7 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     {
         const char * error_msg = lua_tostring( L, -1 );
 
-        hb_log_message( "script", HB_LOG_ERROR, "invalid dump code: %s [%d]"
+        HB_LOG_MESSAGE_ERROR( "script", "invalid dump code: %s [%d]"
             , error_msg
             , ret_loadbuffer
         );

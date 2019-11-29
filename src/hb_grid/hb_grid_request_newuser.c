@@ -73,14 +73,22 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
         }
 
         hb_node_code_t out_code;
-        if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+        char out_reason[1024];
+        if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code, out_reason ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         if( out_code != e_node_ok )
         {
-            return HTTP_BADREQUEST;
+            size_t response_data_size = sprintf( _response, "{\"code\": %u, \"reason\": \"%s\"}"
+                , out_code
+                , out_reason
+            );
+
+            *_size = response_data_size;
+
+            return HTTP_OK;
         }
     }
 
@@ -113,14 +121,22 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
 
         hb_node_api_out_t api_out_data;
         hb_node_code_t out_code;
-        if( hb_node_read_out_data( _handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code ) == HB_FAILURE )
+        char out_reason[1024];
+        if( hb_node_read_out_data( _handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code, out_reason ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         if( out_code != e_node_ok )
         {
-            return HTTP_BADREQUEST;
+            size_t response_data_size = sprintf( _response, "{\"code\": %u, \"reason\": \"%s\"}"
+                , out_code
+                , out_reason
+            );
+
+            *_size = response_data_size;
+
+            return HTTP_OK;
         }
     }
 

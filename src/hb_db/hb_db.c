@@ -22,7 +22,7 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _po
 
     if( mongoc_uri == HB_NULLPTR )
     {
-        hb_log_message( "db", HB_LOG_ERROR, "failed to use URI: %s:%u"
+        HB_LOG_MESSAGE_ERROR( "db", "failed to use URI: %s:%u"
             , _uri
             , _port
         );
@@ -95,11 +95,11 @@ hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _hand
     bson_error_t error;
     if( mongoc_collection_create_index( mongo_collection, &keys, &opt, &error ) == false )
     {
-        hb_log_message( "db", HB_LOG_ERROR,
-            "failed to set collection expire: %s\n"
-            "error message:       %s\n",
-            mongoc_collection_get_name( mongo_collection ),
-            error.message );
+        HB_LOG_MESSAGE_ERROR( "db"
+            , "failed to set collection expire: %s\nerror message: %s\n"
+            , mongoc_collection_get_name( mongo_collection )
+            , error.message
+        );
 
         return HB_FAILURE;
     }
@@ -537,11 +537,11 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, cons
             char sha1hex[41];
             hb_base64_encode( _sha1, 20, sha1hex, 41, &sha1hexsize );
 
-            hb_log_message( "db", HB_LOG_ERROR,
-                "failed to insert: %s\n"
-                "error message: %s\n",
-                sha1hex,
-                insert_error.message );
+            HB_LOG_MESSAGE_ERROR( "db"
+                , "failed to insert: %s\nerror message: %s\n"
+                , sha1hex
+                , insert_error.message 
+            );
 
             return HB_FAILURE;
         }

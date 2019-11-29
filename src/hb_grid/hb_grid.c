@@ -12,11 +12,11 @@
 #include "hb_utils/hb_date.h"
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
+static void __hb_log_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
     const char * ls = hb_log_level_string[_level];
 
-    printf( "[%s] %s: %s\n", _category, ls, _message );
+    printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
 //////////////////////////////////////////////////////////////////////////
 extern int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
@@ -199,7 +199,7 @@ int main( int _argc, char * _argv[] )
 
         if( f == HB_NULLPTR )
         {
-            hb_log_message( "grid", HB_LOG_CRITICAL, "config file '%s' not found"
+            HB_LOG_MESSAGE_CRITICAL( "grid", "config file '%s' not found"
                 , config_file
             );
 
@@ -219,7 +219,7 @@ int main( int _argc, char * _argv[] )
         hb_json_handle_t * json_handle;
         if( hb_json_create( config_buffer, sz, &json_handle ) == HB_FAILURE )
         {
-            hb_log_message( "grid", HB_LOG_CRITICAL, "config file '%s' wrong json"
+            HB_LOG_MESSAGE_CRITICAL( "grid", "config file '%s' wrong json"
                 , config_file
             );
 
@@ -272,6 +272,19 @@ int main( int _argc, char * _argv[] )
 
         hb_json_destroy( json_handle );
     }
+
+    HB_LOG_MESSAGE_INFO( "grid", "start grid with config:" );
+    HB_LOG_MESSAGE_INFO( "grid", "max_thread: %u", max_thread );
+    HB_LOG_MESSAGE_INFO( "grid", "grid_uri: %s", grid_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "grid_port: %u", grid_port );
+    HB_LOG_MESSAGE_INFO( "grid", "name: %s", config->name );
+    HB_LOG_MESSAGE_INFO( "grid", "cache_uri: %s", config->cache_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "cache_port: %u", config->cache_port );
+    HB_LOG_MESSAGE_INFO( "grid", "cache_timeout: %u", config->cache_timeout );
+    HB_LOG_MESSAGE_INFO( "grid", "db_uri: %s", config->db_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "db_port: %u", config->db_port );
+    HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 

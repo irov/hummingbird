@@ -187,7 +187,7 @@ void hb_file_close( hb_file_handle_t * _handle )
 
     if( res != 0 )
     {
-        hb_log_message( "file", HB_LOG_WARNING, "invalid close file '%s' error [%d]"
+        HB_LOG_MESSAGE_WARNING( "file", "invalid close file '%s' error [%d]"
             , _handle->path
             , res
         );

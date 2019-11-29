@@ -52,7 +52,7 @@ hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t *
 
     if( jroot == HB_NULLPTR )
     {
-        hb_log_message( "json", HB_LOG_ERROR, "json '%s' error line [%d] column [%d] position [%d]: %s"
+        HB_LOG_MESSAGE_ERROR( "json", "json '%s' error line [%d] column [%d] position [%d]: %s"
             , er.source
             , er.line
             , er.column
