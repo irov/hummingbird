@@ -11,6 +11,7 @@ typedef struct hb_date_t
     uint32_t hour;
     uint32_t min;
     uint32_t sec;
+    uint32_t msec;
 } hb_date_t;
 
 void hb_date( hb_date_t * _date );

@@ -62,13 +62,21 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
 
     hb_node_upload_out_t out_data;
     hb_node_code_t out_code;
-    if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code ) == HB_FAILURE )
+    char out_reason[1024];
+    if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code, out_reason ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     if( out_code != e_node_ok )
     {
+        size_t response_data_size = sprintf( _response, "{\"code\": %u, \"reason\": \"%s\"}"
+            , out_code
+            , out_reason
+        );
+
+        *_size = response_data_size;
+
         return HTTP_BADREQUEST;
     }
 

@@ -108,6 +108,23 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
 hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uoid, const hb_oid_t _poid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
+
+    if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_users_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_users'" );
+
+        return HB_FAILURE;
+    }
+
+    if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_projects_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_projects'" );
+
+        return HB_FAILURE;
+    }
+
+    hb_oid_copy( g_script_handle->user_oid, _uoid );
+    hb_oid_copy( g_script_handle->project_oid, _poid );
     
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
@@ -160,23 +177,6 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     g_script_handle->L = L;
 
-    if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_users_collection ) == HB_FAILURE )
-    {
-        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_users'" );
-
-        return HB_FAILURE;
-    }
-
-    if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_projects_collection ) == HB_FAILURE )
-    {
-        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_projects'" );
-
-        return HB_FAILURE;
-    }
-
-    hb_oid_copy( g_script_handle->user_oid, _uoid );
-    hb_oid_copy( g_script_handle->project_oid, _poid );
-
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -185,8 +185,8 @@ void hb_script_finalize()
     hb_db_destroy_collection( g_script_handle->db_users_collection );
     hb_db_destroy_collection( g_script_handle->db_projects_collection );
 
-    hb_log_message( "script", HB_LOG_INFO, "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
-    hb_log_message( "script", HB_LOG_INFO, "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
+    HB_LOG_MESSAGE_INFO( "script", "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
+    HB_LOG_MESSAGE_INFO( "script", "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );
 
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
@@ -224,9 +224,11 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     if( status != LUA_OK )
     {
         const char * e = lua_tostring( L, -1 );
-        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid load buffer: %s"
+            , e
+        );
 
-        lua_pop( L, 1 );  /* pop error message from the stack */
+        lua_pop( L, 1 );
 
         return HB_FAILURE;
     }
@@ -236,9 +238,12 @@ hb_result_t hb_script_load( const void * _buffer, size_t _size )
     if( ret != 0 )
     {
         const char * e = lua_tostring( L, -1 );
-        hb_log_message( "script", HB_LOG_ERROR, "%s", e );
 
-        lua_pop( L, 1 );  /* pop error message from the stack */
+        HB_LOG_MESSAGE_ERROR( "script", "invalid call buffer: %s"
+            , e
+        );
+
+        lua_pop( L, 1 );
 
         return HB_FAILURE;
     }
@@ -281,7 +286,7 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
+        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
             , _method
             , _datasize
             , _data
@@ -340,7 +345,7 @@ hb_result_t hb_script_event_call( const char * _event, const void * _data, size_
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        hb_log_message( "script", HB_LOG_ERROR, "call function '%s' data '%.*s' with error: %s"
+        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
             , _event
             , _datasize
             , _data

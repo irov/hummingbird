@@ -7,6 +7,8 @@
 
 #include "hb_utils/hb_getopt.h"
 
+#include <stdarg.h>
+#include <string.h>
 #include <memory.h>
 #include <stdio.h>
 
@@ -170,7 +172,7 @@ hb_result_t hb_node_write_out_data( hb_sharedmemory_handle_t * _sharedmemory, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, hb_node_code_t _code )
+hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, hb_node_code_t _code, const char * _format, ... )
 {
     if( _code == e_node_ok )
     {
@@ -193,10 +195,28 @@ hb_result_t hb_node_write_error_data( hb_sharedmemory_handle_t * _sharedmemory, 
         return HB_FAILURE;
     }
 
+    va_list args;
+    va_start( args, _format );
+
+    char reason[1024] = {'\0'};
+    int n = vsprintf( reason, _format, args );
+
+    va_end( args );
+
+    if( n >= 1024 )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_sharedmemory_write( _sharedmemory, reason, n + 1 ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_node_code_t * _code )
+hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, void * _data, size_t _size, hb_node_code_t * _code, char * _reason )
 {
     hb_sharedmemory_rewind( _sharedmemory );
 
@@ -221,6 +241,11 @@ hb_result_t hb_node_read_out_data( hb_sharedmemory_handle_t * _sharedmemory, voi
 
     if( *_code != 0 )
     {
+        if( hb_sharedmemory_read( _sharedmemory, _reason, 1024, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
         return HB_SUCCESSFUL;
     }
 

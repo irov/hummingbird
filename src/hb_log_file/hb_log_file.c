@@ -1,6 +1,6 @@
 #include "hb_log_file.h"
 
-#include "hb_utils/hb_time.h"
+#include "hb_utils/hb_date.h"
 
 #include <stdio.h>
 
@@ -15,12 +15,21 @@ typedef struct hb_log_file_handle_t
 //////////////////////////////////////////////////////////////////////////
 static hb_log_file_handle_t * g_log_file_handle = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_file_observer( const char * _category, hb_log_level_e _level, const char * _message )
+static void __hb_log_file_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
-    hb_time_t t;
-    hb_time( &t );
+    HB_UNUSED( _file );
+    HB_UNUSED( _line );
 
-    fprintf( g_log_file_handle->f, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
+    const char * ls = hb_log_level_string[_level];
+
+    hb_date_t d;
+    hb_date( &d );
+
+#ifdef HB_DEBUG
+    fprintf( g_log_file_handle->f, "%s [%u.%u.%u][%u:%u:%u][%u] (%s) [%s:%u]: %s\n", ls, d.year, d.mon, d.mday, d.hour, d.min, d.sec, d.msec, _category, _file, _line, _message );
+#else
+    fprintf( g_log_file_handle->f, "%s [%u.%u.%u][%u:%u:%u][%u] (%s): %s\n", ls, d.year, d.mon, d.mday, d.hour, d.min, d.sec, d.msec, _category, _message );
+#endif
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_file_initialize( const char * _file )

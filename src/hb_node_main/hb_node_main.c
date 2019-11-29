@@ -14,11 +14,11 @@
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, hb_log_level_e _level, const char * _message )
+static void __hb_log_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
     const char * ls = hb_log_level_string[_level];
 
-    printf( "[%s] %s: %s\n", _category, ls, _message );
+    printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
@@ -82,13 +82,13 @@ int main( int _argc, char * _argv[] )
     {
         if( hb_cache_initialize( config.cache_uri, config.cache_port, config.cache_timeout ) == HB_FAILURE )
         {
-            hb_log_message( "node", HB_LOG_ERROR, "node '%s' invalid initialize [cache] component [uri %s:%u]"
+            HB_LOG_MESSAGE_ERROR( "node", "node '%s' invalid initialize [cache] component [uri %s:%u]"
                 , config.name
                 , config.cache_uri
                 , config.cache_port
             );
 
-            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize, "invalid initialize cache" );
 
             return EXIT_SUCCESS;
         }
@@ -98,13 +98,13 @@ int main( int _argc, char * _argv[] )
     {
         if( hb_db_initialze( config.name, config.db_uri, config.db_port ) == HB_FAILURE )
         {
-            hb_log_message( "node", HB_LOG_ERROR, "node '%s' invalid initialize [db] component [uri %s:%u]"
+            HB_LOG_MESSAGE_ERROR( "node", "node '%s' invalid initialize [db] component [uri %s:%u]"
                 , config.name
                 , config.db_uri
                 , config.db_port
             );
 
-            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize, "invalid initialize db" );
 
             return EXIT_SUCCESS;
         }
@@ -114,11 +114,11 @@ int main( int _argc, char * _argv[] )
     {
         if( hb_storage_initialize() == HB_FAILURE )
         {
-            hb_log_message( "node", HB_LOG_ERROR, "node '%s' invalid initialize [storage] component"
+            HB_LOG_MESSAGE_ERROR( "node", "node '%s' invalid initialize [storage] component"
                 , config.name
             );
 
-            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize );
+            hb_node_write_error_data( sharedmemory_handle, e_node_component_invalid_initialize, "invalid initialize storage" );
 
             return EXIT_SUCCESS;
         }

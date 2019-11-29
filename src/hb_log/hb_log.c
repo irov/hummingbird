@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_observer_desc_t
 {
-    hb_log_level_e level;
+    hb_log_level_t level;
     char category[32];
     hb_log_observer_t observer;
 }hb_log_service_observer_desc_t;
@@ -45,7 +45,7 @@ void hb_log_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_log_add_observer( const char * _category, hb_log_level_e _level, hb_log_observer_t _observer )
+hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer )
 {
     if( g_log_service_handle->observer_count == HB_LOG_MAX_OBSERVER )
     {
@@ -90,7 +90,7 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
     return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_log_message_args( const char * _category, hb_log_level_e _level, const char * _message )
+static void __hb_log_message_args( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
     int count = g_log_service_handle->observer_count;
 
@@ -108,21 +108,21 @@ static void __hb_log_message_args( const char * _category, hb_log_level_e _level
             continue;
         }
 
-        (*desc->observer)(_category, _level, _message);
+        (*desc->observer)(_category, _level, _file, _line, _message);
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_log_message( const char * _category, hb_log_level_e _level, const char * _format, ... )
+void hb_log_message( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _format, ... )
 {
     va_list args;
     va_start( args, _format );
 
-    char message[HB_LOG_MAX_MESSAGE_SIZE];    
+    char message[HB_LOG_MAX_MESSAGE_SIZE];
     int n = vsprintf( message, _format, args );
 
     if( n > 0 )
     {
-        __hb_log_message_args( _category, _level, message );
+        __hb_log_message_args( _category, _level, _file, _line, message );
     }
 
     va_end( args );

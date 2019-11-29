@@ -1,7 +1,8 @@
-from urllib import parse
 from urllib import request
+from urllib.error import HTTPError
 import mimetypes
 import binascii
+import sys
 import io
 import uuid
 import json
@@ -13,7 +14,13 @@ def post(url, **params):
     r = request.Request(url)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
-    response = request.urlopen(r, timeout=60, data=data)
+    try:
+        response = request.urlopen(r, timeout=60, data=data)
+    except HTTPError as e:
+        print("Error code: ", e.code, e.reason)
+        return None
+        pass
+        
     reader = codecs.getreader("utf-8")
     r = reader(response)
     j = json.load(r)
@@ -129,11 +136,18 @@ def api(url, token, method, **params):
 print("----newproject----")
 jnewproject = post("http://localhost:5555/newproject")
 print("response: ", jnewproject)
+
+if jnewproject["code"] != 0:
+    sys.exit(0)
+
 pid = jnewproject["pid"]
 
 print("----upload---- pid: {0}".format(pid))
 jupload = upload("http://localhost:5555/upload", "server.lua", pid = pid)
 print("response: ", jupload)
+
+if jupload["code"] != 0:
+    sys.exit(0)
 
 login = uuid.uuid4().hex
 password = "test"
@@ -142,9 +156,15 @@ print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, pas
 jnewuser = post("http://localhost:5555/newuser", pid = pid, login = login, password = password)
 print("response: ", jnewuser)
 
+if jnewuser["code"] != 0:
+    sys.exit(0)
+
 print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
 jloginuser = post("http://localhost:5555/loginuser", pid = pid, login = login, password = password)
 print("response: ", jloginuser)
+
+if jloginuser["code"] != 0:
+    sys.exit(0)
 
 token = jloginuser["token"]
 method = "test"
@@ -152,3 +172,8 @@ data = dict(a=1, b=2, c="testc")
 print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
 japi = api("http://localhost:5555/api", token, method, **data)
 print("response: ", japi)
+
+if japi["code"] != 0:
+    sys.exit(0)
+    
+print("done")

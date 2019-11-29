@@ -23,7 +23,7 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
 {
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token.uoid, _token.poid ) == HB_FAILURE )
     {
-        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script" );
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script" );
 
         return HB_FAILURE;
     }
@@ -31,7 +31,7 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
     hb_db_collection_handle_t * db_collection_projects;
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
-        hb_log_message( "script", HB_LOG_ERROR, "invalid initialize script: db not found collection 'hb_projects'" );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_projects'" );
 
         return HB_FAILURE;
     }
@@ -41,14 +41,14 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
     hb_db_value_handle_t db_script_sha1_handles[1];
     if( hb_db_get_values( db_collection_projects, _token.poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
     {
-        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: collection 'hb_projects' not found 'script_sha1'" );
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection 'hb_projects' not found 'script_sha1'" );
 
         return HB_FAILURE;
     }
 
     if( db_script_sha1_handles[0].u.binary.length != sizeof( hb_sha1_t ) )
     {
-        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid data 'script_sha1'" );
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: invalid data 'script_sha1'" );
 
         return HB_FAILURE;
     }
@@ -63,14 +63,14 @@ static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
     hb_data_t script_data;
     if( hb_storage_get_code( script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
-        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid get data from storage" );
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: invalid get data from storage" );
 
         return HB_FAILURE;
     }
 
     if( hb_script_load( script_data, script_data_size ) == HB_FAILURE )
     {
-        hb_log_message( "node", HB_LOG_ERROR, "invalid initialize script: invalid load data" );
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: invalid load data" );
 
         return HB_FAILURE;
     }    
@@ -84,11 +84,6 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_node_api_out_t * out_data = (hb_node_api_out_t *)_out;
     *_size = sizeof( hb_node_api_out_t );
 
-    if( hb_cache_available() == HB_FALSE )
-    {
-        return HB_FAILURE;
-    }
-    
     if( hb_cache_expire_value( in_data->token, sizeof( in_data->token ), 1800 ) == HB_FAILURE )
     {
         return HB_FAILURE;
