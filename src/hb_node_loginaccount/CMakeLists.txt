@@ -1,0 +1,13 @@
+PROJECT(hb_node_loginaccount C)
+
+ADD_FILTER(
+src
+	hb_node_loginaccount.h
+	hb_node_loginaccount.c
+)
+
+ADD_EXECUTABLE(${PROJECT_NAME} WIN32 ${HUMMINGBIRD_SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_node_main)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_token)
+

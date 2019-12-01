@@ -2,15 +2,18 @@
 
 #include "hb_node_newproject/hb_node_newproject.h"
 
+#include "hb_token/hb_token.h"
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
-int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
+int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token )
 {
     HB_UNUSED( _request );
 
     hb_node_newproject_in_t in_data;
+
+    hb_token_base16_decode( _token, in_data.token );
 
     if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
     {

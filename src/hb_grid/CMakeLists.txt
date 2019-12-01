@@ -12,7 +12,9 @@ src
     hb_grid_request_upload.c
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c
-    hb_grid_request_newproject.c    
+    hb_grid_request_newproject.c
+    hb_grid_request_newaccount.c
+    hb_grid_request_loginaccount.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)

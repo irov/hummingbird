@@ -60,9 +60,8 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 1 );
 
-    hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_users, authentication_handles, 2, &authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_users, authentication_handles, 2, HB_NULLPTR, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -94,7 +93,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
             return HB_FAILURE;
         }
 
-        hb_token_handle_t token_handle;
+        hb_user_token_handle_t token_handle;
         hb_oid_copy( token_handle.uoid, user_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 

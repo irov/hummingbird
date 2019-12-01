@@ -76,7 +76,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     if( authentication_exist == HB_TRUE )
     {
-        hb_token_handle_t token_handle;
+        hb_user_token_handle_t token_handle;
         hb_oid_copy( token_handle.uoid, authentication_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 

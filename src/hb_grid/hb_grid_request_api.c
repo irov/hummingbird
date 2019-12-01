@@ -6,7 +6,7 @@
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
 
-int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid, const char * _token, const char * _method )
+int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
 {    
     HB_UNUSED( _pid );
 

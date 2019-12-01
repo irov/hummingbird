@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db | e_hb_component_storage;
 //////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-static hb_result_t __node_initialize_script( const hb_token_handle_t _token )
+static hb_result_t __node_initialize_script( const hb_user_token_handle_t _token )
 {
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token.uoid, _token.poid ) == HB_FAILURE )
     {
@@ -89,7 +88,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         return HB_FAILURE;
     }
 
-    hb_token_handle_t token_handle;
+    hb_user_token_handle_t token_handle;
     if( hb_cache_get_value( in_data->token, sizeof( in_data->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
