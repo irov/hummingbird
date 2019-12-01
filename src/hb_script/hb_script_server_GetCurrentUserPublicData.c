@@ -26,7 +26,7 @@ int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
     const char * db_fields[1] = { "public_data" };
 
     hb_db_value_handle_t handler[1];
-    if( hb_db_get_values( g_script_handle->db_users_collection, g_script_handle->user_oid, db_fields, 1, handler ) == HB_FAILURE )
+    if( hb_db_get_values( g_script_handle->db_collection_users, g_script_handle->user_oid, db_fields, 1, handler ) == HB_FAILURE )
     {
         lua_pushboolean( L, 0 );
 

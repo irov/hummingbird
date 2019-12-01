@@ -45,7 +45,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
 
     hb_oid_t project_oid;
     hb_bool_t project_exist;
-    if( hb_db_find_oid( db_collection_projects, project_handles, 1, project_oid, &project_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_projects, project_handles, 1, &project_oid, &project_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

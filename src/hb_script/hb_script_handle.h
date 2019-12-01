@@ -23,9 +23,9 @@ typedef struct hb_script_handle_t
     uint32_t call_used;
     uint32_t call_limit;
 
-    hb_db_collection_handle_t * db_entities_collection;
-    hb_db_collection_handle_t * db_users_collection;
-    hb_db_collection_handle_t * db_projects_collection;
+    hb_db_collection_handle_t * db_collection_entities;
+    hb_db_collection_handle_t * db_collection_users;
+    hb_db_collection_handle_t * db_collection_projects;
 
     hb_oid_t project_oid;
     hb_oid_t user_oid;    

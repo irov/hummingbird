@@ -237,7 +237,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
@@ -283,7 +283,10 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
 
     const bson_oid_t * oid = bson_iter_oid( &iter );
 
-    memcpy( _oid, oid->bytes, sizeof( hb_oid_t ) );
+    if( _oid != HB_NULLPTR )
+    {
+        memcpy( *_oid, oid->bytes, sizeof( hb_oid_t ) );
+    }
 
     mongoc_cursor_destroy( cursor );
 
