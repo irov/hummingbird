@@ -1,4 +1,5 @@
 #include "hb_date.h"
+#include "hb_clock.h"
 
 #include <time.h>
 
@@ -14,9 +15,8 @@ void hb_date( hb_date_t * _date )
     _date->min = tm->tm_min;
     _date->sec = tm->tm_sec;
 
-    clock_t c = clock();
+    hb_clock_t msec;
+    hb_clock_msec( &msec );
 
-    clock_t msec = c / (CLOCKS_PER_SEC / 1000);
-
-    _date->msec = msec % 1000;
+    _date->msec = msec;
 }

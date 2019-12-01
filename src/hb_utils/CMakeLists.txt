@@ -38,6 +38,9 @@ src
     
     hb_time.h
     ${hb_time_platform}
+    
+    hb_clock.h
+    hb_clock.c
 
     hb_date.h
     hb_date.c

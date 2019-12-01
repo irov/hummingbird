@@ -119,7 +119,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
     
-    if( hb_db_get_collection( "hb", "hb_entities", &g_script_handle->db_entities_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_entities", &g_script_handle->db_collection_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_entities'" );
 
@@ -127,14 +127,14 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     }
 
 
-    if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_users_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_collection_users ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_users'" );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_projects_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_projects'" );
 
@@ -200,8 +200,8 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 //////////////////////////////////////////////////////////////////////////
 void hb_script_finalize()
 {
-    hb_db_destroy_collection( g_script_handle->db_users_collection );
-    hb_db_destroy_collection( g_script_handle->db_projects_collection );
+    hb_db_destroy_collection( g_script_handle->db_collection_users );
+    hb_db_destroy_collection( g_script_handle->db_collection_projects );
 
     HB_LOG_MESSAGE_INFO( "script", "memory peak %d [max %d] %%%0.2f", g_script_handle->memory_peak - g_script_handle->memory_base, g_script_handle->memory_limit - g_script_handle->memory_base, (float)(g_script_handle->memory_peak - g_script_handle->memory_base) / (float)(g_script_handle->memory_limit - g_script_handle->memory_base) * 100.f );
     HB_LOG_MESSAGE_INFO( "script", "instruction %d [max %d] %%%0.2f", g_script_handle->call_used, g_script_handle->call_limit, (float)(g_script_handle->call_used) / (float)(g_script_handle->call_limit) * 100.f );

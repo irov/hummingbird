@@ -1,19 +1,20 @@
 version = 1
 
+
+--[[
 event.onCreateProject = function(data)
-    if( data.version == 1 )
-    {        
-        local entity = server.CreateProjectEntity({a=1,b=2,c=3})
-
-        local public_data = {a = 1, b = "test", e = entity}
-        local status = server.SetProjectPublicData(public_data)
-    }
-end
-
-event.onCreateUser = function(data)
-    local entity = server.CreateUserEntity({a=1,b=2,c=3})
+    local entity = server.CreateProjectEntity({a=1,b=2,c=3})
 
     local public_data = {a = 1, b = "test", e = entity}
+    local status = server.SetProjectPublicData(public_data)
+end
+]]--
+
+event.onCreateUser = function(data)
+    local entity1 = server.CreateUserEntity({a=1,b=2,c=3})
+    local entity2 = server.CreateUserEntity({a=2,b=2,c=3})
+
+    local public_data = {a = 1, b = "test", e = entity1}
     local status = server.SetCurrentUserPublicData(public_data)
 end
 
@@ -34,6 +35,7 @@ api.test = function(data)
     print(b)    
     print(c)    
     
+    --[[
     local status, a, b, e = server.GetProjectPublicData({"a", "b", "e"})
     
     print(status)
@@ -47,6 +49,7 @@ api.test = function(data)
     print(a)
     print(b)    
     print(c)
+    ]]--
     
     return status, {a=a, b=b, c=c, e=e}
 end
