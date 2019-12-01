@@ -89,7 +89,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_handles + 2 );
 
         hb_oid_t user_oid;
-        if( hb_db_new_document( db_collection_users, user_handles, 3, user_oid ) == HB_FAILURE )
+        if( hb_db_new_document( db_collection_users, user_handles, 3, &user_oid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

@@ -19,10 +19,10 @@ static const char * hb_log_level_string[] = {"all", "info", "warning", "error", 
 hb_result_t hb_log_initialize();
 void hb_log_finalize();
 
-typedef void(*hb_log_observer_t)(const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message);
+typedef void(*hb_log_observer_t)(const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message, void * _ud);
 
-hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer );
-hb_result_t hb_log_remove_observer( hb_log_observer_t _observer );
+hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer, void * _ud );
+hb_result_t hb_log_remove_observer( hb_log_observer_t _observer, void ** _ud );
 
 void hb_log_message( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _format, ... );
 

@@ -35,6 +35,7 @@ typedef hb_error_code_e hb_error_code_t;
 typedef uint32_t hb_pid_t;
 typedef char hb_pid16_t[8];
 typedef uint8_t hb_oid_t[12];
+typedef char hb_oid16_t[24];
 typedef uint8_t hb_sha1_t[20];
 typedef uint8_t hb_token_t[14];
 typedef char hb_token16_t[28];

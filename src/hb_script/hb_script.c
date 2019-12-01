@@ -13,9 +13,14 @@ hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 extern int __hb_script_server_GetCurrentUserPublicData( lua_State * L );
 extern int __hb_script_server_SetCurrentUserPublicData( lua_State * L );
+extern int __hb_script_server_CreateUserEntity( lua_State * L );
+extern int __hb_script_server_GetUserEntityPublicData( lua_State * L );
+extern int __hb_script_server_SetUserEntityPublicData( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
+    char msg[1024] = { '\0' };
+
     int n = lua_gettop( L );  /* number of arguments */
     int i;
     lua_getglobal( L, "tostring" );
@@ -29,11 +34,13 @@ static int __hb_lua_print( lua_State * L )
         s = lua_tolstring( L, -1, &l );  /* get result */
         if( s == NULL )
             return luaL_error( L, "'tostring' must return a string to 'print'" );
-        if( i > 1 ) printf( "\t" );
-        printf( s );
+        if( i > 1 ) strcat( msg, "\t" );
+        strcat( msg, s );
         lua_pop( L, 1 );  /* pop result */
     }
-    printf("\n");
+    strcat( msg, "\n" );
+
+    HB_LOG_MESSAGE_INFO( "script", "%s", msg );
 
     return 0;
 }
@@ -46,12 +53,15 @@ static const struct luaL_Reg globalLib[] = {
 static const struct luaL_Reg serverLib[] = {
     { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData }
     , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
+    , { "CreateUserEntity", &__hb_script_server_CreateUserEntity }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
     , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_panic( lua_State * L )
 {
-    HB_UNUSED( L );
+    HB_UNUSED( L );    
 
     longjmp( g_script_handle->panic_jump, 1 );
 }
@@ -108,6 +118,14 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
 hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uoid, const hb_oid_t _poid )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
+    
+    if( hb_db_get_collection( "hb", "hb_entities", &g_script_handle->db_entities_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_entities'" );
+
+        return HB_FAILURE;
+    }
+
 
     if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_users_collection ) == HB_FAILURE )
     {
@@ -136,7 +154,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     g_script_handle->memory_base = 0;
     g_script_handle->memory_used = 0;
     g_script_handle->memory_peak = 0;
-    g_script_handle->memory_limit = _memorylimit;
+    g_script_handle->memory_limit = ~0U;
 
     lua_State * L = lua_newstate( &__hb_lua_alloc, HB_NULLPTR );
 
@@ -173,7 +191,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     size_t memory_used = g_script_handle->memory_used;
     g_script_handle->memory_base = memory_used;
-    g_script_handle->memory_limit += memory_used;
+    g_script_handle->memory_limit = memory_used + _memorylimit;
 
     g_script_handle->L = L;
 
@@ -302,7 +320,7 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
     
     if( lua_type( L, -1 ) == LUA_TTABLE )
     {
-        hb_script_json_dumps( L, _result, _capacity, _resultsize );
+        hb_script_json_dumps( L, -1, _result, _capacity, _resultsize );
     }
     else
     {

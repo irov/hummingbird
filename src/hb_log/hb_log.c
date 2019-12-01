@@ -18,6 +18,7 @@ typedef struct hb_log_service_observer_desc_t
     hb_log_level_t level;
     char category[32];
     hb_log_observer_t observer;
+    void * ud;
 }hb_log_service_observer_desc_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_handle_t
@@ -45,7 +46,7 @@ void hb_log_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer )
+hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer, void * _ud )
 {
     if( g_log_service_handle->observer_count == HB_LOG_MAX_OBSERVER )
     {
@@ -65,13 +66,14 @@ hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, 
     }
 
     desc.observer = _observer;
+    desc.ud = _ud;
 
     g_log_service_handle->observers[g_log_service_handle->observer_count++] = desc;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
+hb_result_t hb_log_remove_observer( hb_log_observer_t _observer, void ** _ud )
 {
     for( int i = 0; i != HB_LOG_MAX_OBSERVER; ++i )
     {
@@ -80,6 +82,11 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer )
         if( desc->observer != _observer )
         {
             continue;
+        }
+
+        if( _ud != HB_NULLPTR )
+        {
+            *_ud = desc->ud;
         }
 
         g_log_service_handle->observers[i] = g_log_service_handle->observers[g_log_service_handle->observer_count - 1];
@@ -108,7 +115,7 @@ static void __hb_log_message_args( const char * _category, hb_log_level_t _level
             continue;
         }
 
-        (*desc->observer)(_category, _level, _file, _line, _message);
+        (*desc->observer)(_category, _level, _file, _line, _message, desc->ud);
     }
 }
 //////////////////////////////////////////////////////////////////////////

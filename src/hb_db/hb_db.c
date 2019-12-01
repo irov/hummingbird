@@ -154,7 +154,7 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_hand
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t _newoid )
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
@@ -176,7 +176,7 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const
 
     bson_destroy( &query );
 
-    memcpy( _newoid, oid.bytes, sizeof( hb_oid_t ) );
+    memcpy( *_newoid, oid.bytes, sizeof( hb_oid_t ) );
 
     return HB_SUCCESSFUL;
 }

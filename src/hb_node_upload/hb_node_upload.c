@@ -80,7 +80,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_db_value_handle_t handles[1];
         hb_db_make_binary_value( "sha1", ~0U, sha1, sizeof( sha1 ), handles + 0 );
 
-        hb_db_new_document( db_collection_projects_subversion, handles, 1, project_subversion_oid );
+        hb_db_new_document( db_collection_projects_subversion, handles, 1, &project_subversion_oid );
     }
     else
     {
@@ -91,7 +91,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_db_make_binary_value( "sha1", ~0U, sha1, sizeof( sha1 ), handles + 0 );
         hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.u.binary.buffer, db_script_sha1_handle.u.binary.length, handles + 1 );
 
-        hb_db_new_document( db_collection_projects_subversion, handles, 2, project_subversion_oid );
+        hb_db_new_document( db_collection_projects_subversion, handles, 2, &project_subversion_oid );
 
         hb_db_destroy_values( &db_script_sha1_handle, 1 );
     }

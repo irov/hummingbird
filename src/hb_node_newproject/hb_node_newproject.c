@@ -35,7 +35,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_db_make_int64_value( "script_revision", ~0U, 0, new_value + 0 );
 
     hb_oid_t project_oid;
-    if( hb_db_new_document( db_collection_projects, new_value, 1, project_oid ) == HB_FAILURE )
+    if( hb_db_new_document( db_collection_projects, new_value, 1, &project_oid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
