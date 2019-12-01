@@ -9,25 +9,18 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
+int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid )
 {
     hb_node_upload_in_t in_data;
+
+    hb_base16_decode( _pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
     if( hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
-    }
-
-    size_t params_pid_size;
-    const void * params_pid;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "pid", &params_pid, &params_pid_size ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    hb_base16_decode( params_pid, params_pid_size, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+    }    
 
     size_t params_data_size;
     const void * params_data;

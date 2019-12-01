@@ -118,12 +118,10 @@ def upload(url, filename, **fields):
     return j
     pass
     
-def api(url, token, method, **params):
+def api(url, **params):
     jd = json.dumps(params)
     data = jd.encode('utf-8')
     r = request.Request(url)
-    r.add_header('X-Token', token)
-    r.add_header('X-Method', method)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
     response = request.urlopen(r, timeout=60, data=data)
@@ -143,7 +141,7 @@ if jnewproject["code"] != 0:
 pid = jnewproject["pid"]
 
 print("----upload---- pid: {0}".format(pid))
-jupload = upload("http://localhost:5555/upload", "server.lua", pid = pid)
+jupload = upload("http://localhost:5555/{0}/upload".format(pid), "server.lua")
 print("response: ", jupload)
 
 if jupload["code"] != 0:
@@ -153,14 +151,14 @@ login = uuid.uuid4().hex
 password = "test"
 
 print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jnewuser = post("http://localhost:5555/newuser", pid = pid, login = login, password = password)
+jnewuser = post("http://localhost:5555/{0}/newuser".format(pid), login = login, password = password)
 print("response: ", jnewuser)
 
 if jnewuser["code"] != 0:
     sys.exit(0)
 
 print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jloginuser = post("http://localhost:5555/loginuser", pid = pid, login = login, password = password)
+jloginuser = post("http://localhost:5555/{0}/loginuser".format(pid), login = login, password = password)
 print("response: ", jloginuser)
 
 if jloginuser["code"] != 0:
@@ -170,7 +168,7 @@ token = jloginuser["token"]
 method = "test"
 data = dict(a=1, b=2, c="testc")
 print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
-japi = api("http://localhost:5555/api", token, method, **data)
+japi = api("http://localhost:5555/{0}/api/{1}/{2}".format(pid, token, method), **data)
 print("response: ", japi)
 
 if japi["code"] != 0:

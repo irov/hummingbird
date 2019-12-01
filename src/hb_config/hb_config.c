@@ -7,6 +7,12 @@
 void * hb_new( size_t _size )
 {
     void * p = malloc( _size );
+
+    if( p == HB_NULLPTR )
+    {
+        return HB_NULLPTR;
+    }
+
     memset( p, 0, _size );
 
     return p;
