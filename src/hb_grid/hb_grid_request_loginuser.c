@@ -7,26 +7,22 @@
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_base16.h"
 
-int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
+int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid )
 {
-    size_t request_data_size;
-    char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
     hb_node_loginuser_in_t in_data;
 
+    hb_base16_decode( _pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+
     {
-        hb_json_handle_t * json_handle;
-        if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
+        size_t request_data_size;
+        char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+        if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        const char * pid;
-        if( hb_json_get_field_string( json_handle, "pid", &pid, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
+        hb_json_handle_t * json_handle;
+        if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
@@ -41,9 +37,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
         if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
-        }
-
-        hb_base16_decode( pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+        }        
 
         strcpy( in_data.login, login );
         strcpy( in_data.password, password );
