@@ -5,7 +5,7 @@
 
 typedef struct hb_node_newproject_in_t
 {
-    uint8_t dummy;
+    hb_token_t token;
 } hb_node_newproject_in_t;
 
 typedef struct hb_node_newproject_out_t

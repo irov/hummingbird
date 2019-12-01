@@ -2,6 +2,7 @@
 
 #include "hb_node_upload/hb_node_upload.h"
 #include "hb_process/hb_process.h"
+#include "hb_token/hb_token.h"
 #include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_strstre.h"
 #include "hb_utils/hb_base16.h"
@@ -9,9 +10,11 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid )
+int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid )
 {
     hb_node_upload_in_t in_data;
+
+    hb_token_base16_decode( _token, in_data.token );
 
     hb_base16_decode( _pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 

@@ -21,11 +21,13 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
     printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
 //////////////////////////////////////////////////////////////////////////
-extern int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
-extern int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid, const char * _token, const char * _method );
-extern int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid );
+extern int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_loginaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
+extern int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token );
+extern int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid );
 extern int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid );
 extern int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid );
+extern int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
 ////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -66,49 +68,108 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char pid[128] = { '\0' };
+    char cmd[128] = { '\0' };
+    char arg1[128] = { '\0' };
+    char arg2[128] = { '\0' };
+    char arg3[128] = { '\0' };
+    int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd, arg1, arg2, arg3 );
 
-    if( strcmp( uri, "/newproject" ) == 0 )
+    if( count == 0 )
     {
-        response_code = hb_grid_request_newproject( _request, process, response_data, &response_data_size );
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
     }
-    else
-    {
-        char cmd[128] = { '\0' };
-        char token[128] = { '\0' };
-        char method[128] = { '\0' };
-        int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", pid, cmd, token, method );
 
-        if( count < 2 )
+    if( strcmp( cmd, "newaccount" ) == 0 )
+    {
+        if( count != 1 )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
             return;
         }
 
-        if( strcmp( cmd, "api" ) == 0 )
+        response_code = hb_grid_request_newaccount( _request, process, response_data, &response_data_size );
+    }
+    else if( strcmp( cmd, "loginaccount" ) == 0 )
+    {
+        if( count != 1 )
         {
-            if( count < 4 )
-            {
-                evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
-                return;
-            }
+            return;
+        }
 
-            response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, pid, token, method );
-        }
-        else if( strcmp( cmd, "upload" ) == 0 )
+        response_code = hb_grid_request_loginaccount( _request, process, response_data, &response_data_size );
+    }
+    else if( strcmp( cmd, "newproject" ) == 0 )
+    {
+        if( count != 2 )
         {
-            response_code = hb_grid_request_upload( _request, process, response_data, &response_data_size, pid );
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
         }
-        else if( strcmp( cmd, "newuser" ) == 0 )
+
+        const char * account_token = arg1;
+
+        response_code = hb_grid_request_newproject( _request, process, response_data, &response_data_size, account_token );
+    }
+    else if( strcmp( cmd, "upload" ) == 0 )
+    {
+        if( count != 3 )
         {
-            response_code = hb_grid_request_newuser( _request, process, response_data, &response_data_size, pid );
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
         }
-        else if( strcmp( cmd, "loginuser" ) == 0 )
+
+        const char * account_token = arg1;
+        const char * pid = arg2;
+
+        response_code = hb_grid_request_upload( _request, process, response_data, &response_data_size, account_token, pid );
+    }
+    else if( strcmp( cmd, "newuser" ) == 0 )
+    {
+        if( count != 2 )
         {
-            response_code = hb_grid_request_loginuser( _request, process, response_data, &response_data_size, pid );
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
         }
+
+        const char * pid = arg1;
+
+        response_code = hb_grid_request_newuser( _request, process, response_data, &response_data_size, pid );
+    }
+    else if( strcmp( cmd, "loginuser" ) == 0 )
+    {
+        if( count != 2 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * pid = arg1;
+
+        response_code = hb_grid_request_loginuser( _request, process, response_data, &response_data_size, pid );
+    }
+    else if( strcmp( cmd, "api" ) == 0 )
+    {
+        if( count != 4 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+        const char * pid = arg2;
+        const char * method = arg3;
+
+        response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, pid, method );
     }
 
     evbuffer_add( output_buffer, response_data, response_data_size );

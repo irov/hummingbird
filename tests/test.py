@@ -130,9 +130,28 @@ def api(url, **params):
     j = json.load(r)
     return j
     pass
+    
+login = uuid.uuid4().hex
+password = "testaccount"
+    
+print("----newaccount---- login: {0} password: {1}".format(login, password))
+jnewaccount = post("http://localhost:5555/newaccount", login = login, password = password)
+print("response: ", jnewaccount)
+
+if jnewaccount["code"] != 0:
+    sys.exit(0)
+    
+print("----loginaccount---- login: {0} password: {1}".format(login, password))
+jloginaccount = post("http://localhost:5555/loginaccount", login = login, password = password)
+print("response: ", jloginaccount)
+
+if jloginaccount["code"] != 0:
+    sys.exit(0)    
+    
+token = jloginaccount["token"]
    
-print("----newproject----")
-jnewproject = post("http://localhost:5555/newproject")
+print("----newproject---- token: {0}".format(token))
+jnewproject = post("http://localhost:5555/newproject/{0}".format(token))
 print("response: ", jnewproject)
 
 if jnewproject["code"] != 0:
@@ -140,25 +159,25 @@ if jnewproject["code"] != 0:
 
 pid = jnewproject["pid"]
 
-print("----upload---- pid: {0}".format(pid))
-jupload = upload("http://localhost:5555/{0}/upload".format(pid), "server.lua")
+print("----upload---- token: {0} pid: {1}".format(token, pid))
+jupload = upload("http://localhost:5555/upload/{0}/{1}".format(token, pid), "server.lua")
 print("response: ", jupload)
 
 if jupload["code"] != 0:
     sys.exit(0)
 
 login = uuid.uuid4().hex
-password = "test"
+password = "testuser"
 
 print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jnewuser = post("http://localhost:5555/{0}/newuser".format(pid), login = login, password = password)
+jnewuser = post("http://localhost:5555/newuser/{0}".format(pid), login = login, password = password)
 print("response: ", jnewuser)
 
 if jnewuser["code"] != 0:
     sys.exit(0)
 
 print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jloginuser = post("http://localhost:5555/{0}/loginuser".format(pid), login = login, password = password)
+jloginuser = post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)
 print("response: ", jloginuser)
 
 if jloginuser["code"] != 0:
@@ -168,7 +187,7 @@ token = jloginuser["token"]
 method = "test"
 data = dict(a=1, b=2, c="testc")
 print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
-japi = api("http://localhost:5555/{0}/api/{1}/{2}".format(pid, token, method), **data)
+japi = api("http://localhost:5555/api/{0}/{1}/{2}".format(pid, token, method), **data)
 print("response: ", japi)
 
 if japi["code"] != 0:

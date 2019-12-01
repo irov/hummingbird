@@ -5,6 +5,8 @@
 
 typedef struct hb_node_upload_in_t
 {
+    hb_token_t token;
+
     hb_pid_t pid;
 
     hb_source_t script_source;
