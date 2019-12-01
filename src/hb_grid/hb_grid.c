@@ -165,8 +165,8 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             return;
         }
 
-        const char * user_token = arg1;
-        const char * pid = arg2;
+        const char * pid = arg1;
+        const char * user_token = arg2;
         const char * method = arg3;
 
         response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, pid, method );

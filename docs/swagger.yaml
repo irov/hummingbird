@@ -24,13 +24,89 @@ tags:
 schemes:
 - http
 paths:
-  /newproject:
+  /newaccount:
+    post:
+      tags:
+      - newaccount
+      summary: create new account
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: data
+        description: new user data
+        required: true
+        schema:
+          type: object
+          required:
+            - login
+            - password
+          properties:
+            login:
+              type: string
+            password:
+              type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              token:
+                type: "string"
+        400:
+          description: invalid operation
+  /loginaccount:
+    post:
+      tags:
+      - loginaccount
+      summary: login new account
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: data
+        description: login user data
+        required: true
+        schema:
+          type: object
+          required:
+            - login
+            - password
+          properties:
+            login:
+              type: string
+            password:
+              type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              token:
+                type: "string"
+        400:
+          description: invalid operation
+  /newproject/{token}:
     post:
       tags:
       - newproject
       summary: create new project
       consumes:
       - application/json
+      parameters:
+      - in: path
+        name: token
+        description: account token
+        required: true
+        type: string
       responses:
         200:
           description: successful operation
@@ -44,7 +120,7 @@ paths:
                 type: "string"
         400:
           description: invalid operation
-  /upload:
+  /upload/{token}/{pid}:
     post:
       tags:
       - upload
@@ -52,9 +128,14 @@ paths:
       consumes:
       - multipart/form-data
       parameters:
+      - name: token
+        in: path
+        description: account token
+        required: true
+        type: string
       - name: pid
-        in: formData
-        description: Project ID
+        in: path
+        description: project id
         required: true
         type: string
       - name: data
@@ -73,10 +154,10 @@ paths:
                 format: "int32"
               revision:
                 type: "integer"
-                format: "int64"          
+                format: "int64"
         400:
           description: invalid operation
-  /newuser:
+  /newuser/{pid}:
     post:
       tags:
       - newuser
@@ -84,18 +165,21 @@ paths:
       consumes:
       - application/json
       parameters:
+      - name: pid
+        in: path
+        description: project id
+        required: true
+        type: string
       - in: body
         name: data
         description: new user data
+        required: true
         schema:
           type: object
           required:
-            - pid
             - login
             - password
           properties:
-            pid:
-              type: string
             login:
               type: string
             password:
@@ -113,7 +197,7 @@ paths:
                 type: "string"
         400:
           description: invalid operation
-  /loginuser:
+  /loginuser/{pid}:
     post:
       tags:
       - loginuser
@@ -121,18 +205,20 @@ paths:
       consumes:
       - application/json
       parameters:
+      - name: pid
+        in: path
+        description: project id
+        required: true
+        type: string
       - in: body
         name: data
         description: login user data
         schema:
           type: object
           required:
-            - pid
             - login
             - password
           properties:
-            pid:
-              type: string
             login:
               type: string
             password:
@@ -150,7 +236,7 @@ paths:
                 type: "string"
         400:
           description: invalid operation
-  /api:
+  /api/{pid}/{token}/{method}:
     post:
       tags:
       - api
@@ -159,22 +245,27 @@ paths:
       consumes:
       - application/json
       parameters:
-      - name: X-Token
-        in: header
+      - name: pid
+        in: path
+        description: project id
+        required: true
+        type: string
+      - name: token
+        in: path
         description: user token
         required: true
         type: string
-      - name: X-Method
-        in: header
+      - name: method
+        in: path
         description: api method
         required: true
         type: string
       - in: body
         name: data
-        description: login user data
+        description: api data
         required: true
         schema:
-          type: object       
+          type: object
       responses:
         200:
           description: successful operation
@@ -187,6 +278,6 @@ paths:
               successful:
                 type: "boolean"
               data:
-                type: "object"      
+                type: "object"
         400:
           description: invalid operation
