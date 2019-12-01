@@ -186,7 +186,7 @@ if jloginuser["code"] != 0:
 token = jloginuser["token"]
 method = "test"
 data = dict(a=1, b=2, c="testc")
-print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
+print("----api---- pid: {0} token: {1} method: {2} data: {3}".format(pid, token, method, data))
 japi = api("http://localhost:5555/api/{0}/{1}/{2}".format(pid, token, method), **data)
 print("response: ", japi)
 
