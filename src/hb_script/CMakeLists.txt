@@ -13,6 +13,10 @@ src
     
     hb_script_server_GetCurrentUserPublicData.c
     hb_script_server_SetCurrentUserPublicData.c
+    
+    hb_script_server_CreateUserEntity.c
+    hb_script_server_GetUserEntityPublicData.c
+    hb_script_server_SetUserEntityPublicData.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)

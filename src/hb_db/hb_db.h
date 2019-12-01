@@ -69,7 +69,7 @@ void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const vo
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
 void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
 
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t _newoid );
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid );
 
 hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t _oid, hb_bool_t * _exist );
 hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, uint32_t * _founds );
