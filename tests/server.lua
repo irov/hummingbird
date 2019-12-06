@@ -1,20 +1,16 @@
 version = 1
 
-
---[[
 event.onCreateProject = function(data)
-    local entity = server.CreateProjectEntity({a=1,b=2,c=3})
+    local entity = server.CreateProjectEntity("match", "", {a=1,b=2,c=3})
 
     local public_data = {a = 1, b = "test", e = entity}
     local status = server.SetProjectPublicData(public_data)
 end
-]]--
 
 event.onCreateUser = function(data)
-    local entity1 = server.CreateUserEntity({a=1,b=2,c=3})
-    local entity2 = server.CreateUserEntity({a=2,b=2,c=3})
+    local entity = server.CreateUserEntity("test", "", {a=1,b=2,c=3})
 
-    local public_data = {a = 1, b = "test", e = entity1}
+    local public_data = {a = 1, b = "test", e = entity}
     local status = server.SetCurrentUserPublicData(public_data)
 end
 
