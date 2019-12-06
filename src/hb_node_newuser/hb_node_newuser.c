@@ -82,13 +82,14 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_sha1_t password_sha1;
         hb_sha1( in_data->password, strlen( in_data->password ), password_sha1 );
 
-        hb_db_value_handle_t user_handles[3];
-        hb_db_make_int32_value( "pid", ~0U, in_data->pid, user_handles + 0 );
-        hb_db_make_binary_value( "login", ~0U, login_sha1, 20, user_handles + 1 );
-        hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_handles + 2 );
+        hb_db_value_handle_t user_values[4];
+        hb_db_make_int32_value( "pid", ~0U, in_data->pid, user_values + 0 );
+        hb_db_make_binary_value( "login", ~0U, login_sha1, 20, user_values + 1 );
+        hb_db_make_binary_value( "password", ~0U, password_sha1, 20, user_values + 2 );
+        hb_db_make_symbol_value( "public_data", ~0U, "{}", ~0U, user_values + 3 );
 
         hb_oid_t user_oid;
-        if( hb_db_new_document( db_collection_users, user_handles, 3, &user_oid ) == HB_FAILURE )
+        if( hb_db_new_document( db_collection_users, user_values, 4, &user_oid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

@@ -237,21 +237,21 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t query;
     bson_init( &query );
 
-    __hb_db_append_values( &query, _handles, _count );
+    __hb_db_append_values( &query, _query, _count );
 
     bson_t fields;
     bson_init( &fields );
 
     BSON_APPEND_INT32( &fields, "_id", 1 );
 
-    mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, &fields, HB_NULLPTR );
+    mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 1, 0, &query, &fields, HB_NULLPTR );
 
     bson_destroy( &query );
     bson_destroy( &fields );
@@ -295,14 +295,159 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _handles, uint32_t _count, uint32_t * _founds )
+hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, const char ** _fields, uint32_t _fieldcount, hb_db_value_handle_t * _values, uint32_t _capacity, uint32_t * _exists )
+{
+    mongoc_collection_t * mongo_collection = _handle->collection;
+
+    bson_t query;
+    bson_init( &query );
+
+    __hb_db_append_values( &query, _query, _count );
+
+    bson_t fields;
+    bson_init( &fields );
+
+    for( uint32_t index = 0; index != _fieldcount; ++index )
+    {
+        BSON_APPEND_INT32( &fields, _fields[index], 1 );
+    }
+
+    mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, &fields, HB_NULLPTR );
+
+    bson_destroy( &query );
+    bson_destroy( &fields );
+
+    uint32_t cursor_count = 0;
+
+    const bson_t * data;
+    while( mongoc_cursor_next( cursor, &data ) == true )
+    {
+        if( cursor_count == _capacity )
+        {
+            break;
+        }
+
+        bson_iter_t iter;
+        if( bson_iter_init( &iter, data ) == false )
+        {
+            mongoc_cursor_destroy( cursor );
+
+            return HB_FAILURE;
+        }
+
+        for( uint32_t index = 0; index != _fieldcount; ++index )
+        {
+            hb_db_value_handle_t * value = _values + cursor_count * _fieldcount + index;
+
+            value->handle = index == 0 ? cursor : HB_NULLPTR;
+
+            const char * field = _fields[index];
+
+            value->field = field;
+            value->field_length = strlen( field );
+
+            if( bson_iter_find( &iter, field ) == false )
+            {
+                mongoc_cursor_destroy( cursor );
+
+                return HB_FAILURE;
+            }
+
+            bson_type_t type = bson_iter_type( &iter );
+
+            switch( type )
+            {
+            case BSON_TYPE_INT32:
+                {
+                    value->type = e_hb_db_int32;
+
+                    value->u.i32 = bson_iter_int32( &iter );
+                }break;
+            case BSON_TYPE_INT64:
+                {
+                    value->type = e_hb_db_int64;
+
+                    value->u.i64 = bson_iter_int64( &iter );
+                }break;
+            case BSON_TYPE_UTF8:
+                {
+                    value->type = e_hb_db_utf8;
+
+                    uint32_t utf8_length;
+                    const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
+
+                    value->u.utf8.length = utf8_length;
+                    value->u.utf8.buffer = utf8_value;
+                }break;
+            case BSON_TYPE_SYMBOL:
+                {
+                    value->type = e_hb_db_symbol;
+
+                    uint32_t symbol_length;
+                    const char * symbol_value = bson_iter_symbol( &iter, &symbol_length );
+
+                    value->u.symbol.length = symbol_length;
+                    value->u.symbol.buffer = symbol_value;
+                }break;
+            case BSON_TYPE_BINARY:
+                {
+                    value->type = e_hb_db_binary;
+
+                    bson_subtype_t binary_subtype;
+                    uint32_t binary_length;
+                    const uint8_t * binary_buffer;
+                    bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
+
+                    value->u.binary.length = binary_length;
+                    value->u.binary.buffer = binary_buffer;
+                }break;
+            case BSON_TYPE_DATE_TIME:
+                {
+                    value->type = e_hb_db_time;
+
+                    value->u.time = bson_iter_time_t( &iter );
+                }break;
+            case BSON_TYPE_OID:
+                {
+                    value->type = e_hb_db_oid;
+
+                    const bson_oid_t * value_oid = bson_iter_oid( &iter );
+
+                    value->u.oid = value_oid->bytes;
+                }break;
+            default:
+                {
+                    return HB_FAILURE;
+                }break;
+            }
+        }
+
+        ++cursor_count;
+    }
+
+    bson_error_t error;
+    if( mongoc_cursor_error( cursor, &error ) )
+    {
+        HB_LOG_MESSAGE_ERROR( "db", "select values error occurred: %s", error.message );
+
+        mongoc_cursor_destroy( cursor );
+
+        return HB_FAILURE;
+    }
+
+    *_exists = cursor_count;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, uint32_t * _founds )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
     bson_t filter;
     bson_init( &filter );
 
-    __hb_db_append_values( &filter, _handles, _count );
+    __hb_db_append_values( &filter, _query, _count );
 
     bson_error_t error;
     int64_t count = mongoc_collection_count_documents( mongo_collection, &filter, HB_NULLPTR, HB_NULLPTR, HB_NULLPTR, &error );

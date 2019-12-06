@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////
 extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
-int __hb_script_server_CreateUserEntity( lua_State * L )
+int __hb_script_server_CreateProjectEntity( lua_State * L )
 {
     size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
@@ -30,22 +30,21 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
         eid = hb_rand_time();
         eid &= 0x7fffffff;
 
-        hb_db_value_handle_t values[4];
+        hb_db_value_handle_t values[3];
         hb_db_make_int32_value( "eid", ~0U, eid, values + 0 );
         hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, values + 1 );
-        hb_db_make_oid_value( "uoid", ~0U, g_script_handle->user_oid, values + 2 );
 
-        uint32_t extra_values = 0;       
+        uint32_t extra_values = 0;
 
         if( name_len != 0 )
         {
-            hb_db_make_symbol_value( "name", ~0U, name, name_len, values + 3 );
+            hb_db_make_symbol_value( "name", ~0U, name, name_len, values + 2 );
 
             extra_values += 1;
         }
 
         hb_bool_t exist;
-        if( hb_db_find_oid( g_script_handle->db_collection_user_entities, values, 3 + extra_values, HB_NULLPTR, &exist ) == HB_FAILURE )
+        if( hb_db_find_oid( g_script_handle->db_collection_project_entities, values, 2 + extra_values, HB_NULLPTR, &exist ) == HB_FAILURE )
         {
             lua_pushboolean( L, 0 );
             lua_pushnil( L );
@@ -59,16 +58,15 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
         }
     }
 
-    hb_db_value_handle_t values[6];
+    hb_db_value_handle_t values[5];
     hb_db_make_int32_value( "eid", ~0U, eid, values + 0 );
     hb_db_make_symbol_value( "name", ~0U, name, name_len, values + 1 );
     hb_db_make_symbol_value( "parent", ~0U, parent, parent_len, values + 2 );
     hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, values + 3 );
-    hb_db_make_oid_value( "uoid", ~0U, g_script_handle->user_oid, values + 4 );
-    hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, values + 5 );
+    hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, values + 4 );
 
     hb_oid_t eoid;
-    if( hb_db_new_document( g_script_handle->db_collection_user_entities, values, 6, &eoid ) == HB_FAILURE )
+    if( hb_db_new_document( g_script_handle->db_collection_user_entities, values, 5, &eoid ) == HB_FAILURE )
     {
         lua_pushboolean( L, 0 );
         lua_pushnil( L );
