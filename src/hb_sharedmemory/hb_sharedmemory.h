@@ -5,7 +5,7 @@
 
 typedef struct hb_sharedmemory_handle_t hb_sharedmemory_handle_t;
 
-hb_result_t hb_sharedmemory_create( uint32_t * _id, size_t _size, hb_sharedmemory_handle_t ** _handle );
+hb_result_t hb_sharedmemory_create( size_t _size, hb_sharedmemory_handle_t ** _handle );
 hb_result_t hb_sharedmemory_open( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle );
 hb_result_t hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle );
 
