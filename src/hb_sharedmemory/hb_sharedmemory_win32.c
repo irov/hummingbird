@@ -21,10 +21,14 @@ static void __hb_write_name( char * _name, uint32_t _id )
     sprintf( _name, "hb_sm_%03u", _id );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
+hb_result_t hb_sharedmemory_create( uint32_t * _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
+    static uint32_t id = 0;
+
+    ++id;
+
     char name[64];
-    __hb_write_name( name, _id );
+    __hb_write_name( name, id );
 
     HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, _size, name );
 
@@ -42,13 +46,14 @@ hb_result_t hb_sharedmemory_create( uint32_t _id, size_t _size, hb_sharedmemory_
 
     hb_sharedmemory_handle_t * handle = HB_NEW( hb_sharedmemory_handle_t );
 
-    handle->id = _id;
+    handle->id = id;
     strcpy( handle->name, name );
     handle->size = _size;
     handle->carriage = 0;
     handle->hMapFile = hMapFile;
     handle->pBuf = pBuf;
 
+    *_id = id;
     *_handle = handle;
 
     return HB_SUCCESSFUL;
