@@ -21,7 +21,7 @@ static void __hb_write_name( char * _name, uint32_t _id )
     sprintf( _name, "hb_sm_%03u", _id );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_sharedmemory_create( uint32_t * _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
+hb_result_t hb_sharedmemory_create( size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
     static uint32_t id = 0;
 
@@ -53,7 +53,6 @@ hb_result_t hb_sharedmemory_create( uint32_t * _id, size_t _size, hb_sharedmemor
     handle->hMapFile = hMapFile;
     handle->pBuf = pBuf;
 
-    *_id = id;
     *_handle = handle;
 
     return HB_SUCCESSFUL;

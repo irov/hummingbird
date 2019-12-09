@@ -397,7 +397,7 @@ int main( int _argc, char * _argv[] )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
-        if( hb_sharedmemory_create( i, 65536, &process_handle->sharedmemory ) == HB_FAILURE )
+        if( hb_sharedmemory_create( 65536, &process_handle->sharedmemory ) == HB_FAILURE )
         {
             continue;
         }

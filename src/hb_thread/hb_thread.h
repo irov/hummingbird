@@ -5,7 +5,11 @@
 
 typedef struct hb_thread_handle_t hb_thread_handle_t;
 
+#ifdef HB_PLATFORM_WINDOWS
 typedef uint32_t( __stdcall * hb_thread_function_t )(void * _ud);
+#elif HB_PLATFORM_LINUX
+typedef uint32_t( *hb_thread_function_t )(void * _ud);
+#endif
 
 hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thread_handle_t ** _handle );
 void hb_thread_join( hb_thread_handle_t * _handle );

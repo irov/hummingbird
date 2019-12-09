@@ -93,4 +93,12 @@ void hb_free( void * _ptr );
 #define HB_SHAREDMEMORY_SIZE 65536
 #endif
 
+#if defined(WIN32)
+#   define HB_PLATFORM_WINDOWS
+#elif defined(__linux__) && !defined(__ANDROID__)
+#   define HB_PLATFORM_LINUX
+#else
+#   error "undefine platform"
+#endif
+
 #endif
