@@ -12,7 +12,11 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+#if defined(HB_PLATFORM_WINDOWS)
 #include <WinSock2.h>
+#else defined(HB_PLATFORM_LINUX)
+#include <sys/time.h>
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 redisContext * g_redis_context = HB_NULLPTR;
