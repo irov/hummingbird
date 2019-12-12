@@ -11,6 +11,9 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_date.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message, void * _ud )
 {
