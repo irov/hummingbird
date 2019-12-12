@@ -68,9 +68,9 @@ hb_result_t hb_process_run( const char * _name, hb_sharedmemory_handle_t * _hand
     {
         DWORD le = GetLastError();
 
-        HB_LOG_MESSAGE_ERROR( "process", "name '%ls' command '%ls' return error [%d]"
-            , unicode_name
-            , unicode_command
+        HB_LOG_MESSAGE_ERROR( "process", "name '%s' command '%s' return error [%d]"
+            , _name
+            , command
             , le
         );
 
@@ -87,9 +87,9 @@ hb_result_t hb_process_run( const char * _name, hb_sharedmemory_handle_t * _hand
 
     if( result == FALSE )
     {
-        HB_LOG_MESSAGE_ERROR( "process", "name '%ls' command '%ls' execute invalid get exit code"
-            , unicode_name
-            , unicode_command
+        HB_LOG_MESSAGE_ERROR( "process", "name '%s' command '%s' execute invalid get exit code"
+            , _name
+            , command
         );
 
         return HB_FAILURE;

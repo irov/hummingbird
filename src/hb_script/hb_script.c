@@ -137,28 +137,36 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     
     if( hb_db_get_collection( "hb", "hb_user_entities", &g_script_handle->db_collection_user_entities ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_user_entities'" );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_user_entities"
+        );
 
         return HB_FAILURE;
     }
 
     if( hb_db_get_collection( "hb", "hb_project_entities", &g_script_handle->db_collection_project_entities ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_project_entities'" );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_project_entities"
+        );
 
         return HB_FAILURE;
     }
 
     if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_collection_users ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_users'" );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_users" 
+        );
 
         return HB_FAILURE;
     }
 
     if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_collection_projects ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection 'hb_projects'" );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_projects" 
+        );
 
         return HB_FAILURE;
     }
