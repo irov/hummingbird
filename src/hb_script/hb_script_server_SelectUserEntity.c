@@ -13,9 +13,24 @@ extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_SelectUserEntity( lua_State * L )
 {
-    const char * parent = lua_tostring( L, 1 );
+    size_t parent_len;
+    const char * parent = lua_tolstring( L, 1, &parent_len );
 
-    if( strlen( parent ) == 0 )
+    lua_Integer limit = lua_tointeger( L, 2 );
+
+    if( parent_len == 0 )
+    {
+        lua_pushboolean( L, 1 );
+        lua_createtable( L, 0, 0 );
+
+        return 2;
+    }
+
+    if( limit < 0 )
+    {
+        limit = 32;
+    }
+    else if( limit > 32 )
     {
         lua_pushboolean( L, 1 );
         lua_createtable( L, 0, 0 );
@@ -24,7 +39,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
     }
 
     hb_db_value_handle_t query[3];
-    hb_db_make_symbol_value( "name", ~0U, parent, ~0U, query + 0 );
+    hb_db_make_symbol_value( "name", ~0U, parent, parent_len, query + 0 );
     hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, query + 1 );
     hb_db_make_oid_value( "uoid", ~0U, g_script_handle->user_oid, query + 2 );    
 
@@ -32,7 +47,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
 
     uint32_t exists = 0;
     hb_db_value_handle_t values[1 * 32];
-    if( hb_db_select_values( g_script_handle->db_collection_user_entities, query, 3, db_fields, 1, values, 32, &exists ) == HB_FAILURE )
+    if( hb_db_select_values( g_script_handle->db_collection_user_entities, query, 3, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
     {
         lua_pushboolean( L, 0 );
         lua_pushnil( L );
