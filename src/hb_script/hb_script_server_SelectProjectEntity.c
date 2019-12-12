@@ -16,7 +16,21 @@ int __hb_script_server_SelectProjectEntity( lua_State * L )
     size_t parent_len;
     const char * parent = lua_tolstring( L, 1, &parent_len );
 
+    lua_Integer limit = lua_tointeger( L, 2 );
+
     if( parent_len == 0 )
+    {
+        lua_pushboolean( L, 1 );
+        lua_createtable( L, 0, 0 );
+
+        return 2;
+    }
+
+    if( limit < 0 )
+    {
+        limit = 32;
+    }
+    else if( limit > 32 )
     {
         lua_pushboolean( L, 1 );
         lua_createtable( L, 0, 0 );
@@ -32,7 +46,7 @@ int __hb_script_server_SelectProjectEntity( lua_State * L )
 
     uint32_t exists = 0;
     hb_db_value_handle_t values[1 * 32];
-    if( hb_db_select_values( g_script_handle->db_collection_project_entities, query, 2, db_fields, 1, values, 32, &exists ) == HB_FAILURE )
+    if( hb_db_select_values( g_script_handle->db_collection_project_entities, query, 2, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
     {
         lua_pushboolean( L, 0 );
         lua_pushnil( L );
