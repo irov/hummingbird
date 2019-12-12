@@ -2,8 +2,10 @@ PROJECT(hb_utils C)
 
 IF(WIN32)
     SET(hb_time_platform hb_time_win32.c)
+    SET(hb_sleep_platform hb_sleep_win32.c)
 ELSEIF(UNIX)
     SET(hb_time_platform hb_time_unix.c)
+    SET(hb_sleep_platform hb_sleep_unix.c)
 ENDIF()
 
 
@@ -44,6 +46,9 @@ src
 
     hb_date.h
     hb_date.c
+
+    hb_sleep.h
+    ${hb_sleep_platform}
     
     hb_oid.h
     hb_oid.c

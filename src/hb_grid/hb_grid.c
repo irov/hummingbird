@@ -10,6 +10,7 @@
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_date.h"
+#include "hb_utils/hb_sleep.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -415,7 +416,7 @@ int main( int _argc, char * _argv[] )
             continue;
         }
 
-        Sleep( 100 ); //hack
+        hb_sleep( 100 ); //hack
     }
 
     for( uint32_t i = 0; i != max_thread; ++i )
