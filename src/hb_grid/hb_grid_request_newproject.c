@@ -55,7 +55,7 @@ int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid
     hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16, sizeof( pid16 ), HB_NULLPTR );
 
     size_t response_data_size = sprintf( _response, "{\"code\": 0, \"pid\": \"%.*s\"}"
-        , sizeof( pid16 )
+        , (int)sizeof( pid16 )
         , pid16
     );
 
