@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT(hummingbird_win32 LANGUAGES C)
 
+INCLUDE(../base_template.cmake)
 INCLUDE(../win32_template.cmake)
 INCLUDE(../hummingbird_template.cmake)
 INCLUDE(../macro_template.cmake)
