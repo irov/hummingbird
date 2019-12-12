@@ -9,6 +9,8 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
+#include <string.h>
+
 int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size )
 {
     hb_node_newaccount_in_t in_data;
@@ -90,7 +92,7 @@ int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid
         hb_token_base16_encode( out_data.token, token16 );
 
         size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\"}"
-            , sizeof( token16 )
+            , (int)sizeof( token16 )
             , token16
         );
 

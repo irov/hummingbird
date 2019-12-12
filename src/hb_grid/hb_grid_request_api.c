@@ -6,6 +6,8 @@
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
 
+#include <string.h>
+
 int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
 {    
     HB_UNUSED( _pid );
@@ -60,8 +62,8 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
 
     if( out_data.successful == HB_TRUE )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": true, \"data\": %.*s, \"stat\": {\"memory_used\":%u, \"call_used\":%u}}"
-            , out_data.response_size
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": true, \"data\": %.*s, \"stat\": {\"memory_used\":%lu, \"call_used\":%u}}"
+            , (int)out_data.response_size
             , out_data.response_data
             , out_data.memory_used
             , out_data.call_used

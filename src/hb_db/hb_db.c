@@ -93,7 +93,7 @@ hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _hand
     bson_append_int64( &keys, _field, strlen( _field ), 1 );
 
     bson_error_t error;
-    if( mongoc_collection_create_index( mongo_collection, &keys, &opt, &error ) == false )
+    if( mongoc_collection_create_index_with_opts( mongo_collection, &keys, &opt, HB_NULLPTR, HB_NULLPTR, &error ) == false )
     {
         HB_LOG_MESSAGE_ERROR( "db"
             , "failed to set collection expire: %s\nerror message: %s\n"

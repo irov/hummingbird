@@ -10,6 +10,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+#include <string.h>
+
 int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid )
 {
     hb_node_upload_in_t in_data;
