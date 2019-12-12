@@ -2,7 +2,7 @@ PROJECT(hb_sharedmemory C)
 
 IF(WIN32)
     SET(hb_sharedmemory_platform hb_sharedmemory_win32.c)
-ELSEIF(UNIX)
+ELSEIF(UNIX AND NOT ANDROID)
     SET(hb_sharedmemory_platform hb_sharedmemory_unix.c)
 ENDIF()
 

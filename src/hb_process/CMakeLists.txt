@@ -2,7 +2,7 @@ PROJECT(hb_process C)
 
 IF(WIN32)
     SET(hb_process_platform hb_process_win32.c)
-ELSEIF(UNIX)
+ELSEIF(UNIX AND NOT ANDROID)
     SET(hb_process_platform hb_process_unix.c)
 ENDIF()
 
@@ -15,3 +15,4 @@ src
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_sharedmemory)
