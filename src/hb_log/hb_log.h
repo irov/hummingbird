@@ -26,16 +26,16 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer, void ** _ud );
 
 void hb_log_message( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _format, ... );
 
-#define HB_LOG_MESSAGE_INFO(category, format, ...)\
-    hb_log_message(category, HB_LOG_INFO, __FILE__, __LINE__, format, __VA_ARGS__)
+#define HB_LOG_MESSAGE_INFO(category, ...)\
+    hb_log_message(category, HB_LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
 
-#define HB_LOG_MESSAGE_WARNING(category, format, ...)\
-    hb_log_message(category, HB_LOG_WARNING, __FILE__, __LINE__, format, __VA_ARGS__)
+#define HB_LOG_MESSAGE_WARNING(category, ...)\
+    hb_log_message(category, HB_LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
 
-#define HB_LOG_MESSAGE_ERROR(category, format, ...)\
-    hb_log_message(category, HB_LOG_ERROR, __FILE__, __LINE__, format, __VA_ARGS__)
+#define HB_LOG_MESSAGE_ERROR(category, ...)\
+    hb_log_message(category, HB_LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 
-#define HB_LOG_MESSAGE_CRITICAL(category, format, ...)\
-    hb_log_message(category, HB_LOG_CRITICAL, __FILE__, __LINE__, format, __VA_ARGS__)
+#define HB_LOG_MESSAGE_CRITICAL(category, ...)\
+    hb_log_message(category, HB_LOG_CRITICAL, __FILE__, __LINE__, __VA_ARGS__)
 
 #endif
