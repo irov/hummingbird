@@ -27,7 +27,7 @@ static void * __hb_thread_proxy( void * _ud )
     pthread_exit( HB_NULLPTR );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thread_handle_t * _handle )
+hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thread_handle_t ** _handle )
 {
     hb_thread_proxy_t * proxy = HB_NEW( hb_thread_proxy_t );
     proxy->function = _function;
