@@ -2,8 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT(dependencies_win32)
 
+INCLUDE(../base_template.cmake)
 INCLUDE(../win32_template.cmake)
-INCLUDE(../hummingbird_template.cmake)
 
 SET(HUMMINGBIRD_REPOSITORY ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 SET(HUMMINGBIRD_DEPENDENCIES_DIRECTORY ${HUMMINGBIRD_REPOSITORY}/dependencies)
