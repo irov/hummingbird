@@ -184,7 +184,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     evhttp_send_reply( _request, response_code, "", output_buffer );
 }
 //////////////////////////////////////////////////////////////////////////
-static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
+static void __hb_ev_thread_base( void * _ud )
 {
     HB_UNUSED( _ud );
 
@@ -215,8 +215,6 @@ static uint32_t __stdcall __hb_ev_thread_base( void * _ud )
     event_base_dispatch( base );
     
     evhttp_free( http_server );
-
-    return 0;
 }
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
