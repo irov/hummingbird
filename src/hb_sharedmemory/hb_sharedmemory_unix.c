@@ -63,6 +63,11 @@ hb_result_t hb_sharedmemory_destroy( hb_sharedmemory_handle_t * _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+uint32_t hb_sharedmemory_get_id( hb_sharedmemory_handle_t * _handle )
+{
+    return (uint32_t)_handle->id;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_rewind( hb_sharedmemory_handle_t * _handle )
 {
     _handle->carriage = 0;
