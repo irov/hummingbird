@@ -13,7 +13,6 @@ typedef struct hb_sharedmemory_handle_t
     size_t carriage;
     HANDLE hMapFile;
     LPVOID pBuf;
-
 } hb_sharedmemory_handle_t;
 //////////////////////////////////////////////////////////////////////////
 static void __hb_write_name( char * _name, uint32_t _id )

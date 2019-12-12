@@ -2,38 +2,64 @@
 
 #include "hb_log/hb_log.h"
 
-#define WIN32_LEAN_AND_MEAN
+#include <unistd.h>
+#include <pthread.h>
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
+//////////////////////////////////////////////////////////////////////////
+typedef struct hb_thread_proxy_t
+{
+    hb_thread_function_t function;
+    void * ud;
+}hb_thread_proxy_t;
+//////////////////////////////////////////////////////////////////////////
+typedef struct hb_thread_handle_t
+{
+    pthread_t id;
+    hb_thread_proxy_t * proxy;
+}hb_thread_handle_t;
+//////////////////////////////////////////////////////////////////////////
+static void * __hb_thread_proxy( void * _ud )
+{
+    hb_thread_proxy_t * proxy = (hb_thread_proxy_t *)(_ud);
 
-#include <Windows.h>
+    (*proxy->function)(proxy->ud);
 
-#include <process.h>
-
+    pthread_exit( HB_NULLPTR );
+}
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thread_handle_t * _handle )
 {
-    uint32_t id;
-    uintptr_t handle = _beginthreadex( HB_NULLPTR, 0, _function, _ud, 0, &id );
+    hb_thread_proxy_t * proxy = HB_NEW( hb_thread_proxy_t );
+    proxy->function = _function;
+    proxy->ud = _ud;
+
+    pthread_t id;
+    pthread_create( &id, HB_NULLPTR, &__hb_thread_proxy, proxy );
     
-    _handle->id = id;
-    _handle->handle = (void *)handle;
+    hb_thread_handle_t * handle = HB_NEW( hb_thread_handle_t );
+
+    handle->id = id;
+    handle->proxy = proxy;
+
+    *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_thread_join( hb_thread_handle_t * _handle )
 {
-    HANDLE handle = (HANDLE)_handle->handle;
+    pthread_t id = _handle->id;
 
-    WaitForSingleObject( handle, INFINITE );
+    pthread_join( id, HB_NULLPTR );
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_thread_destroy( hb_thread_handle_t * _handle )
 {
-    HANDLE handle = (HANDLE)_handle->handle;
+    pthread_t id = _handle->id;
 
-    CloseHandle( handle );
+    pthread_cancel( id );
+    pthread_join( id, HB_NULLPTR );
+
+    HB_DELETE( _handle->proxy );
+    HB_DELETE( _handle );
 }
