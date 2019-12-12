@@ -16,7 +16,7 @@ typedef struct hb_sharedmemory_handle_t
 
 } hb_sharedmemory_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_sharedmemory_create( uint32_t * _id, size_t _size, hb_sharedmemory_handle_t ** _handle )
+hb_result_t hb_sharedmemory_create( size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
     int shmid = shmget( IPC_PRIVATE, 1024, IPC_CREAT | IPC_EXCL );
 
