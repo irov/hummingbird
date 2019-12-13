@@ -53,7 +53,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
     }
 
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_loginuser.exe", _handle->sharedmemory, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( _handle->config->process_loginuser, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
