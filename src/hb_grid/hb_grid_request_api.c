@@ -50,7 +50,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
 
     if( out_code != e_node_ok )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": %u, \"reason\": \"%s\"}"
+        size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"%s\"}"
             , out_code
             , out_reason
         );
