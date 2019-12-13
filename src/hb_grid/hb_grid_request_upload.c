@@ -48,7 +48,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
     }
 
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_upload.exe", _handle->sharedmemory, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( _handle->config->process_upload, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

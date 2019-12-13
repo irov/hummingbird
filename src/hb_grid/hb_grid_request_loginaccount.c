@@ -51,7 +51,7 @@ int hb_grid_request_loginaccount( struct evhttp_request * _request, struct hb_gr
     }
 
     hb_bool_t process_successful;
-    if( hb_process_run( "hb_node_loginaccount.exe", _handle->sharedmemory, &process_successful ) == HB_FAILURE )
+    if( hb_process_run( _handle->config->process_loginaccount, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
