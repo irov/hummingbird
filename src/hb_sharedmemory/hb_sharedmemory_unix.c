@@ -18,16 +18,16 @@ typedef struct hb_sharedmemory_handle_t
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_sharedmemory_create( size_t _size, hb_sharedmemory_handle_t ** _handle )
 {
-    int shmid = shmget( IPC_PRIVATE, 1024, IPC_CREAT | IPC_EXCL );
+    int shmid = shmget( IPC_PRIVATE, _size, IPC_CREAT | 0666 );
 
     if( shmid == -1 )
     {
         return HB_FAILURE;
     }
 
-    void * pBuf = (char*)shmat( shmid, 0, 0 ); 
+    void * buffer = shmat( shmid, 0, 0 ); 
 
-    if( pBuf == HB_NULLPTR )
+    if( buffer == (void *)~0U )
     {
         return HB_FAILURE;
     }
@@ -37,7 +37,7 @@ hb_result_t hb_sharedmemory_create( size_t _size, hb_sharedmemory_handle_t ** _h
     handle->id = shmid;
     handle->size = _size;
     handle->carriage = 0;
-    handle->buffer = pBuf;
+    handle->buffer = buffer;
     handle->create = HB_TRUE;
 
     *_handle = handle;
