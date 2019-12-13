@@ -445,14 +445,14 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newaccount: %u", config->process_newaccount );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginaccount: %u", config->process_loginaccount );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newproject: %u", config->process_newproject );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginproject: %u", config->process_loginproject );
-    HB_LOG_MESSAGE_INFO( "grid", "process_upload: %u", config->process_upload );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newuser: %u", config->process_newuser );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginuser: %u", config->process_loginuser );
-    HB_LOG_MESSAGE_INFO( "grid", "process_api: %u", config->process_api );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newaccount: %s", config->process_newaccount );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginaccount: %s", config->process_loginaccount );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newproject: %s", config->process_newproject );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginproject: %s", config->process_loginproject );
+    HB_LOG_MESSAGE_INFO( "grid", "process_upload: %s", config->process_upload );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newuser: %s", config->process_newuser );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginuser: %s", config->process_loginuser );
+    HB_LOG_MESSAGE_INFO( "grid", "process_api: %s", config->process_api );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
