@@ -23,6 +23,15 @@ typedef struct hb_node_config_t
 
     char log_uri[128];
     uint16_t log_port;
+
+    char process_newaccount[HB_MAX_PATH];
+    char process_loginaccount[HB_MAX_PATH];
+    char process_newproject[HB_MAX_PATH];
+    char process_loginproject[HB_MAX_PATH];
+    char process_upload[HB_MAX_PATH];
+    char process_newuser[HB_MAX_PATH];
+    char process_loginuser[HB_MAX_PATH];
+    char process_api[HB_MAX_PATH];
 } hb_node_config_t;
 
 hb_result_t hb_node_open_sharedmemory( int _argc, char * _argv[], hb_sharedmemory_handle_t ** _sharedmemory );

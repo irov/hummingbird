@@ -29,8 +29,9 @@ hb_result_t hb_process_run( const char * _name, hb_sharedmemory_handle_t * _hand
         }break;
     case 0:
         {
-            char * args[] = {"--sm", command, NULL};
-            int code = execv("_name", args);
+            char * const args[] = {(char *)_name, "--sm", command, NULL};
+            int code = execv( _name, args );
+
             exit(code);
         }break;
     default:
@@ -45,12 +46,19 @@ hb_result_t hb_process_run( const char * _name, hb_sharedmemory_handle_t * _hand
                 return HB_FAILURE;
             }
 
-            if( status == 0 )
+            if( WIFEXITED( status ) != 0 )
             {
-               *_successful = HB_TRUE;
+                *_successful = HB_TRUE;
             }
             else
             {
+                HB_LOG_MESSAGE_INFO( "process", "name '%s' execute invalid status signaled(%d) termsig(%d) stopped(%d) stopsig(%d)"
+                    , WIFSIGNALED( status )
+                    , WTERMSIG( status )
+                    , WIFSTOPPED( status )
+                    , WSTOPSIG( status )
+                );
+
                 *_successful = HB_FALSE;
             }
         }break;

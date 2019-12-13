@@ -289,6 +289,26 @@ int main( int _argc, char * _argv[] )
     strcpy( config->log_uri, "127.0.0.1" );
     config->log_port = 5044;
 
+#if defined(HB_PLATFORM_WINDOWS)
+    strcpy( config->process_newaccount, "hb_node_newaccount.exe" );
+    strcpy( config->process_loginaccount, "hb_node_loginaccount.exe" );
+    strcpy( config->process_newproject, "hb_node_newproject.exe" );
+    strcpy( config->process_loginproject, "hb_node_loginproject.exe" );
+    strcpy( config->process_upload, "hb_node_upload.exe" );
+    strcpy( config->process_newuser, "hb_node_newuser.exe" );
+    strcpy( config->process_loginuser, "hb_node_loginuser.exe" );
+    strcpy( config->process_api, "hb_node_api.exe" );
+#elif defined(HB_PLATFORM_LINUX)
+    strcpy( config->process_newaccount, "./hb_node_newaccount" );
+    strcpy( config->process_loginaccount, "./hb_node_loginaccount" );
+    strcpy( config->process_newproject, "./hb_node_newproject" );
+    strcpy( config->process_loginproject, "./hb_node_loginproject" );
+    strcpy( config->process_upload, "./hb_node_upload" );
+    strcpy( config->process_newuser, "./hb_node_newuser" );
+    strcpy( config->process_loginuser, "./hb_node_loginuser" );
+    strcpy( config->process_api, "./hb_node_api" );
+#endif
+
     if( config_file != HB_NULLPTR )
     {
         FILE * f = fopen( config_file, "rb" );
@@ -376,10 +396,43 @@ int main( int _argc, char * _argv[] )
         hb_json_get_field_integer( json_handle, "log_port", &log_port, config->log_port );
         config->log_port = (uint16_t)log_port;
 
+        const char * process_newaccount = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_newaccount", &process_newaccount, HB_NULLPTR, config->process_newaccount );
+        strcpy( config->process_newaccount, process_newaccount );
+
+        const char * process_loginaccount = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_loginaccount", &process_loginaccount, HB_NULLPTR, config->process_loginaccount );
+        strcpy( config->process_loginaccount, process_loginaccount );
+
+        const char * process_newproject = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_newproject", &process_newproject, HB_NULLPTR, config->process_newproject );
+        strcpy( config->process_newproject, process_newproject );
+
+        const char * process_loginproject = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_loginproject", &process_loginproject, HB_NULLPTR, config->process_loginproject );
+        strcpy( config->process_loginproject, process_loginproject );
+
+        const char * process_upload = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_upload", &process_upload, HB_NULLPTR, config->process_upload );
+        strcpy( config->process_upload, process_upload );
+
+        const char * process_newuser = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_newuser", &process_newuser, HB_NULLPTR, config->process_newuser );
+        strcpy( config->process_newuser, process_newuser );
+
+        const char * process_loginuser = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_loginuser", &process_loginuser, HB_NULLPTR, config->process_loginuser );
+        strcpy( config->process_loginuser, process_loginuser );
+
+        const char * process_api = HB_NULLPTR;
+        hb_json_get_field_string( json_handle, "process_api", &process_api, HB_NULLPTR, config->process_api );
+        strcpy( config->process_api, process_api );
+
         hb_json_destroy( json_handle );
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "start grid with config:" );
+    HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
     HB_LOG_MESSAGE_INFO( "grid", "max_thread: %u", max_thread );
     HB_LOG_MESSAGE_INFO( "grid", "grid_uri: %s", grid_uri );
     HB_LOG_MESSAGE_INFO( "grid", "grid_port: %u", grid_port );
@@ -391,6 +444,16 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "db_port: %u", config->db_port );
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
+    HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newaccount: %u", config->process_newaccount );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginaccount: %u", config->process_loginaccount );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newproject: %u", config->process_newproject );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginproject: %u", config->process_loginproject );
+    HB_LOG_MESSAGE_INFO( "grid", "process_upload: %u", config->process_upload );
+    HB_LOG_MESSAGE_INFO( "grid", "process_newuser: %u", config->process_newuser );
+    HB_LOG_MESSAGE_INFO( "grid", "process_loginuser: %u", config->process_loginuser );
+    HB_LOG_MESSAGE_INFO( "grid", "process_api: %u", config->process_api );
+    HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
