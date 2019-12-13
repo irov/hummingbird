@@ -4,6 +4,7 @@ OPTION(HUMMINGBIRD_DOWNLOADS_SILENT "download silent" OFF)
 
 PROJECT(downloads)
 
+INCLUDE(../base_template.cmake)
 INCLUDE(../hummingbird_template.cmake)
 include(../download_template.cmake)
 
