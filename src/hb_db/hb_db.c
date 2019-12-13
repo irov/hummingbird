@@ -30,18 +30,35 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _po
         return HB_FAILURE;
     }
 
-    mongoc_client_t * mongoc_client = mongoc_client_new_from_uri( mongoc_uri );
+    mongoc_client_t * mongo_client = mongoc_client_new_from_uri( mongoc_uri );
 
     mongoc_uri_destroy( mongoc_uri );
 
-    if( mongoc_client == HB_NULLPTR )
+    if( mongo_client == HB_NULLPTR )
     {
         return HB_FAILURE;
     }
 
-    mongoc_client_set_appname( mongoc_client, _name );
+    mongoc_client_set_appname( mongo_client, _name );
 
-    g_mongo_client = mongoc_client;
+    bson_t ping;
+    bson_init( &ping );
+
+    bson_append_int32( &ping, "ping", sizeof( "ping" ) - 1, 1 );
+
+    bson_error_t error;
+    bool mongoc_ping = mongoc_client_command_simple( mongo_client, "admin", &ping, NULL, NULL, &error );
+
+    bson_destroy( &ping );
+
+    if( mongoc_ping == false )
+    {
+        mongoc_client_destroy( mongo_client );
+
+        return HB_FAILURE;
+    }
+
+    g_mongo_client = mongo_client;
 
     return HB_SUCCESSFUL;
 }
