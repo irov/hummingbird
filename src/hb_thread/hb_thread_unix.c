@@ -57,7 +57,6 @@ void hb_thread_destroy( hb_thread_handle_t * _handle )
 {
     pthread_t id = _handle->id;
 
-    pthread_cancel( id );
     pthread_join( id, HB_NULLPTR );
 
     HB_DELETE( _handle->proxy );
