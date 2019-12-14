@@ -17,11 +17,13 @@ script:
     - echo "Configured Downloads"
     - pushd ./cmake/downloads && cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES:STRING=$BUILD_CONFIGURATION -DHUMMINGBIRD_DOWNLOADS_SILENT=ON & popd
     - echo "Downloads Dependencies"
-    - pushd ./cmake/downloads && cmake --build . --clean-first -j 4 --config $BUILD_CONFIGURATION & popd
+    - pushd ./cmake/downloads && cmake --build . --clean-first --config $BUILD_CONFIGURATION & popd
     - echo "Configured Dependencies"
-    - pushd ./cmake/dependencies_unix && cmake --build . --clean-first -j 4 --config $BUILD_CONFIGURATION & popd
+    - pushd ./cmake/dependencies_unix && cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES:STRING=$BUILD_CONFIGURATION & popd
+    - echo "Build Dependencies"
+    - pushd ./cmake/dependencies_unix && cmake --build . --clean-first --config $BUILD_CONFIGURATION & popd
     - echo "Configured Solution"
     - pushd ./cmake/hummingbird_unix && cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES:STRING=$BUILD_CONFIGURATION & popd
     - echo "Build Solution"
-    - pushd ./cmake/hummingbird_unix && cmake --build . --clean-first -j 4 --config $BUILD_CONFIGURATION & popd
+    - pushd ./cmake/hummingbird_unix && cmake --build . --clean-first --config $BUILD_CONFIGURATION & popd
     - echo "Complete!"
