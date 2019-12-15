@@ -17,9 +17,7 @@ int __hb_script_server_SetCurrentUserPublicData( lua_State * L )
 
     if( hb_db_update_values( g_script_handle->db_collection_users, g_script_handle->user_oid, handler, 1 ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );

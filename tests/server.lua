@@ -1,5 +1,3 @@
-version = 1
-
 event.onCreateProject = function(data)
     local entity = server.CreateProjectEntity("match", "", {a=1,b=2,c=3})
 
@@ -12,6 +10,10 @@ event.onCreateUser = function(data)
 
     local public_data = {a = 1, b = "test", e = entity}
     local status = server.SetCurrentUserPublicData(public_data)
+end
+
+event.onLoginUser = function(data)
+    
 end
 
 api.test = function(data)
@@ -28,17 +30,10 @@ api.test = function(data)
 
     print(status)
     print(a)
-    print(b)    
+    print(b)
     print(c)    
     
     --[[
-    local status, a, b, e = server.GetProjectPublicData({"a", "b", "e"})
-    
-    print(status)
-    print(a)
-    print(b)
-    print(e)
-    
     local status, a, b, c = server.GetProjectEntityPublicData(e, {"a", "b", "c"})
 
     print(status)

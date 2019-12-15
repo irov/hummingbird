@@ -112,7 +112,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_db_value_handle_t db_project_handles[3];
     hb_db_make_binary_value( "script_sha1", ~0U, sha1, sizeof( sha1 ), db_project_handles + 0 );
     hb_db_make_oid_value( "script_subversion", ~0U, project_subversion_oid, db_project_handles + 1 );
-    hb_db_make_int64_value( "script_revision", ~0U, script_revision + 1, db_project_handles + 2 );    
+    hb_db_make_int64_value( "script_revision", ~0U, script_revision + 1, db_project_handles + 2 );
 
     hb_db_update_values( db_collection_projects, project_oid, db_project_handles, 3 );
 

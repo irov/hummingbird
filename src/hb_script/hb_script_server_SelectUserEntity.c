@@ -20,10 +20,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
 
     if( parent_len == 0 )
     {
-        lua_pushboolean( L, 1 );
-        lua_createtable( L, 0, 0 );
-
-        return 2;
+        return -1;
     }
 
     if( limit < 0 )
@@ -32,10 +29,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
     }
     else if( limit > 32 )
     {
-        lua_pushboolean( L, 1 );
-        lua_createtable( L, 0, 0 );
-
-        return 2;
+        return -1;
     }
 
     hb_db_value_handle_t query[3];
@@ -49,10 +43,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
     hb_db_value_handle_t values[1 * 32];
     if( hb_db_select_values( g_script_handle->db_collection_user_entities, query, 3, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-        lua_pushnil( L );
-
-        return 2;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );

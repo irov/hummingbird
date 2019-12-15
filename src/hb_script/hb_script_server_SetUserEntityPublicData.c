@@ -20,9 +20,7 @@ int __hb_script_server_SetUserEntityPublicData( lua_State * L )
     hb_oid_t eoid;
     if( hb_db_find_oid( g_script_handle->db_collection_user_entities, values, 3, &eoid, &exist ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        return -1;
     }
 
     if( exist == HB_FALSE )
@@ -41,9 +39,7 @@ int __hb_script_server_SetUserEntityPublicData( lua_State * L )
 
     if( hb_db_update_values( g_script_handle->db_collection_user_entities, eoid, handler, 1 ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );
