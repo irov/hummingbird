@@ -17,9 +17,7 @@ int __hb_script_server_SetProjectPublicData( lua_State * L )
 
     if( hb_db_update_values( g_script_handle->db_collection_projects, g_script_handle->project_oid, handler, 1 ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );

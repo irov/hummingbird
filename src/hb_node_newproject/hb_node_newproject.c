@@ -41,13 +41,14 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t project_values[3];
+    hb_db_value_handle_t project_values[4];
     hb_db_make_oid_value( "aoid", ~0U, token_handle.aoid, project_values + 0 );
     hb_db_make_int64_value( "script_revision", ~0U, 0, project_values + 1 );
-    hb_db_make_symbol_value( "public_data", ~0U, "{}", ~0U, project_values + 2 );
+    hb_db_make_int64_value( "script_version", ~0U, 0, project_values + 2 );
+    hb_db_make_symbol_value( "public_data", ~0U, "{}", ~0U, project_values + 3 );
 
     hb_oid_t project_oid;
-    if( hb_db_new_document( db_collection_projects, project_values, 3, &project_oid ) == HB_FAILURE )
+    if( hb_db_new_document( db_collection_projects, project_values, 4, &project_oid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

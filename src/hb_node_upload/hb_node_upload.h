@@ -16,6 +16,7 @@ typedef struct hb_node_upload_in_t
 typedef struct hb_node_upload_out_t
 {
     int64_t revision;
+    uint32_t version;
 } hb_node_upload_out_t;
 
 #endif

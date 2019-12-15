@@ -46,10 +46,7 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
         hb_bool_t exist;
         if( hb_db_find_oid( g_script_handle->db_collection_project_entities, values, 2 + extra_values, HB_NULLPTR, &exist ) == HB_FAILURE )
         {
-            lua_pushboolean( L, 0 );
-            lua_pushnil( L );
-
-            return 2;
+            return -1;
         }
 
         if( exist == HB_FALSE )
@@ -68,10 +65,7 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
     hb_oid_t eoid;
     if( hb_db_new_document( g_script_handle->db_collection_user_entities, values, 5, &eoid ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-        lua_pushnil( L );
-
-        return 2;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );

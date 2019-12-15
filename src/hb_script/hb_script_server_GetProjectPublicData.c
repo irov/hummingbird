@@ -16,6 +16,11 @@ int __hb_script_server_GetProjectPublicData( lua_State * L )
     lua_pushnil( L );
     while( lua_next( L, -2 ) != 0 )
     {
+        if( field_iterator == 16 )
+        {
+            return -1;
+        }
+
         const char * value = lua_tostring( L, -1 );
         fields[field_iterator++] = value;
 
@@ -28,14 +33,7 @@ int __hb_script_server_GetProjectPublicData( lua_State * L )
     hb_db_value_handle_t handler[1];
     if( hb_db_get_values( g_script_handle->db_collection_projects, g_script_handle->project_oid, db_fields, 1, handler ) == HB_FAILURE )
     {
-        lua_pushboolean( L, 0 );
-
-        for( uint32_t index = 0; index != field_iterator; ++index )
-        {
-            lua_pushnil( L );
-        }
-
-        return 1 + field_iterator;
+        return -1;
     }
 
     lua_pushboolean( L, 1 );
