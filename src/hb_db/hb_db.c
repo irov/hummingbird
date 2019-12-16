@@ -485,12 +485,12 @@ hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _handle, const hb
 {
     const char ** fields = &_field;
 
-    hb_result_t result = hb_db_get_values( _handle, _oid, fields, 1, _handles );
+    hb_result_t result = hb_db_get_values( _handle, _oid, fields, _handles, 1 );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_value_handle_t * _handles )
+hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _handles, uint32_t _count )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 

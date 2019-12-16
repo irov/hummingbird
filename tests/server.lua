@@ -10,15 +10,15 @@ event.onCreateUser = function(data)
 
     local public_data = {a = 1, b = "test", e = entity}
     local status = server.SetCurrentUserPublicData(public_data)
-    print string.format("onCreateUser: %t", status)
+    print(string.format("onCreateUser: %s", status))
 end
 
 event.onLoginUser = function(data)
     local status, a, b, e = server.GetCurrentUserPublicData({"a"})
 
-    local public_data = {a = a + 3}
-    local status = server.UpdateCurrentUserPublicData(add_data)
-    print string.format("onLoginUser: %t", status)
+    local update_data = {a = a + 3}
+    local status = server.UpdateCurrentUserPublicData(update_data)
+    print(string.format("onLoginUser: %s", status))
 end
 
 api.test = function(data)
@@ -27,16 +27,12 @@ api.test = function(data)
     local status, a, b, e = server.GetCurrentUserPublicData({"a", "b", "e"})
     
     print(status)
-    print(a)
-    print(b)
-    print(e)
+    print(string.format("a = %s b = %s e = %s", a, b, e))
     
     local status, a, b, c = server.GetUserEntityPublicData(e, {"a", "b", "c"})
 
     print(status)
-    print(a)
-    print(b)
-    print(c)    
+    print(string.format("a = %s b = %s c = %s", a, b, c))
     
     --[[
     local status, a, b, c = server.GetProjectEntityPublicData(e, {"a", "b", "c"})

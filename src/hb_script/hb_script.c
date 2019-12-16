@@ -195,12 +195,13 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     lua_atpanic( L, &__hb_lua_panic );
 
-    luaopen_base( L );
-    luaopen_coroutine( L );
-    luaopen_table( L );
-    luaopen_string( L );
-    luaopen_utf8( L );
-    luaopen_math( L );
+    luaL_openlibs( L );
+    //luaopen_package( L );
+    //luaopen_coroutine( L );
+    //luaopen_table( L );
+    //luaopen_string( L );
+    //luaopen_utf8( L );
+    //luaopen_math( L );
 
     lua_getglobal( L, "_G" );
     luaL_setfuncs( L, globalLib, 0 );
@@ -352,7 +353,10 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
     
     if( lua_type( L, -1 ) == LUA_TTABLE )
     {
-        hb_script_json_dumps( L, -1, _result, _capacity, _resultsize );
+        if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
     }
     else
     {
