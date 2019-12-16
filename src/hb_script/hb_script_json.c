@@ -1,7 +1,5 @@
 #include "hb_script_json.h"
 
-#include "hb_json/hb_json.h"
-
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -259,6 +257,23 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
     }
 
     hb_json_destroy( json_data );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle_t ** _json )
+{
+    char json_data[10240];
+    size_t json_size;
+    if( hb_script_json_dumps( L, _index, json_data, 10240, &json_size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_json_create( json_data, json_size, _json ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     return HB_SUCCESSFUL;
 }

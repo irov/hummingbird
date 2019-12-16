@@ -35,7 +35,10 @@ int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
 
     char json_data[2048];
     size_t json_data_size;
-    hb_script_json_dumps( L, 2, json_data, 2048, &json_data_size );
+    if( hb_script_json_dumps( L, 2, json_data, 2048, &json_data_size ) == HB_FAILURE )
+    {
+        return -1;
+    }
 
     hb_db_value_handle_t handler[1];
     hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, handler + 0 );

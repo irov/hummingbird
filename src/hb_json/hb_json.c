@@ -79,6 +79,35 @@ void hb_json_destroy( hb_json_handle_t * _handle )
     json_decref( jroot );
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update )
+{
+    json_t * jbase = _base->jroot;
+    json_t * jupdate = _update->jroot;
+
+    if( json_object_update( jbase, jupdate ) == -1 )
+    {
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
+{
+    json_t * jroot = _handle->jroot;
+
+    size_t sz = json_dumpb( jroot, _buffer, _capacity, JSON_COMPACT );
+
+    if( sz == 0 )
+    {
+        return HB_FAILURE;
+    }
+
+    *_size = sz;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out )
 {
     json_t * jroot = _handle->jroot;

@@ -127,11 +127,13 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
     char message[HB_LOG_MAX_MESSAGE_SIZE];
     int n = vsprintf( message, _format, args );
 
-    if( n > 0 )
-    {
-        __hb_log_message_args( _category, _level, _file, _line, message );
-    }
-
     va_end( args );
+
+    if( n <= 0 )
+    {
+        return;
+    }
+     
+    __hb_log_message_args( _category, _level, _file, _line, message );
 }
 //////////////////////////////////////////////////////////////////////////

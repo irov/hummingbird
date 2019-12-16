@@ -71,7 +71,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     const char * db_projects_fields[] = { "script_revision" };
 
     hb_db_value_handle_t db_script_revision_handle[1];
-    if( hb_db_get_values( db_collection_projects, project_oid, db_projects_fields, 1, db_script_revision_handle ) == HB_FAILURE )
+    if( hb_db_get_values( db_collection_projects, project_oid, db_projects_fields, db_script_revision_handle, 1 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

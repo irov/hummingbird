@@ -30,6 +30,9 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value );
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default );
 hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default );
 
+hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update );
+hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size );
+
 typedef void(*hb_json_visitor_t)(const char * _key, hb_json_handle_t * _value, void * _ud);
 void hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud );
 

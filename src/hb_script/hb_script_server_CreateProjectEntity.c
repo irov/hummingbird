@@ -21,7 +21,10 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
 
     char json_data[2048];
     size_t json_data_size;
-    hb_script_json_dumps( L, 3, json_data, 2048, &json_data_size );
+    if( hb_script_json_dumps( L, 3, json_data, 2048, &json_data_size ) == HB_FAILURE )
+    {
+        return -1;
+    }
 
     uint32_t eid = 0;
 
@@ -68,7 +71,6 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
         return -1;
     }
 
-    lua_pushboolean( L, 1 );
     lua_pushinteger( L, eid );
 
     return 1;

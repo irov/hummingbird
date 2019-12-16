@@ -105,6 +105,7 @@ if(HUMMINGBIRD_DEPENDENCE_HIREDIS)
     message("================hiredis================")
     
     SET(ENABLE_SSL OFF CACHE BOOL "ENABLE_SSL" FORCE)
+    SET(DISABLE_TESTS ON CACHE BOOL "DISABLE_TESTS" FORCE)
     
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hiredis/CMakeLists.txt ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/hiredis/CMakeLists.txt COPYONLY)
     

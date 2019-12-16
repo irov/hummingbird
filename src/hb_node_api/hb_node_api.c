@@ -40,7 +40,7 @@ static hb_result_t __node_initialize_script( const hb_user_token_handle_t * _tok
     const char * db_projects_fields[] = { "script_sha1" };
 
     hb_db_value_handle_t db_script_sha1_handles[1];
-    if( hb_db_get_values( db_collection_projects, _token->poid, db_projects_fields, 1, db_script_sha1_handles ) == HB_FAILURE )
+    if( hb_db_get_values( db_collection_projects, _token->poid, db_projects_fields, db_script_sha1_handles, 1 ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
             , "hb_projects" 
