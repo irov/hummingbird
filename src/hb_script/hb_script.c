@@ -15,6 +15,7 @@ extern int __hb_script_server_GetCurrentUserPublicData( lua_State * L );
 extern int __hb_script_server_SetCurrentUserPublicData( lua_State * L );
 extern int __hb_script_server_GetUserEntityPublicData( lua_State * L );
 extern int __hb_script_server_SetUserEntityPublicData( lua_State * L );
+extern int __hb_script_server_UpdateCurrentUserPublicData( lua_State * L );
 extern int __hb_script_server_CreateUserEntity( lua_State * L );
 extern int __hb_script_server_SelectUserEntity( lua_State * L );
 extern int __hb_script_server_GetUserEntityPublicData( lua_State * L );
@@ -63,15 +64,16 @@ static const struct luaL_Reg serverLib[] = {
     , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
     , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
     , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , {"CreateUserEntity", &__hb_script_server_CreateUserEntity}
-    , {"SelectUserEntity", &__hb_script_server_SelectUserEntity}
-    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
-    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
-    , {"CreateProjectEntity", &__hb_script_server_CreateProjectEntity}
-    , {"SelectProjectEntity", &__hb_script_server_SelectProjectEntity}
-    , {"GetProjectEntity", &__hb_script_server_GetProjectEntity}
-    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
-    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
+    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
+    , { "CreateUserEntity", &__hb_script_server_CreateUserEntity }
+    , { "SelectUserEntity", &__hb_script_server_SelectUserEntity }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
+    , { "CreateProjectEntity", &__hb_script_server_CreateProjectEntity }
+    , { "SelectProjectEntity", &__hb_script_server_SelectProjectEntity }
+    , { "GetProjectEntity", &__hb_script_server_GetProjectEntity }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
     , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////

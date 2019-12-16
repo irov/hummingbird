@@ -8,6 +8,14 @@ extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
 {
+    const char * db_fields[1] = { "public_data" };
+
+    hb_db_value_handle_t handler[1];
+    if( hb_db_get_values( g_script_handle->db_collection_users, g_script_handle->user_oid, db_fields, 1, handler ) == HB_FAILURE )
+    {
+        return -1;
+    }
+
     const char * fields[16];
 
     uint32_t field_iterator = 0;
@@ -27,14 +35,6 @@ int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
         lua_pop( L, 1 );
     }
     lua_pop( L, 1 );
-
-    const char * db_fields[1] = { "public_data" };
-
-    hb_db_value_handle_t handler[1];
-    if( hb_db_get_values( g_script_handle->db_collection_users, g_script_handle->user_oid, db_fields, 1, handler ) == HB_FAILURE )
-    {
-        return -1;
-    }
 
     lua_pushboolean( L, 1 );
 

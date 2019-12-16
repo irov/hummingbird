@@ -18,6 +18,7 @@ src_common
     hb_script_server_GetProjectPublicData.c    
     hb_script_server_GetCurrentUserPublicData.c
     hb_script_server_SetCurrentUserPublicData.c
+    hb_script_server_UpdateCurrentUserPublicData.c
 )
 
 ADD_FILTER(
