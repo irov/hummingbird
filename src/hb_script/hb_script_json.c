@@ -21,9 +21,18 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int32_t _index, 
         }break;
     case LUA_TNUMBER:
         {
-            lua_Number result = lua_tonumber( L, _index );
+            if( lua_isinteger( L, _index ) == 0 )
+            {
+                lua_Number result = lua_tonumber( L, _index );
 
-            *_offset += sprintf( _buffer + *_offset, LUA_NUMBER_FMT, result );
+                *_offset += sprintf( _buffer + *_offset, LUA_NUMBER_FMT, result );
+            }
+            else
+            {
+                lua_Integer result = lua_tointeger( L, _index );
+
+                *_offset += sprintf( _buffer + *_offset, LUA_INTEGER_FMT, result );
+            }
         }break;
     case LUA_TSTRING:
         {

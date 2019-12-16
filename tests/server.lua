@@ -10,10 +10,15 @@ event.onCreateUser = function(data)
 
     local public_data = {a = 1, b = "test", e = entity}
     local status = server.SetCurrentUserPublicData(public_data)
+    print string.format("onCreateUser: %t", status)
 end
 
 event.onLoginUser = function(data)
-    
+    local status, a, b, e = server.GetCurrentUserPublicData({"a"})
+
+    local public_data = {a = a + 3}
+    local status = server.UpdateCurrentUserPublicData(add_data)
+    print string.format("onLoginUser: %t", status)
 end
 
 api.test = function(data)
