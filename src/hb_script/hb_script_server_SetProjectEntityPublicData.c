@@ -23,7 +23,7 @@ int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
     hb_oid_t eoid;
     if( hb_db_find_oid( g_script_handle->db_collection_project_entities, values, 2, &eoid, &exist ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     if( exist == HB_FALSE )
@@ -37,7 +37,7 @@ int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
     size_t json_data_size;
     if( hb_script_json_dumps( L, 2, json_data, 2048, &json_data_size ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_db_value_handle_t handler[1];
@@ -45,7 +45,7 @@ int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
 
     if( hb_db_update_values( g_script_handle->db_collection_project_entities, eoid, handler, 1 ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     lua_pushboolean( L, 1 );

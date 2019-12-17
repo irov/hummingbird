@@ -32,4 +32,6 @@ typedef struct hb_script_handle_t
     hb_oid_t user_oid;    
 } hb_script_handle_t;
 
+#define HB_SCRIPT_ERROR(L, ...) {lua_pushstring( L, __VA_ARGS__ ); lua_error( L );}
+
 #endif

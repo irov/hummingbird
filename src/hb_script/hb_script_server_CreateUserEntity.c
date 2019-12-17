@@ -23,7 +23,7 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
     size_t json_data_size;
     if( hb_script_json_dumps( L, 3, json_data, 2048, &json_data_size ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     uint32_t eid = 0;
@@ -50,7 +50,7 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
         hb_bool_t exist;
         if( hb_db_find_oid( g_script_handle->db_collection_user_entities, values, 3 + extra_values, HB_NULLPTR, &exist ) == HB_FAILURE )
         {
-            return -1;
+            HB_SCRIPT_ERROR( L, "internal error" );
         }
 
         if( exist == HB_FALSE )
@@ -70,7 +70,7 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
     hb_oid_t eoid;
     if( hb_db_new_document( g_script_handle->db_collection_user_entities, values, 6, &eoid ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     lua_pushinteger( L, eid );
