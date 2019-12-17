@@ -18,7 +18,7 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
 
     if( name_len == 0 )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_db_value_handle_t query_values[2];
@@ -29,7 +29,7 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
     hb_oid_t eoid;
     if( hb_db_find_oid( g_script_handle->db_collection_project_entities, query_values, 2, &eoid, &exist ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     const char * db_fields[1] = {"eid"};
@@ -37,7 +37,7 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
     hb_db_value_handle_t handler[1];
     if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, handler, 1 ) == HB_FAILURE )
     {
-        return -1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     lua_pushboolean( L, 1 );
