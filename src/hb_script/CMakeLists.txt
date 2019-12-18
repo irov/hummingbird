@@ -36,13 +36,19 @@ src_user_entity
 )
 
 ADD_FILTER(
-src_project_entity    
+src_project_entity
     hb_script_server_CreateProjectEntity.c
     hb_script_server_GetProjectEntity.c
     hb_script_server_SelectProjectEntity.c
     hb_script_server_GetProjectEntityPublicData.c
     hb_script_server_SetProjectEntityPublicData.c
     hb_script_server_UpdateProjectEntityPublicData.c
+)
+
+ADD_FILTER(
+src_matching
+    hb_script_server_CreateMatching.c
+    hb_script_server_JoinMatching.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)

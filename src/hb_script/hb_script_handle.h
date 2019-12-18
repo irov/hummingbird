@@ -23,10 +23,12 @@ typedef struct hb_script_handle_t
     uint32_t call_used;
     uint32_t call_limit;
 
-    hb_db_collection_handle_t * db_collection_user_entities;
-    hb_db_collection_handle_t * db_collection_project_entities;
-    hb_db_collection_handle_t * db_collection_users;
     hb_db_collection_handle_t * db_collection_projects;
+    hb_db_collection_handle_t * db_collection_users;
+    hb_db_collection_handle_t * db_collection_project_entities;
+    hb_db_collection_handle_t * db_collection_user_entities;
+    hb_db_collection_handle_t * db_collection_matching;
+    hb_db_collection_handle_t * db_collection_candidate;
 
     hb_oid_t project_oid;
     hb_oid_t user_oid;    

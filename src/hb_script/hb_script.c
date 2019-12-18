@@ -30,6 +30,8 @@ extern int __hb_script_server_GetProjectEntity( lua_State * L );
 extern int __hb_script_server_SelectProjectEntity( lua_State * L );
 extern int __hb_script_server_GetProjectEntityPublicData( lua_State * L );
 extern int __hb_script_server_SetProjectEntityPublicData( lua_State * L );
+extern int __hb_script_server_CreateMatching( lua_State * L );
+extern int __hb_script_server_JoinMatching( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
@@ -85,6 +87,8 @@ static const struct luaL_Reg serverLib[] = {
     , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
     , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
     , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
+    , { "CreateMatching", &__hb_script_server_CreateMatching }
+    , { "JoinMatching", &__hb_script_server_JoinMatching }
     , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
@@ -179,6 +183,24 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_projects" 
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( hb_db_get_collection( "hb", "hb_matching", &g_script_handle->db_collection_matching ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_matching"
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( hb_db_get_collection( "hb", "hb_candidate", &g_script_handle->db_collection_candidate ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_candidate"
         );
 
         return HB_FAILURE;
