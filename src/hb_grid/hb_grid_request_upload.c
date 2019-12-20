@@ -18,7 +18,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
 
     hb_token_base16_decode( _token, in_data.token );
 
-    hb_base16_decode( _pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+    hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];

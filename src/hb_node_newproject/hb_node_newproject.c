@@ -42,10 +42,10 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     }
 
     hb_db_value_handle_t project_values[4];
-    hb_db_make_oid_value( "aoid", ~0U, token_handle.aoid, project_values + 0 );
-    hb_db_make_int64_value( "script_revision", ~0U, 0, project_values + 1 );
-    hb_db_make_int64_value( "script_version", ~0U, 0, project_values + 2 );
-    hb_db_make_symbol_value( "public_data", ~0U, "{}", ~0U, project_values + 3 );
+    hb_db_make_oid_value( "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid, project_values + 0 );
+    hb_db_make_int64_value( "script_revision", HB_UNKNOWN_STRING_SIZE, 0, project_values + 1 );
+    hb_db_make_int64_value( "script_version", HB_UNKNOWN_STRING_SIZE, 0, project_values + 2 );
+    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE, project_values + 3 );
 
     hb_oid_t project_oid;
     if( hb_db_new_document( db_collection_projects, project_values, 4, &project_oid ) == HB_FAILURE )
@@ -61,7 +61,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         pid &= 0x7fffffff;
 
         hb_db_value_handle_t handles[1];
-        hb_db_make_int32_value( "pid", ~0U, pid, handles + 0 );
+        hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, handles + 0 );
 
         if( hb_db_update_values( db_collection_projects, project_oid, handles, 1 ) == HB_FAILURE )
         {

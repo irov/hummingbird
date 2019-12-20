@@ -14,8 +14,10 @@
 
 typedef uint32_t hb_bool_t;
 
-static const hb_bool_t HB_TRUE = 1;
-static const hb_bool_t HB_FALSE = 0;
+static const hb_bool_t HB_TRUE = (1);
+static const hb_bool_t HB_FALSE = (0);
+
+static const size_t HB_UNKNOWN_STRING_SIZE = (~0U);
 
 typedef enum hb_result_e
 {

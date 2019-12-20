@@ -35,8 +35,8 @@ int __hb_script_server_GetProjectEntityPublicData( lua_State * L )
     lua_pop( L, 1 );
 
     hb_db_value_handle_t values[2];
-    hb_db_make_int32_value( "eid", ~0U, (int32_t)eid, values + 0 );
-    hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, values + 1 );
+    hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid, values + 0 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
 
     hb_bool_t exist;
     hb_oid_t eoid;

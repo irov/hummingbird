@@ -53,8 +53,8 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
 
     hb_db_value_handle_t project_handles[2];
-    hb_db_make_oid_value( "aoid", ~0U, token_handle.aoid, project_handles + 0 );
-    hb_db_make_int32_value( "pid", ~0U, in_data->pid, project_handles + 1 );
+    hb_db_make_oid_value( "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid, project_handles + 0 );
+    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, in_data->pid, project_handles + 1 );
 
     hb_oid_t project_oid;
     hb_bool_t project_exist;
@@ -91,7 +91,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     if( script_revision == 0 )
     {
         hb_db_value_handle_t handles[1];
-        hb_db_make_binary_value( "sha1", ~0U, sha1, sizeof( sha1 ), handles + 0 );
+        hb_db_make_binary_value( "sha1", HB_UNKNOWN_STRING_SIZE, sha1, sizeof( sha1 ), handles + 0 );
 
         hb_db_new_document( db_collection_projects_subversion, handles, 1, &project_subversion_oid );
     }
@@ -101,8 +101,8 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_db_get_value( db_collection_projects, project_oid, "script_sha1", &db_script_sha1_handle );
 
         hb_db_value_handle_t handles[2];
-        hb_db_make_binary_value( "sha1", ~0U, sha1, sizeof( sha1 ), handles + 0 );
-        hb_db_make_binary_value( "prev", ~0U, db_script_sha1_handle.u.binary.buffer, db_script_sha1_handle.u.binary.length, handles + 1 );
+        hb_db_make_binary_value( "sha1", HB_UNKNOWN_STRING_SIZE, sha1, sizeof( sha1 ), handles + 0 );
+        hb_db_make_binary_value( "prev", HB_UNKNOWN_STRING_SIZE, db_script_sha1_handle.u.binary.buffer, db_script_sha1_handle.u.binary.length, handles + 1 );
 
         hb_db_new_document( db_collection_projects_subversion, handles, 2, &project_subversion_oid );
 
@@ -110,9 +110,9 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     }
 
     hb_db_value_handle_t db_project_handles[3];
-    hb_db_make_binary_value( "script_sha1", ~0U, sha1, sizeof( sha1 ), db_project_handles + 0 );
-    hb_db_make_oid_value( "script_subversion", ~0U, project_subversion_oid, db_project_handles + 1 );
-    hb_db_make_int64_value( "script_revision", ~0U, script_revision + 1, db_project_handles + 2 );
+    hb_db_make_binary_value( "script_sha1", HB_UNKNOWN_STRING_SIZE, sha1, sizeof( sha1 ), db_project_handles + 0 );
+    hb_db_make_oid_value( "script_subversion", HB_UNKNOWN_STRING_SIZE, project_subversion_oid, db_project_handles + 1 );
+    hb_db_make_int64_value( "script_revision", HB_UNKNOWN_STRING_SIZE, script_revision + 1, db_project_handles + 2 );
 
     hb_db_update_values( db_collection_projects, project_oid, db_project_handles, 3 );
 

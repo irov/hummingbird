@@ -22,8 +22,8 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
     }
 
     hb_db_value_handle_t query_values[2];
-    hb_db_make_symbol_value( "name", ~0U, name, name_len, query_values + 0 );
-    hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, query_values + 1 );
+    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, query_values + 0 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, query_values + 1 );
 
     hb_bool_t exist;
     hb_oid_t eoid;

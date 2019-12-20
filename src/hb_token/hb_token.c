@@ -35,7 +35,7 @@ hb_result_t hb_token_generate( const char _prefix[2], const void * _value, size_
     uint32_t increment = rand_time & 0x0000ffff;
 
     uint64_t token_index;
-    if( hb_cache_incrby_value( "token_enumerator", ~0U, increment, &token_index ) == HB_FAILURE )
+    if( hb_cache_incrby_value( "token_enumerator", HB_UNKNOWN_STRING_SIZE, increment, &token_index ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

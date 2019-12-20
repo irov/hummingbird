@@ -34,14 +34,14 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
         eid &= 0x7fffffff;
 
         hb_db_value_handle_t values[3];
-        hb_db_make_int32_value( "eid", ~0U, eid, values + 0 );
-        hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, values + 1 );
+        hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, eid, values + 0 );
+        hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
 
         uint32_t extra_values = 0;
 
         if( name_len != 0 )
         {
-            hb_db_make_symbol_value( "name", ~0U, name, name_len, values + 2 );
+            hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, values + 2 );
 
             extra_values += 1;
         }
@@ -59,11 +59,11 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
     }
 
     hb_db_value_handle_t values[5];
-    hb_db_make_int32_value( "eid", ~0U, eid, values + 0 );
-    hb_db_make_symbol_value( "name", ~0U, name, name_len, values + 1 );
-    hb_db_make_symbol_value( "parent", ~0U, parent, parent_len, values + 2 );
-    hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, values + 3 );
-    hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, values + 4 );
+    hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, eid, values + 0 );
+    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, values + 1 );
+    hb_db_make_symbol_value( "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len, values + 2 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 3 );
+    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size, values + 4 );
 
     hb_oid_t eoid;
     if( hb_db_new_document( g_script_handle->db_collection_user_entities, values, 5, &eoid ) == HB_FAILURE )
