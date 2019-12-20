@@ -52,6 +52,12 @@ src
     
     hb_oid.h
     hb_oid.c
+    
+    hb_murmurhash64.h
+    hb_murmurhash64.c
+    
+    hb_hashtable.h
+    hb_hashtable.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

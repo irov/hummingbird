@@ -81,6 +81,10 @@ void hb_free( void * _ptr );
 #define HB_DELETE(P) hb_free(P);
 #endif
 
+#ifndef HB_DELETEN
+#define HB_DELETEN(P) hb_free(P);
+#endif
+
 #ifndef HB_MAX_PATH
 #define HB_MAX_PATH 260
 #endif
