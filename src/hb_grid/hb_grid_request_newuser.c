@@ -15,7 +15,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
 {
     hb_node_newuser_in_t in_data;
 
-    hb_base16_decode( _pid, ~0U, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+    hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     {
         size_t request_data_size;

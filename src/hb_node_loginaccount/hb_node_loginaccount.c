@@ -34,12 +34,12 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_sha1_t login_sha1;
     hb_sha1( in_data->login, strlen( in_data->login ), login_sha1 );
 
-    hb_db_make_binary_value( "login", ~0U, login_sha1, 20, authentication_handles + 0 );
+    hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, authentication_handles + 0 );
 
     hb_sha1_t password_sha1;
     hb_sha1( in_data->password, strlen( in_data->password ), password_sha1 );
 
-    hb_db_make_binary_value( "password", ~0U, password_sha1, 20, authentication_handles + 1 );
+    hb_db_make_binary_value( "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20, authentication_handles + 1 );
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;

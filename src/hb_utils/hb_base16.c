@@ -74,7 +74,7 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_base16_decode( const char * _base16, size_t _size, void * _data, size_t _capacity, size_t * _outsize )
 {
-    if( _size == ~0U )
+    if( _size == HB_UNKNOWN_STRING_SIZE )
     {
         _size = strlen( _base16 );
     }

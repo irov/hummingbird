@@ -26,8 +26,8 @@ int __hb_script_server_CreateMatching( lua_State * L )
     }
 
     hb_db_value_handle_t find_values[2];
-    hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, find_values + 0 );
-    hb_db_make_symbol_value( "name", ~0U, name, name_len, find_values + 1 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, find_values + 0 );
+    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, find_values + 1 );
 
     hb_bool_t exist;
     if( hb_db_find_oid( g_script_handle->db_collection_matching, find_values, 2, HB_NULLPTR, &exist ) == HB_FAILURE )
@@ -43,11 +43,11 @@ int __hb_script_server_CreateMatching( lua_State * L )
     }
 
     hb_db_value_handle_t new_candidate_values[5];
-    hb_db_make_oid_value( "poid", ~0U, g_script_handle->project_oid, new_candidate_values + 0 );
-    hb_db_make_symbol_value( "name", ~0U, name, name_len, new_candidate_values + 1 );
-    hb_db_make_int32_value( "count", ~0U, (int32_t)count, new_candidate_values + 2 );
-    hb_db_make_int32_value( "dispersion", ~0U, (int32_t)dispersion, new_candidate_values + 3 );
-    hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, new_candidate_values + 4 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, new_candidate_values + 0 );
+    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, new_candidate_values + 1 );
+    hb_db_make_int32_value( "count", HB_UNKNOWN_STRING_SIZE, (int32_t)count, new_candidate_values + 2 );
+    hb_db_make_int32_value( "dispersion", HB_UNKNOWN_STRING_SIZE, (int32_t)dispersion, new_candidate_values + 3 );
+    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size, new_candidate_values + 4 );
 
     if( hb_db_new_document( g_script_handle->db_collection_matching, new_candidate_values, 5, HB_NULLPTR ) == HB_FAILURE )
     {

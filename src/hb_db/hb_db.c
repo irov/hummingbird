@@ -203,7 +203,7 @@ void hb_db_make_int32_value( const char * _field, size_t _fieldlength, int32_t _
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_int32;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.i32 = _value;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_int64;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.i64 = _value;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -221,9 +221,9 @@ void hb_db_make_symbol_value( const char * _field, size_t _fieldlength, const ch
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_symbol;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.symbol.buffer = _buffer;
-    _handle->u.symbol.length = _bufferlength == ~0U ? strlen( _buffer ) : _bufferlength;
+    _handle->u.symbol.length = _bufferlength == HB_UNKNOWN_STRING_SIZE ? strlen( _buffer ) : _bufferlength;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle )
@@ -231,7 +231,7 @@ void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const vo
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_binary;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.binary.buffer = _buffer;
     _handle->u.binary.length = _bufferlength;
 }
@@ -241,7 +241,7 @@ void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t 
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_time;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.time = _time;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_oid;
     _handle->field = _field;
-    _handle->field_length = _fieldlength == ~0U ? strlen( _field ) : _fieldlength;
+    _handle->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     _handle->u.oid = _oid;
 }
 //////////////////////////////////////////////////////////////////////////

@@ -84,7 +84,7 @@ hb_result_t hb_cache_set_value(  const void * _key, size_t _keysize, const void 
         return HB_FAILURE;
     }
 
-    if( _keysize == ~0U )
+    if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
@@ -112,7 +112,7 @@ hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _valu
         return HB_FAILURE;
     }
 
-    if( _keysize == ~0U )
+    if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
@@ -161,7 +161,7 @@ hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t 
         return HB_FAILURE;
     }
 
-    if( _keysize == ~0U )
+    if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
@@ -198,7 +198,7 @@ hb_result_t hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t 
         return HB_FAILURE;
     }
 
-    if( _keysize == ~0U )
+    if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }

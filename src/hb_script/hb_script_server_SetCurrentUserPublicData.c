@@ -16,7 +16,7 @@ int __hb_script_server_SetCurrentUserPublicData( lua_State * L )
     }
 
     hb_db_value_handle_t handler[1];
-    hb_db_make_symbol_value( "public_data", ~0U, json_data, json_data_size, handler + 0 );
+    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size, handler + 0 );
 
     if( hb_db_update_values( g_script_handle->db_collection_users, g_script_handle->user_oid, handler, 1 ) == HB_FAILURE )
     {

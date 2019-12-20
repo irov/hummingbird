@@ -12,6 +12,8 @@
 #include "hb_utils/hb_date.h"
 #include "hb_utils/hb_sleep.h"
 
+#include "hb_utils/hb_hashtable.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -232,6 +234,9 @@ int main( int _argc, char * _argv[] )
     {
         return EXIT_FAILURE;
     }
+
+    hb_hashtable_t * ht;
+    hb_hashtable_create( 32, &ht );
 
 #ifdef WIN32
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
