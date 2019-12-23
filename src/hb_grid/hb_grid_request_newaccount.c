@@ -1,9 +1,10 @@
-#include "hb_grid_request.h"
+#include "hb_grid.h"
 
 #include "hb_node_newaccount/hb_node_newaccount.h"
 #include "hb_node_api/hb_node_api.h"
 
 #include "hb_token/hb_token.h"
+#include "hb_http/hb_http.h"
 #include "hb_process/hb_process.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_base64.h"
@@ -16,15 +17,8 @@ int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid
     hb_node_newaccount_in_t in_data;
 
     {
-        size_t request_data_size;
-        char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
         hb_json_handle_t * json_handle;
-        if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
+        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }

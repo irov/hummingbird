@@ -89,7 +89,7 @@ void hb_sha1( const void * _buffer, const size_t _size, hb_sha1_t _sha1 )
 {
     uint32_t result[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0};
 
-    const uint8_t * sarray = (const uint8_t *)_buffer;
+    const hb_byte_t * sarray = (const hb_byte_t *)_buffer;
 
     uint32_t w[80];
 

@@ -1,7 +1,9 @@
-#include "hb_grid_request.h"
+#include "hb_grid.h"
 
 #include "hb_node_upload/hb_node_upload.h"
+
 #include "hb_process/hb_process.h"
+#include "hb_http/hb_http.h"
 #include "hb_token/hb_token.h"
 #include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_strstre.h"
@@ -22,7 +24,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
 
     uint32_t multipart_params_count;
     multipart_params_handle_t multipart_params[8];
-    if( hb_grid_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == HB_FAILURE )
+    if( hb_http_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }    

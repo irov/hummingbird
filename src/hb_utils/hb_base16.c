@@ -3,7 +3,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-static const uint8_t base16_decode_table[256] = {
+static const hb_byte_t base16_decode_table[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //15
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //31
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //47
@@ -51,14 +51,14 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
         'M', 'N', 'P', 'Q', 
         'R', 'S', 'T', 'V' };
 
-    const uint8_t * data = (const uint8_t *)_data;
+    const hb_byte_t * data = (const hb_byte_t *)_data;
 
     for( size_t i = 0, j = 0; i != _size;)
     {
-        uint8_t v = data[i++];
+        hb_byte_t v = data[i++];
 
-        uint8_t a = (v >> 0) & 0xf;
-        uint8_t b = (v >> 4) & 0xf;
+        hb_byte_t a = (v >> 0) & 0xf;
+        hb_byte_t b = (v >> 4) & 0xf;
 
         _base16[j++] = base16_encode_table[a];
         _base16[j++] = base16_encode_table[b];
@@ -86,12 +86,12 @@ hb_result_t hb_base16_decode( const char * _base16, size_t _size, void * _data, 
         return HB_FAILURE;
     }
 
-    uint8_t * data = (uint8_t *)_data;
+    hb_byte_t * data = (hb_byte_t *)_data;
 
     for( uint32_t i = 0, j = 0; i != _size;)
     {
-        uint8_t a = base16_decode_table[_base16[i++]];
-        uint8_t b = base16_decode_table[_base16[i++]];
+        hb_byte_t a = base16_decode_table[_base16[i++]];
+        hb_byte_t b = base16_decode_table[_base16[i++]];
 
         data[j++] = (a << 0) | (b << 4);
     }

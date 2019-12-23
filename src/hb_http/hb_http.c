@@ -1,10 +1,9 @@
-#include "hb_grid_request.h"
+#include "hb_http.h"
 
-#include "hb_utils/hb_multipart.h"
 #include "hb_utils/hb_strstre.h"
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multipart_params_handle_t * _params, uint32_t _capacity, uint32_t * _count )
+hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multipart_params_handle_t * _params, uint32_t _capacity, uint32_t * _count )
 {
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );
@@ -41,7 +40,7 @@ hb_result_t hb_grid_get_request_params( struct evhttp_request * _request, multip
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
 {
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
 
@@ -64,7 +63,24 @@ hb_result_t hb_grid_get_request_data( struct evhttp_request * _request, void * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_get_request_header( struct evhttp_request * _request, const char * _header, const char ** _value )
+hb_result_t hb_http_get_request_json( struct evhttp_request * _request, hb_json_handle_t ** _handle )
+{
+    hb_data_t data;
+    size_t data_size;
+    if( hb_http_get_request_data( _request, data, HB_DATA_MAX_SIZE, &data_size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_json_create( data, data_size, _handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_http_get_request_header( struct evhttp_request * _request, const char * _header, const char ** _value )
 {
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
     HB_UNUSED( command_type );

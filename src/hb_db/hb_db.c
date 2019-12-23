@@ -245,7 +245,7 @@ void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t 
     _handle->u.time = _time;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle )
+void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const hb_byte_t * _oid, hb_db_value_handle_t * _handle )
 {
     _handle->handle = HB_NULLPTR;
     _handle->type = e_hb_db_oid;
@@ -412,7 +412,7 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
 
                     bson_subtype_t binary_subtype;
                     uint32_t binary_length;
-                    const uint8_t * binary_buffer;
+                    const hb_byte_t * binary_buffer;
                     bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
 
                     value->u.binary.length = binary_length;
@@ -590,7 +590,7 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const h
 
                 bson_subtype_t binary_subtype;
                 uint32_t binary_length;
-                const uint8_t * binary_buffer;
+                const hb_byte_t * binary_buffer;
                 bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
 
                 handle->u.binary.length = binary_length;
@@ -670,7 +670,7 @@ void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, const hb_byte_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
@@ -722,11 +722,11 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, cons
 typedef struct hb_db_script_handle_t
 {
     mongoc_cursor_t * cursor;
-    const uint8_t * buffer;
+    const hb_byte_t * buffer;
     size_t size;    
 } hb_db_script_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const uint8_t * _sha1, hb_db_script_handle_t ** _script )
+hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const hb_byte_t * _sha1, hb_db_script_handle_t ** _script )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 
@@ -758,7 +758,7 @@ hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const 
 
     bson_subtype_t subtype;
     uint32_t script_code_length;
-    const uint8_t * script_code_buffer;
+    const hb_byte_t * script_code_buffer;
     bson_iter_binary( &iter, &subtype, &script_code_length, &script_code_buffer );
 
     if( subtype != BSON_SUBTYPE_BINARY )
@@ -779,11 +779,11 @@ hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-const uint8_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size )
+const hb_byte_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size )
 {
     *_size = _script->size;
 
-    const uint8_t * buffer = _script->buffer;
+    const hb_byte_t * buffer = _script->buffer;
 
     return buffer;
 }
