@@ -1,9 +1,10 @@
-#include "hb_grid_request.h"
+#include "hb_grid.h"
 
 #include "hb_node_loginuser/hb_node_loginuser.h"
 #include "hb_node_api/hb_node_api.h"
 
 #include "hb_token/hb_token.h"
+#include "hb_http/hb_http.h"
 #include "hb_process/hb_process.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_base16.h"
@@ -19,7 +20,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
     {
         size_t request_data_size;
         char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        if( hb_grid_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
+        if( hb_http_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }

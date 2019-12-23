@@ -26,7 +26,7 @@ uint64_t hb_murmurhash64( const void * _data, size_t _size )
 		h *= m;
 	}
 
-	const uint8_t * tail8 = (const uint8_t *)data64;
+	const hb_byte_t * tail8 = (const hb_byte_t *)data64;
 
     switch( _size & 7 )
     {

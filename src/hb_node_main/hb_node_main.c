@@ -43,7 +43,7 @@ int main( int _argc, char * _argv[] )
 
     hb_node_config_t config;
 
-    uint8_t in_data[20480];
+    hb_data_t in_data;
     if( hb_node_read_in_data( sharedmemory_handle, &config, in_data, sizeof( in_data ) ) == HB_FAILURE )
     {
         return EXIT_FAILURE;
@@ -126,7 +126,7 @@ int main( int _argc, char * _argv[] )
         }
     }
 
-    uint8_t out_data[1024];
+    hb_byte_t out_data[1024];
     size_t out_data_size;
 
     hb_node_process( in_data, out_data, &out_data_size );

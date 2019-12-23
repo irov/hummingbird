@@ -1,7 +1,7 @@
-#include "hb_grid_request.h"
+#include "hb_grid.h"
 
 #include "hb_node_api/hb_node_api.h"
-
+#include "hb_http/hb_http.h"
 #include "hb_token/hb_token.h"
 #include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
@@ -19,7 +19,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
     in_data.category = e_hb_node_api;
     strcpy( in_data.method, _method );
 
-    if( hb_grid_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
+    if( hb_http_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

@@ -15,7 +15,7 @@ typedef struct hb_json_handle_t
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_json_load_data_t
 {
-    const uint8_t * buffer;
+    const hb_byte_t * buffer;
     size_t carriage;
     size_t capacity;
 } hb_json_load_data_t;
@@ -34,7 +34,7 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
         return 0;
     }
 
-    const uint8_t * jd_buffer = jd->buffer + jd->carriage;
+    const hb_byte_t * jd_buffer = jd->buffer + jd->carriage;
     memcpy( _buffer, jd_buffer, _buflen );
     jd->carriage += _buflen;
 
@@ -44,7 +44,7 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
 hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle )
 {
     hb_json_load_data_t jd;
-    jd.buffer = (const uint8_t *)(_data);
+    jd.buffer = (const hb_byte_t *)(_data);
     jd.carriage = 0;
     jd.capacity = _size;
 

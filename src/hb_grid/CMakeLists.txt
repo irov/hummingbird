@@ -5,9 +5,6 @@ src
 	hb_grid.h
 	hb_grid.c
     
-    hb_grid_request.h
-    hb_grid_request.c
-    
     hb_grid_request_api.c
     hb_grid_request_upload.c
     hb_grid_request_loginuser.c
@@ -42,3 +39,4 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_thread)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_cache)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_node)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_db)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_http)

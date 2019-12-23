@@ -3,6 +3,7 @@
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
+#include "hb_http/hb_http.h"
 #include "hb_json/hb_json.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
@@ -61,6 +62,12 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     hb_matching_process_handle_t * process = (hb_matching_process_handle_t *)_ud;
     HB_UNUSED( process );
 
+    hb_json_handle_t * json;
+    if( hb_http_get_request_json( _request, &json ) == HB_FAILURE )
+    {
+        return;
+    }
+
     int32_t response_code = HTTP_OK;
 
     size_t response_data_size = 2;
@@ -68,10 +75,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     strcpy( response_data, "{}" );
 
     char cmd[128] = { '\0' };
-    char arg1[128] = { '\0' };
-    char arg2[128] = { '\0' };
-    char arg3[128] = { '\0' };
-    int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd, arg1, arg2, arg3 );
+    int count = sscanf( uri, "/%[^'/']", cmd );
 
     if( count == 0 )
     {
@@ -80,7 +84,14 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    
+    if( strcmp( cmd, "create" ) == 0 )
+    {
+
+    }
+    else if( strcmp( cmd, "join" ) == 0 )
+    {
+
+    }
 
     evbuffer_add( output_buffer, response_data, response_data_size );
 

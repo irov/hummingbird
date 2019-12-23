@@ -5,12 +5,12 @@
 //////////////////////////////////////////////////////////////////////////
 size_t hb_memsize( const void * _begin, const void * _end )
 {
-    return (const uint8_t *)_end - (const uint8_t *)_begin;
+    return (const hb_byte_t *)_end - (const hb_byte_t *)_begin;
 }
 //////////////////////////////////////////////////////////////////////////
 const void * hb_memadvance( const void * _buffer, size_t _offset )
 {
-    return (const void *)((const uint8_t *)_buffer + _offset);
+    return (const void *)((const hb_byte_t *)_buffer + _offset);
 }
 //////////////////////////////////////////////////////////////////////////
 const void * hb_memmem( const void * _buffer, size_t _size, const void * _subbuffer, size_t _subsize, size_t * _offset )
@@ -20,7 +20,7 @@ const void * hb_memmem( const void * _buffer, size_t _size, const void * _subbuf
         return HB_NULLPTR;
     }
 
-    const uint8_t * carriage = (const uint8_t *)_buffer;
+    const hb_byte_t * carriage = (const hb_byte_t *)_buffer;
 
     size_t step = 0;
 
@@ -49,7 +49,7 @@ const void * hb_memmeme( const void * _buffer, size_t _size, const void * _subbu
         return HB_NULLPTR;
     }
 
-    const uint8_t * carriage = (const uint8_t *)_buffer;
+    const hb_byte_t * carriage = (const hb_byte_t *)_buffer;
 
     size_t step = 0;
 

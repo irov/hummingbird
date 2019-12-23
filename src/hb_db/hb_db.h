@@ -67,7 +67,7 @@ void hb_db_make_int64_value( const char * _field, size_t _fieldlength, int64_t _
 void hb_db_make_symbol_value( const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
 void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength, hb_db_value_handle_t * _handle );
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
-void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const uint8_t * _oid, hb_db_value_handle_t * _handle );
+void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const hb_byte_t * _oid, hb_db_value_handle_t * _handle );
 
 hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid );
 
@@ -79,12 +79,12 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const h
 hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const hb_db_value_handle_t * _values, uint32_t _count );
 void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count );
 
-hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const hb_byte_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
 
 typedef struct hb_db_script_handle_t hb_db_script_handle_t;
 
-hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const uint8_t * _sha1, hb_db_script_handle_t ** _script );
-const uint8_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size );
+hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const hb_byte_t * _sha1, hb_db_script_handle_t ** _script );
+const hb_byte_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size );
 
 void hb_db_close_script( hb_db_script_handle_t * _data );
 

@@ -129,12 +129,12 @@ hb_result_t hb_sharedmemory_write( hb_sharedmemory_handle_t * _handle, const voi
 
     uint32_t u32_size = (uint32_t)_size;
 
-    PVOID pBufSize = (uint8_t *)_handle->pBuf + _handle->carriage;
+    PVOID pBufSize = (hb_byte_t *)_handle->pBuf + _handle->carriage;
     CopyMemory( pBufSize, &u32_size, sizeof( uint32_t ) );
 
     _handle->carriage += sizeof( uint32_t );
 
-    PVOID pBufData = (uint8_t *)_handle->pBuf + _handle->carriage;
+    PVOID pBufData = (hb_byte_t *)_handle->pBuf + _handle->carriage;
     CopyMemory( pBufData, _buffer, _size );
 
     _handle->carriage += _size;
@@ -149,7 +149,7 @@ hb_result_t hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _bu
         return HB_FAILURE;
     }
 
-    PVOID pBufSize = (uint8_t *)_handle->pBuf + _handle->carriage;
+    PVOID pBufSize = (hb_byte_t *)_handle->pBuf + _handle->carriage;
 
     uint32_t u32_size;
     CopyMemory( &u32_size, pBufSize, sizeof( uint32_t ) );
@@ -166,7 +166,7 @@ hb_result_t hb_sharedmemory_read( hb_sharedmemory_handle_t * _handle, void * _bu
         return HB_FAILURE;
     }
 
-    PVOID pBufData = (uint8_t *)_handle->pBuf + _handle->carriage;
+    PVOID pBufData = (hb_byte_t *)_handle->pBuf + _handle->carriage;
 
     CopyMemory( _buffer, pBufData, u32_size );
 

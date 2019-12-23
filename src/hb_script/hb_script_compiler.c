@@ -31,7 +31,7 @@ static int s_writer( lua_State * L, const void * p, size_t size, void * u )
         return LUA_ERRMEM;
     }
 
-    memcpy( (uint8_t *)desc->buffer + desc->carriage, p, size );
+    memcpy( (hb_byte_t *)desc->buffer + desc->carriage, p, size );
 
     desc->carriage += size;
 
