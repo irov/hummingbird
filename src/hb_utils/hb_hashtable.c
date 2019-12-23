@@ -9,7 +9,7 @@ typedef struct hb_hashtable_record_t
 {
     uint64_t hash;
 
-    const void * key;
+    uint8_t key[32];
     size_t key_size;
 
     void * element;
@@ -32,7 +32,7 @@ static hb_hashtable_record_t * __hb_hashtable_newbuffer( size_t _capacity )
         hb_hashtable_record_t * record = new_records + index;
 
         record->hash = 0ULL;
-        record->key = HB_NULLPTR;
+        record->key[0] = 0;
         record->key_size = 0ULL;
         record->element = HB_NULLPTR;
     }
@@ -90,7 +90,7 @@ static void __hb_hashtable_push( hb_hashtable_record_t * _records, size_t _capac
         if( record->element == HB_NULLPTR || record->element == (void *)(~0) )
         {
             record->hash = _hash;
-            record->key = _key;
+            memcpy( record->key, _key, _size );
             record->key_size = _size;
             record->element = _element;
 
@@ -155,6 +155,11 @@ void hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size
         _size = strlen( (const char *)_key );
     }
 
+    if( _size > 32 )
+    {
+        return;
+    }
+
     uint64_t hash = hb_murmurhash64( _key, _size );
 
     __hb_hashtable_push( _ht->records, _ht->capacity, hash, _key, _size, _element );
@@ -194,7 +199,8 @@ static void * __hb_hashtable_change( hb_hashtable_record_t * _records, size_t _c
         if( record->element == HB_NULLPTR )
         {
             record->hash = _hash;
-            record->key = _key;
+            memcpy( record->key, _key, _size );
+            record->key_size = _size;
             record->element = _element;
 
             return HB_NULLPTR;
@@ -209,6 +215,11 @@ void * hb_hashtable_change( hb_hashtable_t * _ht, const void * _key, size_t _siz
     if( _size == HB_UNKNOWN_STRING_SIZE )
     {
         _size = strlen( (const char *)_key );
+    }
+
+    if( _size > 32 )
+    {
+        return HB_NULLPTR;
     }
 
     __hb_hashtable_checkincrease( _ht );
@@ -265,6 +276,11 @@ void * hb_hashtable_erase( hb_hashtable_t * _ht, const void * _key, size_t _size
         _size = strlen( (const char *)_key );
     }
 
+    if( _size > 32 )
+    {
+        return HB_NULLPTR;
+    }
+
     uint64_t hash = hb_murmurhash64( _key, _size );
 
     void * erase_element = __hb_hashtable_pop( _ht->records, _ht->capacity, hash, _key, _size );
@@ -317,6 +333,11 @@ void * hb_hashtable_find( hb_hashtable_t * _ht, const void * _key, size_t _size 
     if( _size == HB_UNKNOWN_STRING_SIZE )
     {
         _size = strlen( (const char *)_key );
+    }
+
+    if( _size > 32 )
+    {
+        return HB_NULLPTR;
     }
 
     uint64_t hash = hb_murmurhash64( _key, _size );
@@ -374,7 +395,7 @@ void hb_hashtable_clear( hb_hashtable_t * _ht )
         }
 
         record->element = HB_NULLPTR;
-        record->key = HB_NULLPTR;
+        record->key[0] = 0;
         record->key_size = 0;
     }
 

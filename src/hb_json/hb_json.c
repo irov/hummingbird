@@ -226,6 +226,11 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_oid16( hb_json_handle_t * _handle, const char * _key, hb_oid16_t * _oid, const char * _default )
+{
+    return HB_FAILURE;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default )
 {
     hb_json_handle_t * field;

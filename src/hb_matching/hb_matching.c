@@ -12,6 +12,7 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_date.h"
 #include "hb_utils/hb_sleep.h"
+#include "hb_utils/hb_oid.h"
 
 #include "hb_utils/hb_hashtable.h"
 
@@ -62,31 +63,82 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     hb_matching_process_handle_t * process = (hb_matching_process_handle_t *)_ud;
     HB_UNUSED( process );
 
-    hb_json_handle_t * json;
-    if( hb_http_get_request_json( _request, &json ) == HB_FAILURE )
-    {
-        return;
-    }
-
     int32_t response_code = HTTP_OK;
 
     size_t response_data_size = 2;
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char cmd[128] = { '\0' };
-    int count = sscanf( uri, "/%[^'/']", cmd );
-
-    if( count == 0 )
+    hb_json_handle_t * json;
+    if( hb_http_get_request_json( _request, &json ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+        return;
+    }
+
+    const char * moid16;
+    size_t moid16_size;
+    if( hb_json_get_field_string( json, "moid16", &moid16, &moid16_size, HB_NULLPTR ) == HB_FAILURE )
+    {
+        hb_json_destroy( json );
 
         return;
     }
 
-    if( strcmp( cmd, "create" ) == 0 )
+    const char * uoid16;
+    size_t uoid16_size;
+    if( hb_json_get_field_string( json, "uoid16", &uoid16, &uoid16_size, HB_NULLPTR ) == HB_FAILURE )
     {
+        hb_json_destroy( json );
 
+        return;
+    }
+
+    hb_matching_room_t * room_found = (hb_matching_room_t *)hb_hashtable_find( process->ht, moid16, moid16_size );
+
+    if( room_found == HB_NULLPTR )
+    {
+        hb_oid_t moid;
+        hb_oid_base16_decode( moid16, &moid );
+
+        const char * fields = { "count", "dispersion" };
+
+        hb_db_value_handle_t values[2];
+        if( hb_db_get_values( process->db_collection_matching, moid, fields, values, 2 ) == HB_FAILURE )
+        {
+            hb_json_destroy( json );
+
+            return;
+        }
+
+        hb_matching_room_t * new_room = HB_NEW( hb_matching_room_t );
+        
+        new_room->count = values[0].u.i32;
+        new_room->dispersion = values[1].u.i32;
+
+        new_room->users = HB_NEWN( hb_matching_user_t, 64 );
+        new_room->users_count = 0;
+        new_room->users_capacity = 64;
+
+        hb_hashtable_emplace( new_room, moid16, moid16_size, new_room );
+    }
+
+    hb_json_destroy( json );
+
+    //char cmd[128] = { '\0' };
+    //int count = sscanf( uri, "/%[^'/']", cmd );
+
+    //if( count == 0 )
+    //{
+        //evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        //return;
+    //}
+
+    //if( strcmp( cmd, "create" ) == 0 )
+    //{
+
+
+        //hb_json_destroy( json );
     }
     else if( strcmp( cmd, "join" ) == 0 )
     {
@@ -268,6 +320,17 @@ int main( int _argc, char * _argv[] )
         hb_json_destroy( json_handle );
     }
 
+    hb_db_collection_handle_t * db_collection_matching;
+
+    if( hb_db_get_collection( "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
+            , "hb_matching"
+        );
+
+        return EXIT_FAILURE;
+    }
+
     HB_LOG_MESSAGE_INFO( "grid", "start matching with config:" );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
     HB_LOG_MESSAGE_INFO( "grid", "max_thread: %u", max_thread );
@@ -292,10 +355,10 @@ int main( int _argc, char * _argv[] )
 
         strcpy( process_handle->matching_uri, matching_uri );
         process_handle->matching_port = matching_port;
-
         process_handle->ev_socket = &ev_socket;
-
         process_handle->config = config;
+        process_handle->db_collection_matching = db_collection_matching;
+        process_handle->ht = ht;
 
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
         {
@@ -318,6 +381,8 @@ int main( int _argc, char * _argv[] )
 
         hb_thread_destroy( process_handle->thread );
     }
+
+    hb_db_destroy_collection( db_collection_matching );
 
     HB_DELETEN( process_handles );
 
