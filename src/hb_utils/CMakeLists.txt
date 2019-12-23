@@ -58,6 +58,9 @@ src
     
     hb_hashtable.h
     hb_hashtable.c
+    
+    hb_file.h
+    hb_file.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

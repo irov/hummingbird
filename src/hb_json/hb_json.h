@@ -8,6 +8,8 @@ typedef struct hb_json_handle_t hb_json_handle_t;
 hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle );
 void hb_json_destroy( hb_json_handle_t * _handle );
 
+hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle );
+
 typedef enum hb_json_type_t
 {
     e_hb_json_object,

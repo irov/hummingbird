@@ -316,39 +316,8 @@ int main( int _argc, char * _argv[] )
 
     if( config_file != HB_NULLPTR )
     {
-        FILE * f = fopen( config_file, "rb" );
-
-        if( f == HB_NULLPTR )
-        {
-            HB_LOG_MESSAGE_CRITICAL( "grid", "config file '%s' not found"
-                , config_file
-            );
-
-            return EXIT_FAILURE;
-        }
-
-        fseek( f, 0L, SEEK_END );
-        long sz = ftell( f );
-        rewind( f );
-
-        if( sz > 10240 )
-        {
-            HB_LOG_MESSAGE_CRITICAL( "grid", "config file '%s' very large [%d]"
-                , config_file
-                , sz
-            );
-
-            return EXIT_FAILURE;
-        }
-
-        char config_buffer[10240];
-        size_t r = fread( config_buffer, sz, 1, f );
-        HB_UNUSED( r );
-
-        fclose( f );
-
         hb_json_handle_t * json_handle;
-        if( hb_json_create( config_buffer, sz, &json_handle ) == HB_FAILURE )
+        if( hb_json_load( config_file, &json_handle ) == HB_FAILURE )
         {
             HB_LOG_MESSAGE_CRITICAL( "grid", "config file '%s' wrong json"
                 , config_file
@@ -502,7 +471,7 @@ int main( int _argc, char * _argv[] )
         hb_sharedmemory_destroy( process_handle->sharedmemory );        
     }
 
-    HB_DELETE( process_handles );
+    HB_DELETEN( process_handles );
 
     HB_DELETE( config );
 

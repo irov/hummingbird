@@ -1,6 +1,7 @@
 #include "hb_json.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_utils/hb_file.h"
 
 #include "jansson.h"
 
@@ -77,6 +78,25 @@ void hb_json_destroy( hb_json_handle_t * _handle )
     json_t * jroot = _handle->jroot;
 
     json_decref( jroot );
+
+    HB_DELETE( _handle );
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
+{
+    char buffer[10240];
+    size_t buffer_size;
+    if( hb_file_read( _file, buffer, 10240, &buffer_size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_json_create( buffer, buffer_size, _handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update )
