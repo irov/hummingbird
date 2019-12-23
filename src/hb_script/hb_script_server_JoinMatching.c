@@ -18,13 +18,13 @@ int __hb_script_server_JoinMatching( lua_State * L )
 
     //lua_Integer dispersion = lua_tointegerx( L, 2, HB_NULLPTR );
 
-    hb_db_value_handle_t values[2];
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 0 );
-    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, values + 1 );
+    hb_db_value_handle_t query[2];
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, query + 0 );
+    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, query + 1 );
 
     hb_bool_t exist;
     hb_oid_t moid;
-    if( hb_db_find_oid( g_script_handle->db_collection_matching, values, 2, &moid, &exist ) == HB_FAILURE )
+    if( hb_db_find_oid( g_script_handle->db_collection_matching, query, 2, &moid, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
