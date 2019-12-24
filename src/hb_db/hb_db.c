@@ -830,7 +830,7 @@ void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, const hb_byte_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, hb_sha1_t _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
 

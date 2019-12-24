@@ -18,7 +18,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
 {
     hb_node_upload_in_t in_data;
 
-    hb_token_base16_decode( _token, in_data.token );
+    hb_token_base16_decode( _token, &in_data.token );
 
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 

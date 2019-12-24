@@ -44,7 +44,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     }
 
     hb_sha1_t sha1;
-    if( hb_storage_set( code_buffer, code_size, in_data->script_source, in_data->script_source_size, sha1 ) == HB_FAILURE )
+    if( hb_storage_set( code_buffer, code_size, in_data->script_source, in_data->script_source_size, &sha1 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

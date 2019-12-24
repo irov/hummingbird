@@ -54,12 +54,12 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
     hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, in_data->pid, authentication_handles + 0 );
 
     hb_sha1_t login_sha1;
-    hb_sha1( in_data->login, strlen( in_data->login ), login_sha1 );
+    hb_sha1( in_data->login, strlen( in_data->login ), &login_sha1 );
 
     hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, authentication_handles + 1 );
 
     hb_sha1_t password_sha1;
-    hb_sha1( in_data->password, strlen( in_data->password ), password_sha1 );
+    hb_sha1( in_data->password, strlen( in_data->password ), &password_sha1 );
 
     hb_db_make_binary_value( "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20, authentication_handles + 2 );
 
@@ -80,7 +80,7 @@ hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
         hb_oid_copy( token_handle.uoid, authentication_oid );
         hb_oid_copy( token_handle.poid, project_oid );
 
-        if( hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, out_data->token ) == HB_FAILURE )
+        if( hb_token_generate( "UR", &token_handle, sizeof( token_handle ), 1800, &out_data->token ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

@@ -43,7 +43,7 @@ void hb_storage_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t _sha1 )
+hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
 {
     size_t bound_size = hb_archive_bound( _codesize );
 
@@ -61,7 +61,7 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
 
     hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
-    if( hb_db_upload_script( g_storage_settings->db_collection, _sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
+    if( hb_db_upload_script( g_storage_settings->db_collection, *_sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
