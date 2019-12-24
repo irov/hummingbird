@@ -32,6 +32,7 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value );
 
 hb_result_t hb_json_get_field_oid16( hb_json_handle_t * _handle, const char * _key, hb_oid16_t * _oid );
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default );
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity );
 hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default );
 
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update );

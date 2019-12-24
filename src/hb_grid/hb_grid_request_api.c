@@ -14,7 +14,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
 
     hb_node_api_in_t in_data;
 
-    hb_token_base16_decode( _token, in_data.token );
+    hb_token_base16_decode( _token, &in_data.token );
 
     in_data.category = e_hb_node_api;
     strcpy( in_data.method, _method );

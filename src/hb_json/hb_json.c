@@ -289,6 +289,33 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    const char * value;
+    size_t size;
+    if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( size > _capacity )
+    {
+        return HB_FAILURE;
+    }
+
+    memcpy( _value, value, size );
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default )
 {
     hb_json_handle_t * field;
