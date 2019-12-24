@@ -75,32 +75,30 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    const char * moid16;
-    size_t moid16_size;
-    if( hb_json_get_field_string( json, "moid16", &moid16, &moid16_size, HB_NULLPTR ) == HB_FAILURE )
+    hb_oid16_t moid16;
+    if( hb_json_get_field_oid16( json, "moid16", &moid16 ) == HB_FAILURE )
     {
         hb_json_destroy( json );
 
         return;
     }
 
-    const char * uoid16;
-    size_t uoid16_size;
-    if( hb_json_get_field_string( json, "uoid16", &uoid16, &uoid16_size, HB_NULLPTR ) == HB_FAILURE )
+    hb_oid16_t uoid16;
+    if( hb_json_get_field_oid16( json, "uoid16", &uoid16 ) == HB_FAILURE )
     {
         hb_json_destroy( json );
 
         return;
     }
 
-    hb_matching_room_t * room_found = (hb_matching_room_t *)hb_hashtable_find( process->ht, moid16, moid16_size );
+    hb_matching_room_t * room_found = (hb_matching_room_t *)hb_hashtable_find( process->ht, moid16, sizeof( hb_oid16_t ) );
 
     if( room_found == HB_NULLPTR )
     {
         hb_oid_t moid;
         hb_oid_base16_decode( moid16, &moid );
 
-        const char * fields = { "count", "dispersion" };
+        const char * fields[] = {"count", "dispersion"};
 
         hb_db_value_handle_t values[2];
         if( hb_db_get_values( process->db_collection_matching, moid, fields, values, 2 ) == HB_FAILURE )
@@ -119,7 +117,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         new_room->users_count = 0;
         new_room->users_capacity = 64;
 
-        hb_hashtable_emplace( new_room, moid16, moid16_size, new_room );
+        hb_hashtable_emplace( process->ht, moid16, sizeof( hb_oid16_t ), new_room );
     }
 
     hb_json_destroy( json );
@@ -139,11 +137,11 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
 
         //hb_json_destroy( json );
-    }
-    else if( strcmp( cmd, "join" ) == 0 )
-    {
+    //}
+    //else if( strcmp( cmd, "join" ) == 0 )
+    //{
 
-    }
+    //}
 
     evbuffer_add( output_buffer, response_data, response_data_size );
 
