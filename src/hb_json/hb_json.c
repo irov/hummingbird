@@ -187,6 +187,24 @@ hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle )
     }
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_oid16( hb_json_handle_t * _handle, hb_oid16_t * _oid )
+{
+    json_t * jvalue = _handle->jroot;
+
+    const char * value = json_string_value( jvalue );
+
+    size_t size = json_string_length( jvalue );
+
+    if( size != sizeof( hb_oid16_t ) )
+    {
+        return HB_FAILURE;
+    }
+
+    memcpy( *_oid, value, sizeof( hb_oid16_t ) );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size )
 {
     json_t * jvalue = _handle->jroot;
@@ -226,9 +244,22 @@ hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_oid16( hb_json_handle_t * _handle, const char * _key, hb_oid16_t * _oid, const char * _default )
+hb_result_t hb_json_get_field_oid16( hb_json_handle_t * _handle, const char * _key, hb_oid16_t * _oid )
 {
-    return HB_FAILURE;
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_json_to_oid16( field, _oid ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default )
