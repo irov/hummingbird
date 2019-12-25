@@ -1,96 +1,53 @@
 #include "hb_grid.h"
 
-#include "hb_node_newuser/hb_node_newuser.h"
-#include "hb_node_api/hb_node_api.h"
+#include "hb_grid_process_newuser.h"
+#include "hb_grid_process_api.h"
 
 #include "hb_token/hb_token.h"
 #include "hb_http/hb_http.h"
-#include "hb_process/hb_process.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
 #include <string.h>
 
-int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid )
+int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
 {
-    hb_node_newuser_in_t in_data;
+    HB_UNUSED( _process );
+
+    hb_grid_process_newuser_in_data_t in_data;
 
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     {
-        size_t request_data_size;
-        char request_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-        if( hb_http_get_request_data( _request, request_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &request_data_size ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
         hb_json_handle_t * json_handle;
-        if( hb_json_create( request_data, request_data_size, &json_handle ) == HB_FAILURE )
+        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        const char * login;
-        if( hb_json_get_field_string( json_handle, "login", &login, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_copy_field_string( json_handle, "login", in_data.login, 128 ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        const char * password;
-        if( hb_json_get_field_string( json_handle, "password", &password, HB_NULLPTR, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_copy_field_string( json_handle, "password", in_data.password, 128 ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
-
-        strcpy( in_data.login, login );
-        strcpy( in_data.password, password );
 
         hb_json_destroy( json_handle );
     }
 
-    hb_node_newuser_out_t out_data;
-
+    hb_grid_process_newuser_out_data_t out_data;
+    if( hb_grid_process_newuser( &in_data, &out_data ) == HB_FAILURE )
     {
-        if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_bool_t process_successful;
-        if( hb_process_run( _handle->config->process_newuser, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( process_successful == HB_FALSE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_node_code_t out_code;
-        char out_reason[1024];
-        if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code, out_reason ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( out_code != e_node_ok )
-        {
-            size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"%s\"}"
-                , out_reason
-            );
-
-            *_size = response_data_size;
-
-            return HTTP_OK;
-        }
+        return HTTP_BADREQUEST;
     }
 
     if( out_data.exist == HB_FALSE )
     {
-        hb_node_api_in_t api_in_data;
+        hb_grid_process_api_in_data_t api_in_data;
 
         api_in_data.data_size = 0;
 
@@ -99,50 +56,29 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
         api_in_data.category = e_hb_node_event;
         strcpy( api_in_data.method, "onCreateUser" );
 
-        if( hb_node_write_in_data( _handle->sharedmemory, &api_in_data, sizeof( api_in_data ), _handle->config ) == HB_FAILURE )
+        hb_grid_process_api_out_data_t api_out_data;
+        if( hb_grid_process_api( &api_in_data, &api_out_data ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        hb_bool_t process_successful;
-        if( hb_process_run( _handle->config->process_api, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
+        if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
         {
-            return HTTP_BADREQUEST;
-        }
-
-        if( process_successful == HB_FALSE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_node_api_out_t api_out_data;
-        hb_node_code_t out_code;
-        char out_reason[1024];
-        if( hb_node_read_out_data( _handle->sharedmemory, &api_out_data, sizeof( api_out_data ), &out_code, out_reason ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( out_code != e_node_ok )
-        {
-            size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"%s\"}"
-                , out_reason
-            );
+            size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"error event onCreatUser\"}" );
 
             *_size = response_data_size;
 
             return HTTP_OK;
         }
-    }
 
-    if( out_data.exist == HB_FALSE )
-    {
         hb_token16_t token16;
         hb_token_base16_encode( out_data.token, &token16 );
 
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\"}"
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %u, \"call_used\": %u}}"
             , (int)sizeof( token16 )
             , token16
+            , api_out_data.memory_used
+            , api_out_data.call_used
         );
 
         *_size = response_data_size;

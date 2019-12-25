@@ -1,4 +1,4 @@
-#include "hb_node_api.h"
+#include "hb_grid_process_api.h"
 
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
@@ -6,7 +6,6 @@
 #include "hb_script/hb_script_compiler.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_storage/hb_storage.h"
-#include "hb_sharedmemory/hb_sharedmemory.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
@@ -16,9 +15,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-uint32_t hb_node_components_enumerator = e_hb_component_cache | e_hb_component_db | e_hb_component_storage;
-//////////////////////////////////////////////////////////////////////////
-static hb_result_t __node_initialize_script( const hb_user_token_handle_t * _token )
+static hb_result_t __grid_process_api_initialize_script( const hb_user_token_handle_t * _token )
 {
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token->uoid, _token->poid ) == HB_FAILURE )
     {
@@ -87,73 +84,76 @@ static hb_result_t __node_initialize_script( const hb_user_token_handle_t * _tok
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_node_process( const void * _data, void * _out, size_t * _size )
+hb_result_t hb_grid_process_api( const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * _out )
 {
-    const hb_node_api_in_t * in_data = (const hb_node_api_in_t *)_data;
-    hb_node_api_out_t * out_data = (hb_node_api_out_t *)_out;
-    *_size = sizeof( hb_node_api_out_t );
-
-    if( hb_cache_expire_value( in_data->token, sizeof( in_data->token ), 1800 ) == HB_FAILURE )
+    if( hb_cache_expire_value( _in->token, sizeof( _in->token ), 1800 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_user_token_handle_t token_handle;
-    if( hb_cache_get_value( in_data->token, sizeof( in_data->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_value( _in->token, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( __node_initialize_script( &token_handle ) == HB_FAILURE )
+    if( __grid_process_api_initialize_script( &token_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    switch( in_data->category )
+    switch( _in->category )
     {
     case e_hb_node_api:
         {
             hb_error_code_t code;
-            hb_result_t result = hb_script_server_call( in_data->method, in_data->data, in_data->data_size, out_data->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &out_data->response_size, &out_data->successful, &code );
+            hb_result_t result = hb_script_server_call( _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &_out->successful, &code );
 
             if( result == HB_FAILURE )
             {
                 if( code == HB_ERROR_NOT_FOUND )
                 {
-                    out_data->response_size = 0;
-                    out_data->successful = HB_FALSE;
-                    out_data->method_found = HB_FALSE;
+                    _out->response_size = 0;
+                    _out->successful = HB_TRUE;
+                    _out->method_found = HB_FALSE;
                 }
                 else
                 {
-                    return HB_FAILURE;
+                    _out->response_size = 0;
+                    _out->successful = HB_FALSE;
+                    _out->method_found = HB_FALSE;
                 }
             }
             else
             {
-                out_data->method_found = HB_TRUE;
-            }            
+                _out->successful = HB_TRUE;
+                _out->method_found = HB_TRUE;
+            }
         }break;
     case e_hb_node_event:
         {
-            if( hb_script_event_call( in_data->method, in_data->data, in_data->data_size ) == HB_FAILURE )
+            if( hb_script_event_call( _in->method, _in->data, _in->data_size ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
 
-            out_data->successful = HB_TRUE;
-            out_data->response_size = 0;
-            out_data->method_found = HB_TRUE;
-        }
+            _out->successful = HB_TRUE;
+            _out->response_size = 0;
+            _out->method_found = HB_TRUE;
+        }break;
+    default:
+        {
+            return HB_FAILURE;
+        }break;
     }
 
     hb_script_stat_t stat;
     hb_script_stat( &stat );
 
-    out_data->memory_used = stat.memory_used;
-    out_data->call_used = stat.call_used;
+    _out->memory_used = stat.memory_used;
+    _out->call_used = stat.call_used;
 
     hb_script_finalize();
 
-    return EXIT_SUCCESS;
+    return HB_SUCCESSFUL;
 }

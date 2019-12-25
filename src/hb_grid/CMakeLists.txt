@@ -4,7 +4,10 @@ ADD_FILTER(
 src
 	hb_grid.h
 	hb_grid.c
-    
+)
+
+ADD_FILTER(
+request
     hb_grid_request_api.c
     hb_grid_request_upload.c
     hb_grid_request_loginuser.c
@@ -12,6 +15,24 @@ src
     hb_grid_request_newproject.c
     hb_grid_request_newaccount.c
     hb_grid_request_loginaccount.c
+)
+
+ADD_FILTER(
+process    
+    hb_grid_process_newaccount.h
+    hb_grid_process_newaccount.c
+    hb_grid_process_loginaccount.h
+    hb_grid_process_loginaccount.c
+    hb_grid_process_newuser.h
+    hb_grid_process_newuser.c
+    hb_grid_process_loginuser.h
+    hb_grid_process_loginuser.c
+    hb_grid_process_newproject.h
+    hb_grid_process_newproject.c
+    hb_grid_process_upload.h
+    hb_grid_process_upload.c
+    hb_grid_process_api.h
+    hb_grid_process_api.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
@@ -29,14 +50,11 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_config)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log_tcp)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log_file)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_sharedmemory)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_script)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_storage)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_process)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_json)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_token)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_thread)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_cache)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_node)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_db)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_http)

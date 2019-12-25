@@ -1,19 +1,18 @@
 #include "hb_grid.h"
+#include "hb_grid_process_api.h"
 
-#include "hb_node_api/hb_node_api.h"
 #include "hb_http/hb_http.h"
 #include "hb_token/hb_token.h"
-#include "hb_process/hb_process.h"
 #include "hb_utils/hb_base64.h"
 
 #include <string.h>
 
-int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
+int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
 {    
+    HB_UNUSED( _process );
     HB_UNUSED( _pid );
 
-    hb_node_api_in_t in_data;
-
+    hb_grid_process_api_in_data_t in_data;
     hb_token_base16_decode( _token, &in_data.token );
 
     in_data.category = e_hb_node_api;
@@ -24,39 +23,10 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
+    hb_grid_process_api_out_data_t out_data;
+    if( hb_grid_process_api( &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
-    }
-
-    hb_bool_t process_successful;
-    if( hb_process_run( _handle->config->process_api, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    if( process_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    hb_node_api_out_t out_data;
-    hb_node_code_t out_code;
-    char out_reason[1024];
-    if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code, out_reason ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    if( out_code != e_node_ok )
-    {
-        size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"%s\"}"
-            , out_reason
-        );
-
-        *_size = response_data_size;
-
-        return HTTP_OK;
     }
 
     if( out_data.successful == HB_TRUE )

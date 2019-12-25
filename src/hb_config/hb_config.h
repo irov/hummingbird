@@ -12,10 +12,13 @@
 #define HB_DEBUG
 #endif
 
-typedef uint32_t hb_bool_t;
+typedef enum hb_bool_e
+{
+    HB_FALSE,
+    HB_TRUE,
+} hb_bool_e;
 
-static const hb_bool_t HB_TRUE = (1);
-static const hb_bool_t HB_FALSE = (0);
+typedef uint32_t hb_bool_t;
 
 static const size_t HB_UNKNOWN_STRING_SIZE = (~0U);
 

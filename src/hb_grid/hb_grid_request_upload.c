@@ -1,8 +1,6 @@
 #include "hb_grid.h"
+#include "hb_grid_process_upload.h"
 
-#include "hb_node_upload/hb_node_upload.h"
-
-#include "hb_process/hb_process.h"
 #include "hb_http/hb_http.h"
 #include "hb_token/hb_token.h"
 #include "hb_utils/hb_multipart.h"
@@ -14,12 +12,12 @@
 
 #include <string.h>
 
-int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid )
+int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid )
 {
-    hb_node_upload_in_t in_data;
+    HB_UNUSED( _process );
 
+    hb_grid_process_upload_in_data_t in_data;
     hb_token_base16_decode( _token, &in_data.token );
-
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     uint32_t multipart_params_count;
@@ -44,38 +42,9 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
     memcpy( in_data.script_source, params_data, params_data_size );
     in_data.script_source_size = params_data_size;
 
-    if( hb_node_write_in_data( _handle->sharedmemory, &in_data, sizeof( in_data ), _handle->config ) == HB_FAILURE )
+    hb_grid_process_upload_out_data_t out_data;
+    if( hb_grid_process_upload( &in_data, &out_data ) == HB_FAILURE )
     {
-        return HTTP_BADREQUEST;
-    }
-
-    hb_bool_t process_successful;
-    if( hb_process_run( _handle->config->process_upload, _handle->sharedmemory, &process_successful ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    if( process_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    hb_node_upload_out_t out_data;
-    hb_node_code_t out_code;
-    char out_reason[1024];
-    if( hb_node_read_out_data( _handle->sharedmemory, &out_data, sizeof( out_data ), &out_code, out_reason ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    if( out_code != e_node_ok )
-    {
-        size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"%s\"}"
-            , out_reason
-        );
-
-        *_size = response_data_size;
-
         return HTTP_BADREQUEST;
     }
 
