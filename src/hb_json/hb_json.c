@@ -310,6 +310,7 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     }
 
     memcpy( _value, value, size );
+    _value[size] = '\0';
 
     hb_json_destroy( field );
 

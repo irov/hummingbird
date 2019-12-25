@@ -10,39 +10,6 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_storage_settings_t
-{
-    hb_db_collection_handle_t * db_collection;
-} hb_storage_settings_t;
-//////////////////////////////////////////////////////////////////////////
-static hb_storage_settings_t * g_storage_settings;
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_initialize()
-{
-    hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    g_storage_settings = HB_NEW( hb_storage_settings_t );
-
-    g_storage_settings->db_collection = db_collection;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-void hb_storage_finalize()
-{   
-    if( g_storage_settings != HB_NULLPTR )
-    {
-        hb_db_destroy_collection( g_storage_settings->db_collection );
-
-        HB_DELETE( g_storage_settings );
-        g_storage_settings = HB_NULLPTR;
-    }
-}
-//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
 {
     size_t bound_size = hb_archive_bound( _codesize );
@@ -61,7 +28,13 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
 
     hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
-    if( hb_db_upload_script( g_storage_settings->db_collection, *_sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_db_upload_script( db_collection, *_sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -86,8 +59,14 @@ hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _
         }
     }
 
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
     hb_db_script_handle_t * db_script_data;
-    if( hb_db_load_script( g_storage_settings->db_collection, _sha1, &db_script_data ) == HB_FAILURE )
+    if( hb_db_load_script( db_collection, _sha1, &db_script_data ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

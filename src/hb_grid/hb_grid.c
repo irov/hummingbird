@@ -3,6 +3,8 @@
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
+#include "hb_db/hb_db.h"
+#include "hb_storage/hb_storage.h"
 #include "hb_json/hb_json.h"
 #include "hb_cache/hb_cache.h"
 #include "hb_utils/hb_memmem.h"
@@ -255,29 +257,10 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-#ifdef HB_DEBUG
-    hb_date_t date;
-    hb_date( &date );
-
-    char logfile[HB_MAX_PATH];
-    sprintf( logfile, "log_grid_%u_%u_%u_%u_%u_%u.log"
-        , date.year
-        , date.mon
-        , date.mday
-        , date.hour
-        , date.min
-        , date.sec );
-
-    if( hb_log_file_initialize( logfile ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
-#endif
-
     const char * config_file = HB_NULLPTR;
     hb_getopt( _argc, _argv, "--config", &config_file );
 
-    hb_node_config_t * config = HB_NEW( hb_node_config_t );
+    hb_grid_config_t * config = HB_NEW( hb_grid_config_t );
 
     uint32_t max_thread = 16;
 
@@ -293,26 +276,6 @@ int main( int _argc, char * _argv[] )
     config->db_port = 27017;
     strcpy( config->log_uri, "127.0.0.1" );
     config->log_port = 5044;
-
-#if defined(HB_PLATFORM_WINDOWS)
-    strcpy( config->process_newaccount, "hb_node_newaccount.exe" );
-    strcpy( config->process_loginaccount, "hb_node_loginaccount.exe" );
-    strcpy( config->process_newproject, "hb_node_newproject.exe" );
-    strcpy( config->process_loginproject, "hb_node_loginproject.exe" );
-    strcpy( config->process_upload, "hb_node_upload.exe" );
-    strcpy( config->process_newuser, "hb_node_newuser.exe" );
-    strcpy( config->process_loginuser, "hb_node_loginuser.exe" );
-    strcpy( config->process_api, "hb_node_api.exe" );
-#elif defined(HB_PLATFORM_LINUX)
-    strcpy( config->process_newaccount, "./hb_node_newaccount" );
-    strcpy( config->process_loginaccount, "./hb_node_loginaccount" );
-    strcpy( config->process_newproject, "./hb_node_newproject" );
-    strcpy( config->process_loginproject, "./hb_node_loginproject" );
-    strcpy( config->process_upload, "./hb_node_upload" );
-    strcpy( config->process_newuser, "./hb_node_newuser" );
-    strcpy( config->process_loginuser, "./hb_node_loginuser" );
-    strcpy( config->process_api, "./hb_node_api" );
-#endif
 
     if( config_file != HB_NULLPTR )
     {
@@ -370,40 +333,27 @@ int main( int _argc, char * _argv[] )
         hb_json_get_field_integer( json_handle, "log_port", &log_port, config->log_port );
         config->log_port = (uint16_t)log_port;
 
-        const char * process_newaccount = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_newaccount", &process_newaccount, HB_NULLPTR, config->process_newaccount );
-        strcpy( config->process_newaccount, process_newaccount );
-
-        const char * process_loginaccount = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_loginaccount", &process_loginaccount, HB_NULLPTR, config->process_loginaccount );
-        strcpy( config->process_loginaccount, process_loginaccount );
-
-        const char * process_newproject = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_newproject", &process_newproject, HB_NULLPTR, config->process_newproject );
-        strcpy( config->process_newproject, process_newproject );
-
-        const char * process_loginproject = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_loginproject", &process_loginproject, HB_NULLPTR, config->process_loginproject );
-        strcpy( config->process_loginproject, process_loginproject );
-
-        const char * process_upload = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_upload", &process_upload, HB_NULLPTR, config->process_upload );
-        strcpy( config->process_upload, process_upload );
-
-        const char * process_newuser = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_newuser", &process_newuser, HB_NULLPTR, config->process_newuser );
-        strcpy( config->process_newuser, process_newuser );
-
-        const char * process_loginuser = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_loginuser", &process_loginuser, HB_NULLPTR, config->process_loginuser );
-        strcpy( config->process_loginuser, process_loginuser );
-
-        const char * process_api = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "process_api", &process_api, HB_NULLPTR, config->process_api );
-        strcpy( config->process_api, process_api );
-
         hb_json_destroy( json_handle );
     }
+
+#ifdef HB_DEBUG
+    hb_date_t date;
+    hb_date( &date );
+
+    char logfile[HB_MAX_PATH];
+    sprintf( logfile, "log_grid_%u_%u_%u_%u_%u_%u.log"
+        , date.year
+        , date.mon
+        , date.mday
+        , date.hour
+        , date.min
+        , date.sec );
+
+    if( hb_log_file_initialize( logfile ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+#endif
 
     HB_LOG_MESSAGE_INFO( "grid", "start grid with config:" );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
@@ -419,15 +369,33 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newaccount: %s", config->process_newaccount );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginaccount: %s", config->process_loginaccount );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newproject: %s", config->process_newproject );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginproject: %s", config->process_loginproject );
-    HB_LOG_MESSAGE_INFO( "grid", "process_upload: %s", config->process_upload );
-    HB_LOG_MESSAGE_INFO( "grid", "process_newuser: %s", config->process_newuser );
-    HB_LOG_MESSAGE_INFO( "grid", "process_loginuser: %s", config->process_loginuser );
-    HB_LOG_MESSAGE_INFO( "grid", "process_api: %s", config->process_api );
-    HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
+
+    if( hb_log_tcp_initialize( config->log_uri, config->log_port ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
+    }
+
+    if( hb_cache_initialize( config->cache_uri, config->cache_port, config->cache_timeout ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [cache] component [uri %s:%u]"
+            , config->name
+            , config->cache_uri
+            , config->cache_port
+        );
+        
+        return EXIT_FAILURE;
+    }
+
+    if( hb_db_initialze( config->name, config->db_uri, config->db_port ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
+            , config->name
+            , config->db_uri
+            , config->db_port
+        );
+
+        return EXIT_FAILURE;
+    }
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
@@ -435,11 +403,6 @@ int main( int _argc, char * _argv[] )
     for( uint32_t i = 0; i != max_thread; ++i )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
-
-        if( hb_sharedmemory_create( 65536, &process_handle->sharedmemory ) == HB_FAILURE )
-        {
-            continue;
-        }
 
         strcpy( process_handle->grid_uri, grid_uri );
         process_handle->grid_port = grid_port;
@@ -468,10 +431,14 @@ int main( int _argc, char * _argv[] )
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
         hb_thread_destroy( process_handle->thread );
-        hb_sharedmemory_destroy( process_handle->sharedmemory );        
     }
 
     HB_DELETEN( process_handles );
+
+    hb_cache_finalize();
+    hb_db_finalize();
+
+    hb_log_tcp_finalize();
 
     HB_DELETE( config );
 
