@@ -33,19 +33,21 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
         return 1;
     }
 
-    const char * db_fields[1] = { "public_data" };
+    const char * db_fields[1] = {"public_data"};
 
-    hb_db_value_handle_t handler[1];
-    if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, handler, 1 ) == HB_FAILURE )
+    hb_db_value_handle_t entity_get_values[1];
+    if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, entity_get_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_json_handle_t * json_data;
-    if( hb_json_create( handler[0].u.symbol.buffer, handler[0].u.symbol.length, &json_data ) == HB_FAILURE )
+    if( hb_json_create( entity_get_values[0].u.symbol.buffer, entity_get_values[0].u.symbol.length, &json_data ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
+
+    hb_db_destroy_values( entity_get_values, 1 );
 
     hb_json_handle_t * json_update;
     if( hb_script_json_create( L, 1, &json_update ) == HB_FAILURE )
@@ -65,13 +67,15 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_value_handle_t update_handler[1];
-    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size, update_handler + 0 );
+    hb_db_value_handle_t entity_update_values[1];
+    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size, entity_update_values + 0 );
 
-    if( hb_db_update_values( g_script_handle->db_collection_project_entities, eoid, update_handler, 1 ) == HB_FAILURE )
+    if( hb_db_update_values( g_script_handle->db_collection_project_entities, eoid, entity_update_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
+
+    hb_db_destroy_values( entity_update_values, 1 );
 
     lua_pushboolean( L, 1 );
 

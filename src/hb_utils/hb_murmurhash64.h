@@ -1,5 +1,5 @@
-#ifndef HB_CRC64_H_
-#define HB_CRC64_H_
+#ifndef HB_MURMURHASH64_H_
+#define HB_MURMURHASH64_H_
 
 #include "hb_config/hb_config.h"
 

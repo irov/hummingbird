@@ -10,10 +10,8 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_request_loginaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size )
+int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size )
 {
-    HB_UNUSED( _process );
-
     hb_grid_process_loginaccount_in_data_t in_data;
 
     {
@@ -37,7 +35,7 @@ int hb_grid_request_loginaccount( struct evhttp_request * _request, struct hb_gr
     }
 
     hb_grid_process_loginaccount_out_data_t out_data;
-    if( hb_grid_process_loginaccount( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_loginaccount( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

@@ -29,13 +29,13 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
     printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
 //////////////////////////////////////////////////////////////////////////
-extern int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
-extern int hb_grid_request_loginaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size );
-extern int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid );
-extern int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid );
-extern int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _pid );
-extern int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _handle, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
+extern int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
+extern int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
+extern int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
+extern int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid );
+extern int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
+extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
+extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
 ////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -53,7 +53,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     }
 
     enum evhttp_cmd_type command_type = evhttp_request_get_command( _request );
-    
+
     if( command_type == EVHTTP_REQ_OPTIONS )
     {
         struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
@@ -76,10 +76,10 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char cmd[128] = { '\0' };
-    char arg1[128] = { '\0' };
-    char arg2[128] = { '\0' };
-    char arg3[128] = { '\0' };
+    char cmd[128] = {'\0'};
+    char arg1[128] = {'\0'};
+    char arg2[128] = {'\0'};
+    char arg3[128] = {'\0'};
     int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd, arg1, arg2, arg3 );
 
     if( count == 0 )
@@ -221,7 +221,7 @@ static void __hb_ev_thread_base( void * _ud )
     }
 
     event_base_dispatch( base );
-    
+
     evhttp_free( http_server );
 }
 //////////////////////////////////////////////////////////////////////////
@@ -236,9 +236,6 @@ int main( int _argc, char * _argv[] )
     {
         return EXIT_FAILURE;
     }
-
-    hb_hashtable_t * ht;
-    hb_hashtable_create( 32, &ht );
 
 #ifdef WIN32
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
@@ -382,7 +379,7 @@ int main( int _argc, char * _argv[] )
             , config->cache_uri
             , config->cache_port
         );
-        
+
         return EXIT_FAILURE;
     }
 
@@ -392,6 +389,16 @@ int main( int _argc, char * _argv[] )
             , config->name
             , config->db_uri
             , config->db_port
+        );
+
+        return EXIT_FAILURE;
+    }
+
+    hb_matching_t * matching;
+    if( hb_matching_initialize( 1024, &matching ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [matching] component"
+            , config->name
         );
 
         return EXIT_FAILURE;
@@ -410,6 +417,7 @@ int main( int _argc, char * _argv[] )
         process_handle->ev_socket = &ev_socket;
 
         process_handle->config = config;
+        process_handle->matching = matching;
 
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
         {
@@ -434,6 +442,8 @@ int main( int _argc, char * _argv[] )
     }
 
     HB_DELETEN( process_handles );
+
+    hb_matching_finalize( matching );
 
     hb_cache_finalize();
     hb_db_finalize();

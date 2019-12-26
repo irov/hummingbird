@@ -1,5 +1,5 @@
-#ifndef HB_STORAGE_H_
-#define HB_STORAGE_H_
+#ifndef HB_THREAD_H_
+#define HB_THREAD_H_
 
 #include "hb_config/hb_config.h"
 

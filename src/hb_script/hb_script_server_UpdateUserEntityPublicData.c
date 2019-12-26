@@ -30,19 +30,21 @@ int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
         return 1;
     }
 
-    const char * db_fields[1] = { "public_data" };
+    const char * db_fields[1] = {"public_data"};
 
-    hb_db_value_handle_t handler[1];
-    if( hb_db_get_values( g_script_handle->db_collection_user_entities, eoid, db_fields, handler, 1 ) == HB_FAILURE )
+    hb_db_value_handle_t user_entity_values[1];
+    if( hb_db_get_values( g_script_handle->db_collection_user_entities, eoid, db_fields, user_entity_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_json_handle_t * json_data;
-    if( hb_json_create( handler[0].u.symbol.buffer, handler[0].u.symbol.length, &json_data ) == HB_FAILURE )
+    if( hb_json_create( user_entity_values[0].u.symbol.buffer, user_entity_values[0].u.symbol.length, &json_data ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
+
+    hb_db_destroy_values( user_entity_values, 1 );
 
     hb_json_handle_t * json_update;
     if( hb_script_json_create( L, 1, &json_update ) == HB_FAILURE )

@@ -37,7 +37,7 @@ const void * hb_memmem( const void * _buffer, size_t _size, const void * _subbuf
 
         ++carriage;
         ++step;
-    }   
+    }
 
     return HB_NULLPTR;
 }

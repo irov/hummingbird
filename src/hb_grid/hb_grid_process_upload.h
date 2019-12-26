@@ -3,6 +3,8 @@
 
 #include "hb_config/hb_config.h"
 
+#include "hb_grid.h"
+
 typedef struct hb_grid_process_upload_in_data_t
 {
     hb_token_t token;
@@ -19,6 +21,6 @@ typedef struct hb_grid_process_upload_out_data_t
     uint32_t version;
 } hb_grid_process_upload_out_data_t;
 
-hb_result_t hb_grid_process_upload( const hb_grid_process_upload_in_data_t * _in, hb_grid_process_upload_out_data_t * _out );
+hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const hb_grid_process_upload_in_data_t * _in, hb_grid_process_upload_out_data_t * _out );
 
 #endif

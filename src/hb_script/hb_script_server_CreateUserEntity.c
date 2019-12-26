@@ -38,7 +38,7 @@ int __hb_script_server_CreateUserEntity( lua_State * L )
         hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
         hb_db_make_oid_value( "uoid", HB_UNKNOWN_STRING_SIZE, g_script_handle->user_oid, values + 2 );
 
-        uint32_t extra_values = 0;       
+        uint32_t extra_values = 0;
 
         if( name_len != 0 )
         {

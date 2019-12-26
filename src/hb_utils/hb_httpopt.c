@@ -14,8 +14,8 @@ hb_result_t hb_httpopt( const char * _http, size_t _size, const char * _name, co
         const char * chr_equal_name = base;
         size_t chr_equal_name_size = chr_equal - base;
 
-        if( chr_amp == HB_NULLPTR )            
-        { 
+        if( chr_amp == HB_NULLPTR )
+        {
             base = HB_NULLPTR;
         }
         else

@@ -1,7 +1,10 @@
 #ifndef HB_SCRIPT_HANDLE_H_
 #define HB_SCRIPT_HANDLE_H_
 
+#include "hb_config/hb_config.h"
+
 #include "hb_db/hb_db.h"
+#include "hb_matching/hb_matching.h"
 
 #include "lua.h"
 #include "lualib.h"
@@ -31,7 +34,9 @@ typedef struct hb_script_handle_t
     hb_db_collection_handle_t * db_collection_candidate;
 
     hb_oid_t project_oid;
-    hb_oid_t user_oid;    
+    hb_oid_t user_oid;
+
+    hb_matching_t * matching;
 } hb_script_handle_t;
 
 #define HB_SCRIPT_ERROR(L, ...) {lua_pushstring( L, __VA_ARGS__ ); lua_error( L );}

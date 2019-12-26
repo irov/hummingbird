@@ -13,8 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_newuser( const hb_grid_process_newuser_in_data_t * _in, hb_grid_process_newuser_out_data_t * _out )
+hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const hb_grid_process_newuser_in_data_t * _in, hb_grid_process_newuser_out_data_t * _out )
 {
+    HB_UNUSED( _process );
+
     hb_db_collection_handle_t * db_collection_projects;
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
@@ -97,6 +99,6 @@ hb_result_t hb_grid_process_newuser( const hb_grid_process_newuser_in_data_t * _
     }
 
     hb_db_destroy_collection( db_collection_users );
- 
+
     return HB_SUCCESSFUL;
 }

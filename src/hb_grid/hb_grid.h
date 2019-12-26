@@ -4,6 +4,7 @@
 #include "hb_config/hb_config.h"
 
 #include "hb_thread/hb_thread.h"
+#include "hb_matching/hb_matching.h"
 
 #include "evhttp.h"
 #include "event2/thread.h"
@@ -33,6 +34,8 @@ typedef struct hb_grid_process_handle_t
     hb_thread_handle_t * thread;
 
     hb_grid_config_t * config;
+
+    hb_matching_t * matching;
 } hb_grid_process_handle_t;
 
 #endif

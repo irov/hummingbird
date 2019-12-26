@@ -12,10 +12,8 @@
 
 #include <string.h>
 
-int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid )
+int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid )
 {
-    HB_UNUSED( _process );
-
     hb_grid_process_upload_in_data_t in_data;
     hb_token_base16_decode( _token, &in_data.token );
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
@@ -25,7 +23,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
     if( hb_http_get_request_params( _request, multipart_params, 8, &multipart_params_count ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
-    }    
+    }
 
     size_t params_data_size;
     const void * params_data;
@@ -43,7 +41,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, struct hb_grid_pro
     in_data.script_source_size = params_data_size;
 
     hb_grid_process_upload_out_data_t out_data;
-    if( hb_grid_process_upload( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_upload( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
