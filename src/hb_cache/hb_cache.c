@@ -77,7 +77,7 @@ void hb_cache_finalize()
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_set_value(  const void * _key, size_t _keysize, const void * _value, size_t _size )
+hb_result_t hb_cache_set_value( const void * _key, size_t _keysize, const void * _value, size_t _size )
 {
     if( g_redis_context == HB_NULLPTR )
     {

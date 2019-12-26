@@ -34,7 +34,7 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level
 #else
     int message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
 #endif
-    
+
     bufferevent_write( g_log_tcp_handle->bev_cnn, message, message_size );
 
     event_base_dispatch( g_log_tcp_handle->base );
@@ -74,9 +74,9 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 
     struct event_base * base = event_base_new();
     struct bufferevent * bev_cnn = bufferevent_socket_new( base, -1, BEV_OPT_CLOSE_ON_FREE );
-    
-    int error_connect = bufferevent_socket_connect( bev_cnn, (const struct sockaddr *)&sin, sizeof( sin ) );
-    
+
+    int error_connect = bufferevent_socket_connect( bev_cnn, (const struct sockaddr *) & sin, sizeof( sin ) );
+
     if( error_connect != 0 )
     {
         bufferevent_free( bev_cnn );
@@ -90,7 +90,7 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 
     g_log_tcp_handle = HB_NEW( hb_log_tcp_handle_t );
     g_log_tcp_handle->base = base;
-    g_log_tcp_handle->bev_cnn = bev_cnn;    
+    g_log_tcp_handle->bev_cnn = bev_cnn;
 
     if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ERROR, &__hb_log_tcp_observer, HB_NULLPTR ) == HB_FAILURE )
     {

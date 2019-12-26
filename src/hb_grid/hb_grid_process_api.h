@@ -3,6 +3,8 @@
 
 #include "hb_config/hb_config.h"
 
+#include "hb_grid.h"
+
 typedef enum hb_grid_process_api_category_e
 {
     e_hb_node_api,
@@ -15,7 +17,7 @@ typedef struct hb_grid_process_api_in_data_t
 
     hb_node_api_category_e category;
     char method[32];
-    
+
     hb_data_t data;
     size_t data_size;
 
@@ -34,6 +36,6 @@ typedef struct hb_grid_process_api_out_data_t
 
 } hb_grid_process_api_out_data_t;
 
-hb_result_t hb_grid_process_api( const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * _out );
+hb_result_t hb_grid_process_api( hb_grid_process_handle_t * _process, const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * _out );
 
 #endif

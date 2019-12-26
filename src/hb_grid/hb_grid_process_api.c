@@ -15,9 +15,9 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __grid_process_api_initialize_script( const hb_user_token_handle_t * _token )
+static hb_result_t __grid_process_api_initialize_script( hb_grid_process_handle_t * _process, const hb_user_token_handle_t * _token )
 {
-    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token->uoid, _token->poid ) == HB_FAILURE )
+    if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _token->poid, _token->uoid, _process->matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script" );
 
@@ -28,25 +28,25 @@ static hb_result_t __grid_process_api_initialize_script( const hb_user_token_han
     if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_projects" 
+            , "hb_projects"
         );
 
         return HB_FAILURE;
     }
 
-    const char * db_projects_fields[] = { "script_sha1" };
+    const char * db_projects_fields[] = {"script_sha1"};
 
-    hb_db_value_handle_t db_script_sha1_handles[1];
-    if( hb_db_get_values( db_collection_projects, _token->poid, db_projects_fields, db_script_sha1_handles, 1 ) == HB_FAILURE )
+    hb_db_value_handle_t project_values[1];
+    if( hb_db_get_values( db_collection_projects, _token->poid, db_projects_fields, project_values, 1 ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
-            , "hb_projects" 
+            , "hb_projects"
         );
 
         return HB_FAILURE;
     }
 
-    if( db_script_sha1_handles[0].u.binary.length != sizeof( hb_sha1_t ) )
+    if( project_values[0].u.binary.length != sizeof( hb_sha1_t ) )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid data 'script_sha1'"
             , "hb_projects"
@@ -56,9 +56,9 @@ static hb_result_t __grid_process_api_initialize_script( const hb_user_token_han
     }
 
     hb_sha1_t script_sha1;
-    memcpy( script_sha1, db_script_sha1_handles[0].u.binary.buffer, sizeof( hb_sha1_t ) );
+    memcpy( script_sha1, project_values[0].u.binary.buffer, sizeof( hb_sha1_t ) );
 
-    hb_db_destroy_values( db_script_sha1_handles, 1 );
+    hb_db_destroy_values( project_values, 1 );
     hb_db_destroy_collection( db_collection_projects );
 
     size_t script_data_size;
@@ -79,12 +79,12 @@ static hb_result_t __grid_process_api_initialize_script( const hb_user_token_han
         );
 
         return HB_FAILURE;
-    }    
+    }
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_process_api( const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * _out )
+hb_result_t hb_grid_process_api( hb_grid_process_handle_t * _process, const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * _out )
 {
     if( hb_cache_expire_value( _in->token, sizeof( _in->token ), 1800 ) == HB_FAILURE )
     {
@@ -97,7 +97,7 @@ hb_result_t hb_grid_process_api( const hb_grid_process_api_in_data_t * _in, hb_g
         return HB_FAILURE;
     }
 
-    if( __grid_process_api_initialize_script( &token_handle ) == HB_FAILURE )
+    if( __grid_process_api_initialize_script( _process, &token_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

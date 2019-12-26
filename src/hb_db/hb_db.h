@@ -16,7 +16,7 @@ void hb_db_destroy_collection( hb_db_collection_handle_t * _collection );
 hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire );
 
 typedef enum hb_db_value_type_e
-{   
+{
     e_hb_db_int32,
     e_hb_db_int64,
     e_hb_db_symbol,
@@ -75,7 +75,6 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
 hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _querycount, hb_oid_t * _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _fieldcount, hb_bool_t * _exist );
 hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, const char ** _fields, uint32_t _fieldcount, hb_db_value_handle_t * _values, uint32_t _capacity, uint32_t * _exists );
 hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, uint32_t * _founds );
-hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _values );
 hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _count );
 hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const hb_db_value_handle_t * _values, uint32_t _count );
 void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count );

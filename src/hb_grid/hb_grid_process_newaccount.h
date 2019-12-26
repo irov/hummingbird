@@ -3,6 +3,8 @@
 
 #include "hb_config/hb_config.h"
 
+#include "hb_grid.h"
+
 typedef struct hb_grid_process_newaccount_in_data_t
 {
     char login[128];
@@ -17,6 +19,6 @@ typedef struct hb_grid_process_newaccount_out_data_t
     uint32_t exist;
 } hb_grid_process_newaccount_out_data_t;
 
-hb_result_t hb_grid_process_newaccount( const hb_grid_process_newaccount_in_data_t * _in, hb_grid_process_newaccount_out_data_t * _out );
+hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, const hb_grid_process_newaccount_in_data_t * _in, hb_grid_process_newaccount_out_data_t * _out );
 
 #endif

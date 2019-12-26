@@ -13,10 +13,8 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size )
+int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size )
 {
-    HB_UNUSED( _process );
-
     hb_grid_process_newaccount_in_data_t in_data;
 
     {
@@ -40,11 +38,11 @@ int hb_grid_request_newaccount( struct evhttp_request * _request, struct hb_grid
     }
 
     hb_grid_process_newaccount_out_data_t out_data;
-    if( hb_grid_process_newaccount( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_newaccount( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
-    
+
     if( out_data.exist == HB_FALSE )
     {
         hb_token16_t token16;

@@ -133,7 +133,7 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
     {
         return;
     }
-     
+
     __hb_log_message_args( _category, _level, _file, _line, message );
 }
 //////////////////////////////////////////////////////////////////////////

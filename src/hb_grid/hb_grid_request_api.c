@@ -7,8 +7,8 @@
 
 #include <string.h>
 
-int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
-{    
+int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
+{
     HB_UNUSED( _process );
     HB_UNUSED( _pid );
 
@@ -24,7 +24,7 @@ int hb_grid_request_api( struct evhttp_request * _request, struct hb_grid_proces
     }
 
     hb_grid_process_api_out_data_t out_data;
-    if( hb_grid_process_api( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_api( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

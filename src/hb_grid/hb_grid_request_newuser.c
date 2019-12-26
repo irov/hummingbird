@@ -11,10 +11,8 @@
 
 #include <string.h>
 
-int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
+int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
 {
-    HB_UNUSED( _process );
-
     hb_grid_process_newuser_in_data_t in_data;
 
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
@@ -40,7 +38,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
     }
 
     hb_grid_process_newuser_out_data_t out_data;
-    if( hb_grid_process_newuser( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_newuser( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -57,7 +55,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, struct hb_grid_pr
         strcpy( api_in_data.method, "onCreateUser" );
 
         hb_grid_process_api_out_data_t api_out_data;
-        if( hb_grid_process_api( &api_in_data, &api_out_data ) == HB_FAILURE )
+        if( hb_grid_process_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }

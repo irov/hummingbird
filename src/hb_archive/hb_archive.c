@@ -9,7 +9,7 @@
 size_t hb_archive_bound( size_t _size )
 {
     int32_t size = LZ4_compressBound( (int)_size );
-    
+
     return (size_t)size;
 }
 //////////////////////////////////////////////////////////////////////////

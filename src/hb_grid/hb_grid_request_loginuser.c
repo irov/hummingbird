@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
+int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
 {
     HB_UNUSED( _process );
 
@@ -33,17 +33,17 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
         if( hb_json_copy_field_string( json_handle, "password", in_data.password, 128 ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
-        }        
+        }
 
         hb_json_destroy( json_handle );
     }
 
     hb_grid_process_loginuser_out_data_t out_data;
-    if( hb_grid_process_loginuser( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_loginuser( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
-    
+
     if( out_data.exist == HB_TRUE )
     {
         hb_grid_process_api_in_data_t api_in_data;
@@ -56,7 +56,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, struct hb_grid_
         strcpy( api_in_data.method, "onLoginUser" );
 
         hb_grid_process_api_out_data_t api_out_data;
-        if( hb_grid_process_api( &api_in_data, &api_out_data ) == HB_FAILURE )
+        if( hb_grid_process_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }

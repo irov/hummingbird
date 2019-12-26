@@ -14,8 +14,10 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_newproject( const hb_grid_process_newproject_in_data_t * _in, hb_grid_process_newproject_out_data_t * _out )
+hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, const hb_grid_process_newproject_in_data_t * _in, hb_grid_process_newproject_out_data_t * _out )
 {
+    HB_UNUSED( _process );
+
     if( hb_cache_expire_value( _in->token, sizeof( _in->token ), 1800 ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -59,7 +61,7 @@ hb_result_t hb_grid_process_newproject( const hb_grid_process_newproject_in_data
         {
             return HB_FAILURE;
         }
-        
+
         if( hb_db_count_values( db_collection_projects, handles, 1, &founds ) == HB_FAILURE )
         {
             return HB_FAILURE;

@@ -14,8 +14,10 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_process_loginuser( const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
+hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
 {
+    HB_UNUSED( _process );
+
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
 
@@ -78,6 +80,6 @@ hb_result_t hb_grid_process_loginuser( const hb_grid_process_loginuser_in_data_t
             return HB_FAILURE;
         }
     }
-    
+
     return HB_SUCCESSFUL;
 }

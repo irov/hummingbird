@@ -54,22 +54,22 @@ int __hb_script_server_GetUserEntityPublicData( lua_State * L )
         return 1 + field_iterator;
     }
 
-    const char * db_fields[1] = { "public_data" };
+    const char * db_fields[1] = {"public_data"};
 
-    hb_db_value_handle_t handler[1];
-    if( hb_db_get_values( g_script_handle->db_collection_user_entities, eoid, db_fields, handler, 1 ) == HB_FAILURE )
+    hb_db_value_handle_t user_entity_values[1];
+    if( hb_db_get_values( g_script_handle->db_collection_user_entities, eoid, db_fields, user_entity_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     lua_pushboolean( L, 1 );
 
-    if( hb_script_json_load_fields( L, handler[0].u.symbol.buffer, handler[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
+    if( hb_script_json_load_fields( L, user_entity_values[0].u.symbol.buffer, user_entity_values[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_destroy_values( handler, 1 );
+    hb_db_destroy_values( user_entity_values, 1 );
 
     return 1 + field_iterator;
 }

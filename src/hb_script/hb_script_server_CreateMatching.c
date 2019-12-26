@@ -1,6 +1,7 @@
 #include "hb_script_handle.h"
 #include "hb_script_json.h"
 
+#include "hb_matching/hb_matching.h"
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_oid.h"
 #include "hb_utils/hb_rand.h"
@@ -25,12 +26,8 @@ int __hb_script_server_CreateMatching( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_value_handle_t find_values[2];
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, find_values + 0 );
-    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, find_values + 1 );
-
     hb_bool_t exist;
-    if( hb_db_find_oid( g_script_handle->db_collection_matching, find_values, 2, HB_NULLPTR, &exist ) == HB_FAILURE )
+    if( hb_matching_create( g_script_handle->matching, g_script_handle->project_oid, name, name_len, (uint32_t)count, (uint32_t)dispersion, json_data, json_data_size, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
@@ -40,18 +37,6 @@ int __hb_script_server_CreateMatching( lua_State * L )
         lua_pushboolean( L, 0 );
 
         return 1;
-    }
-
-    hb_db_value_handle_t new_candidate_values[5];
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, new_candidate_values + 0 );
-    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, new_candidate_values + 1 );
-    hb_db_make_int32_value( "count", HB_UNKNOWN_STRING_SIZE, (int32_t)count, new_candidate_values + 2 );
-    hb_db_make_int32_value( "dispersion", HB_UNKNOWN_STRING_SIZE, (int32_t)dispersion, new_candidate_values + 3 );
-    hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size, new_candidate_values + 4 );
-
-    if( hb_db_new_document( g_script_handle->db_collection_matching, new_candidate_values, 5, HB_NULLPTR ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     lua_pushboolean( L, 1 );

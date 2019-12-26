@@ -37,7 +37,7 @@ hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thr
 
     uint32_t id;
     uintptr_t th = _beginthreadex( HB_NULLPTR, 0, &__hb_thread_proxy, proxy, 0, &id );
-    
+
     hb_thread_handle_t * handle = HB_NEW( hb_thread_handle_t );
 
     handle->id = id;

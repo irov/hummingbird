@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_script_writer_desc_t
-{    
+{
     size_t carriage;
     size_t capacity;
 
@@ -24,7 +24,7 @@ static int s_writer( lua_State * L, const void * p, size_t size, void * u )
 {
     HB_UNUSED( L );
 
-    hb_script_writer_desc_t * desc = (hb_script_writer_desc_t *)u;    
+    hb_script_writer_desc_t * desc = (hb_script_writer_desc_t *)u;
 
     if( desc->carriage + size > desc->capacity )
     {
@@ -47,7 +47,7 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     if( ret_loadbuffer != LUA_OK )
     {
         const char * error_msg = lua_tostring( L, -1 );
-        
+
         HB_LOG_MESSAGE_ERROR( "script", "invalid compile script: %s [%d]"
             , error_msg
             , ret_loadbuffer
@@ -86,9 +86,9 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     }
 
     lua_close( L );
-    
+
     *_compilesize = desc.carriage;
-    
+
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////

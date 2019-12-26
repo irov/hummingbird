@@ -635,19 +635,10 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
     {
         return HB_FAILURE;
     }
-    
+
     *_founds = (uint32_t)count;
 
     return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_value( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char * _field, hb_db_value_handle_t * _handles )
-{
-    const char ** fields = &_field;
-
-    hb_result_t result = hb_db_get_values( _handle, _oid, fields, _handles, 1 );
-
-    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _handles, uint32_t _count )
@@ -865,7 +856,7 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, hb_s
             HB_LOG_MESSAGE_ERROR( "db"
                 , "failed to insert: %s\nerror message: %s\n"
                 , sha1hex
-                , insert_error.message 
+                , insert_error.message
             );
 
             return HB_FAILURE;
@@ -883,7 +874,7 @@ typedef struct hb_db_script_handle_t
 {
     mongoc_cursor_t * cursor;
     const hb_byte_t * buffer;
-    size_t size;    
+    size_t size;
 } hb_db_script_handle_t;
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const hb_byte_t * _sha1, hb_db_script_handle_t ** _script )

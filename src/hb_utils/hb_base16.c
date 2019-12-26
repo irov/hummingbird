@@ -45,11 +45,11 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
         return HB_FAILURE;
     }
 
-    const char base16_encode_table[] = { 
-        'B', 'C', 'D', 'G', 
+    const char base16_encode_table[] = {
+        'B', 'C', 'D', 'G',
         'H', 'J', 'K', 'L',
-        'M', 'N', 'P', 'Q', 
-        'R', 'S', 'T', 'V' };
+        'M', 'N', 'P', 'Q',
+        'R', 'S', 'T', 'V'};
 
     const hb_byte_t * data = (const hb_byte_t *)_data;
 

@@ -12,8 +12,8 @@ void hb_sha1_copy( hb_sha1_t _dst, const hb_sha1_t _src )
 //////////////////////////////////////////////////////////////////////////
 static inline void __hb_sha1_clear( uint32_t * _buffer )
 {
-    for( uint32_t 
-        *it = _buffer,
+    for( uint32_t
+        * it = _buffer,
         *it_end = _buffer + 17;
         it != it_end;
         ++it )

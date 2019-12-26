@@ -4,8 +4,9 @@
 #include "hb_config/hb_config.h"
 
 #include "hb_db/hb_db.h"
+#include "hb_matching/hb_matching.h"
 
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uuid, const hb_oid_t _puid );
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _puid, const hb_oid_t _uuid, hb_matching_t * _matching );
 void hb_script_finalize();
 
 typedef struct hb_script_stat_t

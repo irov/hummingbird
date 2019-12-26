@@ -13,8 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_newaccount( const hb_grid_process_newaccount_in_data_t * _in, hb_grid_process_newaccount_out_data_t * _out )
+hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, const hb_grid_process_newaccount_in_data_t * _in, hb_grid_process_newaccount_out_data_t * _out )
 {
+    HB_UNUSED( _process );
+
     hb_db_collection_handle_t * db_collection_accounts;
     if( hb_db_get_collection( "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
     {

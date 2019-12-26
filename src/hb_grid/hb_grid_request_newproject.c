@@ -7,16 +7,15 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
-int hb_grid_request_newproject( struct evhttp_request * _request, struct hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token )
+int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token )
 {
-    HB_UNUSED( _process );
     HB_UNUSED( _request );
 
     hb_grid_process_newproject_in_data_t in_data;
     hb_token_base16_decode( _token, &in_data.token );
 
     hb_grid_process_newproject_out_data_t out_data;
-    if( hb_grid_process_newproject( &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_newproject( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

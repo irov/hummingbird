@@ -35,7 +35,7 @@ extern int __hb_script_server_JoinMatching( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
-    char msg[1024] = { '\0' };
+    char msg[1024] = {'\0'};
 
     int n = lua_gettop( L );  /* number of arguments */
     int i;
@@ -62,39 +62,39 @@ static int __hb_lua_print( lua_State * L )
 }
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg globalLib[] = {
-    { "print", &__hb_lua_print }
-    , { NULL, NULL } /* end of array */
+    {"print", &__hb_lua_print}
+    , {NULL, NULL} /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    { "GetProjectPublicData", &__hb_script_server_GetProjectPublicData }
-    , { "SetProjectPublicData", &__hb_script_server_SetProjectPublicData }
-    , { "UpdateProjectPublicData", &__hb_script_server_UpdateProjectPublicData }
-    , { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData }
-    , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
-    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
-    , { "CreateUserEntity", &__hb_script_server_CreateUserEntity }
-    , { "SelectUserEntity", &__hb_script_server_SelectUserEntity }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
-    , { "CreateProjectEntity", &__hb_script_server_CreateProjectEntity }
-    , { "SelectProjectEntity", &__hb_script_server_SelectProjectEntity }
-    , { "GetProjectEntity", &__hb_script_server_GetProjectEntity }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
-    , { "CreateMatching", &__hb_script_server_CreateMatching }
-    , { "JoinMatching", &__hb_script_server_JoinMatching }
-    , { NULL, NULL } /* end of array */
+    {"GetProjectPublicData", &__hb_script_server_GetProjectPublicData}
+    , {"SetProjectPublicData", &__hb_script_server_SetProjectPublicData}
+    , {"UpdateProjectPublicData", &__hb_script_server_UpdateProjectPublicData}
+    , {"GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData}
+    , {"SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData}
+    , {"UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData}
+    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
+    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
+    , {"UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData}
+    , {"CreateUserEntity", &__hb_script_server_CreateUserEntity}
+    , {"SelectUserEntity", &__hb_script_server_SelectUserEntity}
+    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
+    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
+    , {"UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData}
+    , {"CreateProjectEntity", &__hb_script_server_CreateProjectEntity}
+    , {"SelectProjectEntity", &__hb_script_server_SelectProjectEntity}
+    , {"GetProjectEntity", &__hb_script_server_GetProjectEntity}
+    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
+    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
+    , {"UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData}
+    , {"CreateMatching", &__hb_script_server_CreateMatching}
+    , {"JoinMatching", &__hb_script_server_JoinMatching}
+    , {NULL, NULL} /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_panic( lua_State * L )
 {
-    HB_UNUSED( L );    
+    HB_UNUSED( L );
 
     longjmp( g_script_handle->panic_jump, 1 );
 }
@@ -122,7 +122,7 @@ static void * __hb_lua_alloc( void * ud, void * ptr, size_t osize, size_t nsize 
     {
         g->memory_peak = g->memory_used;
     }
-    
+
     if( nsize == 0 )
     {
         free( ptr );
@@ -148,10 +148,10 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _uoid, const hb_oid_t _poid )
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_t * _matching )
 {
     g_script_handle = HB_NEW( hb_script_handle_t );
-    
+
     if( hb_db_get_collection( "hb", "hb_user_entities", &g_script_handle->db_collection_user_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
@@ -173,7 +173,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     if( hb_db_get_collection( "hb", "hb_users", &g_script_handle->db_collection_users ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_users" 
+            , "hb_users"
         );
 
         return HB_FAILURE;
@@ -182,7 +182,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
     if( hb_db_get_collection( "hb", "hb_projects", &g_script_handle->db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_projects" 
+            , "hb_projects"
         );
 
         return HB_FAILURE;
@@ -206,9 +206,11 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    hb_oid_copy( g_script_handle->user_oid, _uoid );
     hb_oid_copy( g_script_handle->project_oid, _poid );
+    hb_oid_copy( g_script_handle->user_oid, _uoid );
+    g_script_handle->matching = _matching;
     
+
     if( setjmp( g_script_handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
@@ -383,7 +385,7 @@ hb_result_t hb_script_server_call( const char * _method, const void * _data, siz
     }
 
     int successful = lua_toboolean( L, -2 );
-    
+
     if( lua_type( L, -1 ) == LUA_TTABLE )
     {
         if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )

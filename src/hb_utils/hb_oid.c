@@ -20,6 +20,16 @@ void hb_oid_make( const char * _str, hb_oid_t * _oid )
     hb_base16_decode( _str, sizeof( hb_oid16_t ), *_oid, sizeof( hb_oid_t ), HB_NULLPTR );
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_oid_cmp( const hb_oid_t _dst, const hb_oid_t _src )
+{
+    if( memcmp( _dst, _src, sizeof( hb_oid_t ) ) != 0 )
+    {
+        return HB_FALSE;
+    }
+
+    return HB_TRUE;
+}
+//////////////////////////////////////////////////////////////////////////
 void hb_oid16_make( const char * _str, hb_oid16_t * _base16 )
 {
     memcpy( *_base16, _str, sizeof( hb_oid16_t ) );
