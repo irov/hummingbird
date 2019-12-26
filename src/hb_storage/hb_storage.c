@@ -28,16 +28,18 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
 
     hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
-    hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
+    hb_db_collection_handle_t * db_collection_scripts;
+    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection_scripts ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_db_upload_script( db_collection, *_sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
+    if( hb_db_upload_script( db_collection_scripts, *_sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_destroy_collection( db_collection_scripts );
 
     return HB_SUCCESSFUL;
 }

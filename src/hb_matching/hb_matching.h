@@ -2,12 +2,8 @@
 #define HB_MATCHING_H_
 
 #include "hb_config/hb_config.h"
-#include "hb_thread/hb_thread.h"
-#include "hb_db/hb_db.h"
-#include "hb_utils/hb_hashtable.h"
 
-#include "evhttp.h"
-#include "event2/thread.h"
+#include "hb_utils/hb_hashtable.h"
 
 typedef struct hb_matching_user_t
 {
@@ -25,35 +21,14 @@ typedef struct hb_matching_room_t
     size_t users_capacity;
 } hb_matching_room_t;
 
-typedef struct hb_matching_config_t
+typedef struct hb_matching_t
 {
-    char name[32];
-
-    char cache_uri[128];
-    uint16_t cache_port;
-    uint16_t cache_timeout;
-
-    char db_uri[128];
-    uint16_t db_port;
-
-    char log_uri[128];
-    uint16_t log_port;
-} hb_matching_config_t;
-
-typedef struct hb_matching_process_handle_t
-{
-    char matching_uri[128];
-    ev_uint16_t matching_port;
-
-    evutil_socket_t * ev_socket;
-
-    hb_thread_handle_t * thread;
-
-    hb_matching_config_t * config;
-
-    hb_db_collection_handle_t * db_collection_matching;
-
     hb_hashtable_t * ht;
-} hb_matching_process_handle_t;
+} hb_matching_t;
+
+hb_result_t hb_matching_initialize( uint32_t _count, hb_matching_t ** _matching );
+void hb_matching_finalize( hb_matching_t * _matching );
+
+hb_result_t hb_matching_create( hb_matching_t * _matching, hb_oid16_t _moid16, hb_oid16_t _uoid16 );
 
 #endif
