@@ -28,9 +28,7 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
 
     if( exist == HB_FALSE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     const char * db_fields[1] = {"public_data"};
@@ -77,7 +75,5 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
 
     hb_db_destroy_values( entity_update_values, 1 );
 
-    lua_pushboolean( L, 1 );
-
-    return 1;
+    return 0;
 }

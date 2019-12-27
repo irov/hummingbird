@@ -23,7 +23,5 @@ int __hb_script_server_SetProjectPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
-
-    return 1;
+    return 0;
 }

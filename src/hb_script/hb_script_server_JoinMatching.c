@@ -11,32 +11,30 @@
 //////////////////////////////////////////////////////////////////////////
 extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
+static void __hb_matching_complete( const hb_matching_user_t * _user, int32_t _count, const char * _data, size_t _datasize )
+{
+    HB_UNUSED( _user );
+    HB_UNUSED( _count );
+    HB_UNUSED( _data );
+    HB_UNUSED( _datasize );
+}
+//////////////////////////////////////////////////////////////////////////
 int __hb_script_server_JoinMatching( lua_State * L )
 {
     size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
-
-    //lua_Integer dispersion = lua_tointegerx( L, 2, HB_NULLPTR );
-
-    hb_db_value_handle_t query[2];
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, query + 0 );
-    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, name, name_len, query + 1 );
+    lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
     hb_bool_t exist;
-    hb_oid_t moid;
-    if( hb_db_find_oid( g_script_handle->db_collection_matching, query, 2, &moid, &exist ) == HB_FAILURE )
+    if( hb_matching_join( g_script_handle->matching, g_script_handle->project_oid, name, name_len, g_script_handle->user_oid, (int32_t)rating, &exist, &__hb_matching_complete ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     if( exist == HB_FALSE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    //ToDo
-
-    return 1;
+    return 0;
 }
