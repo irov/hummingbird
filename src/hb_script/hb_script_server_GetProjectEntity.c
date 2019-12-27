@@ -40,10 +40,9 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
     lua_pushinteger( L, project_entity_values[0].u.i32 );
 
     hb_db_destroy_values( project_entity_values, 1 );
 
-    return 2;
+    return 1;
 }

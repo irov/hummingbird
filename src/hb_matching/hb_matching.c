@@ -103,7 +103,7 @@ static int32_t __matching_user_cmp( const void * _left, const void * _right )
     return user_left->rating - user_right->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_matching_complete_t _complete )
+hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_t _complete )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -133,8 +133,12 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
     if( exist == HB_FALSE )
     {
-        return HB_FAILURE;
+        *_exist = HB_FALSE;
+
+        return HB_SUCCESSFUL;
     }
+
+    *_exist = HB_TRUE;
 
     hb_matching_room_t * room_found = (hb_matching_room_t *)hb_hashtable_find( _matching->ht, moid, sizeof( hb_oid_t ) );
 

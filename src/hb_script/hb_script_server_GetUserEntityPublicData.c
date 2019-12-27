@@ -44,14 +44,7 @@ int __hb_script_server_GetUserEntityPublicData( lua_State * L )
 
     if( exist == HB_FALSE )
     {
-        lua_pushboolean( L, 0 );
-
-        for( uint32_t index = 0; index != field_iterator; ++index )
-        {
-            lua_pushnil( L );
-        }
-
-        return 1 + field_iterator;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     const char * db_fields[1] = {"public_data"};
@@ -62,8 +55,6 @@ int __hb_script_server_GetUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
-
     if( hb_script_json_load_fields( L, user_entity_values[0].u.symbol.buffer, user_entity_values[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
@@ -71,5 +62,5 @@ int __hb_script_server_GetUserEntityPublicData( lua_State * L )
 
     hb_db_destroy_values( user_entity_values, 1 );
 
-    return 1 + field_iterator;
+    return field_iterator;
 }

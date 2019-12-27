@@ -46,7 +46,6 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
     lua_createtable( L, exists, 0 );
     for( uint32_t index = 0; index != exists; ++index )
     {
@@ -58,5 +57,5 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
 
     hb_db_destroy_values( values, 1 * exists );
 
-    return 2;
+    return 1;
 }

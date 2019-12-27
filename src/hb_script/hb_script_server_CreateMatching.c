@@ -34,12 +34,8 @@ int __hb_script_server_CreateMatching( lua_State * L )
 
     if( exist == HB_TRUE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
-
-    return 1;
+    return 0;
 }

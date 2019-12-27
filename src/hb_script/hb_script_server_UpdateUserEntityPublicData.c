@@ -25,9 +25,7 @@ int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
 
     if( exist == HB_FALSE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     const char * db_fields[1] = {"public_data"};
@@ -72,7 +70,5 @@ int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
-
-    return 1;
+    return 0;
 }

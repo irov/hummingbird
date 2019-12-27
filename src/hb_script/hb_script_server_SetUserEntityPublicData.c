@@ -25,9 +25,7 @@ int __hb_script_server_SetUserEntityPublicData( lua_State * L )
 
     if( exist == HB_FALSE )
     {
-        lua_pushboolean( L, 0 );
-
-        return 1;
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     char json_data[2048];
@@ -45,7 +43,5 @@ int __hb_script_server_SetUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushboolean( L, 1 );
-
-    return 1;
+    return 0;
 }
