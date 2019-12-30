@@ -197,14 +197,24 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_candidate", &g_script_handle->db_collection_candidate ) == HB_FAILURE )
+    if( hb_db_get_collection( "hb", "hb_worlds", &g_script_handle->db_collection_worlds ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_candidate"
+            , "hb_worlds"
         );
 
         return HB_FAILURE;
     }
+
+    if( hb_db_get_collection( "hb", "hb_avatars", &g_script_handle->db_collection_avatars ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "hb_avatars"
+        );
+
+        return HB_FAILURE;
+    }
+    
 
     hb_oid_copy( g_script_handle->project_oid, _poid );
     hb_oid_copy( g_script_handle->user_oid, _uoid );

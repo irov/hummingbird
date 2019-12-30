@@ -171,9 +171,9 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_value_hand
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid )
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid )
 {
-    mongoc_collection_t * mongo_collection = _handle->collection;
+    mongoc_collection_t * mongo_collection = _collection->collection;
 
     bson_oid_t oid;
     bson_oid_init( &oid, HB_NULLPTR );
@@ -196,6 +196,25 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const
     memcpy( *_newoid, oid.bytes, sizeof( hb_oid_t ) );
 
     return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_new_document_by_name( const char * _name, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_new_document( db_collection, _values, _count, _newoid );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_int32_value( const char * _field, size_t _fieldlength, int32_t _value, hb_db_value_handle_t * _handle )

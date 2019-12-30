@@ -103,7 +103,7 @@ static int32_t __matching_user_cmp( const void * _left, const void * _right )
     return user_left->rating - user_right->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_t _complete )
+hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_t _complete, void * _ud )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -237,7 +237,33 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
     if( successful == HB_TRUE )
     {
-        const char * fields[] = {"public_data"};
+        hb_db_value_handle_t new_world_values[2];
+        hb_db_make_oid_value( "moid", HB_UNKNOWN_STRING_SIZE, moid, new_world_values + 0 );
+        hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, _poid, new_world_values + 1 );
+
+        hb_oid_t woid;
+        if( hb_db_new_document_by_name( "hb_worlds", new_world_values, 2, &woid ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        for( hb_matching_user_t * it_matching = user_matching,
+            *it_matching_end = user_matching + room_found->count;
+            it_matching != it_matching_end;
+            ++it_matching )
+        {
+            hb_db_value_handle_t new_avatar_values[3];
+            hb_db_make_oid_value( "woid", HB_UNKNOWN_STRING_SIZE, woid, new_avatar_values + 0 );
+            hb_db_make_oid_value( "uoid", HB_UNKNOWN_STRING_SIZE, it_matching->uoid, new_avatar_values + 1 );
+            hb_db_make_int32_value( "rating", HB_UNKNOWN_STRING_SIZE, it_matching->rating, new_avatar_values + 2 );
+
+            if( hb_db_new_document_by_name( "hb_avatars", new_avatar_values, 3, &it_matching->aoid ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+        }
+
+        const char * fields[] = { "public_data" };
 
         hb_db_value_handle_t values[1];
         if( hb_db_get_values( db_collection_matching, moid, fields, values, 1 ) == HB_FAILURE )
@@ -245,7 +271,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
             return HB_FAILURE;
         }
 
-        (*_complete)(user_matching, room_found->count, values[0].u.symbol.buffer, values[0].u.symbol.length);
+        hb_result_t result = (*_complete)(user_matching, room_found->count, values[0].u.symbol.buffer, values[0].u.symbol.length, _ud);
 
         hb_db_destroy_values( values, 1 );
 
@@ -256,6 +282,11 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
         {
             --room_found->users_count;
             *it_matching = *(room_found->users + room_found->users_count);
+        }
+
+        if( result == HB_FAILURE )
+        {
+            return HB_FAILURE;
         }
     }
 

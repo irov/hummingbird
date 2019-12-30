@@ -69,14 +69,15 @@ void hb_db_make_binary_value( const char * _field, size_t _fieldlength, const vo
 void hb_db_make_time_value( const char * _field, size_t _fieldlength, hb_time_t _time, hb_db_value_handle_t * _handle );
 void hb_db_make_oid_value( const char * _field, size_t _fieldlength, const hb_byte_t * _oid, hb_db_value_handle_t * _handle );
 
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid );
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid );
+hb_result_t hb_db_new_document_by_name( const char * _name, const hb_db_value_handle_t * _values, uint32_t _count, hb_oid_t * _newoid );
 
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist );
-hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _querycount, hb_oid_t * _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _fieldcount, hb_bool_t * _exist );
-hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, const char ** _fields, uint32_t _fieldcount, hb_db_value_handle_t * _values, uint32_t _capacity, uint32_t * _exists );
-hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _count, uint32_t * _founds );
-hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _count );
-hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const hb_db_value_handle_t * _values, uint32_t _count );
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _query, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist );
+hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _query, uint32_t _querycount, hb_oid_t * _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _fieldcount, hb_bool_t * _exist );
+hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _query, uint32_t _count, const char ** _fields, uint32_t _fieldcount, hb_db_value_handle_t * _values, uint32_t _capacity, uint32_t * _exists );
+hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _collection, const hb_db_value_handle_t * _query, uint32_t _count, uint32_t * _founds );
+hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _count );
+hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _values, uint32_t _count );
 void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count );
 
 hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, hb_sha1_t _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );

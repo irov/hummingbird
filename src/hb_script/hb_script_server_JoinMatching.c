@@ -11,12 +11,24 @@
 //////////////////////////////////////////////////////////////////////////
 extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
-static void __hb_matching_complete( const hb_matching_user_t * _user, int32_t _count, const char * _data, size_t _datasize )
+static hb_result_t __hb_matching_complete( const hb_matching_user_t * _user, int32_t _count, const char * _data, size_t _datasize, void * _ud )
 {
+    lua_State * L = (lua_State *)_ud;
+
+    lua_getglobal( L, "event" );
+
+    if( lua_getfield( L, -1, "onCreateWorld" ) != LUA_TFUNCTION )
+    {
+        return HB_SUCCESSFUL;
+    }
+
     HB_UNUSED( _user );
     HB_UNUSED( _count );
     HB_UNUSED( _data );
     HB_UNUSED( _datasize );
+    HB_UNUSED( _ud );
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_JoinMatching( lua_State * L )
@@ -26,7 +38,7 @@ int __hb_script_server_JoinMatching( lua_State * L )
     lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
     hb_bool_t exist;
-    if( hb_matching_join( g_script_handle->matching, g_script_handle->project_oid, name, name_len, g_script_handle->user_oid, (int32_t)rating, &exist, &__hb_matching_complete ) == HB_FAILURE )
+    if( hb_matching_join( g_script_handle->matching, g_script_handle->project_oid, name, name_len, g_script_handle->user_oid, (int32_t)rating, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
