@@ -21,6 +21,10 @@ event.onLoginUser = function(data)
     print(string.format("onLoginUser"))
 end
 
+event.onCreateWorld = function(users, data)
+
+end
+
 api.test = function(data)
     print(data.a, data.b, data.c)
     

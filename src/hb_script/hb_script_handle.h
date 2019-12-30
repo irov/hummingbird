@@ -31,7 +31,8 @@ typedef struct hb_script_handle_t
     hb_db_collection_handle_t * db_collection_project_entities;
     hb_db_collection_handle_t * db_collection_user_entities;
     hb_db_collection_handle_t * db_collection_matching;
-    hb_db_collection_handle_t * db_collection_candidate;
+    hb_db_collection_handle_t * db_collection_worlds;
+    hb_db_collection_handle_t * db_collection_avatars;
 
     hb_oid_t project_oid;
     hb_oid_t user_oid;
