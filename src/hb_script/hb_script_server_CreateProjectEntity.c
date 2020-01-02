@@ -87,32 +87,16 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_pid_t eid = 0;
-    uint32_t founds = 0;
-    for( ; founds != 1; )
+    hb_db_value_handle_t count_values[1];
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, count_values + 0 );
+
+    hb_pid_t pid;
+    if( hb_db_make_pid( g_script_handle->db_collection_user_entities, eoid, count_values, 1, &pid ) == HB_FAILURE )
     {
-        eid = hb_rand_time();
-        eid &= 0x7fffffff;
-
-        hb_db_value_handle_t update_values[1];
-        hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, eid, update_values + 0 );
-
-        if( hb_db_update_values( g_script_handle->db_collection_project_entities, eoid, update_values, 1 ) == HB_FAILURE )
-        {
-            HB_SCRIPT_ERROR( L, "internal error" );
-        }
-
-        hb_db_value_handle_t count_values[2];
-        hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, count_values + 0 );
-        hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, eid, count_values + 1 );
-
-        if( hb_db_count_values( g_script_handle->db_collection_project_entities, count_values, 2, &founds ) == HB_FAILURE )
-        {
-            HB_SCRIPT_ERROR( L, "internal error" );
-        }
+        HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    lua_pushinteger( L, eid );
+    lua_pushinteger( L, pid );
 
     return 1;
 }

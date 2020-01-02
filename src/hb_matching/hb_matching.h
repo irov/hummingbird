@@ -10,13 +10,14 @@ typedef struct hb_matching_user_t
     hb_oid_t uoid;
     int32_t rating;
     hb_oid_t aoid;
+    hb_pid_t apid;
     hb_bool_t process;
 } hb_matching_user_t;
 
 typedef struct hb_matching_room_t
 {
-    int32_t count;
-    int32_t dispersion;
+    uint32_t count;
+    uint32_t dispersion;
 
     hb_matching_user_t * users;
     size_t users_count;
@@ -33,7 +34,22 @@ void hb_matching_finalize( hb_matching_t * _matching );
 
 hb_result_t hb_matching_create( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, uint32_t _count, uint32_t _dispersion, const void * _data, size_t _datasize, hb_bool_t * _exist );
 
-typedef hb_result_t( *hb_matching_complete_t )(const hb_matching_user_t * _user, int32_t _count, const char * _data, size_t _datasize, void * _ud);
-hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_t _complete, void * _ud );
+typedef struct hb_matching_complete_desc_t
+{
+    const char * name;
+
+    hb_pid_t wpid;
+
+    const hb_matching_user_t * users;
+    uint32_t users_count;
+    
+    const char * data;
+    size_t data_size;
+
+    void * ud;
+} hb_matching_complete_desc_t;
+
+typedef hb_result_t( *hb_matching_complete_func_t )(const hb_matching_complete_desc_t * _desc);
+hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud );
 
 #endif

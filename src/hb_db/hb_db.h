@@ -82,6 +82,9 @@ void hb_db_destroy_values( const hb_db_value_handle_t * _values, uint32_t _count
 
 hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, hb_sha1_t _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
 
+hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _values, size_t _size, hb_pid_t * _pid );
+hb_result_t hb_db_make_pid_by_name( const char * _name, const hb_oid_t _oid, const hb_db_value_handle_t * _values, size_t _size, hb_pid_t * _pid );
+
 typedef struct hb_db_script_handle_t hb_db_script_handle_t;
 
 hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const hb_byte_t * _sha1, hb_db_script_handle_t ** _script );

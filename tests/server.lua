@@ -21,8 +21,11 @@ event.onLoginUser = function(data)
     print(string.format("onLoginUser"))
 end
 
-event.onCreateWorld = function(users, data)
-
+event.onCreateWorld = function(name, pid, avatars, data)
+    print(name)
+    print(pid)
+    print(avatars)
+    print(data)
 end
 
 api.test = function(data)

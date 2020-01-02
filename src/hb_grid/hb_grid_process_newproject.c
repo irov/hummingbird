@@ -48,24 +48,9 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     }
 
     hb_pid_t pid;
-    uint32_t founds = 0;
-    for( ; founds != 1; )
+    if( hb_db_make_pid( db_collection_projects, project_oid, HB_NULLPTR, 0, &pid ) == HB_FAILURE )
     {
-        pid = hb_rand_time();
-        pid &= 0x7fffffff;
-
-        hb_db_value_handle_t update_values[1];
-        hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, update_values + 0 );
-
-        if( hb_db_update_values( db_collection_projects, project_oid, update_values, 1 ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        if( hb_db_count_values( db_collection_projects, update_values, 1, &founds ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        return HB_FAILURE;
     }
 
     hb_db_destroy_collection( db_collection_projects );
