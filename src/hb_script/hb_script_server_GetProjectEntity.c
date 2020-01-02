@@ -32,7 +32,7 @@ int __hb_script_server_GetProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    const char * db_fields[1] = {"eid"};
+    const char * db_fields[1] = { "pid" };
 
     hb_db_value_handle_t project_entity_values[1];
     if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, project_entity_values, 1 ) == HB_FAILURE )

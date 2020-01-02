@@ -3,6 +3,7 @@
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_rand.h"
 
 #include "mongoc/mongoc.h"
 
@@ -887,6 +888,62 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, hb_s
     mongoc_cursor_destroy( cursor );
 
     return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, const hb_db_value_handle_t * _values, size_t _size, hb_pid_t * _pid )
+{
+    hb_pid_t pid = 0;
+    uint32_t founds = 0;
+    for( ; founds != 1; )
+    {
+        pid = hb_rand_time();
+        pid &= 0x7fffffff;
+
+        hb_db_value_handle_t update_values[1];
+        hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, update_values + 0 );
+
+        if( hb_db_update_values( _collection, _oid, update_values, 1 ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        hb_db_value_handle_t count_values[16];
+
+        for( size_t index = 0; index != _size; ++index )
+        {
+            count_values[index] = _values[index];
+        }
+        
+        hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, count_values + _size );
+
+        if( hb_db_count_values( _collection, count_values, _size + 1, &founds ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+    }
+
+    *_pid = pid;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_make_pid_by_name( const char * _name, const hb_oid_t _oid, const hb_db_value_handle_t * _values, size_t _size, hb_pid_t * _pid )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_make_pid( db_collection, _oid, _values, _size, _pid );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_script_handle_t

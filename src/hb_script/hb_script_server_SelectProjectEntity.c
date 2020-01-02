@@ -36,7 +36,7 @@ int __hb_script_server_SelectProjectEntity( lua_State * L )
     hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len, query + 0 );
     hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, query + 1 );
 
-    const char * db_fields[1] = {"eid"};
+    const char * db_fields[1] = { "pid" };
 
     uint32_t exists = 0;
     hb_db_value_handle_t values[1 * 32];

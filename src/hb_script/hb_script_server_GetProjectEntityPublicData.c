@@ -35,7 +35,7 @@ int __hb_script_server_GetProjectEntityPublicData( lua_State * L )
     lua_pop( L, 1 );
 
     hb_db_value_handle_t values[2];
-    hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid, values + 0 );
+    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid, values + 0 );
     hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
 
     hb_bool_t exist;
@@ -50,7 +50,7 @@ int __hb_script_server_GetProjectEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    const char * db_fields[1] = {"public_data"};
+    const char * db_fields[1] = { "public_data" };
 
     hb_db_value_handle_t project_entity_values[1];
     if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, project_entity_values, 1 ) == HB_FAILURE )

@@ -13,10 +13,10 @@ extern hb_script_handle_t * g_script_handle;
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
 {
-    lua_Integer eid = lua_tointeger( L, 1 );
+    lua_Integer pid = lua_tointeger( L, 1 );
 
     hb_db_value_handle_t values[2];
-    hb_db_make_int32_value( "eid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid, values + 0 );
+    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid, values + 0 );
     hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
 
     hb_bool_t exist;
