@@ -4,6 +4,7 @@
 #include "hb_http/hb_http.h"
 #include "hb_token/hb_token.h"
 #include "hb_utils/hb_base64.h"
+#include "hb_utils/hb_base16.h"
 
 #include <string.h>
 
@@ -14,6 +15,8 @@ int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_h
 
     hb_grid_process_script_command_in_data_t in_data;
     hb_token_base16_decode( _token, &in_data.token );
+
+    hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
 
     strcpy( in_data.method, _method );
 

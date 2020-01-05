@@ -90,7 +90,7 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
     hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid, count_values + 0 );
 
     hb_pid_t pid;
-    if( hb_db_make_pid( script_handle->db_collection_user_entities, eoid, count_values, 1, &pid ) == HB_FAILURE )
+    if( hb_db_make_pid( script_handle->db_collection_project_entities, eoid, count_values, 1, &pid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
