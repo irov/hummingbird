@@ -47,6 +47,8 @@ typedef hb_byte_t hb_sha1_t[20];
 typedef hb_byte_t hb_token_t[14];
 typedef char hb_token16_t[28];
 
+static const hb_oid_t HB_OID_NONE = { 0 };
+
 typedef struct hb_user_token_handle_t
 {
     hb_oid_t uoid;

@@ -332,6 +332,25 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_find_oid_by_name( const char * _name, const hb_db_value_handle_t * _query, uint32_t _count, hb_oid_t * _oid, hb_bool_t * _exist )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_find_oid( db_collection, _query, _count, _oid, _exist );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_value_handle_t * _query, uint32_t _querycount, hb_oid_t * _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _fieldcount, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
@@ -936,6 +955,11 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
         hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, count_values + _size );
 
         if( hb_db_count_values( _collection, count_values, _size + 1, &founds ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( founds == 0 )
         {
             return HB_FAILURE;
         }

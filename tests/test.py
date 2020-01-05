@@ -34,6 +34,16 @@ print("response: ", jupload)
 
 if jupload["code"] != 0:
     sys.exit(0)
+    
+token = jloginaccount["token"]
+method = "create"
+data = dict(a=5, b=6, c="testp")
+print("----command---- token: {0} method: {1} data: {2}".format(token, method, data))
+japi = hummingbird.api("http://localhost:5555/command/{0}/{1}/{2}".format(token, pid, method), **data)
+print("response: ", japi)
+
+if japi["code"] != 0:
+    sys.exit(0)    
 
 login = hummingbird.make_uuid()
 password = "testuser"
