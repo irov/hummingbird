@@ -9,6 +9,7 @@ src
 ADD_FILTER(
 request
     hb_grid_request_api.c
+    hb_grid_request_command.c
     hb_grid_request_upload.c
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c

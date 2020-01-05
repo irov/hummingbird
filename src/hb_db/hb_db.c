@@ -791,6 +791,25 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const h
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_get_values_by_name( const char * _name, const hb_oid_t _oid, const char ** _fields, hb_db_value_handle_t * _values, uint32_t _count )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_get_values( db_collection, _oid, _fields, _values, _count );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _handle, const hb_oid_t _oid, const hb_db_value_handle_t * _handles, uint32_t _count )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;

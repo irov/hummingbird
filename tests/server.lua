@@ -48,5 +48,5 @@ api.test = function(data)
     print(c)
     ]]--
     
-    return true, {a=a, b=b, c=c, e=e}
+    return {a=a, b=b, c=c, e=e}
 end

@@ -35,7 +35,8 @@ extern int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid
 extern int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid );
 extern int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
 extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
-extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
+extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _method );
+extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
 ////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -166,6 +167,20 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     }
     else if( strcmp( cmd, "api" ) == 0 )
     {
+        if( count != 3 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+        const char * method = arg2;
+
+        response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, method );
+    }
+    else if( strcmp( cmd, "command" ) == 0 )
+    {
         if( count != 4 )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
@@ -173,11 +188,11 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             return;
         }
 
-        const char * pid = arg1;
-        const char * user_token = arg2;
+        const char * account_token = arg1;
+        const char * pid = arg2;
         const char * method = arg3;
 
-        response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, pid, method );
+        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, pid, method );        
     }
 
     evbuffer_add( output_buffer, response_data, response_data_size );

@@ -30,6 +30,7 @@ typedef enum hb_result_e
 
 typedef enum hb_error_code_e
 {
+    HB_ERROR_OK,
     HB_ERROR_INTERNAL,
     HB_ERROR_NOT_FOUND,
 } hb_error_code_e;
