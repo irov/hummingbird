@@ -36,27 +36,30 @@ hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, con
     }
 
     hb_error_code_t code;
-    hb_result_t result = hb_script_server_call( script_handle, _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &_out->successful, &code );
-
-    if( result == HB_FAILURE )
+    if( hb_script_api_call( script_handle, _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &code ) == HB_FAILURE )
     {
-        if( code == HB_ERROR_NOT_FOUND )
+        return HB_FAILURE;
+    }
+
+    switch( code )
+    {
+    case HB_ERROR_OK:
+        {
+            _out->successful = HB_TRUE;
+            _out->method_found = HB_TRUE;
+        }break;
+    case HB_ERROR_INTERNAL:
+        {
+            _out->response_size = 0;
+            _out->successful = HB_FALSE;
+            _out->method_found = HB_TRUE;
+        }break;
+    case HB_ERROR_NOT_FOUND:
         {
             _out->response_size = 0;
             _out->successful = HB_TRUE;
             _out->method_found = HB_FALSE;
-        }
-        else
-        {
-            _out->response_size = 0;
-            _out->successful = HB_FALSE;
-            _out->method_found = HB_FALSE;
-        }
-    }
-    else
-    {
-        _out->successful = HB_TRUE;
-        _out->method_found = HB_TRUE;
+        }break;
     }
 
     hb_script_stat_t stat;

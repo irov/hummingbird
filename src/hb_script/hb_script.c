@@ -396,13 +396,11 @@ hb_result_t hb_script_load( hb_script_handle_t * _handle, const void * _buffer, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_server_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_t * _code )
+hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
         /* recovered from panic. log and return */
-
-        *_code = HB_ERROR_INTERNAL;
 
         return HB_FAILURE;
     }
@@ -415,17 +413,15 @@ hb_result_t hb_script_server_call( hb_script_handle_t * _handle, const char * _m
     {
         *_code = HB_ERROR_NOT_FOUND;
 
-        return HB_FAILURE;
+        return HB_SUCCESSFUL;
     }
 
     if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
     {
-        *_code = HB_ERROR_INTERNAL;
-
         return HB_FAILURE;
     }
 
-    int status = lua_pcallk( L, 1, 2, 0, 0, HB_NULLPTR );
+    int status = lua_pcallk( L, 1, 1, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
     {
@@ -440,10 +436,8 @@ hb_result_t hb_script_server_call( hb_script_handle_t * _handle, const char * _m
 
         *_code = HB_ERROR_INTERNAL;
 
-        return HB_FAILURE;
+        return HB_SUCCESSFUL;
     }
-
-    int successful = lua_toboolean( L, -2 );
 
     if( lua_type( L, -1 ) == LUA_TTABLE )
     {
@@ -457,9 +451,9 @@ hb_result_t hb_script_server_call( hb_script_handle_t * _handle, const char * _m
         sprintf( _result, "{}" );
     }
 
-    lua_pop( L, 2 );
+    lua_pop( L, 1 );
 
-    *_successful = (hb_bool_t)successful;
+    *_code = HB_ERROR_OK;
 
     return HB_SUCCESSFUL;
 }
@@ -506,7 +500,7 @@ hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _ev
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _event, const void * _data, size_t _datasize )
+hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _event, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
@@ -521,6 +515,8 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
 
     if( lua_getfield( L, -1, _event ) != LUA_TFUNCTION )
     {
+        *_code = HB_ERROR_NOT_FOUND;
+
         return HB_SUCCESSFUL;
     }
 
@@ -529,7 +525,7 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
         return HB_FAILURE;
     }
 
-    int status = lua_pcallk( L, 1, 0, 0, 0, HB_NULLPTR );
+    int status = lua_pcallk( L, 1, 1, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
     {
@@ -542,8 +538,26 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
             , error_msg
         );
 
-        return HB_FAILURE;
+        *_code = HB_ERROR_INTERNAL;
+
+        return HB_SUCCESSFUL;
     }
+
+    if( lua_type( L, -1 ) == LUA_TTABLE )
+    {
+        if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+    }
+    else
+    {
+        sprintf( _result, "{}" );
+    }
+
+    lua_pop( L, 1 );
+
+    *_code = HB_ERROR_OK;
 
     return HB_SUCCESSFUL;
 }
