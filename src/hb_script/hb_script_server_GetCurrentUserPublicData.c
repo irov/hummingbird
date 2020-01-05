@@ -3,15 +3,14 @@
 
 #include "hb_json/hb_json.h"
 
-//////////////////////////////////////////////////////////////////////////
-extern hb_script_handle_t * g_script_handle;
-//////////////////////////////////////////////////////////////////////////
 int __hb_script_server_GetCurrentUserPublicData( lua_State * L )
 {
+    hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
+
     const char * db_fields[1] = {"public_data"};
 
     hb_db_value_handle_t user_values[1];
-    if( hb_db_get_values( g_script_handle->db_collection_users, g_script_handle->user_oid, db_fields, user_values, 1 ) == HB_FAILURE )
+    if( hb_db_get_values( script_handle->db_collection_users, script_handle->user_oid, db_fields, user_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

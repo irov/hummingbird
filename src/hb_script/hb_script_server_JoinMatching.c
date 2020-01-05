@@ -9,13 +9,10 @@
 
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
-extern hb_script_handle_t * g_script_handle;
-//////////////////////////////////////////////////////////////////////////
 static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _desc )
 {
     lua_State * L = (lua_State *)_desc->ud;
-
+        
     lua_getglobal( L, "event" );
 
     if( lua_getfield( L, -1, "onCreateWorld" ) != LUA_TFUNCTION )
@@ -61,12 +58,14 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
 //////////////////////////////////////////////////////////////////////////
 int __hb_script_server_JoinMatching( lua_State * L )
 {
+    hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
+
     size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
     hb_bool_t exist;
-    if( hb_matching_join( g_script_handle->matching, g_script_handle->project_oid, name, name_len, g_script_handle->user_oid, (int32_t)rating, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
+    if( hb_matching_join( script_handle->matching, script_handle->project_oid, name, name_len, script_handle->user_oid, (int32_t)rating, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

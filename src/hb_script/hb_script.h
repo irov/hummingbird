@@ -6,8 +6,10 @@
 #include "hb_db/hb_db.h"
 #include "hb_matching/hb_matching.h"
 
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _puid, const hb_oid_t _uuid, hb_matching_t * _matching );
-void hb_script_finalize();
+typedef struct hb_script_handle_t hb_script_handle_t;
+
+hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _puid, const hb_oid_t _uuid, hb_matching_t * _matching, hb_script_handle_t ** _handle );
+void hb_script_finalize( hb_script_handle_t * _handle );
 
 typedef struct hb_script_stat_t
 {
@@ -16,10 +18,11 @@ typedef struct hb_script_stat_t
 
 }hb_script_stat_t;
 
-void hb_script_stat( hb_script_stat_t * _stat );
+void hb_script_stat( hb_script_handle_t * _handle, hb_script_stat_t * _stat );
 
-hb_result_t hb_script_load( const void * _buffer, size_t _size );
-hb_result_t hb_script_server_call( const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_t * _code );
-hb_result_t hb_script_event_call( const char * _method, const void * _data, size_t _datasize );
+hb_result_t hb_script_load( hb_script_handle_t * _handle, const void * _buffer, size_t _size );
+hb_result_t hb_script_server_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_bool_t * _successful, hb_error_code_t * _code );
+hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize );
+hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize );
 
 #endif
