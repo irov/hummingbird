@@ -7,8 +7,9 @@
 
 typedef enum hb_grid_process_api_category_e
 {
-    e_hb_node_api,
-    e_hb_node_event
+    e_hb_node_api,    
+    e_hb_node_event,
+    e_hb_node_command
 } hb_node_api_category_e;
 
 typedef struct hb_grid_process_api_in_data_t

@@ -8,20 +8,19 @@
 
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
-extern hb_script_handle_t * g_script_handle;
-//////////////////////////////////////////////////////////////////////////
 int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
 {
+    hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
+
     lua_Integer pid = lua_tointeger( L, 1 );
 
     hb_db_value_handle_t values[2];
     hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid, values + 0 );
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, values + 1 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid, values + 1 );
 
     hb_bool_t exist;
     hb_oid_t eoid;
-    if( hb_db_find_oid( g_script_handle->db_collection_project_entities, values, 2, &eoid, &exist ) == HB_FAILURE )
+    if( hb_db_find_oid( script_handle->db_collection_project_entities, values, 2, &eoid, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
@@ -34,7 +33,7 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
     const char * db_fields[1] = {"public_data"};
 
     hb_db_value_handle_t entity_get_values[1];
-    if( hb_db_get_values( g_script_handle->db_collection_project_entities, eoid, db_fields, entity_get_values, 1 ) == HB_FAILURE )
+    if( hb_db_get_values( script_handle->db_collection_project_entities, eoid, db_fields, entity_get_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
@@ -68,7 +67,7 @@ int __hb_script_server_UpdateProjectEntityPublicData( lua_State * L )
     hb_db_value_handle_t entity_update_values[1];
     hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size, entity_update_values + 0 );
 
-    if( hb_db_update_values( g_script_handle->db_collection_project_entities, eoid, entity_update_values, 1 ) == HB_FAILURE )
+    if( hb_db_update_values( script_handle->db_collection_project_entities, eoid, entity_update_values, 1 ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

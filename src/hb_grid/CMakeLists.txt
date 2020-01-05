@@ -18,7 +18,7 @@ request
 )
 
 ADD_FILTER(
-process    
+process
     hb_grid_process_newaccount.h
     hb_grid_process_newaccount.c
     hb_grid_process_loginaccount.h
@@ -31,8 +31,12 @@ process
     hb_grid_process_newproject.c
     hb_grid_process_upload.h
     hb_grid_process_upload.c
-    hb_grid_process_api.h
-    hb_grid_process_api.c
+    hb_grid_process_script_api.h
+    hb_grid_process_script_api.c
+    hb_grid_process_script_event.h
+    hb_grid_process_script_event.c
+    hb_grid_process_script_command.h
+    hb_grid_process_script_command.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)

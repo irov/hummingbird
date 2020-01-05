@@ -8,11 +8,10 @@
 
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
-extern hb_script_handle_t * g_script_handle;
-//////////////////////////////////////////////////////////////////////////
 int __hb_script_server_SelectProjectEntity( lua_State * L )
 {
+    hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
+
     size_t parent_len;
     const char * parent = lua_tolstring( L, 1, &parent_len );
 
@@ -34,13 +33,13 @@ int __hb_script_server_SelectProjectEntity( lua_State * L )
 
     hb_db_value_handle_t query[2];
     hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len, query + 0 );
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, g_script_handle->project_oid, query + 1 );
+    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid, query + 1 );
 
     const char * db_fields[1] = { "pid" };
 
     uint32_t exists = 0;
     hb_db_value_handle_t values[1 * 32];
-    if( hb_db_select_values( g_script_handle->db_collection_project_entities, query, 2, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
+    if( hb_db_select_values( script_handle->db_collection_project_entities, query, 2, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

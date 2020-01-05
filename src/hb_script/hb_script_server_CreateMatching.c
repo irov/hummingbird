@@ -9,11 +9,10 @@
 
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
-extern hb_script_handle_t * g_script_handle;
-//////////////////////////////////////////////////////////////////////////
 int __hb_script_server_CreateMatching( lua_State * L )
 {
+    hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
+
     size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer count = lua_tointegerx( L, 2, HB_NULLPTR );
@@ -27,7 +26,7 @@ int __hb_script_server_CreateMatching( lua_State * L )
     }
 
     hb_bool_t exist;
-    if( hb_matching_create( g_script_handle->matching, g_script_handle->project_oid, name, name_len, (uint32_t)count, (uint32_t)dispersion, json_data, json_data_size, &exist ) == HB_FAILURE )
+    if( hb_matching_create( script_handle->matching, script_handle->project_oid, name, name_len, (uint32_t)count, (uint32_t)dispersion, json_data, json_data_size, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

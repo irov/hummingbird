@@ -1,4 +1,4 @@
-event.onCreateProject = function(data)
+command.create = function(data)
     local entity = server.CreateProjectEntity("match", "", {a=1,b=2,c=3})
 
     local public_data = {a = 1, b = "test", e = entity}
