@@ -34,7 +34,7 @@ extern int __hb_script_server_JoinMatching( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
-    char msg[1024] = {'\0'};
+    char msg[1024] = { '\0' };
 
     int n = lua_gettop( L );  /* number of arguments */
     int i;
@@ -60,7 +60,7 @@ static int __hb_lua_print( lua_State * L )
     return 0;
 }
 //////////////////////////////////////////////////////////////////////////
-static int __hb_lua_json( lua_State * L )
+static int __hb_lua_json_dumps( lua_State * L )
 {
     char buffer[10240];
     size_t buffer_size;
@@ -77,35 +77,35 @@ static int __hb_lua_json( lua_State * L )
 }
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg globalLib[] = {
-    {"print", &__hb_lua_print}
-    , { "json", &__hb_lua_json }
-    , {NULL, NULL} /* end of array */
+    { "print", &__hb_lua_print }
+    , { "json_dumps", &__hb_lua_json_dumps }
+    , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    {"GetProjectPublicData", &__hb_script_server_GetProjectPublicData}
-    , {"SetProjectPublicData", &__hb_script_server_SetProjectPublicData}
-    , {"UpdateProjectPublicData", &__hb_script_server_UpdateProjectPublicData}
-    , {"GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData}
-    , {"SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData}
-    , {"UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData}
-    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
-    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
-    , {"UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData}
-    , {"CreateUserEntity", &__hb_script_server_CreateUserEntity}
-    , {"SelectUserEntity", &__hb_script_server_SelectUserEntity}
-    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
-    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
-    , {"UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData}
-    , {"CreateProjectEntity", &__hb_script_server_CreateProjectEntity}
-    , {"SelectProjectEntity", &__hb_script_server_SelectProjectEntity}
-    , {"GetProjectEntity", &__hb_script_server_GetProjectEntity}
-    , {"SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData}
-    , {"GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData}
-    , {"UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData}
-    , {"CreateMatching", &__hb_script_server_CreateMatching}
-    , {"JoinMatching", &__hb_script_server_JoinMatching}
-    , {NULL, NULL} /* end of array */
+    { "GetProjectPublicData", &__hb_script_server_GetProjectPublicData }
+    , { "SetProjectPublicData", &__hb_script_server_SetProjectPublicData }
+    , { "UpdateProjectPublicData", &__hb_script_server_UpdateProjectPublicData }
+    , { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData }
+    , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
+    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
+    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
+    , { "CreateUserEntity", &__hb_script_server_CreateUserEntity }
+    , { "SelectUserEntity", &__hb_script_server_SelectUserEntity }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
+    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
+    , { "CreateProjectEntity", &__hb_script_server_CreateProjectEntity }
+    , { "SelectProjectEntity", &__hb_script_server_SelectProjectEntity }
+    , { "GetProjectEntity", &__hb_script_server_GetProjectEntity }
+    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
+    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
+    , { "CreateMatching", &__hb_script_server_CreateMatching }
+    , { "JoinMatching", &__hb_script_server_JoinMatching }
+    , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_panic( lua_State * L )
@@ -229,7 +229,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
         return HB_FAILURE;
     }
-    
+
 
     hb_oid_copy( handle->project_oid, _poid );
     hb_oid_copy( handle->user_oid, _uoid );
@@ -484,7 +484,7 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
         lua_pop( L, nresults );
 
         return HB_FAILURE;
-    }   
+    }
 
     *_code = HB_ERROR_OK;
 
