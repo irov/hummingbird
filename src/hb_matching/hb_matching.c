@@ -81,8 +81,8 @@ hb_result_t hb_matching_create( hb_matching_t * _matching, hb_oid_t _poid, const
 
     hb_matching_room_t * new_room = HB_NEW( hb_matching_room_t );
 
-    new_room->count = _count;
-    new_room->dispersion = _dispersion;
+    new_room->matching_count = _count;
+    new_room->matching_dispersion = _dispersion;
 
     new_room->users = HB_NEWN( hb_matching_user_t, 64 );
     new_room->users_count = 0;
@@ -144,7 +144,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
     if( room_found == HB_NULLPTR )
     {
-        const char * fields[] = {"count", "dispersion"};
+        const char * fields[] = { "count", "dispersion" };
 
         hb_db_value_handle_t values[2];
         if( hb_db_get_values( db_collection_matching, moid, fields, values, 2 ) == HB_FAILURE )
@@ -154,8 +154,8 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
         hb_matching_room_t * new_room = HB_NEW( hb_matching_room_t );
 
-        new_room->count = values[0].u.i32;
-        new_room->dispersion = values[1].u.i32;
+        new_room->matching_count = values[0].u.i32;
+        new_room->matching_dispersion = values[1].u.i32;
 
         new_room->users = HB_NEWN( hb_matching_user_t, 64 );
         new_room->users_count = 0;
@@ -193,6 +193,11 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
     ++room_found->users_count;
 
+    if( room_found->users_count < room_found->matching_count )
+    {
+        return HB_SUCCESSFUL;
+    }
+
     qsort( room_found->users, room_found->users_count, sizeof( hb_matching_user_t * ), &__matching_user_cmp );
 
     hb_matching_user_t * user_matching = HB_NULLPTR;
@@ -200,7 +205,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
     hb_bool_t successful = HB_TRUE;
 
     for( hb_matching_user_t * it = room_found->users,
-        *it_end = room_found->users + room_found->users_count - room_found->count - 1;
+        *it_end = room_found->users + room_found->users_count - room_found->matching_count - 1;
         it != it_end;
         ++it )
     {
@@ -211,7 +216,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
         successful = HB_TRUE;
 
         for( hb_matching_user_t * it_dispersion = it + 1,
-            *it_dispersion_end = it + room_found->count;
+            *it_dispersion_end = it + room_found->matching_count;
             it_dispersion != it_dispersion_end;
             ++it_dispersion )
         {
@@ -219,7 +224,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
             uint32_t user_dispersion_rating = user_dispersion->rating;
 
-            if( user_dispersion_rating - user_rating > room_found->dispersion )
+            if( user_dispersion_rating - user_rating > room_found->matching_dispersion )
             {
                 successful = HB_FALSE;
 
@@ -239,7 +244,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
     {
         hb_db_value_handle_t new_world_values[2];
         hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, _poid, new_world_values + 0 );
-        hb_db_make_oid_value( "moid", HB_UNKNOWN_STRING_SIZE, moid, new_world_values + 1 );        
+        hb_db_make_oid_value( "moid", HB_UNKNOWN_STRING_SIZE, moid, new_world_values + 1 );
 
         hb_oid_t woid;
         if( hb_db_new_document_by_name( "hb_worlds", new_world_values, 2, &woid ) == HB_FAILURE )
@@ -257,17 +262,18 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
         }
 
         for( hb_matching_user_t * it_matching = user_matching,
-            *it_matching_end = user_matching + room_found->count;
+            *it_matching_end = user_matching + room_found->matching_count;
             it_matching != it_matching_end;
             ++it_matching )
         {
             hb_db_value_handle_t new_avatar_values[4];
-            hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, _poid, count_world_values + 0 );
+            hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, _poid, new_avatar_values + 0 );
             hb_db_make_oid_value( "woid", HB_UNKNOWN_STRING_SIZE, woid, new_avatar_values + 1 );
             hb_db_make_oid_value( "uoid", HB_UNKNOWN_STRING_SIZE, it_matching->uoid, new_avatar_values + 2 );
             hb_db_make_int32_value( "rating", HB_UNKNOWN_STRING_SIZE, it_matching->rating, new_avatar_values + 3 );
 
-            if( hb_db_new_document_by_name( "hb_avatars", new_avatar_values, 4, &it_matching->aoid ) == HB_FAILURE )
+            hb_oid_t aoid;
+            if( hb_db_new_document_by_name( "hb_avatars", new_avatar_values, 4, &aoid ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
@@ -276,7 +282,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
             hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, _poid, count_avatar_values + 0 );
             hb_db_make_oid_value( "woid", HB_UNKNOWN_STRING_SIZE, woid, count_avatar_values + 1 );
 
-            if( hb_db_make_pid_by_name( "hb_avatars", woid, count_avatar_values, 2, &it_matching->apid ) == HB_FAILURE )
+            if( hb_db_make_pid_by_name( "hb_avatars", aoid, count_avatar_values, 2, &it_matching->apid ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
@@ -294,7 +300,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
         desc.name = _name;
         desc.wpid = wpid;
         desc.users = user_matching;
-        desc.users_count = room_found->count;
+        desc.users_count = room_found->matching_count;
         desc.data = values[0].u.symbol.buffer;
         desc.data_size = values[0].u.symbol.length;
         desc.ud = _ud;
@@ -304,7 +310,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
         hb_db_destroy_values( values, 1 );
 
         for( hb_matching_user_t * it_matching = user_matching,
-            *it_matching_end = user_matching + room_found->count;
+            *it_matching_end = user_matching + room_found->matching_count;
             it_matching != it_matching_end;
             ++it_matching )
         {

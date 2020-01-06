@@ -20,6 +20,8 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
         return HB_SUCCESSFUL;
     }
 
+    lua_remove( L, -2 );
+
     lua_pushstring( L, _desc->name );
     lua_pushinteger( L, _desc->wpid );
 

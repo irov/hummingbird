@@ -9,15 +9,13 @@ typedef struct hb_matching_user_t
 {
     hb_oid_t uoid;
     int32_t rating;
-    hb_oid_t aoid;
     hb_pid_t apid;
-    hb_bool_t process;
 } hb_matching_user_t;
 
 typedef struct hb_matching_room_t
 {
-    uint32_t count;
-    uint32_t dispersion;
+    uint32_t matching_count;
+    uint32_t matching_dispersion;
 
     hb_matching_user_t * users;
     size_t users_count;
