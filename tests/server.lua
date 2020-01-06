@@ -5,12 +5,14 @@ command.create = function(data)
 
     local public_data = {a = 1, b = "test", e = entity}
     server.SetProjectPublicData(public_data)
+    
+    server.CreateMatching("game", 2, 50, {})
 end
 
 event.onCreateUser = function(data)
     local entity = server.CreateUserEntity("test", "", {a=1,b=2,c=3})
 
-    local public_data = {a = 1, b = "test", e = entity}
+    local public_data = {a = 1, b = "test", e = entity, rating = 50}
     server.SetCurrentUserPublicData(public_data)
     print(string.format("onCreateUser"))
 end
@@ -24,10 +26,11 @@ event.onLoginUser = function(data)
 end
 
 event.onCreateWorld = function(name, pid, avatars, data)
+    print("!!!onCreateWorld!!!")
     print(name)
     print(pid)
-    print(avatars)
-    print(data)
+    print(json(avatars))
+    print(json(data))
 end
 
 api.test = function(data)
@@ -51,4 +54,10 @@ api.test = function(data)
     ]]--
     
     return {a=a, b=b, c=c, e=e}
+end
+
+api.join = function(data)
+    local rating = server.GetCurrentUserPublicData({"rating"})
+
+    server.JoinMatching("game", rating)
 end

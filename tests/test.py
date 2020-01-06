@@ -1,8 +1,12 @@
 import hummingbird
+
+#----------------------------------------------------------------------------------------------------------------
+# create account
+#----------------------------------------------------------------------------------------------------------------
     
 login = hummingbird.make_uuid()
 password = "testaccount"
-    
+
 print("----newaccount---- login: {0} password: {1}".format(login, password))
 jnewaccount = hummingbird.post("http://localhost:5555/newaccount", login = login, password = password)
 print("response: ", jnewaccount)
@@ -16,6 +20,10 @@ print("response: ", jloginaccount)
 
 if jloginaccount["code"] != 0:
     sys.exit(0)    
+    
+#----------------------------------------------------------------------------------------------------------------
+# create project
+#----------------------------------------------------------------------------------------------------------------
     
 token = jloginaccount["token"]
    
@@ -43,33 +51,54 @@ japi = hummingbird.api("http://localhost:5555/command/{0}/{1}/{2}".format(token,
 print("response: ", japi)
 
 if japi["code"] != 0:
-    sys.exit(0)    
-
-login = hummingbird.make_uuid()
-password = "testuser"
-
-print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jnewuser = hummingbird.post("http://localhost:5555/newuser/{0}".format(pid), login = login, password = password)
-print("response: ", jnewuser)
-
-if jnewuser["code"] != 0:
     sys.exit(0)
 
-print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
-jloginuser = hummingbird.post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)
-print("response: ", jloginuser)
+#----------------------------------------------------------------------------------------------------------------
+# create user
+#----------------------------------------------------------------------------------------------------------------
 
-if jloginuser["code"] != 0:
-    sys.exit(0)
+def create_user(pid):
+    login = hummingbird.make_uuid()
+    password = "testuser"
 
-token = jloginuser["token"]
-method = "test"
-data = dict(a=1, b=2, c="testc")
-print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
-japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
-print("response: ", japi)
+    print("----newuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
+    jnewuser = hummingbird.post("http://localhost:5555/newuser/{0}".format(pid), login = login, password = password)
+    print("response: ", jnewuser)
 
-if japi["code"] != 0:
-    sys.exit(0)
+    if jnewuser["code"] != 0:
+        sys.exit(0)
+
+    print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
+    jloginuser = hummingbird.post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)
+    print("response: ", jloginuser)
+
+    if jloginuser["code"] != 0:
+        sys.exit(0)
+
+    token = jloginuser["token"]
+    method = "test"
+    data = dict(a=1, b=2, c="testc")
+    print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
+    japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
+    print("response: ", japi)
+
+    if japi["code"] != 0:
+        sys.exit(0)
+        
+    token = jloginuser["token"]
+    method = "join"
+    data = dict()
+    print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
+    japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
+    print("response: ", japi)
+
+    if japi["code"] != 0:
+        sys.exit(0)
+    pass
+    
+create_user(pid)
+create_user(pid)
     
 print("done")
+
+

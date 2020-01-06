@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_script_json_value_dumps( lua_State * L, int32_t _index, char * _buffer, size_t * _offset, size_t _capacity )
+static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char * _buffer, size_t * _offset, size_t _capacity )
 {
     HB_UNUSED( _capacity );
 
@@ -40,36 +40,71 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int32_t _index, 
         }break;
     case LUA_TTABLE:
         {
-            *_offset += sprintf( _buffer + *_offset, "{" );
+            size_t len = lua_rawlen( L, _index );
 
-            lua_pushvalue( L, _index );
-            lua_pushnil( L );
-            int it = lua_next( L, -2 );
-            while( it != 0 )
+            if( len == 0 )
             {
-                const char * key = lua_tostring( L, -2 );
-                *_offset += sprintf( _buffer + *_offset, "\"%s\": ", key );
+                *_offset += sprintf( _buffer + *_offset, "{" );
 
-                if( __hb_script_json_value_dumps( L, -1, _buffer, _offset, _capacity ) == HB_FAILURE )
+                lua_pushvalue( L, _index );
+                lua_pushnil( L );
+                int it = lua_next( L, -2 );
+                while( it != 0 )
                 {
-                    return HB_FAILURE;
+                    const char * key = lua_tostring( L, -2 );
+                    *_offset += sprintf( _buffer + *_offset, "\"%s\": ", key );
+
+                    if( __hb_script_json_value_dumps( L, -1, _buffer, _offset, _capacity ) == HB_FAILURE )
+                    {
+                        return HB_FAILURE;
+                    }
+
+                    lua_pop( L, 1 );
+
+                    it = lua_next( L, -2 );
+
+                    if( it == 0 )
+                    {
+                        break;
+                    }
+
+                    *_offset += sprintf( _buffer + *_offset, ", " );
                 }
 
                 lua_pop( L, 1 );
 
-                it = lua_next( L, -2 );
+                *_offset += sprintf( _buffer + *_offset, "}" );
+            }
+            else
+            {
+                *_offset += sprintf( _buffer + *_offset, "[" );
 
-                if( it == 0 )
+                lua_pushvalue( L, _index );
+                lua_pushnil( L );
+                int it = lua_next( L, -2 );
+                while( it != 0 )
                 {
-                    break;
+                    if( __hb_script_json_value_dumps( L, -1, _buffer, _offset, _capacity ) == HB_FAILURE )
+                    {
+                        return HB_FAILURE;
+                    }
+
+                    lua_pop( L, 1 );
+
+                    it = lua_next( L, -2 );
+
+                    if( it == 0 )
+                    {
+                        break;
+                    }
+
+                    *_offset += sprintf( _buffer + *_offset, ", " );
                 }
 
-                *_offset += sprintf( _buffer + *_offset, ", " );
+                lua_pop( L, 1 );
+
+                *_offset += sprintf( _buffer + *_offset, "]" );
             }
-
-            lua_pop( L, 1 );
-
-            *_offset += sprintf( _buffer + *_offset, "}" );
         }break;
     default:
         return HB_FAILURE;
