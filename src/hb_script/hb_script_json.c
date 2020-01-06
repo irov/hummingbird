@@ -254,21 +254,30 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
             {
                 size_t length;
                 const char * value;
-                hb_json_to_string( json_field, &value, &length );
+                if( hb_json_to_string( json_field, &value, &length ) == HB_FAILURE )
+                {
+                    return HB_FAILURE;
+                }
 
                 lua_pushlstring( L, value, length );
             }break;
         case e_hb_json_integer:
             {
                 int64_t value;
-                hb_json_to_integer( json_field, &value );
+                if( hb_json_to_integer( json_field, &value ) == HB_FAILURE )
+                {
+                    return HB_FAILURE;
+                }
 
                 lua_pushinteger( L, (lua_Integer)value );
             }break;
         case e_hb_json_real:
             {
                 double value;
-                hb_json_to_real( json_field, &value );
+                if( hb_json_to_real( json_field, &value ) == HB_FAILURE )
+                {
+                    return HB_FAILURE;
+                }
 
                 lua_pushnumber( L, (lua_Number)value );
             }break;

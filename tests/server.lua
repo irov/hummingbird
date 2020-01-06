@@ -29,8 +29,8 @@ event.onCreateWorld = function(name, pid, avatars, data)
     print("!!!onCreateWorld!!!")
     print(name)
     print(pid)
-    print(json(avatars))
-    print(json(data))
+    print(json_dumps(avatars))
+    print(json_dumps(data))
 end
 
 api.test = function(data)
