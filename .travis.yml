@@ -14,6 +14,7 @@ addons:
     packages:
       - cmake
       - g++-7
+      - python3
 
 os:
     - linux
@@ -24,10 +25,6 @@ compiler:
 env:
     - BUILD_CONFIGURATION=Debug
     - BUILD_CONFIGURATION=Release
-    
-before_install:
-    - sudo apt-get update
-    - sudo apt-get install python3
         
 script:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export CC=/usr/bin/gcc-7 && gcc -v && cmake --version; fi
