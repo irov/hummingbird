@@ -1,7 +1,11 @@
 import hummingbird
+
+import sys
 import unittest
 
-
+if len(sys.argv) == 2:
+    GLOBAL_upload_filepath = sys.argv.pop()
+    pass
 
 class Testing(unittest.TestCase):
     #----------------------------------------------------------------------------------------------------------------
@@ -46,8 +50,10 @@ class Testing(unittest.TestCase):
         pass
 
     def test_3_upload(self):
+        global GLOBAL_upload_filepath
+        filepath = "server.lua" if GLOBAL_upload_filepath is None else GLOBAL_upload_filepath
         print("----upload---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
-        jupload = hummingbird.upload("http://localhost:5555/upload/{0}/{1}".format(Testing.account_token, Testing.pid), "server.lua")
+        jupload = hummingbird.upload("http://localhost:5555/upload/{0}/{1}".format(Testing.account_token, Testing.pid), filepath)
         print("response: ", jupload)
 
         self.assertEqual(jupload["code"], 0)
