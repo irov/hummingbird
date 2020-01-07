@@ -3,6 +3,13 @@ sudo: required
 
 language: c
 
+python:
+    - "3.6"
+    
+services: 
+    - mongodb
+    - redis-server
+
 addons:
   apt:
     sources:
@@ -53,5 +60,7 @@ script:
     - pushd ./cmake/hummingbird_unix
     - cmake --build . --config $BUILD_CONFIGURATION
     - popd
+    
+    - exec "./bin/hummingbird_unix/Unix Makefiles/$BUILD_CONFIGURATION/hb_grid" & python "./tests/test.py" & wait
     
     - echo "Complete!"

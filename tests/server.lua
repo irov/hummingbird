@@ -59,5 +59,5 @@ end
 api.join = function(data)
     local rating = server.GetCurrentUserPublicData({"rating"})
 
-    server.JoinMatching("game", rating)
+    server.JoinMatching("game", rating, {rating = rating})
 end
