@@ -20,6 +20,7 @@ class Testing(unittest.TestCase):
         jnewaccount = hummingbird.post("http://localhost:5555/newaccount", login = Testing.account_login, password = Testing.account_password)
         print("response: ", jnewaccount)
 
+        self.assertIsNotNone(jnewaccount)
         self.assertEqual(jnewaccount["code"], 0)
         pass
             
@@ -28,6 +29,7 @@ class Testing(unittest.TestCase):
         jloginaccount = hummingbird.post("http://localhost:5555/loginaccount", login = Testing.account_login, password = Testing.account_password)
         print("response: ", jloginaccount)
 
+        self.assertIsNotNone(jloginaccount)
         self.assertEqual(jloginaccount["code"], 0)
         self.assertIn("token", jloginaccount)
         
@@ -43,6 +45,7 @@ class Testing(unittest.TestCase):
         jnewproject = hummingbird.post("http://localhost:5555/newproject/{0}".format(Testing.account_token))
         print("response: ", jnewproject)
 
+        self.assertIsNotNone(jnewproject)
         self.assertEqual(jnewproject["code"], 0)
         self.assertIn("pid", jnewproject)
 
@@ -56,6 +59,7 @@ class Testing(unittest.TestCase):
         jupload = hummingbird.upload("http://localhost:5555/upload/{0}/{1}".format(Testing.account_token, Testing.pid), filepath)
         print("response: ", jupload)
 
+        self.assertIsNotNone(jupload)
         self.assertEqual(jupload["code"], 0)
         pass
     
@@ -66,6 +70,7 @@ class Testing(unittest.TestCase):
         jcommand = hummingbird.api("http://localhost:5555/command/{0}/{1}/{2}".format(Testing.account_token, Testing.pid, method), **data)
         print("response: ", jcommand)
 
+        self.assertIsNotNone(jcommand)
         self.assertEqual(jcommand["code"], 0)
         pass
 
@@ -80,6 +85,7 @@ class Testing(unittest.TestCase):
         jnewuser = hummingbird.post("http://localhost:5555/newuser/{0}".format(Testing.pid), login = Testing.user_login, password = Testing.user_password)
         print("response: ", jnewuser)
 
+        self.assertIsNotNone(jnewuser)
         self.assertEqual(jnewuser["code"], 0)
         pass
 
@@ -88,6 +94,7 @@ class Testing(unittest.TestCase):
         jloginuser = hummingbird.post("http://localhost:5555/loginuser/{0}".format(Testing.pid), login = Testing.user_login, password = Testing.user_password)
         print("response: ", jloginuser)
 
+        self.assertIsNotNone(jloginuser)
         self.assertEqual(jloginuser["code"], 0)
         self.assertIn("token", jloginuser)
 
@@ -101,6 +108,7 @@ class Testing(unittest.TestCase):
         japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(Testing.user_token, method), **data)
         print("response: ", japi)
 
+        self.assertIsNotNone(japi)
         self.assertEqual(japi["code"], 0)
         pass
 
@@ -112,12 +120,14 @@ class Testing(unittest.TestCase):
         jnewuser = hummingbird.post("http://localhost:5555/newuser/{0}".format(pid), login = login, password = password)
         print("response: ", jnewuser)
 
+        self.assertIsNotNone(jnewuser)
         self.assertEqual(jnewuser["code"], 0)
 
         print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
         jloginuser = hummingbird.post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)
         print("response: ", jloginuser)
 
+        self.assertIsNotNone(jloginuser)
         self.assertEqual(jloginuser["code"], 0)
 
         token = jloginuser["token"]
@@ -127,6 +137,7 @@ class Testing(unittest.TestCase):
         japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
         print("response: ", japi)
 
+        self.assertIsNotNone(japi)
         self.assertEqual(japi["code"], 0)
             
         token = jloginuser["token"]
@@ -136,6 +147,7 @@ class Testing(unittest.TestCase):
         japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
         print("response: ", japi)
 
+        self.assertIsNotNone(japi)
         self.assertEqual(japi["code"], 0)
         pass
             

@@ -8,6 +8,22 @@ import uuid
 import json
 import codecs
 
+def __response_json(response):
+    reader = codecs.getreader("utf-8")
+    r = reader(response)
+    
+    try:
+        j = json.load(r)
+        
+        return j
+    except json.decoder.JSONDecodeError as ex:
+        print("json.decoder.JSONDecodeError:", ex)
+        print("response:", response)
+        pass
+        
+    return None
+    pass
+
 def post(url, **params):
     jd = json.dumps(params)
     data = jd.encode('utf-8')
@@ -17,13 +33,12 @@ def post(url, **params):
     try:
         response = request.urlopen(r, timeout=60, data=data)
     except HTTPError as e:
-        print("Error code: ", e.code, e.reason)
+        print("HTTPError: ", e.code, e.reason)
         return None
         pass
-        
-    reader = codecs.getreader("utf-8")
-    r = reader(response)
-    j = json.load(r)
+    
+    j = __response_json(response)
+    
     return j
     pass
     
@@ -113,10 +128,16 @@ def upload(url, filename, **fields):
     r = request.Request(url, data=data)
     r.add_header('Content-type', form.get_content_type())
     r.add_header('Content-length', len(data))
-    response = request.urlopen(r, timeout=60)
-    reader = codecs.getreader("utf-8")
-    r = reader(response)
-    j = json.load(r)
+    
+    try:
+        response = request.urlopen(r, timeout=60)
+    except HTTPError as e:
+        print("HTTPError: ", e.code, e.reason)
+        return None
+        pass
+    
+    j = __response_json(response)
+    
     return j
     pass
     
@@ -126,10 +147,16 @@ def api(url, **params):
     r = request.Request(url)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
-    response = request.urlopen(r, timeout=60, data=data)
-    reader = codecs.getreader("utf-8")
-    r = reader(response)
-    j = json.load(r)
+    
+    try:
+        response = request.urlopen(r, timeout=60, data=data)
+    except HTTPError as e:
+        print("HTTPError: ", e.code, e.reason)
+        return None
+        pass
+        
+    j = __response_json(response)
+        
     return j
     pass
     
