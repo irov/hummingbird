@@ -18,9 +18,9 @@ int __hb_script_server_CreateMatching( lua_State * L )
     lua_Integer count = lua_tointegerx( L, 2, HB_NULLPTR );
     lua_Integer dispersion = lua_tointegerx( L, 3, HB_NULLPTR );
 
-    char json_data[2048];
+    char json_data[10240];
     size_t json_data_size;
-    if( hb_script_json_dumps( L, 4, json_data, 2048, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, 4, json_data, 10240, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

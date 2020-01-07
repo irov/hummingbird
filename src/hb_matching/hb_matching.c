@@ -103,7 +103,7 @@ static int32_t __matching_user_cmp( const void * _left, const void * _right )
     return user_left->rating - user_right->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
+hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -190,6 +190,8 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
 
     hb_oid_copy( new_user->uoid, _uoid );
     new_user->rating = _rating;
+    
+    hb_array_create( _data, _datasize, &new_user->public_data );
 
     ++room_found->users_count;
 
@@ -314,6 +316,8 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
             it_matching != it_matching_end;
             ++it_matching )
         {
+            hb_array_destroy( it_matching->public_data );
+
             --room_found->users_count;
             *it_matching = *(room_found->users + room_found->users_count);
         }

@@ -442,6 +442,8 @@ int main( int _argc, char * _argv[] )
         hb_sleep( 100 ); //hack
     }
 
+    HB_LOG_MESSAGE_INFO( "grid", "ready.." );
+
     for( uint32_t i = 0; i != max_thread; ++i )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;

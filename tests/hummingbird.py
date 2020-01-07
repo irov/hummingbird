@@ -106,8 +106,10 @@ def upload(url, filename, **fields):
         form.add_field(k, v)
 
     # Add a fake file
-    form.add_file('data', filename, fileHandle=open(filename, 'rb'))
+    f = open(filename, 'rb')
+    form.add_file('data', filename, fileHandle=f)
     data=bytes(form)
+    f.close()
     r = request.Request(url, data=data)
     r.add_header('Content-type', form.get_content_type())
     r.add_header('Content-length', len(data))

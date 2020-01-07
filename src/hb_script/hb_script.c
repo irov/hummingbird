@@ -67,8 +67,6 @@ static int __hb_lua_json_dumps( lua_State * L )
     if( hb_script_json_dumps( L, -1, buffer, 10240, &buffer_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
-
-        return 0;
     }
 
     lua_pushlstring( L, buffer, buffer_size );
