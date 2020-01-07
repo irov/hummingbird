@@ -61,6 +61,7 @@ script:
     - cmake --build . --config $BUILD_CONFIGURATION
     - popd
     
-    - exec "./bin/hummingbird_unix/Unix Makefiles/$BUILD_CONFIGURATION/hb_grid" & python "./tests/test.py" & wait
+    - python --version
+    - exec "./bin/hummingbird_unix/Unix Makefiles/$BUILD_CONFIGURATION/hb_grid" & py -3 "./tests/test.py" & wait
     
     - echo "Complete!"
