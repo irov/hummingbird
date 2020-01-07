@@ -59,8 +59,13 @@ script:
     - cmake --build . --config $BUILD_CONFIGURATION
     - popd
     
-    - pyenv global 3
+    - pyenv install -l
+    - pyenv install  3.8.0
+    - pyenv global 3.8.0
     - python --version
-    - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" & python "./tests/test.py" & wait
+    - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" &
+    - serverpid=$!
+    - python "./tests/test.py"
+    - kill -INT $serverpid
     
     - echo "Complete!"
