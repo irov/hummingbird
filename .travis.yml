@@ -2,9 +2,6 @@ dist: trusty
 sudo: required 
 
 language: c
-
-python:
-    - "3.6"
     
 services: 
     - mongodb
@@ -27,6 +24,10 @@ compiler:
 env:
     - BUILD_CONFIGURATION=Debug
     - BUILD_CONFIGURATION=Release
+    
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install python3
         
 script:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export CC=/usr/bin/gcc-7 && gcc -v && cmake --version; fi
@@ -61,7 +62,8 @@ script:
     - cmake --build . --config $BUILD_CONFIGURATION
     - popd
     
+    - pyenv global 3
     - python --version
-    - exec "./bin/hummingbird_unix/Unix Makefiles/$BUILD_CONFIGURATION/hb_grid" & py -3 "./tests/test.py" & wait
+    - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" & py -3 "./tests/test.py" & wait
     
     - echo "Complete!"
