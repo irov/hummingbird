@@ -59,7 +59,6 @@ script:
     - cmake --build . --config $BUILD_CONFIGURATION
     - popd
     
-    - pyenv install -l
     - pyenv install 3.6.0
     - pyenv global 3.6.0
     - python --version
