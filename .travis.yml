@@ -60,8 +60,8 @@ script:
     - popd
     
     - pyenv install -l
-    - pyenv install  3.8.0
-    - pyenv global 3.8.0
+    - pyenv install 3.6.0
+    - pyenv global 3.6.0
     - python --version
     - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" &
     - serverpid=$!
