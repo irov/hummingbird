@@ -18,7 +18,7 @@ def __response_json(response):
         return j
     except json.decoder.JSONDecodeError as ex:
         print("json.decoder.JSONDecodeError:", ex)
-        print("response:", response)
+        print("response:", response, r)
         pass
         
     return None

@@ -131,17 +131,8 @@ class Testing(unittest.TestCase):
 
         self.assertIsNotNone(jloginuser)
         self.assertEqual(jloginuser["code"], 0)
-
-        token = jloginuser["token"]
-        method = "test"
-        data = dict(a=1, b=2, c="testc")
-        print("----api---- token: {0} method: {1} data: {2}".format(token, method, data))
-        japi = hummingbird.api("http://localhost:5555/api/{0}/{1}".format(token, method), **data)
-        print("response: ", japi)
-
-        self.assertIsNotNone(japi)
-        self.assertEqual(japi["code"], 0)
-            
+        self.assertIn("token", jloginuser)
+           
         token = jloginuser["token"]
         method = "join"
         data = dict()
