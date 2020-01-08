@@ -12,13 +12,15 @@ def __response_json(response):
     reader = codecs.getreader("utf-8")
     r = reader(response)
     
+    d = r.read()
+    
     try:
-        j = json.load(r)
+        j = json.loads(d)
         
         return j
     except json.decoder.JSONDecodeError as ex:
         print("json.decoder.JSONDecodeError:", ex)
-        print("response:", response.decode('utf-8'), r)
+        print("data:", d)
         pass
         
     return None
