@@ -3,6 +3,8 @@ import hummingbird
 import sys
 import unittest
 
+GLOBAL_upload_filepath = None
+
 if len(sys.argv) == 2:
     GLOBAL_upload_filepath = sys.argv.pop()
     pass
