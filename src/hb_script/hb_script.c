@@ -476,6 +476,8 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
     else if( nresults == 0 )
     {
         sprintf( _result, "{}" );
+
+        *_resultsize = 2;
     }
     else
     {
