@@ -11,6 +11,10 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char
 
     switch( type )
     {
+    case LUA_TNIL:
+        {
+            *_offset += sprintf( _buffer + *_offset, "null" );
+        }break;
     case LUA_TBOOLEAN:
         {
             int result = lua_toboolean( L, _index );
