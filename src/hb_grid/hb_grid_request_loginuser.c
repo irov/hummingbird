@@ -73,7 +73,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process
         hb_token16_t token16;
         hb_token_base16_encode( out_data.token, &token16 );
 
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %u, \"call_used\": %u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %zu, \"call_used\": %u}}"
             , (int)sizeof( token16 )
             , token16
             , api_out_data.memory_used
