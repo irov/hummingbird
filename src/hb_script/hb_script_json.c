@@ -131,7 +131,7 @@ hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
+static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
 {
     lua_State * L = (lua_State *)_ud;
 
@@ -142,10 +142,14 @@ static void __hb_json_visitor( const char * _key, hb_json_handle_t * _value, voi
     case e_hb_json_object:
         {
             //ToDo
+
+            return HB_FAILURE;
         }break;
     case e_hb_json_array:
         {
             //ToDo
+
+            return HB_FAILURE;
         }break;
     case e_hb_json_string:
         {
@@ -182,10 +186,13 @@ static void __hb_json_visitor( const char * _key, hb_json_handle_t * _value, voi
             lua_pushnil( L );
         }break;
     default:
+        return HB_FAILURE;
         break;
     }
 
     lua_setfield( L, -2, _key );
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _size )
@@ -207,11 +214,11 @@ hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _s
 
     lua_createtable( L, 0, json_count );
 
-    hb_json_foreach( json_data, &__hb_json_visitor, (void *)L );
+    hb_result_t result = hb_json_foreach( json_data, &__hb_json_visitor, (void *)L );
 
     hb_json_destroy( json_data );
 
-    return HB_SUCCESSFUL;
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, size_t _size, const char ** _fields, uint32_t _fieldcount )

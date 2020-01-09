@@ -337,16 +337,23 @@ hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
+hb_result_t hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
 {
     json_t * jvalue = _handle->jroot;
 
-    for( const char * key = json_object_iter_key( json_object_iter( jvalue ) ); key != NULL; key = json_object_iter_key( json_object_iter_next( jvalue, json_object_key_to_iter( key ) ) ) )
+    for( const char * key = json_object_iter_key( json_object_iter( jvalue ) );
+        key != NULL;
+        key = json_object_iter_key( json_object_iter_next( jvalue, json_object_key_to_iter( key ) ) ) )
     {
         json_t * jelement = json_object_iter_value( json_object_key_to_iter( key ) );
 
         hb_json_handle_t handle;
         handle.jroot = jelement;
-        (*_visitor)(key, &handle, _ud);
+        if( (*_visitor)(key, &handle, _ud) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
     }
+
+    return HB_SUCCESSFUL;
 }
