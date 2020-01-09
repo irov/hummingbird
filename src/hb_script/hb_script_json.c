@@ -256,10 +256,14 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
         case e_hb_json_object:
             {
                 //ToDo
+
+                return HB_FAILURE;
             }break;
         case e_hb_json_array:
             {
                 //ToDo
+
+                return HB_FAILURE;
             }break;
         case e_hb_json_string:
             {
