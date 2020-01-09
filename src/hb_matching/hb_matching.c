@@ -191,7 +191,10 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
     hb_oid_copy( new_user->uoid, _uoid );
     new_user->rating = _rating;
     
-    hb_array_create( _data, _datasize, &new_user->public_data );
+    if( hb_array_create( _data, _datasize, &new_user->public_data ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     ++room_found->users_count;
 
@@ -207,7 +210,7 @@ hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const c
     hb_bool_t successful = HB_TRUE;
 
     for( hb_matching_user_t * it = room_found->users,
-        *it_end = room_found->users + room_found->users_count - room_found->matching_count - 1;
+        *it_end = room_found->users + room_found->users_count - room_found->matching_count + 1;
         it != it_end;
         ++it )
     {
