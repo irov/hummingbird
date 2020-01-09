@@ -594,6 +594,8 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
     else
     {
         sprintf( _result, "{}" );
+
+        *_resultsize = 2;
     }
 
     lua_pop( L, 1 );
