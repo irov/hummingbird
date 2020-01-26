@@ -26,7 +26,9 @@ fast game server
 
 Удачи в сборке, и использованию!
 
-<a href="https://dbdiagram.io/embed/5e2d75ec9e76504e0ef0a92f"><iframe width="560" height="315" src='https://dbdiagram.io/embed/5e2d75ec9e76504e0ef0a92f'/></a>
+## dbdiagram.io
+
+<img src="https://dbdiagram.io/embed/5e2d75ec9e76504e0ef0a92f" data-canonical-src="https://pbs.twimg.com/profile_images/1136901164039991297/-Vt-vAYQ_400x400.png" width="200" height="200"/>
 
 ### MongoDB
 https://www.mongodb.com/download-center/community
