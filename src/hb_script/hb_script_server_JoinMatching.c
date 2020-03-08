@@ -23,7 +23,6 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     lua_remove( L, -2 );
 
     lua_pushstring( L, _desc->name );
-    lua_pushinteger( L, _desc->wpid );
 
     lua_createtable( L, _desc->users_count, 0 );
     for( uint32_t index = 0; index != _desc->users_count; ++index )
@@ -56,7 +55,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
         return HB_FAILURE;
     }
 
-    int status = lua_pcallk( L, 4, 0, 0, 0, HB_NULLPTR );
+    int status = lua_pcallk( L, 3, 0, 0, 0, HB_NULLPTR );
 
     if( status != LUA_OK )
     {

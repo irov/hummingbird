@@ -46,6 +46,13 @@ src_project_entity
 )
 
 ADD_FILTER(
+src_world
+    hb_script_server_GetWorldPublicData.c
+    hb_script_server_SetWorldPublicData.c
+    hb_script_server_UpdateWorldPublicData.c
+)
+
+ADD_FILTER(
 src_matching
     hb_script_server_CreateMatching.c
     hb_script_server_JoinMatching.c
