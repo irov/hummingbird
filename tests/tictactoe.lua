@@ -13,12 +13,11 @@ event.onCreateWorld = function(name, avatars, data)
     print(name)
     print(json_dumps(avatars))
     print(json_dumps(data))
-    server.AllowWorldTurn(name, {0})
+    local r = math.random()
+    local id = r % #avatars
+    
+    server.SetAllowWorldTurn(name, {ids = {t}})
 end
-
-event.onCreateAvatar = function(name)
-    print(name)
-end 
 
 api.join = function(data)
     local rating = server.GetCurrentUserPublicData({"rating"})
@@ -27,21 +26,23 @@ api.join = function(data)
 end
 
 api.update = function(data)
-    local status, avatar = server.UpdateMatching("game")
+    local code, avatar = server.GetStatusMatching("game")
     
-    return {status = status, avatar = avatar}
+    return {code = code, avatar = avatar}
 end
 
-avatar.turn = function(index, avatars, data)
+avatar.turn = function(id, avatars, data)
     local m = server.GetCurrentWorldPublicData({"m"})
     
     if m[data.index] ~= 0 then
         return {successful = false}
         end
         
-    m[data.index] = avatars[index]
+    m[data.index] = avatars[id]
     
-    server.AllowWorldTurn(name, {index + 1 % #avatars})
+    local next_id = (id + 1) % #avatars
+    
+    server.SetAllowWorldTurn(name, {ids = {next_id}})
     
     return {successful = true}
 end

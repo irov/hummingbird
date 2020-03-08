@@ -50,12 +50,14 @@ src_world
     hb_script_server_GetWorldPublicData.c
     hb_script_server_SetWorldPublicData.c
     hb_script_server_UpdateWorldPublicData.c
+    hb_script_server_SetAllowWorldTurn.c
 )
 
 ADD_FILTER(
 src_matching
     hb_script_server_CreateMatching.c
     hb_script_server_JoinMatching.c
+    hb_script_server_GetStatusMatching.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua)
