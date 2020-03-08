@@ -64,7 +64,7 @@ script:
     - python --version
     - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" &
     - serverpid=$!
-    - python "./tests/test.py" "./tests/server.lua"
+    - python "./tests/test.py" "./tests/test.lua"
     - kill -INT $serverpid
     
     - echo "Complete!"

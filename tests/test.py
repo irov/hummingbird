@@ -56,7 +56,7 @@ class Testing(unittest.TestCase):
 
     def test_3_upload(self):
         global GLOBAL_upload_filepath
-        filepath = "server.lua" if GLOBAL_upload_filepath is None else GLOBAL_upload_filepath
+        filepath = "test.lua" if GLOBAL_upload_filepath is None else GLOBAL_upload_filepath
         print("----upload---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
         jupload = hummingbird.upload("http://localhost:5555/upload/{0}/{1}".format(Testing.account_token, Testing.pid), filepath)
         print("response: ", jupload)

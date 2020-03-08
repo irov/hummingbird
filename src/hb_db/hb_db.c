@@ -934,8 +934,11 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
     uint32_t founds = 0;
     for( ; founds != 1; )
     {
-        pid = hb_rand_time();
-        pid &= 0x7fffffff;
+        do
+        {
+            pid = hb_rand_time();
+            pid &= 0x7fffffff;
+        } while( pid != 0 )
 
         hb_db_value_handle_t update_values[1];
         hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, pid, update_values + 0 );
