@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-int __hb_script_server_CreateMatching( lua_State * L )
+int __hb_script_server_GetStatusMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
