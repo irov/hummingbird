@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-int __hb_script_server_SetProjectEntityPublicData( lua_State * L )
+int __hb_script_server_SetWorldPublicData( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 

@@ -52,5 +52,6 @@ typedef struct hb_matching_complete_desc_t
 
 typedef hb_result_t( *hb_matching_complete_func_t )(const hb_matching_complete_desc_t * _desc);
 hb_result_t hb_matching_join( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud );
+hb_result_t hb_matching_found( hb_matching_t * _matching, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, int32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud );
 
 #endif
