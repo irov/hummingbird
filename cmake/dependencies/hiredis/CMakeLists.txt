@@ -30,7 +30,8 @@ ADD_LIBRARY(hiredis STATIC
     net.c
     read.c
     sds.c
-    sockcompat.c)
+    sockcompat.c
+    alloc.c)
 
 SET_TARGET_PROPERTIES(hiredis
     PROPERTIES
@@ -45,7 +46,7 @@ CONFIGURE_FILE(hiredis.pc.in hiredis.pc @ONLY)
 INSTALL(TARGETS hiredis
     DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
-INSTALL(FILES hiredis.h read.h sds.h async.h
+INSTALL(FILES hiredis.h read.h sds.h async.h alloc.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/hiredis)
     
 INSTALL(DIRECTORY adapters
