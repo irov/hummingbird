@@ -12,7 +12,10 @@ int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_ha
     HB_UNUSED( _process );
 
     hb_grid_process_script_avatar_in_data_t in_data;
-    hb_token_base16_decode( _token, &in_data.token );
+    if( hb_token_base16_decode( _token, &in_data.token ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     strcpy( in_data.method, _method );
     strcpy( in_data.world, _world );

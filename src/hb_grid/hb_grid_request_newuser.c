@@ -70,7 +70,10 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
         }
 
         hb_token16_t token16;
-        hb_token_base16_encode( out_data.token, &token16 );
+        if( hb_token_base16_encode( out_data.token, &token16 ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
 
         size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %zu, \"call_used\": %u}}"
             , (int)sizeof( token16 )
