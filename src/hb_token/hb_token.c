@@ -14,14 +14,18 @@ void hb_token_copy( hb_token_t _dst, const hb_token_t _src )
     memcpy( _dst, _src, sizeof( hb_token_t ) );
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_token_base16_encode( const hb_token_t _token, hb_token16_t * _token16 )
+hb_result_t hb_token_base16_encode( const hb_token_t _token, hb_token16_t * _token16 )
 {
-    hb_base16_encode( _token, sizeof( hb_token_t ), *_token16, sizeof( hb_token16_t ), HB_NULLPTR );
+    hb_result_t result = hb_base16_encode( _token, sizeof( hb_token_t ), *_token16, sizeof( hb_token16_t ), HB_NULLPTR );
+
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_token_base16_decode( const hb_token16_t _token16, hb_token_t * _token )
+hb_result_t hb_token_base16_decode( const hb_token16_t _token16, hb_token_t * _token )
 {
-    hb_base16_decode( _token16, sizeof( hb_token16_t ), *_token, sizeof( hb_token_t ), HB_NULLPTR );
+    hb_result_t result = hb_base16_decode( _token16, sizeof( hb_token16_t ), *_token, sizeof( hb_token_t ), HB_NULLPTR );
+
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_token_generate( const char _prefix[2], const void * _value, size_t _size, uint32_t _expire, hb_token_t * _token )

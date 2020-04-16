@@ -43,7 +43,10 @@ int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_proc
     if( out_data.exist == HB_TRUE )
     {
         hb_token16_t token16;
-        hb_token_base16_encode( out_data.token, &token16 );
+        if( hb_token_base16_encode( out_data.token, &token16 ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
 
         size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\"}"
             , (int)sizeof( token16 )

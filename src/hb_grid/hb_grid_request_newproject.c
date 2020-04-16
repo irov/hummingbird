@@ -12,7 +12,10 @@ int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_proces
     HB_UNUSED( _request );
 
     hb_grid_process_newproject_in_data_t in_data;
-    hb_token_base16_decode( _token, &in_data.token );
+    if( hb_token_base16_decode( _token, &in_data.token ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_grid_process_newproject_out_data_t out_data;
     if( hb_grid_process_newproject( _process, &in_data, &out_data ) == HB_FAILURE )
@@ -21,7 +24,10 @@ int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_proces
     }
 
     hb_pid16_t pid16;
-    hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16, sizeof( pid16 ), HB_NULLPTR );
+    if( hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16, sizeof( pid16 ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     size_t response_data_size = sprintf( _response, "{\"code\": 0, \"pid\": \"%.*s\"}"
         , (int)sizeof( pid16 )
