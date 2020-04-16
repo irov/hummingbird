@@ -33,7 +33,7 @@ def post(url, **params):
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
     try:
-        response = request.urlopen(r, timeout=60, data=data)
+        response = request.urlopen(r, timeout=5, data=data)
     except HTTPError as e:
         print("HTTPError: ", e.code, e.reason)
         return None
@@ -132,7 +132,7 @@ def upload(url, filename, **fields):
     r.add_header('Content-length', len(data))
     
     try:
-        response = request.urlopen(r, timeout=60)
+        response = request.urlopen(r, timeout=5)
     except HTTPError as e:
         print("HTTPError: ", e.code, e.reason)
         return None
@@ -151,7 +151,7 @@ def api(url, **params):
     r.add_header('Content-Length', len(data))
     
     try:
-        response = request.urlopen(r, timeout=60, data=data)
+        response = request.urlopen(r, timeout=5, data=data)
     except HTTPError as e:
         print("HTTPError: ", e.code, e.reason)
         return None
