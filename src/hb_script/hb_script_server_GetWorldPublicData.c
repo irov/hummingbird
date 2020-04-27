@@ -29,18 +29,26 @@ int __hb_script_server_GetWorldPublicData( lua_State * L )
 
     const char * db_fields[1] = {"public_data"};
 
-    hb_db_value_handle_t project_values[1];
-    if( hb_db_get_values( script_handle->db_collection_worlds, script_handle->project_oid, db_fields, project_values, 1 ) == HB_FAILURE )
+    hb_db_values_handle_t * project_values;
+    if( hb_db_get_values( script_handle->db_collection_worlds, script_handle->project_oid, db_fields, 1, &project_values ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    if( hb_script_json_load_fields( L, project_values[0].u.symbol.buffer, project_values[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
+    const char * public_data_symbol;
+    size_t public_data_symbol_length;
+
+    if( hb_db_get_symbol_value( project_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_destroy_values( project_values, 1 );
+    if( hb_script_json_load_fields( L, public_data_symbol, public_data_symbol_length, fields, field_iterator ) == HB_FAILURE )
+    {
+        HB_SCRIPT_ERROR( L, "internal error" );
+    }
+
+    hb_db_destroy_values( project_values );
 
     return field_iterator;
 }

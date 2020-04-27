@@ -46,6 +46,6 @@ static void __hb_script_break()
     HB_UNUSED( i );
 }
 
-#define HB_SCRIPT_ERROR(L, ...) {__hb_script_break(); lua_pushstring( L, __VA_ARGS__ ); lua_error( L );}
+#define HB_SCRIPT_ERROR(L, ...) {__hb_script_break(); lua_pushfstring( L, __VA_ARGS__ ); lua_error( L );}
 
 #endif

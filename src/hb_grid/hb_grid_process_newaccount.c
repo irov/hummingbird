@@ -23,19 +23,25 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t authentication_handles[1];
+    hb_db_values_handle_t * values_authentication;
+    if( hb_db_create_values( &values_authentication ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
 
-    hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, authentication_handles + 0 );
+    hb_db_make_binary_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_accounts, authentication_handles, 1, &authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_accounts, values_authentication, &authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_destroy_values( values_authentication );
 
     if( authentication_exist == HB_TRUE )
     {
@@ -51,15 +57,22 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_sha1_t password_sha1;
     hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
 
-    hb_db_value_handle_t values[2];
-    hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, values + 0 );
-    hb_db_make_binary_value( "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20, values + 1 );
-
-    hb_oid_t account_oid;
-    if( hb_db_new_document( db_collection_accounts, values, 2, &account_oid ) == HB_FAILURE )
+    hb_db_values_handle_t * values_new;
+    if( hb_db_create_values( &values_new ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_make_binary_value( values_new, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
+    hb_db_make_binary_value( values_new, "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20 );
+
+    hb_oid_t account_oid;
+    if( hb_db_new_document( db_collection_accounts, values_new, &account_oid ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_new );
 
     hb_account_token_handle_t token_handle;
     hb_oid_copy( token_handle.aoid, account_oid );

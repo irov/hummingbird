@@ -8,6 +8,10 @@
 
 #include <string.h>
 
+#ifndef HB_SCRIPT_SELECT_USER_ENTITY_MAX
+#define HB_SCRIPT_SELECT_USER_ENTITY_MAX 32
+#endif
+
 int __hb_script_server_SelectUserEntity( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
@@ -24,37 +28,55 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
 
     if( limit < 0 )
     {
-        limit = 32;
+        limit = HB_SCRIPT_SELECT_USER_ENTITY_MAX;
     }
-    else if( limit > 32 )
+    else if( limit > HB_SCRIPT_SELECT_USER_ENTITY_MAX )
     {
-        HB_SCRIPT_ERROR( L, "limit max 32" );
+        HB_SCRIPT_ERROR( L, "limit max %u"
+            , HB_SCRIPT_SELECT_USER_ENTITY_MAX
+        );
     }
 
-    hb_db_value_handle_t query[3];
-    hb_db_make_symbol_value( "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len, query + 0 );
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid, query + 1 );
-    hb_db_make_oid_value( "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid, query + 2 );
+    hb_db_values_handle_t * query;
 
-    const char * db_fields[1] = {"pid"};
-
-    uint32_t exists = 0;
-    hb_db_value_handle_t values[1 * 32];
-    if( hb_db_select_values( script_handle->db_collection_user_entities, query, 3, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
+    if( hb_db_create_values( &query ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
+    hb_db_make_symbol_value( query, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
+    hb_db_make_oid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
+    hb_db_make_oid_value( query, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+
+    const char * db_fields[1] = {"pid"};
+
+    uint32_t exists = 0;
+    hb_db_values_handle_t * values[HB_SCRIPT_SELECT_USER_ENTITY_MAX];
+    if( hb_db_select_values( script_handle->db_collection_user_entities, query, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
+    {
+        HB_SCRIPT_ERROR( L, "internal error" );
+    }
+
+    hb_db_destroy_values( query );
+
     lua_createtable( L, exists, 0 );
     for( uint32_t index = 0; index != exists; ++index )
     {
-        hb_db_value_handle_t * value = values + index * 1 + 0;
+        const hb_db_values_handle_t * value = values[index];
 
-        lua_pushinteger( L, value->u.i32 );
+        int32_t eid;
+        hb_db_get_int32_value( value, 0, &eid );
+
+        lua_pushinteger( L, eid );
         lua_rawseti( L, -2, index + 1 );
     }
 
-    hb_db_destroy_values( values, 1 * exists );
+    for( uint32_t index = 0; index != exists; ++index )
+    {
+        hb_db_values_handle_t * value = values[index];
+
+        hb_db_destroy_values( value );
+    }
 
     return 1;
 }

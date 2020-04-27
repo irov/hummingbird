@@ -146,7 +146,7 @@ static void __hb_hashtable_checkincrease( hb_hashtable_t * _ht )
     __hb_hashtable_increase( _ht );
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element )
+hb_result_t hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element )
 {
     __hb_hashtable_checkincrease( _ht );
 
@@ -157,7 +157,7 @@ void hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size
 
     if( _size > 32 )
     {
-        return;
+        return HB_FAILURE;
     }
 
     uint64_t hash = hb_murmurhash64( _key, _size );
@@ -165,6 +165,8 @@ void hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size
     __hb_hashtable_push( _ht->records, _ht->capacity, hash, _key, _size, _element );
 
     ++_ht->size;
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 static void * __hb_hashtable_change( hb_hashtable_record_t * _records, size_t _capacity, uint64_t _hash, const void * _key, size_t _size, void * _element )

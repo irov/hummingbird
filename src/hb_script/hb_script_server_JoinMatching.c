@@ -27,7 +27,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     lua_createtable( L, _desc->users_count, 0 );
     for( uint32_t index = 0; index != _desc->users_count; ++index )
     {
-        const hb_matching_user_t * user = _desc->users + index;
+        const hb_matching_user_t * user = _desc->users[index];
 
         lua_createtable( L, 3, 0 );
 
