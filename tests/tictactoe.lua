@@ -16,7 +16,7 @@ event.onCreateWorld = function(name, avatars, data)
     local r = math.random()
     local id = r % #avatars
     
-    server.SetAllowWorldTurn(name, {ids = {t}})
+    server.SetAllowWorldTurn(name, {ids = {id}})
 end
 
 api.join = function(data)

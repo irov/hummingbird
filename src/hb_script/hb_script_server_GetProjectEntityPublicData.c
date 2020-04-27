@@ -33,16 +33,23 @@ int __hb_script_server_GetProjectEntityPublicData( lua_State * L )
     }
     lua_pop( L, 1 );
 
-    hb_db_value_handle_t values[2];
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid, values + 0 );
-    hb_db_make_oid_value( "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid, values + 1 );
-
-    hb_bool_t exist;
-    hb_oid_t eoid;
-    if( hb_db_find_oid( script_handle->db_collection_project_entities, values, 2, &eoid, &exist ) == HB_FAILURE )
+    hb_db_values_handle_t * values;
+    if( hb_db_create_values( &values ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
+
+    hb_db_make_int32_value( values, "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)eid );
+    hb_db_make_oid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
+
+    hb_bool_t exist;
+    hb_oid_t eoid;
+    if( hb_db_find_oid( script_handle->db_collection_project_entities, values, &eoid, &exist ) == HB_FAILURE )
+    {
+        HB_SCRIPT_ERROR( L, "internal error" );
+    }
+
+    hb_db_destroy_values( values );
 
     if( exist == HB_FALSE )
     {
@@ -51,18 +58,26 @@ int __hb_script_server_GetProjectEntityPublicData( lua_State * L )
 
     const char * db_fields[1] = { "public_data" };
 
-    hb_db_value_handle_t project_entity_values[1];
-    if( hb_db_get_values( script_handle->db_collection_project_entities, eoid, db_fields, project_entity_values, 1 ) == HB_FAILURE )
+    hb_db_values_handle_t * project_entity_values;
+    if( hb_db_get_values( script_handle->db_collection_project_entities, eoid, db_fields, 1, &project_entity_values ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    if( hb_script_json_load_fields( L, project_entity_values[0].u.symbol.buffer, project_entity_values[0].u.symbol.length, fields, field_iterator ) == HB_FAILURE )
+    const char * public_data_symbol;
+    size_t public_data_symbol_length;
+
+    if( hb_db_get_symbol_value( project_entity_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_destroy_values( project_entity_values, 1 );
+    if( hb_script_json_load_fields( L, public_data_symbol, public_data_symbol_length, fields, field_iterator ) == HB_FAILURE )
+    {
+        HB_SCRIPT_ERROR( L, "internal error" );
+    }
+
+    hb_db_destroy_values( project_entity_values );
 
     return field_iterator;
 }

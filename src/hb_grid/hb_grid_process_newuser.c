@@ -23,15 +23,22 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t project_handles[1];
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, project_handles + 0 );
-
-    hb_oid_t project_oid;
-    hb_bool_t project_exist;
-    if( hb_db_find_oid( db_collection_projects, project_handles, 1, &project_oid, &project_exist ) == HB_FAILURE )
+    hb_db_values_handle_t * values_project_found;
+    if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_make_int32_value( values_project_found, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+
+    hb_oid_t project_oid;
+    hb_bool_t project_exist;
+    if( hb_db_find_oid( db_collection_projects, values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_project_found );
 
     hb_db_destroy_collection( db_collection_projects );
 
@@ -46,19 +53,26 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t authentication_handles[2];
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, authentication_handles + 0 );
+    hb_db_values_handle_t * values_authentication;
+    if( hb_db_create_values( &values_authentication ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+    
+    hb_db_make_int32_value( values_authentication, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
 
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
 
-    hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, authentication_handles + 1 );
+    hb_db_make_binary_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
 
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_users, authentication_handles, 2, HB_NULLPTR, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_users, values_authentication, HB_NULLPTR, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_destroy_values( values_authentication );
 
     if( authentication_exist == HB_TRUE )
     {
@@ -76,17 +90,24 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         hb_sha1_t password_sha1;
         hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
 
-        hb_db_value_handle_t user_values[4];
-        hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, user_values + 0 );
-        hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, user_values + 1 );
-        hb_db_make_binary_value( "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20, user_values + 2 );
-        hb_db_make_symbol_value( "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE, user_values + 3 );
-
-        hb_oid_t user_oid;
-        if( hb_db_new_document( db_collection_users, user_values, 4, &user_oid ) == HB_FAILURE )
+        hb_db_values_handle_t * values_user_new;
+        if( hb_db_create_values( &values_user_new ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
+
+        hb_db_make_int32_value( values_user_new, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+        hb_db_make_binary_value( values_user_new, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
+        hb_db_make_binary_value( values_user_new, "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20 );
+        hb_db_make_symbol_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
+
+        hb_oid_t user_oid;
+        if( hb_db_new_document( db_collection_users, values_user_new, &user_oid ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        hb_db_destroy_values( values_user_new );
 
         hb_user_token_handle_t token_handle;
         hb_oid_copy( token_handle.uoid, user_oid );

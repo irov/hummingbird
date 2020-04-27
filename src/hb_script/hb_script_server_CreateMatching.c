@@ -25,15 +25,21 @@ int __hb_script_server_CreateMatching( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
+    hb_matching_desc_t desc;
+    desc.matching_count = (uint32_t)count;
+    desc.matching_dispersion = (uint32_t)dispersion;
+    desc.join_timeout = 300000;
+    desc.wait_timeout = 10000;
+
     hb_bool_t exist;
-    if( hb_matching_create( script_handle->matching, script_handle->project_oid, name, name_len, (uint32_t)count, (uint32_t)dispersion, json_data, json_data_size, &exist ) == HB_FAILURE )
+    if( hb_matching_create( script_handle->matching, script_handle->project_oid, name, name_len, &desc, json_data, json_data_size, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     if( exist == HB_TRUE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR( L, "game exist game" );
     }
 
     return 0;

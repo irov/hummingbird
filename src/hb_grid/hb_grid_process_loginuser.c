@@ -21,15 +21,22 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
 
-    hb_db_value_handle_t project_handles[1];
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, project_handles + 0 );
-
-    hb_oid_t project_oid;
-    hb_bool_t project_exist;
-    if( hb_db_find_oid( db_collection_projects, project_handles, 1, &project_oid, &project_exist ) == HB_FAILURE )
+    hb_db_values_handle_t * values_project_found;
+    if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_make_int32_value( values_project_found, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+
+    hb_oid_t project_oid;
+    hb_bool_t project_exist;
+    if( hb_db_find_oid( db_collection_projects, values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_project_found );
 
     hb_db_destroy_collection( db_collection_projects );
 
@@ -44,26 +51,32 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t authentication_handles[3];
+    hb_db_values_handle_t * values_authentication;
+    if( hb_db_create_values( &values_authentication ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, authentication_handles + 0 );
+    hb_db_make_int32_value( values_authentication, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
 
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
 
-    hb_db_make_binary_value( "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20, authentication_handles + 1 );
+    hb_db_make_binary_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
 
     hb_sha1_t password_sha1;
     hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
 
-    hb_db_make_binary_value( "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20, authentication_handles + 2 );
+    hb_db_make_binary_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20 );
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_users, authentication_handles, 3, &authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid( db_collection_users, values_authentication, &authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_destroy_values( values_authentication );
 
     hb_db_destroy_collection( db_collection_users );
 

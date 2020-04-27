@@ -28,16 +28,23 @@ hb_result_t hb_grid_process_script_command( hb_grid_process_handle_t * _process,
         return HB_FAILURE;
     }
 
-    hb_db_value_handle_t project_handles[2];
-    hb_db_make_oid_value( "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid, project_handles + 0 );
-    hb_db_make_int32_value( "pid", HB_UNKNOWN_STRING_SIZE, _in->pid, project_handles + 1 );
-
-    hb_oid_t project_oid;
-    hb_bool_t project_exist;
-    if( hb_db_find_oid_by_name( "hb_projects", project_handles, 2, &project_oid, &project_exist ) == HB_FAILURE )
+    hb_db_values_handle_t * values_project_found;
+    if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
+
+    hb_db_make_oid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );
+    hb_db_make_int32_value( values_project_found, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+
+    hb_oid_t project_oid;
+    hb_bool_t project_exist;
+    if( hb_db_find_oid_by_name( "hb_projects", values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_project_found );
 
     hb_script_handle_t * script_handle;
     if( hb_script_initialize( HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, project_oid, HB_OID_NONE, _process->matching, &script_handle ) == HB_FAILURE )

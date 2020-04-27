@@ -291,8 +291,9 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     const char * db_projects_fields[] = { "script_sha1" };
 
-    hb_db_value_handle_t project_values[1];
-    if( hb_db_get_values( handle->db_collection_projects, _poid, db_projects_fields, project_values, 1 ) == HB_FAILURE )
+    hb_db_values_handle_t * project_values;
+
+    if( hb_db_get_values( handle->db_collection_projects, _poid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
             , "hb_projects"
@@ -301,7 +302,8 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( project_values[0].u.binary.length != sizeof( hb_sha1_t ) )
+    hb_sha1_t script_sha1;
+    if( hb_db_copy_binary_value( project_values, 0, &script_sha1, sizeof( script_sha1 ) ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid data 'script_sha1'"
             , "hb_projects"
@@ -310,10 +312,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    hb_sha1_t script_sha1;
-    memcpy( script_sha1, project_values[0].u.binary.buffer, sizeof( hb_sha1_t ) );
-
-    hb_db_destroy_values( project_values, 1 );
+    hb_db_destroy_values( project_values );
 
     size_t script_data_size;
     hb_data_t script_data;

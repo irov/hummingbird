@@ -8,7 +8,7 @@ typedef struct hb_hashtable_t hb_hashtable_t;
 hb_result_t hb_hashtable_create( size_t _capacity, hb_hashtable_t ** _ht );
 void hb_hashtable_destroy( hb_hashtable_t * _ht );
 
-void hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element );
+hb_result_t hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element );
 void * hb_hashtable_change( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element );
 void * hb_hashtable_erase( hb_hashtable_t * _ht, const void * _key, size_t _size );
 void * hb_hashtable_find( hb_hashtable_t * _ht, const void * _key, size_t _size );
