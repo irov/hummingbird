@@ -35,28 +35,10 @@ int __hb_script_server_SetUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    char json_data[2048];
-    size_t json_data_size;
-    if( hb_script_json_dumps( L, 2, json_data, 2048, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_set_public_data( L, 2, script_handle->db_collection_user_entities, eoid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
-
-    hb_db_values_handle_t * handler;
-
-    if( hb_db_create_values( &handler ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_make_symbol_value( handler, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
-
-    if( hb_db_update_values( script_handle->db_collection_user_entities, eoid, handler ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_destroy_values( handler );
 
     return 0;
 }

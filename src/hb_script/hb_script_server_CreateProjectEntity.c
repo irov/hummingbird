@@ -18,9 +18,9 @@ int __hb_script_server_CreateProjectEntity( lua_State * L )
     size_t parent_len;
     const char * parent = lua_tolstring( L, 2, &parent_len );
 
-    char json_data[2048];
+    char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
-    if( hb_script_json_dumps( L, 3, json_data, 2048, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
