@@ -2,6 +2,10 @@
 
 #include <stdio.h>
 
+#ifndef HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX
+#define HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX 16
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char * _buffer, size_t * _offset, size_t _capacity )
 {
@@ -337,3 +341,155 @@ hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, uint32_t * _count )
+{
+    const char * fields[HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX];
+    uint32_t fields_count = 0;
+
+    if( hb_script_get_fields( L, _index, fields, &fields_count ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    const char * db_fields[1] = {"public_data"};
+
+    hb_db_values_handle_t * project_values;
+    if( hb_db_get_values( _collection, _oid, db_fields, 1, &project_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    const char * public_data_symbol;
+    size_t public_data_symbol_length;
+
+    if( hb_db_get_symbol_value( project_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_script_json_load_fields( L, public_data_symbol, public_data_symbol_length, fields, fields_count ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( project_values );
+
+    *_count = fields_count;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+{
+    char json_data[HB_DATA_MAX_SIZE];
+    size_t json_data_size;
+    if( hb_script_json_dumps( L, _index, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_values_handle_t * values_update;
+    if( hb_db_create_values( &values_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_make_symbol_value( values_update, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
+
+    if( hb_db_update_values( _collection, _oid, values_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_update );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+{
+    const char * db_fields[1] = {"public_data"};
+
+    hb_db_values_handle_t * user_values;
+    if( hb_db_get_values( _collection, _oid, db_fields, 1, &user_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    const char * public_data_symbol;
+    size_t public_data_symbol_length;
+
+    if( hb_db_get_symbol_value( user_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_handle_t * json_data;
+    if( hb_json_create( public_data_symbol, public_data_symbol_length, &json_data ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( user_values );
+
+    hb_json_handle_t * json_update;
+    if( hb_script_json_create( L, _index, &json_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_json_update( json_data, json_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    char json_new_data[HB_DATA_MAX_SIZE];
+    size_t json_new_data_size;
+    if( hb_json_dumps( json_data, json_new_data, HB_DATA_MAX_SIZE, &json_new_data_size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_values_handle_t * update_values;
+
+    if( hb_db_create_values( &update_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_make_symbol_value( update_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size );
+
+    if( hb_db_update_values( _collection, _oid, update_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( update_values );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_get_fields( lua_State * L, int32_t _index, const char ** _fieds, uint32_t * _count )
+{
+    uint32_t field_iterator = 0;
+
+    lua_pushvalue( L, _index );
+    lua_pushnil( L );
+    while( lua_next( L, -2 ) != 0 )
+    {
+        if( field_iterator == HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX )
+        {
+            return HB_FAILURE;
+        }
+
+        const char * value = lua_tostring( L, -1 );
+        _fieds[field_iterator++] = value;
+
+        lua_pop( L, 1 );
+    }
+    lua_pop( L, 1 );
+
+    *_count = field_iterator;
+
+    return HB_SUCCESSFUL;
+}
