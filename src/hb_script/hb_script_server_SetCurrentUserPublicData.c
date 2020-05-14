@@ -1,7 +1,7 @@
 #include "hb_script_handle.h"
 #include "hb_script_json.h"
 
-int __hb_script_server_SetCurrentUserPublicData( lua_State * L )
+int hb_script_server_SetCurrentUserPublicData( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 

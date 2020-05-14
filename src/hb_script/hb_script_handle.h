@@ -40,12 +40,8 @@ typedef struct hb_script_handle_t
     hb_matching_t * matching;
 } hb_script_handle_t;
 
-static void __hb_script_break()
-{
-    uint32_t i = 0;
-    HB_UNUSED( i );
-}
+void hb_script_error( lua_State * L, const char * _format, ... );
 
-#define HB_SCRIPT_ERROR(L, ...) {__hb_script_break(); lua_pushfstring( L, __VA_ARGS__ ); lua_error( L );}
+#define HB_SCRIPT_ERROR(L, ...) hb_script_error(L, __VA_ARGS__ )
 
 #endif

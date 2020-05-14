@@ -4,7 +4,7 @@
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_oid.h"
 
-int __hb_script_server_SetUserEntityPublicData( lua_State * L )
+int hb_script_server_SetUserEntityPublicData( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
