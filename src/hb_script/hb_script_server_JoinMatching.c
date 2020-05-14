@@ -90,7 +90,7 @@ int hb_script_server_JoinMatching( lua_State * L )
     }
 
     hb_bool_t exist;
-    if( hb_matching_join( script_handle->matching, script_handle->project_oid, name, name_len, script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
+    if( hb_matching_join( script_handle->matching, script_handle->db_client, script_handle->project_oid, name, name_len, script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

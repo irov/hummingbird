@@ -10,7 +10,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
+hb_result_t hb_storage_set( const hb_db_client_handle_t * _client, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
 {
     size_t bound_size = hb_archive_bound( _codesize );
 
@@ -29,7 +29,7 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
     hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
     hb_db_collection_handle_t * db_collection_scripts;
-    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection_scripts ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_scripts", &db_collection_scripts ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -44,7 +44,7 @@ hb_result_t hb_storage_set( const void * _code, size_t _codesize, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_storage_get_code( const hb_db_client_handle_t * _client, const hb_sha1_t _sha1, void * _buffer, size_t _capacity, size_t * _size )
 {
     hb_bool_t cache_available = hb_cache_available();
 
@@ -62,7 +62,7 @@ hb_result_t hb_storage_get_code( const hb_sha1_t _sha1, void * _buffer, size_t _
     }
 
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

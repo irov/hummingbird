@@ -229,6 +229,14 @@ static void __hb_ev_thread_base( void * _ud )
 
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
+    hb_db_client_handle_t * db_client;
+    if( hb_db_create_client( &db_client ) == HB_FAILURE )
+    {
+        return;
+    }
+
+    handle->db_client = db_client;
+
     struct event_base * base = event_base_new();
     HB_UNUSED( base );
 
@@ -252,6 +260,8 @@ static void __hb_ev_thread_base( void * _ud )
     }
 
     event_base_dispatch( base );
+
+    hb_db_destroy_client( handle->db_client );
 
     evhttp_free( http_server );
 }
@@ -414,7 +424,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_db_initialze( config->name, config->db_uri, config->db_port ) == HB_FAILURE )
+    if( hb_db_initialze( config->db_uri, config->db_port ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
             , config->name

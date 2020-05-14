@@ -65,14 +65,19 @@ typedef struct hb_db_values_handle_t
     uint32_t value_count;
 } hb_db_values_handle_t;
 //////////////////////////////////////////////////////////////////////////
+typedef struct hb_db_client_handle_t
+{
+    mongoc_client_t * client;
+} hb_db_client_handle_t;
+//////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_collection_handle_t
 {
     mongoc_collection_t * collection;
 } hb_db_collection_handle_t;
 //////////////////////////////////////////////////////////////////////////
-mongoc_client_t * g_mongo_client = HB_NULLPTR;
+mongoc_client_pool_t * g_mongo_pool = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _port )
+hb_result_t hb_db_initialze( const char * _uri, uint16_t _port )
 {
     mongoc_init();
 
@@ -88,16 +93,19 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _po
         return HB_FAILURE;
     }
 
-    mongoc_client_t * mongo_client = mongoc_client_new_from_uri( mongoc_uri );
+    mongoc_client_pool_t * mongo_pool = mongoc_client_pool_new( mongoc_uri );
 
     mongoc_uri_destroy( mongoc_uri );
 
-    if( mongo_client == HB_NULLPTR )
+    if( mongoc_client_pool_set_error_api( mongo_pool, MONGOC_ERROR_API_VERSION_2 ) == false )
     {
-        return HB_FAILURE;
-    }
+        HB_LOG_MESSAGE_ERROR( "db", "failed to set error api: %s:%u"
+            , _uri
+            , _port
+        );
 
-    mongoc_client_set_appname( mongo_client, _name );
+        return HB_FAILURE;
+    }    
 
     bson_t ping;
     bson_init( &ping );
@@ -105,7 +113,12 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _po
     bson_append_int32( &ping, "ping", sizeof( "ping" ) - 1, 1 );
 
     bson_error_t error;
+
+    mongoc_client_t * mongo_client = mongoc_client_pool_pop( mongo_pool );
+
     bool mongoc_ping = mongoc_client_command_simple( mongo_client, "admin", &ping, NULL, NULL, &error );
+
+    mongoc_client_pool_push( mongo_pool, mongo_client );
 
     bson_destroy( &ping );
 
@@ -116,25 +129,48 @@ hb_result_t hb_db_initialze( const char * _name, const char * _uri, uint16_t _po
         return HB_FAILURE;
     }
 
-    g_mongo_client = mongo_client;
+    g_mongo_pool = mongo_pool;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_finalize()
 {
-    if( g_mongo_client != HB_NULLPTR )
+    if( g_mongo_pool != HB_NULLPTR )
     {
-        mongoc_client_destroy( g_mongo_client );
-        g_mongo_client = HB_NULLPTR;
+        mongoc_client_pool_destroy( g_mongo_pool );
+        g_mongo_pool = HB_NULLPTR;
     }
 
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_collection_handle_t ** _handle )
+hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle )
 {
-    mongoc_collection_t * collection = mongoc_client_get_collection( g_mongo_client, _db, _name );
+    mongoc_client_t * mongo_client = mongoc_client_pool_pop( g_mongo_pool );
+
+    hb_db_client_handle_t * handle = HB_NEW( hb_db_client_handle_t );
+
+    handle->client = mongo_client;
+
+    *_handle = handle;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_db_destroy_client( const hb_db_client_handle_t * _handle )
+{
+    mongoc_client_t * mongo_client = _handle->client;
+    mongoc_client_pool_push( g_mongo_pool, mongo_client );
+
+    HB_DELETE( _handle );
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_get_collection( const hb_db_client_handle_t * _client, const char * _db, const char * _name, hb_db_collection_handle_t ** _handle )
+{
+    mongoc_client_t * mongo_client = _client->client;
+
+    mongoc_collection_t * collection = mongoc_client_get_collection( mongo_client, _db, _name );
 
     hb_db_collection_handle_t * handle = HB_NEW( hb_db_collection_handle_t );
 
@@ -145,10 +181,9 @@ hb_result_t hb_db_get_collection( const char * _db, const char * _name, hb_db_co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_destroy_collection( hb_db_collection_handle_t * _handle )
+void hb_db_destroy_collection( const hb_db_collection_handle_t * _handle )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
-
     mongoc_collection_destroy( mongo_collection );
 
     HB_DELETE( _handle );
@@ -256,10 +291,10 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document_by_name( const char * _name, const hb_db_values_handle_t * _values, hb_oid_t * _newoid )
+hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _values, hb_oid_t * _newoid )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
             , _name
@@ -573,10 +608,10 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_by_name( const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
             , _name
@@ -1070,10 +1105,10 @@ hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _handle, const h
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values_by_name( const char * _name, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
             , _name
@@ -1220,10 +1255,10 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_make_pid_by_name( const char * _name, const hb_oid_t _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid )
+hb_result_t hb_db_make_pid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
             , _name

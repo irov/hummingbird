@@ -18,7 +18,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     HB_UNUSED( _process );
 
     hb_db_collection_handle_t * db_collection_accounts;
-    if( hb_db_get_collection( "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

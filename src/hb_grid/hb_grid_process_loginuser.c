@@ -19,7 +19,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     HB_UNUSED( _process );
 
     hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
+    hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects );
 
     hb_db_values_handle_t * values_project_found;
     if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
@@ -46,7 +46,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     }
 
     hb_db_collection_handle_t * db_collection_users;
-    if( hb_db_get_collection( "hb", "hb_users", &db_collection_users ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "hb_users", &db_collection_users ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

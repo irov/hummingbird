@@ -158,11 +158,13 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_db_client_handle_t * _client, size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
-    if( hb_db_get_collection( "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
+    handle->db_client = _client;
+
+    if( hb_db_get_collection( _client, "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_user_entities"
@@ -171,7 +173,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_project_entities"
@@ -180,7 +182,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_users", &handle->db_collection_users ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_users", &handle->db_collection_users ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_users"
@@ -189,7 +191,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_projects", &handle->db_collection_projects ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_projects", &handle->db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_projects"
@@ -198,7 +200,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_matching", &handle->db_collection_matching ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_matching", &handle->db_collection_matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_matching"
@@ -207,7 +209,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_worlds", &handle->db_collection_worlds ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_worlds", &handle->db_collection_worlds ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_worlds"
@@ -216,7 +218,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_avatars", &handle->db_collection_avatars ) == HB_FAILURE )
+    if( hb_db_get_collection( _client, "hb", "hb_avatars", &handle->db_collection_avatars ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_avatars"
@@ -227,6 +229,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     hb_oid_copy( handle->project_oid, _poid );
     hb_oid_copy( handle->user_oid, _uoid );
+
     handle->matching = _matching;
 
     if( setjmp( handle->panic_jump ) == 1 )
@@ -313,7 +316,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     size_t script_data_size;
     hb_data_t script_data;
-    if( hb_storage_get_code( script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
+    if( hb_storage_get_code( _client, script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
             , "hb_projects"
