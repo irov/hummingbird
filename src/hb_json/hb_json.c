@@ -84,9 +84,9 @@ void hb_json_destroy( hb_json_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
 {
-    char buffer[10240];
+    char buffer[HB_DATA_MAX_SIZE];
     size_t buffer_size;
-    if( hb_file_read( _file, buffer, 10240, &buffer_size ) == HB_FAILURE )
+    if( hb_file_read( _file, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

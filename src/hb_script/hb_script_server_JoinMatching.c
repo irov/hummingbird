@@ -74,7 +74,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int __hb_script_server_JoinMatching( lua_State * L )
+int hb_script_server_JoinMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
@@ -82,9 +82,9 @@ int __hb_script_server_JoinMatching( lua_State * L )
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
-    char json_data[10240];
+    char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
-    if( hb_script_json_dumps( L, 3, json_data, 10240, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
