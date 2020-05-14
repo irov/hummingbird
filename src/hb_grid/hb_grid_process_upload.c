@@ -38,13 +38,13 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     }
 
     hb_sha1_t sha1;
-    if( hb_storage_set( code_buffer, code_size, _in->script_source, _in->script_source_size, &sha1 ) == HB_FAILURE )
+    if( hb_storage_set( _process->db_client, code_buffer, code_size, _in->script_source, _in->script_source_size, &sha1 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( "hb", "hb_projects", &db_collection_projects );
+    hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects );
 
     hb_db_values_handle_t * values_project_found;
     if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
@@ -89,7 +89,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     hb_db_destroy_values( db_script_revision_handle );
 
     hb_db_collection_handle_t * db_collection_projects_subversion;
-    if( hb_db_get_collection( "hb", "hb_projects_subversion", &db_collection_projects_subversion ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "hb_projects_subversion", &db_collection_projects_subversion ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

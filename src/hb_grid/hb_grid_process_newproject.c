@@ -30,7 +30,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     }
 
     hb_db_collection_handle_t * db_collection_projects;
-    if( hb_db_get_collection( "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
