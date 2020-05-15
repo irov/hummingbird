@@ -19,13 +19,10 @@ hb_result_t hb_mutex_create( hb_mutex_handle_t ** _handle )
     pthread_mutexattr_init( &attr );
     pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
 
-    pthread_mutex_t id;
-    if( pthread_mutex_init( &id, &attr ) != 0 )
+    if( pthread_mutex_init( &handle->id, &attr ) != 0 )
     {
         return HB_FAILURE;
     }
-
-    handle->id = id;
 
     *_handle = handle;
 
@@ -34,14 +31,14 @@ hb_result_t hb_mutex_create( hb_mutex_handle_t ** _handle )
 //////////////////////////////////////////////////////////////////////////
 void hb_mutex_destroy( hb_mutex_handle_t * _handle )
 {
-    pthread_mutex_destroy( _handle->id );
+    pthread_mutex_destroy( &_handle->id );
 
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_mutex_try_lock( hb_mutex_handle_t * _handle )
 {
-    if( pthread_mutex_trylock( _handle->id ) == EBUSY )
+    if( pthread_mutex_trylock( &_handle->id ) == EBUSY )
     {
         return HB_FALSE;
     }
@@ -51,11 +48,11 @@ hb_bool_t hb_mutex_try_lock( hb_mutex_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 void hb_mutex_lock( hb_mutex_handle_t * _handle )
 {
-    pthread_mutex_lock( _handle->id );
+    pthread_mutex_lock( &_handle->id );
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_mutex_unlock( hb_mutex_handle_t * _handle )
 {
-    pthread_mutex_unlock( _handle->id );
+    pthread_mutex_unlock( &_handle->id );
 }
 //////////////////////////////////////////////////////////////////////////
