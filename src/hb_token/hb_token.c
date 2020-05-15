@@ -28,18 +28,13 @@ hb_result_t hb_token_base16_decode( const hb_token16_t _token16, hb_token_t * _t
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_token_generate( const char _prefix[2], const void * _value, size_t _size, uint32_t _expire, hb_token_t * _token )
+hb_result_t hb_token_generate( const hb_cache_handle_t * _cache, const char _prefix[2], const void * _value, size_t _size, uint32_t _expire, hb_token_t * _token )
 {
-    if( hb_cache_available() == HB_FALSE )
-    {
-        return HB_FAILURE;
-    }
-
     uint32_t rand_time = hb_rand_time();
     uint32_t increment = rand_time & 0x0000ffff;
 
     uint64_t token_index;
-    if( hb_cache_incrby_value( "token_enumerator", HB_UNKNOWN_STRING_SIZE, increment, &token_index ) == HB_FAILURE )
+    if( hb_cache_incrby_value( _cache, "token_enumerator", HB_UNKNOWN_STRING_SIZE, increment, &token_index ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -58,12 +53,12 @@ hb_result_t hb_token_generate( const char _prefix[2], const void * _value, size_
     memcpy( *_token + 6, &rand_time, 4 );
     memcpy( *_token + 10, &rand_index_hight, 4 );
 
-    if( hb_cache_set_value( *_token, sizeof( hb_token_t ), _value, _size ) == HB_FAILURE )
+    if( hb_cache_set_value( _cache, *_token, sizeof( hb_token_t ), _value, _size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_cache_expire_value( *_token, sizeof( hb_token_t ), _expire ) == HB_FAILURE )
+    if( hb_cache_expire_value( _cache, *_token, sizeof( hb_token_t ), _expire ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

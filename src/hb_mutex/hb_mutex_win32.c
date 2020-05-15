@@ -21,6 +21,13 @@ hb_result_t hb_mutex_create( hb_mutex_handle_t ** _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+void hb_mutex_destroy( hb_mutex_handle_t * _handle )
+{
+    DeleteCriticalSection( &_handle->section );
+
+    HB_DELETE( _handle );
+}
+//////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_mutex_try_lock( hb_mutex_handle_t * _handle )
 {
     if( TryEnterCriticalSection( &_handle->section ) == FALSE )

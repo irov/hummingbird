@@ -77,7 +77,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_account_token_handle_t token_handle;
     hb_oid_copy( token_handle.aoid, account_oid );
 
-    if( hb_token_generate( "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
+    if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

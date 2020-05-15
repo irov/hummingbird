@@ -158,7 +158,7 @@ hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_destroy_client( const hb_db_client_handle_t * _handle )
+void hb_db_destroy_client( hb_db_client_handle_t * _handle )
 {
     mongoc_client_t * mongo_client = _handle->client;
     mongoc_client_pool_push( g_mongo_pool, mongo_client );
@@ -181,7 +181,7 @@ hb_result_t hb_db_get_collection( const hb_db_client_handle_t * _client, const c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_destroy_collection( const hb_db_collection_handle_t * _handle )
+void hb_db_destroy_collection( hb_db_collection_handle_t * _handle )
 {
     mongoc_collection_t * mongo_collection = _handle->collection;
     mongoc_collection_destroy( mongo_collection );

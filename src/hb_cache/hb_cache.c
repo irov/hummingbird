@@ -19,19 +19,12 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-redisContext * g_redis_context = HB_NULLPTR;
-//////////////////////////////////////////////////////////////////////////
-hb_bool_t hb_cache_available()
+typedef struct hb_cache_handle_t
 {
-    if( g_redis_context == HB_NULLPTR )
-    {
-        return HB_FALSE;
-    }
-
-    return HB_TRUE;
-}
+    redisContext * context;
+} hb_cache_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _timeout )
+hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeout, hb_cache_handle_t ** _handle )
 {
     struct timeval tv_timeout;
     tv_timeout.tv_sec = _timeout / 1000;
@@ -63,38 +56,34 @@ hb_result_t hb_cache_initialize( const char * _uri, uint16_t _port, uint32_t _ti
         return HB_FAILURE;
     }
 
-    g_redis_context = c;
+    hb_cache_handle_t * handle = HB_NEW( hb_cache_handle_t );
+    handle->context = c;
+
+    *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_cache_finalize()
+void hb_cache_destroy( hb_cache_handle_t * _handle )
 {
-    if( g_redis_context != HB_NULLPTR )
-    {
-        redisFree( g_redis_context );
-        g_redis_context = HB_NULLPTR;
-    }
+    redisFree( _handle->context );
+
+    HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_set_value( const void * _key, size_t _keysize, const void * _value, size_t _size )
+hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _size )
 {
-    if( g_redis_context == HB_NULLPTR )
-    {
-        return HB_FAILURE;
-    }
-
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "SET %b %b", _key, _keysize, _value, _size );
+    redisReply * reply = redisCommand( _cache->context, "SET %b %b", _key, _keysize, _value, _size );
 
     if( reply == HB_NULLPTR )
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command set with error: '%s'"
-            , g_redis_context->errstr
+            , _cache->context->errstr
         );
 
         return HB_FAILURE;
@@ -105,24 +94,19 @@ hb_result_t hb_cache_set_value( const void * _key, size_t _keysize, const void *
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
+hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
 {
-    if( g_redis_context == HB_NULLPTR )
-    {
-        return HB_FAILURE;
-    }
-
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "GET %b", _key, _keysize );
+    redisReply * reply = redisCommand( _cache->context, "GET %b", _key, _keysize );
 
     if( reply == HB_NULLPTR )
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command get with error: '%s'"
-            , g_redis_context->errstr
+            , _cache->context->errstr
         );
 
         return HB_FAILURE;
@@ -154,24 +138,19 @@ hb_result_t hb_cache_get_value( const void * _key, size_t _keysize, void * _valu
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t _increment, uint64_t * _value )
+hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint64_t _increment, uint64_t * _value )
 {
-    if( g_redis_context == HB_NULLPTR )
-    {
-        return HB_FAILURE;
-    }
-
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "INCRBY %b %" SCNu64, _key, _keysize, _increment );
+    redisReply * reply = redisCommand( _cache->context, "INCRBY %b %" SCNu64, _key, _keysize, _increment );
 
     if( reply == HB_NULLPTR )
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command incrby with error: '%s'"
-            , g_redis_context->errstr
+            , _cache->context->errstr
         );
 
         return HB_FAILURE;
@@ -191,24 +170,19 @@ hb_result_t hb_cache_incrby_value( const void * _key, size_t _keysize, uint64_t 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_expire_value( const void * _key, size_t _keysize, uint32_t _seconds )
+hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _seconds )
 {
-    if( g_redis_context == HB_NULLPTR )
-    {
-        return HB_FAILURE;
-    }
-
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( g_redis_context, "EXPIRE %b %u", _key, _keysize, _seconds );
+    redisReply * reply = redisCommand( _cache->context, "EXPIRE %b %u", _key, _keysize, _seconds );
 
     if( reply == HB_NULLPTR )
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command expire with error: '%s'"
-            , g_redis_context->errstr
+            , _cache->context->errstr
         );
 
         return HB_FAILURE;

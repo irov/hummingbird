@@ -1,0 +1,11 @@
+PROJECT(hb_pool C)
+
+ADD_FILTER(
+src
+	hb_pool.h
+	hb_pool.c
+)
+
+ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_mutex hb_config)

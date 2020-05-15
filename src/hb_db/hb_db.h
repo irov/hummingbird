@@ -11,12 +11,12 @@ void hb_db_finalize();
 typedef struct hb_db_client_handle_t hb_db_client_handle_t;
 
 hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle );
-void hb_db_destroy_client( const hb_db_client_handle_t * _handle );
+void hb_db_destroy_client( hb_db_client_handle_t * _handle );
 
 typedef struct hb_db_collection_handle_t hb_db_collection_handle_t;
 
 hb_result_t hb_db_get_collection( const hb_db_client_handle_t * _client, const char * _db, const char * _name, hb_db_collection_handle_t ** _collection );
-void hb_db_destroy_collection( const hb_db_collection_handle_t * _collection );
+void hb_db_destroy_collection( hb_db_collection_handle_t * _collection );
 
 hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _collection, const char * _field, uint32_t _expire );
 

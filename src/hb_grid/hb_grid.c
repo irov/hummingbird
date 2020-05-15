@@ -413,17 +413,6 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_initialize( config->cache_uri, config->cache_port, config->cache_timeout ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [cache] component [uri %s:%u]"
-            , config->name
-            , config->cache_uri
-            , config->cache_port
-        );
-
-        return EXIT_FAILURE;
-    }
-
     if( hb_db_initialze( config->db_uri, config->db_port ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
@@ -460,8 +449,26 @@ int main( int _argc, char * _argv[] )
         process_handle->config = config;
         process_handle->matching = matching;
 
+        hb_cache_handle_t * cache;
+        if( hb_cache_create( config->cache_uri, config->cache_port, config->cache_timeout, &cache ) == HB_FAILURE )
+        {
+            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create [cache] component [uri %s:%u]"
+                , config->name
+                , config->cache_uri
+                , config->cache_port
+            );
+
+            continue;
+        }
+
+        process_handle->cache = cache;
+
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
         {
+            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create thread"
+                , config->name
+            );
+
             continue;
         }
 
@@ -481,6 +488,8 @@ int main( int _argc, char * _argv[] )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
+        hb_cache_destroy( process_handle->cache );
+
         hb_thread_destroy( process_handle->thread );
     }
 
@@ -488,7 +497,6 @@ int main( int _argc, char * _argv[] )
 
     hb_matching_finalize( matching );
 
-    hb_cache_finalize();
     hb_db_finalize();
 
     hb_log_tcp_finalize();
