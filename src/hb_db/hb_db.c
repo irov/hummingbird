@@ -136,12 +136,9 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port )
 //////////////////////////////////////////////////////////////////////////
 void hb_db_finalize()
 {
-    if( g_mongo_pool != HB_NULLPTR )
-    {
-        mongoc_client_pool_destroy( g_mongo_pool );
-        g_mongo_pool = HB_NULLPTR;
-    }
-
+    mongoc_client_pool_destroy( g_mongo_pool );
+    g_mongo_pool = HB_NULLPTR;
+    
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
