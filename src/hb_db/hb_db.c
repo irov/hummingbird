@@ -147,10 +147,9 @@ void hb_db_finalize()
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle )
 {
-    mongoc_client_t * mongo_client = mongoc_client_pool_pop( g_mongo_pool );
-
     hb_db_client_handle_t * handle = HB_NEW( hb_db_client_handle_t );
 
+    mongoc_client_t * mongo_client = mongoc_client_pool_pop( g_mongo_pool );
     handle->client = mongo_client;
 
     *_handle = handle;
