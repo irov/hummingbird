@@ -76,7 +76,7 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #endif
 
 void * hb_new( size_t _size );
-void hb_free( const void * _ptr );
+void hb_free( void * _ptr );
 
 #ifndef HB_NEW
 #define HB_NEW(TYPE) ((TYPE*)hb_new(sizeof(TYPE)));
