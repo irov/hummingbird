@@ -1,5 +1,7 @@
 #include "hb_log.h"
 
+#include "hb_mutex/hb_mutex.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,25 +27,35 @@ typedef struct hb_log_service_handle_t
 {
     int32_t observer_count;
     hb_log_service_observer_desc_t observers[HB_LOG_MAX_OBSERVER];
+
+    hb_mutex_handle_t * mutex;
 }hb_log_service_handle_t;
 //////////////////////////////////////////////////////////////////////////
 static hb_log_service_handle_t * g_log_service_handle = HB_NULLPTR;
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_initialize()
 {
-    g_log_service_handle = HB_NEW( hb_log_service_handle_t );
-    g_log_service_handle->observer_count = 0;
+    hb_log_service_handle_t * handle = HB_NEW( hb_log_service_handle_t );
+    handle->observer_count = 0;
 
+    hb_mutex_handle_t * mutex;
+    if( hb_mutex_create( &mutex ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    handle->mutex = mutex;
+
+    g_log_service_handle = handle;
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_log_finalize()
 {
-    if( g_log_service_handle != HB_NULLPTR )
-    {
-        HB_DELETE( g_log_service_handle );
-        g_log_service_handle = HB_NULLPTR;
-    }
+    hb_mutex_destroy( g_log_service_handle->mutex );
+
+    HB_DELETE( g_log_service_handle );
+    g_log_service_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer, void * _ud )
@@ -134,6 +146,10 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
         return;
     }
 
+    hb_mutex_lock( g_log_service_handle->mutex );
+
     __hb_log_message_args( _category, _level, _file, _line, message );
+
+    hb_mutex_unlock( g_log_service_handle->mutex );
 }
 //////////////////////////////////////////////////////////////////////////
