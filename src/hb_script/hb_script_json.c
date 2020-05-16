@@ -166,7 +166,7 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
     case e_hb_json_integer:
         {
             int64_t value;
-            hb_json_to_integer( _value, &value );
+            hb_json_to_int64( _value, &value );
 
             lua_pushinteger( L, (lua_Integer)value );
         }break;
@@ -283,7 +283,7 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
         case e_hb_json_integer:
             {
                 int64_t value;
-                if( hb_json_to_integer( json_field, &value ) == HB_FAILURE )
+                if( hb_json_to_int64( json_field, &value ) == HB_FAILURE )
                 {
                     return HB_FAILURE;
                 }

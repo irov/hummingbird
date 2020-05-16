@@ -35,14 +35,14 @@ void hb_oid16_make( const char * _str, hb_oid16_t * _base16 )
     memcpy( *_base16, _str, sizeof( hb_oid16_t ) );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_oid_base16_encode( hb_oid_t _oid, hb_oid16_t * _base16 )
+hb_result_t hb_oid_base16_encode( const hb_oid_t _oid, hb_oid16_t * _base16 )
 {
     hb_result_t result = hb_base16_encode( _oid, sizeof( hb_oid_t ), *_base16, sizeof( hb_oid16_t ), HB_NULLPTR );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_oid_base16_decode( hb_oid16_t _base16, hb_oid_t * _oid )
+hb_result_t hb_oid_base16_decode( const hb_oid16_t _base16, hb_oid_t * _oid )
 {
     hb_result_t result = hb_base16_decode( _base16, sizeof( hb_oid16_t ), *_oid, sizeof( hb_oid_t ), HB_NULLPTR );
 

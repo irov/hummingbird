@@ -27,18 +27,20 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     lua_createtable( L, _desc->users_count, 0 );
     for( uint32_t index = 0; index != _desc->users_count; ++index )
     {
-        const hb_matching_user_t * user = _desc->users[index];
+        const hb_matching_user_handle_t * user = _desc->users[index];
 
         lua_createtable( L, 3, 0 );
 
-        lua_pushinteger( L, user->apid );
+        hb_pid_t user_apid = hb_matching_user_get_apid( user );
+        lua_pushinteger( L, user_apid );
         lua_rawseti( L, -2, 1 );
 
-        lua_pushinteger( L, user->rating );
+        int32_t user_rating = hb_matching_user_get_rating( user );
+        lua_pushinteger( L, user_rating );
         lua_rawseti( L, -2, 2 );
 
         size_t user_public_data_size;
-        const void * user_public_data = hb_array_data( user->public_data, &user_public_data_size );
+        const void * user_public_data = hb_matching_user_get_public_data( user, &user_public_data_size );
 
         if( hb_script_json_loads( L, user_public_data, user_public_data_size ) == HB_FAILURE )
         {

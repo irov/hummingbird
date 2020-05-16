@@ -158,7 +158,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 

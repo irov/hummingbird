@@ -53,6 +53,9 @@ src
     hb_oid.h
     hb_oid.c
     
+    hb_pid.h
+    hb_pid.c
+    
     hb_murmurhash64.h
     hb_murmurhash64.c
     
