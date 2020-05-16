@@ -38,7 +38,7 @@ typedef struct hb_script_handle_t
     hb_oid_t project_oid;
     hb_oid_t user_oid;
 
-    hb_matching_t * matching;
+    hb_matching_handle_t * matching;
 } hb_script_handle_t;
 
 void hb_script_error( lua_State * L, const char * _format, ... );

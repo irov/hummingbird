@@ -12,6 +12,8 @@
 //////////////////////////////////////////////////////////////////////////
 int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size )
 {
+    hb_bool_t required_successful = HB_TRUE;
+
     hb_grid_process_loginaccount_in_data_t in_data;
 
     {
@@ -21,17 +23,22 @@ int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_proc
             return HTTP_BADREQUEST;
         }
 
-        if( hb_json_copy_field_string( json_handle, "login", in_data.login, 128 ) == HB_FAILURE )
+        if( hb_json_copy_field_string_required( json_handle, "login", in_data.login, 128, &required_successful ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        if( hb_json_copy_field_string( json_handle, "password", in_data.password, 128 ) == HB_FAILURE )
+        if( hb_json_copy_field_string_required( json_handle, "password", in_data.password, 128, &required_successful ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         hb_json_destroy( json_handle );
+    }
+
+    if( required_successful == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
     }
 
     hb_grid_process_loginaccount_out_data_t out_data;

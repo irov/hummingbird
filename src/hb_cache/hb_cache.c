@@ -82,7 +82,7 @@ hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command set with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'SET' with error: '%s'"
             , _cache->context->errstr
         );
 
@@ -105,7 +105,7 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command get with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' with error: '%s'"
             , _cache->context->errstr
         );
 
@@ -149,7 +149,7 @@ hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void 
 
     if( reply == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command incrby with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'INCRBY' with error: '%s'"
             , _cache->context->errstr
         );
 
@@ -181,7 +181,7 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
 
     if( reply == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command expire with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'EXPIRE' with error: '%s'"
             , _cache->context->errstr
         );
 
@@ -193,3 +193,51 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize, uint32_t _score )
+{
+    if( _keysize == HB_UNKNOWN_STRING_SIZE )
+    {
+        _keysize = strlen( (const char *)_key );
+    }
+
+    if( _valuesize == HB_UNKNOWN_STRING_SIZE )
+    {
+        _valuesize = strlen( (const char *)_value );
+    }
+
+    redisReply * reply = redisCommand( _cache->context, "ZADD %b %u %b", _key, _keysize, _score, _value, _valuesize );
+
+    if( reply == HB_NULLPTR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZADD' with error: '%s'"
+            , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    freeReplyObject( reply );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _begin, uint32_t _end, const void ** _value, size_t * _count )
+{
+    redisReply * reply = redisCommand( _cache->context, "ZREVRANGE %b %u %u WITHSCORES", _key, _keysize, _begin, _end );
+
+    if( reply == HB_NULLPTR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' with error: '%s'"
+            , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    HB_UNUSED( _value );
+    HB_UNUSED( _count );
+
+    freeReplyObject( reply );
+
+    return HB_SUCCESSFUL;
+}

@@ -37,7 +37,7 @@ typedef struct hb_grid_process_handle_t
 
     hb_grid_config_t * config;
     
-    hb_matching_t * matching;
+    hb_matching_handle_t * matching;
 
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;
