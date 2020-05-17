@@ -1,5 +1,6 @@
 #include "hb_grid.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
@@ -38,6 +39,7 @@ extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_
 extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _method );
 extern int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _world, const char * _method );
 extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
+extern int hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 extern int hb_grid_request_setleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 extern int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 ////////////////////////////////////////////////////////////////////////
@@ -182,6 +184,19 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
         response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, method );
     }
+    else if( strcmp( cmd, "setusernickname" ) == 0 )
+    {
+        if( count != 2 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+
+        response_code = hb_grid_request_setusernickname( _request, process, response_data, &response_data_size, user_token );
+    }
     else if( strcmp( cmd, "setleaderboard" ) == 0 )
     {
         if( count != 2 )
@@ -294,10 +309,28 @@ static void __hb_ev_thread_base( void * _ud )
     evhttp_free( http_server );
 }
 //////////////////////////////////////////////////////////////////////////
+static void * __hb_memory_alloc( size_t _size, void * _ud )
+{
+    HB_UNUSED( _ud );
+
+    void * ptr = malloc( _size );
+
+    return ptr;
+}
+//////////////////////////////////////////////////////////////////////////
+static void __hb_memory_free( void * _ptr, void * _ud )
+{
+    HB_UNUSED( _ud );
+
+    free( _ptr );
+}
+//////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
+
+    hb_memory_initialize( &__hb_memory_alloc, &__hb_memory_free, HB_NULLPTR );
 
     hb_log_initialize();
 

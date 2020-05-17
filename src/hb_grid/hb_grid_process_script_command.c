@@ -22,7 +22,7 @@ hb_result_t hb_grid_process_script_command( hb_grid_process_handle_t * _process,
         return HB_FAILURE;
     }
 
-    hb_account_token_handle_t token_handle;
+    hb_account_token_t token_handle;
     if( hb_cache_get_value( _process->cache, _in->token, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;

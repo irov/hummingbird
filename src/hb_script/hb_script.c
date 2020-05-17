@@ -2,6 +2,7 @@
 #include "hb_script_json.h"
 #include "hb_script_handle.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_utils/hb_oid.h"
@@ -158,7 +159,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t * _poid, const hb_oid_t * _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
@@ -227,8 +228,8 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
         return HB_FAILURE;
     }
 
-    hb_oid_copy( handle->project_oid, _poid );
-    hb_oid_copy( handle->user_oid, _uoid );
+    hb_oid_copy( &handle->project_oid, _poid );
+    hb_oid_copy( &handle->user_oid, _uoid );
 
     handle->matching = _matching;
 
@@ -316,7 +317,7 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
 
     size_t script_data_size;
     hb_data_t script_data;
-    if( hb_storage_get_code( _cache, _db, script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
+    if( hb_storage_get_code( _cache, _db, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
             , "hb_projects"
@@ -418,7 +419,11 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'", _method, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
+        , _method
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -498,7 +503,11 @@ hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _ev
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'", _event, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'"
+        , _event
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -544,7 +553,11 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call command '%s' data '%.*s'", _command, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call command '%s' data '%.*s'"
+        , _command
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -612,7 +625,11 @@ hb_result_t hb_script_avatar_call( hb_script_handle_t * _handle, const char * _m
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'", _method, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
+        , _method
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 

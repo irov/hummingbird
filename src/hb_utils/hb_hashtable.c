@@ -1,6 +1,8 @@
 #include "hb_hashtable.h"
 #include "hb_murmurhash64.h"
 
+#include "hb_memory/hb_memory.h"
+
 #include <memory.h>
 #include <string.h>
 

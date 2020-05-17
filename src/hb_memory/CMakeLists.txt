@@ -1,0 +1,11 @@
+PROJECT(hb_memory C)
+
+ADD_FILTER(
+src
+	hb_memory.h
+	hb_memory.c
+)
+
+ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_config)

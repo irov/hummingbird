@@ -35,8 +35,8 @@ int hb_script_server_CreateUserEntity( lua_State * L )
             HB_SCRIPT_ERROR( L, "internal error" );
         }
 
-        hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-        hb_db_make_oid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+        hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+        hb_db_make_oid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
         hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
 
         hb_bool_t exist;
@@ -61,8 +61,8 @@ int hb_script_server_CreateUserEntity( lua_State * L )
 
         hb_db_make_symbol_value( new_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
         hb_db_make_symbol_value( new_values, "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
-        hb_db_make_oid_value( new_values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-        hb_db_make_oid_value( new_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+        hb_db_make_oid_value( new_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+        hb_db_make_oid_value( new_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
         hb_db_make_symbol_value( new_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
 
         if( hb_db_new_document( script_handle->db_collection_user_entities, new_values, &eoid ) == HB_FAILURE )
@@ -80,8 +80,8 @@ int hb_script_server_CreateUserEntity( lua_State * L )
             HB_SCRIPT_ERROR( L, "internal error" );
         }
 
-        hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-        hb_db_make_oid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+        hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+        hb_db_make_oid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
         hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
 
         hb_bool_t exist;
@@ -104,8 +104,8 @@ int hb_script_server_CreateUserEntity( lua_State * L )
         }
 
         hb_db_make_symbol_value( new_values, "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
-        hb_db_make_oid_value( new_values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-        hb_db_make_oid_value( new_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+        hb_db_make_oid_value( new_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+        hb_db_make_oid_value( new_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
         hb_db_make_symbol_value( new_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
 
         if( hb_db_new_document( script_handle->db_collection_user_entities, new_values, &eoid ) == HB_FAILURE )
@@ -127,11 +127,11 @@ int hb_script_server_CreateUserEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_oid_value( count_values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-    hb_db_make_oid_value( count_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+    hb_db_make_oid_value( count_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+    hb_db_make_oid_value( count_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
 
     hb_pid_t pid;
-    if( hb_db_make_pid( script_handle->db_collection_user_entities, eoid, count_values, &pid ) == HB_FAILURE )
+    if( hb_db_make_pid( script_handle->db_collection_user_entities, &eoid, count_values, &pid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

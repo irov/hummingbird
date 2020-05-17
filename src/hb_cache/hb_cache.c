@@ -1,5 +1,6 @@
 #include "hb_cache.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 
 #pragma warning( push )
@@ -221,7 +222,7 @@ hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _begin, uint32_t _end, const void ** _value, size_t * _count )
+hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _begin, uint32_t _end, hb_cache_value_t * _values, uint32_t * _count )
 {
     redisReply * reply = redisCommand( _cache->context, "ZREVRANGE %b %u %u WITHSCORES", _key, _keysize, _begin, _end );
 
@@ -234,10 +235,48 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
-    HB_UNUSED( _value );
-    HB_UNUSED( _count );
+    for( size_t index = 0; index != reply->elements; ++index )
+    {
+        struct redisReply * element = *(reply->element + index);
 
-    freeReplyObject( reply );
+        hb_cache_value_t * value = _values + index;
+
+        switch( element->type )
+        {
+        case REDIS_REPLY_INTEGER:
+            {
+                value->type = e_hb_cache_integer;
+
+                value->integer = (int64_t)element->integer;
+            }break;
+        case REDIS_REPLY_DOUBLE:
+            {
+                value->type = e_hb_cache_double;
+
+                value->real = element->dval;
+            }break;
+        case REDIS_REPLY_STRING:
+            {
+                value->type = e_hb_cache_string;
+
+                if( element->len > 127 )
+                {
+                    return HB_FAILURE;
+                }
+
+                memcpy( value->string, element->str, element->len );
+                value->string[element->len] = '\0';
+            }break;
+        default:
+            {
+                return HB_FAILURE;
+            }break;
+        }
+    }
+
+    *_count = (uint32_t)reply->elements;
+
+    freeReplyObject( reply );    
 
     return HB_SUCCESSFUL;
 }

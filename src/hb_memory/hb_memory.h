@@ -1,0 +1,30 @@
+#ifndef HB_MEMORY_H_
+#define HB_MEMORY_H_
+
+#include "hb_config/hb_config.h"
+
+typedef void * (*hb_memory_alloc_t)(size_t _size, void * _ud);
+typedef void(*hb_memory_free_t)(void * _ptr, void * _ud);
+
+void hb_memory_initialize( hb_memory_alloc_t _alloc, hb_memory_free_t _free, void * _ud );
+
+void * hb_memory_alloc( size_t _size );
+void hb_memory_free( void * _ptr );
+
+#ifndef HB_NEW
+#define HB_NEW(TYPE) ((TYPE*)hb_memory_alloc(sizeof(TYPE)))
+#endif
+
+#ifndef HB_NEWN
+#define HB_NEWN(TYPE, N) ((TYPE*)hb_memory_alloc(sizeof(TYPE) * N))
+#endif
+
+#ifndef HB_DELETE
+#define HB_DELETE(P) hb_memory_free(P)
+#endif
+
+#ifndef HB_DELETEN
+#define HB_DELETEN(P) hb_memory_free(P)
+#endif
+
+#endif

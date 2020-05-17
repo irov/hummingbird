@@ -22,7 +22,7 @@ typedef struct hb_matching_handle_t hb_matching_handle_t;
 hb_result_t hb_matching_create( uint32_t _count, hb_matching_handle_t ** _matching );
 void hb_matching_destroy( hb_matching_handle_t * _matching );
 
-hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_oid_t _poid, const char * _name, size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, size_t _datasize, hb_bool_t * _exist );
+hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, size_t _datasize, hb_bool_t * _exist );
 
 typedef struct hb_matching_complete_desc_t
 {
@@ -40,9 +40,9 @@ typedef struct hb_matching_complete_desc_t
 } hb_matching_complete_desc_t;
 
 typedef hb_result_t( *hb_matching_complete_func_t )(const hb_matching_complete_desc_t * _desc);
-hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, uint32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud );
-hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, hb_bool_t * _exist, hb_pid_t * _apid );
-hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_oid_t _poid, const char * _name, size_t _namesize, hb_oid_t _uoid, hb_pid_t _apid, hb_bool_t * _exist );
+hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, uint32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud );
+hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_bool_t * _exist, hb_pid_t * _apid );
+hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_pid_t _apid, hb_bool_t * _exist );
 
 hb_pid_t hb_matching_user_get_apid( const hb_matching_user_handle_t * _user );
 int32_t hb_matching_user_get_rating( const hb_matching_user_handle_t * _user );

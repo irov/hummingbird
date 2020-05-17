@@ -9,21 +9,28 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-void hb_token_copy( hb_token_t _dst, const hb_token_t _src )
+void hb_token_copy( hb_token_t * _dst, const hb_token_t * _src )
 {
-    memcpy( _dst, _src, sizeof( hb_token_t ) );
+    memcpy( _dst->value, _src->value, sizeof( hb_token_t ) );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_token_base16_encode( const hb_token_t _token, hb_token16_t * _token16 )
+hb_result_t hb_token_base16_encode( const hb_token_t * _token, hb_token16_t * _token16 )
 {
-    hb_result_t result = hb_base16_encode( _token, sizeof( hb_token_t ), *_token16, sizeof( hb_token16_t ), HB_NULLPTR );
+    hb_result_t result = hb_base16_encode( _token->value, sizeof( hb_token_t ), _token16->value, sizeof( hb_token16_t ), HB_NULLPTR );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_token_base16_decode( const hb_token16_t _token16, hb_token_t * _token )
+hb_result_t hb_token_base16_decode( const hb_token16_t * _token16, hb_token_t * _token )
 {
-    hb_result_t result = hb_base16_decode( _token16, sizeof( hb_token16_t ), *_token, sizeof( hb_token_t ), HB_NULLPTR );
+    hb_result_t result = hb_base16_decode( _token16->value, sizeof( hb_token16_t ), _token->value, sizeof( hb_token_t ), HB_NULLPTR );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_token_base16_decode_string( const char * _tokenstring, hb_token_t * _token )
+{
+    hb_result_t result = hb_base16_decode( _tokenstring, sizeof( hb_token16_t ), _token->value, sizeof( hb_token_t ), HB_NULLPTR );
 
     return result;
 }
@@ -48,17 +55,17 @@ hb_result_t hb_token_generate( const hb_cache_handle_t * _cache, const char _pre
     uint32_t rand_index_hight_salt = hb_rand_seed( index_low );
     rand_index_hight ^= rand_index_hight_salt;
 
-    memcpy( *_token + 0, _prefix, 2 );
-    memcpy( *_token + 2, &rand_index_low, 4 );
-    memcpy( *_token + 6, &rand_time, 4 );
-    memcpy( *_token + 10, &rand_index_hight, 4 );
+    memcpy( _token->value + 0, _prefix, 2 );
+    memcpy( _token->value + 2, &rand_index_low, 4 );
+    memcpy( _token->value + 6, &rand_time, 4 );
+    memcpy( _token->value + 10, &rand_index_hight, 4 );
 
-    if( hb_cache_set_value( _cache, *_token, sizeof( hb_token_t ), _value, _size ) == HB_FAILURE )
+    if( hb_cache_set_value( _cache, _token->value, sizeof( hb_token_t ), _value, _size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_cache_expire_value( _cache, *_token, sizeof( hb_token_t ), _expire ) == HB_FAILURE )
+    if( hb_cache_expire_value( _cache, _token->value, sizeof( hb_token_t ), _expire ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

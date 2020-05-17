@@ -18,13 +18,13 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
 {
     HB_UNUSED( _process );
 
-    if( hb_cache_expire_value( _process->cache, _in->token, sizeof( _in->token ), 1800 ) == HB_FAILURE )
+    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_account_token_handle_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    hb_account_token_t token_handle;
+    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -41,9 +41,9 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );
+    hb_db_make_oid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, &token_handle.aoid );
     hb_db_make_int64_value( project_values, "script_revision", HB_UNKNOWN_STRING_SIZE, 0 );
-    hb_db_make_int64_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );
+    hb_db_make_int64_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );    
     hb_db_make_symbol_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
 
     hb_oid_t project_oid;
@@ -55,7 +55,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     hb_db_destroy_values( project_values );
 
     hb_pid_t pid;
-    if( hb_db_make_pid( db_collection_projects, project_oid, HB_NULLPTR, &pid ) == HB_FAILURE )
+    if( hb_db_make_pid( db_collection_projects, &project_oid, HB_NULLPTR, &pid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

@@ -1,5 +1,6 @@
 #include "hb_log.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_mutex/hb_mutex.h"
 
 #include <stdarg.h>

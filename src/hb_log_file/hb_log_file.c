@@ -1,5 +1,6 @@
 #include "hb_log_file.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_date.h"
 
 #include <stdio.h>
