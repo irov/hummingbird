@@ -14,9 +14,18 @@ typedef struct hb_grid_process_getleaderboard_in_data_t
 
 } hb_grid_process_getleaderboard_in_data_t;
 
+typedef struct hb_getleaderboard_desc_t
+{
+    uint32_t score;
+
+    char nickname[32];    
+} hb_getleaderboard_desc_t;
+
 typedef struct hb_grid_process_getleaderboard_out_data_t
 {
-    uint32_t dummy;
+    uint32_t descs_count;
+    hb_getleaderboard_desc_t descs[16];
+
 } hb_grid_process_getleaderboard_out_data_t;
 
 hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process, const hb_grid_process_getleaderboard_in_data_t * _in, hb_grid_process_getleaderboard_out_data_t * _out );

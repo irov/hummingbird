@@ -341,7 +341,7 @@ hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, uint32_t * _count )
+hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, uint32_t * _count )
 {
     const char * fields[HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX];
     uint32_t fields_count = 0;
@@ -379,7 +379,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid )
 {
     char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
@@ -406,7 +406,7 @@ hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid )
 {
     const char * db_fields[] = {"public_data"};
 

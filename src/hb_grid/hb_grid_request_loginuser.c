@@ -57,7 +57,7 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process
 
         api_in_data.data_size = 0;
 
-        hb_token_copy( api_in_data.token, out_data.token );
+        hb_token_copy( &api_in_data.token, &out_data.token );
 
         api_in_data.category = e_hb_node_event;
         strcpy( api_in_data.method, "onLoginUser" );
@@ -78,14 +78,14 @@ int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process
         }
 
         hb_token16_t token16;
-        if( hb_token_base16_encode( out_data.token, &token16 ) == HB_FAILURE )
+        if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %zu, \"call_used\": %u}}"
             , (int)sizeof( token16 )
-            , token16
+            , token16.value
             , api_out_data.memory_used
             , api_out_data.call_used
         );

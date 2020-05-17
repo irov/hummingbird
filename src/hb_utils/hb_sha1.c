@@ -3,9 +3,9 @@
 #include <memory.h>
 
 //////////////////////////////////////////////////////////////////////////
-void hb_sha1_copy( hb_sha1_t _dst, const hb_sha1_t _src )
+void hb_sha1_copy( hb_sha1_t * _dst, const hb_sha1_t * _src )
 {
-    memcpy( _dst, _src, sizeof( hb_sha1_t ) );
+    memcpy( _dst->value, _src->value, sizeof( hb_sha1_t ) );
 }
 //////////////////////////////////////////////////////////////////////////
 #define HB_SHA1_ROLL( value, steps ) ((value << steps) | (value >> (32 - steps)))
@@ -136,6 +136,6 @@ void hb_sha1( const void * _buffer, const size_t _size, hb_sha1_t * _sha1 )
 
     for( int32_t hashByte = 20; --hashByte >= 0; )
     {
-        (*_sha1)[hashByte] = (result[hashByte >> 2] >> (((3 - hashByte) & 0x3) << 3)) & 0xff;
+        _sha1->value[hashByte] = (result[hashByte >> 2] >> (((3 - hashByte) & 0x3) << 3)) & 0xff;
     }
 }

@@ -62,12 +62,12 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
 
-    hb_db_make_binary_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
+    hb_db_make_sha1_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
 
     hb_sha1_t password_sha1;
     hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
 
-    hb_db_make_binary_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20 );
+    hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
@@ -84,9 +84,9 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     if( authentication_exist == HB_TRUE )
     {
-        hb_user_token_handle_t token_handle;
-        hb_oid_copy( token_handle.uoid, authentication_oid );
-        hb_oid_copy( token_handle.poid, project_oid );
+        hb_user_token_t token_handle;
+        hb_oid_copy( &token_handle.uoid, &authentication_oid );
+        hb_oid_copy( &token_handle.poid, &project_oid );
 
         if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
         {

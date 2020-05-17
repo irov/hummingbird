@@ -14,7 +14,7 @@ int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_h
     HB_UNUSED( _pid );
 
     hb_grid_process_script_command_in_data_t in_data;
-    if( hb_token_base16_decode( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

@@ -16,7 +16,7 @@ int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_pr
 
     hb_grid_process_getleaderboard_in_data_t in_data;
 
-    if( hb_token_base16_decode( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -52,7 +52,18 @@ int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_pr
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\": 0}" );
+    size_t response_data_size = 0;
+    response_data_size += sprintf( _response + response_data_size, "{\"code\": 0, \"leaderboard\":[" );
+
+    for( uint32_t index = 0; index != out_data.descs_count; ++index )
+    {
+        response_data_size += sprintf( _response + response_data_size, "{\"nickname\": \"%s\", \"score\":%u}"
+            , out_data.descs[index].nickname
+            , out_data.descs[index].score
+        );
+    }
+
+    response_data_size += sprintf( _response + response_data_size, "]}" );
 
     *_size = response_data_size;
 

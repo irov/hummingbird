@@ -40,25 +40,49 @@ typedef hb_error_code_e hb_error_code_t;
 
 typedef uint8_t hb_byte_t;
 typedef uint32_t hb_pid_t;
-typedef char hb_pid16_t[8];
-typedef hb_byte_t hb_oid_t[12];
-typedef char hb_oid16_t[24];
-typedef hb_byte_t hb_sha1_t[20];
-typedef hb_byte_t hb_token_t[14];
-typedef char hb_token16_t[28];
+
+typedef struct hb_pid16_t
+{
+    char value[8];
+} hb_pid16_t;
+
+typedef struct hb_oid_t
+{
+    hb_byte_t value[12];
+} hb_oid_t;
+
+typedef struct hb_oid16_t
+{
+    char value[24];
+} hb_oid16_t;
+
+typedef struct hb_sha1_t
+{
+    hb_byte_t value[20];
+} hb_sha1_t;
+
+typedef struct hb_token_t
+{
+    hb_byte_t value[14];
+} hb_token_t;
+
+typedef struct hb_token16_t
+{
+    char value[28];
+} hb_token16_t;
 
 static const hb_oid_t HB_OID_NONE = { 0 };
 
-typedef struct hb_user_token_handle_t
+typedef struct hb_user_token_t
 {
     hb_oid_t uoid;
     hb_oid_t poid;
-} hb_user_token_handle_t;
+} hb_user_token_t;
 
-typedef struct hb_account_token_handle_t
+typedef struct hb_account_token_t
 {
     hb_oid_t aoid;
-} hb_account_token_handle_t;
+} hb_account_token_t;
 
 #ifndef HB_DATA_MAX_SIZE
 #define HB_DATA_MAX_SIZE 10240
@@ -73,25 +97,6 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 
 #ifndef HB_NULLPTR
 #define HB_NULLPTR ((void*)0)
-#endif
-
-void * hb_new( size_t _size );
-void hb_free( void * _ptr );
-
-#ifndef HB_NEW
-#define HB_NEW(TYPE) ((TYPE*)hb_new(sizeof(TYPE)));
-#endif
-
-#ifndef HB_NEWN
-#define HB_NEWN(TYPE, N) ((TYPE*)hb_new(sizeof(TYPE) * N));
-#endif
-
-#ifndef HB_DELETE
-#define HB_DELETE(P) hb_free(P);
-#endif
-
-#ifndef HB_DELETEN
-#define HB_DELETEN(P) hb_free(P);
 #endif
 
 #ifndef HB_MAX_PATH

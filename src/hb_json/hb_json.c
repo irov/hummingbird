@@ -1,6 +1,7 @@
 #include "hb_json.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_file.h"
 
 #include "jansson.h"
@@ -201,7 +202,7 @@ hb_result_t hb_json_to_oid16( hb_json_handle_t * _handle, hb_oid16_t * _oid )
         return HB_FAILURE;
     }
 
-    memcpy( *_oid, value, sizeof( hb_oid16_t ) );
+    memcpy( _oid->value, value, sizeof( hb_oid16_t ) );
 
     return HB_SUCCESSFUL;
 }

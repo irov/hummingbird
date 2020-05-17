@@ -3,7 +3,10 @@ PROJECT(hb_config C)
 ADD_FILTER(
 src
 	hb_config.h
-	hb_config.c
 )
 
-ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+ADD_LIBRARY(${PROJECT_NAME} INTERFACE)
+
+if(MSVC)
+    add_custom_target(${PROJECT_NAME}.headers SOURCES ${HUMMINGBIRD_SOURCE_FILES})
+endif()
