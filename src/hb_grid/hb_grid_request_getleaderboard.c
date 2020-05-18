@@ -53,11 +53,16 @@ int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_pr
     }
 
     size_t response_data_size = 0;
-    response_data_size += sprintf( _response + response_data_size, "{\"code\": 0, \"leaderboard\":[" );
+    response_data_size += sprintf( _response + response_data_size, "{\"code\":0,\"leaderboard\":[" );
 
     for( uint32_t index = 0; index != out_data.descs_count; ++index )
     {
-        response_data_size += sprintf( _response + response_data_size, "{\"nickname\": \"%s\", \"score\":%u}"
+        if( index != 0 )
+        {
+            response_data_size += sprintf( _response + response_data_size, "," );
+        }
+
+        response_data_size += sprintf( _response + response_data_size, "{\"nickname\":\"%s\",\"score\":%u}"
             , out_data.descs[index].nickname
             , out_data.descs[index].score
         );

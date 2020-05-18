@@ -623,6 +623,87 @@ hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, bson_iter_t * _iter, const char * _field )
+{
+    _value->field = _field;
+    _value->field_length = strlen( _field );
+
+    if( bson_iter_find( _iter, _field ) == false )
+    {
+        return HB_FAILURE;
+    }
+
+    bson_type_t type = bson_iter_type( _iter );
+
+    switch( type )
+    {
+    case BSON_TYPE_INT32:
+        {
+            _value->type = e_hb_db_int32;
+
+            _value->u.i32 = bson_iter_int32( _iter );
+        }break;
+    case BSON_TYPE_INT64:
+        {
+            _value->type = e_hb_db_int64;
+
+            _value->u.i64 = bson_iter_int64( _iter );
+        }break;
+    case BSON_TYPE_UTF8:
+        {
+            _value->type = e_hb_db_utf8;
+
+            uint32_t utf8_length;
+            const char * utf8_value = bson_iter_utf8( _iter, &utf8_length );
+
+            _value->u.utf8.length = utf8_length;
+            _value->u.utf8.buffer = utf8_value;
+        }break;
+    case BSON_TYPE_SYMBOL:
+        {
+            _value->type = e_hb_db_symbol;
+
+            uint32_t symbol_length;
+            const char * symbol_value = bson_iter_symbol( _iter, &symbol_length );
+
+            _value->u.symbol.length = symbol_length;
+            _value->u.symbol.buffer = symbol_value;
+        }break;
+    case BSON_TYPE_BINARY:
+        {
+            _value->type = e_hb_db_binary;
+
+            bson_subtype_t binary_subtype;
+            uint32_t binary_length;
+            const hb_byte_t * binary_buffer;
+            bson_iter_binary( _iter, &binary_subtype, &binary_length, &binary_buffer );
+
+            _value->u.binary.length = binary_length;
+            _value->u.binary.buffer = binary_buffer;
+        }break;
+    case BSON_TYPE_DATE_TIME:
+        {
+            _value->type = e_hb_db_time;
+
+            _value->u.time = bson_iter_time_t( _iter );
+        }break;
+    case BSON_TYPE_OID:
+        {
+            _value->type = e_hb_db_oid;
+
+            const bson_oid_t * value_oid = bson_iter_oid( _iter );
+
+            _value->u.oid = value_oid->bytes;
+        }break;
+    default:
+        {
+            return HB_FAILURE;
+        }break;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t * _values, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
@@ -687,82 +768,11 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
 
             const char * field = _fields[index];
 
-            value->field = field;
-            value->field_length = strlen( field );
-
-            if( bson_iter_find( &iter, field ) == false )
+            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
                 return HB_FAILURE;
-            }
-
-            bson_type_t type = bson_iter_type( &iter );
-
-            switch( type )
-            {
-            case BSON_TYPE_INT32:
-                {
-                    value->type = e_hb_db_int32;
-
-                    value->u.i32 = bson_iter_int32( &iter );
-                }break;
-            case BSON_TYPE_INT64:
-                {
-                    value->type = e_hb_db_int64;
-
-                    value->u.i64 = bson_iter_int64( &iter );
-                }break;
-            case BSON_TYPE_UTF8:
-                {
-                    value->type = e_hb_db_utf8;
-
-                    uint32_t utf8_length;
-                    const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
-
-                    value->u.utf8.length = utf8_length;
-                    value->u.utf8.buffer = utf8_value;
-                }break;
-            case BSON_TYPE_SYMBOL:
-                {
-                    value->type = e_hb_db_symbol;
-
-                    uint32_t symbol_length;
-                    const char * symbol_value = bson_iter_symbol( &iter, &symbol_length );
-
-                    value->u.symbol.length = symbol_length;
-                    value->u.symbol.buffer = symbol_value;
-                }break;
-            case BSON_TYPE_BINARY:
-                {
-                    value->type = e_hb_db_binary;
-
-                    bson_subtype_t binary_subtype;
-                    uint32_t binary_length;
-                    const hb_byte_t * binary_buffer;
-                    bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
-
-                    value->u.binary.length = binary_length;
-                    value->u.binary.buffer = binary_buffer;
-                }break;
-            case BSON_TYPE_DATE_TIME:
-                {
-                    value->type = e_hb_db_time;
-
-                    value->u.time = bson_iter_time_t( &iter );
-                }break;
-            case BSON_TYPE_OID:
-                {
-                    value->type = e_hb_db_oid;
-
-                    const bson_oid_t * value_oid = bson_iter_oid( &iter );
-
-                    value->u.oid = value_oid->bytes;
-                }break;
-            default:
-                {
-                    return HB_FAILURE;
-                }break;
             }
         }
 
@@ -834,8 +844,6 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
             return HB_FAILURE;
         }
 
-
-
         for( uint32_t index = 0; index != _fieldcount; ++index )
         {
             hb_db_value_handle_t * value = values->values + index;
@@ -843,82 +851,11 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
 
             const char * field = _fields[index];
 
-            value->field = field;
-            value->field_length = strlen( field );
-
-            if( bson_iter_find( &iter, field ) == false )
+            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
                 return HB_FAILURE;
-            }
-
-            bson_type_t type = bson_iter_type( &iter );
-
-            switch( type )
-            {
-            case BSON_TYPE_INT32:
-                {
-                    value->type = e_hb_db_int32;
-
-                    value->u.i32 = bson_iter_int32( &iter );
-                }break;
-            case BSON_TYPE_INT64:
-                {
-                    value->type = e_hb_db_int64;
-
-                    value->u.i64 = bson_iter_int64( &iter );
-                }break;
-            case BSON_TYPE_UTF8:
-                {
-                    value->type = e_hb_db_utf8;
-
-                    uint32_t utf8_length;
-                    const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
-
-                    value->u.utf8.length = utf8_length;
-                    value->u.utf8.buffer = utf8_value;
-                }break;
-            case BSON_TYPE_SYMBOL:
-                {
-                    value->type = e_hb_db_symbol;
-
-                    uint32_t symbol_length;
-                    const char * symbol_value = bson_iter_symbol( &iter, &symbol_length );
-
-                    value->u.symbol.length = symbol_length;
-                    value->u.symbol.buffer = symbol_value;
-                }break;
-            case BSON_TYPE_BINARY:
-                {
-                    value->type = e_hb_db_binary;
-
-                    bson_subtype_t binary_subtype;
-                    uint32_t binary_length;
-                    const hb_byte_t * binary_buffer;
-                    bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
-
-                    value->u.binary.length = binary_length;
-                    value->u.binary.buffer = binary_buffer;
-                }break;
-            case BSON_TYPE_DATE_TIME:
-                {
-                    value->type = e_hb_db_time;
-
-                    value->u.time = bson_iter_time_t( &iter );
-                }break;
-            case BSON_TYPE_OID:
-                {
-                    value->type = e_hb_db_oid;
-
-                    const bson_oid_t * value_oid = bson_iter_oid( &iter );
-
-                    value->u.oid = value_oid->bytes;
-                }break;
-            default:
-                {
-                    return HB_FAILURE;
-                }break;
             }
         }
 
@@ -1053,89 +990,16 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
         for( uint32_t index_field = 0; index_field != _fieldscount; ++index_field )
         {
-            hb_db_value_handle_t * handle = values->values + index_oid * _fieldscount + index_field;
+            hb_db_value_handle_t * value = values->values + index_oid * _fieldscount + index_field;
             ++values->value_count;
 
             const char * field = _fields[index_field];
 
-            handle->field = field;
-            handle->field_length = strlen( field );
-
-            if( bson_iter_find( &iter, field ) == false )
+            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
                 return HB_FAILURE;
-            }
-
-            bson_type_t type = bson_iter_type( &iter );
-
-            switch( type )
-            {
-            case BSON_TYPE_INT32:
-                {
-                    handle->type = e_hb_db_int32;
-
-                    handle->u.i32 = bson_iter_int32( &iter );
-                }break;
-            case BSON_TYPE_INT64:
-                {
-                    handle->type = e_hb_db_int64;
-
-                    handle->u.i64 = bson_iter_int64( &iter );
-                }break;
-            case BSON_TYPE_UTF8:
-                {
-                    handle->type = e_hb_db_utf8;
-
-                    uint32_t utf8_length;
-                    const char * utf8_value = bson_iter_utf8( &iter, &utf8_length );
-
-                    handle->u.utf8.length = utf8_length;
-                    handle->u.utf8.buffer = utf8_value;
-                }break;
-            case BSON_TYPE_SYMBOL:
-                {
-                    handle->type = e_hb_db_symbol;
-
-                    uint32_t symbol_length;
-                    const char * symbol_value = bson_iter_symbol( &iter, &symbol_length );
-
-                    handle->u.symbol.length = symbol_length;
-                    handle->u.symbol.buffer = symbol_value;
-                }break;
-            case BSON_TYPE_BINARY:
-                {
-                    handle->type = e_hb_db_binary;
-
-                    bson_subtype_t binary_subtype;
-                    uint32_t binary_length;
-                    const hb_byte_t * binary_buffer;
-                    bson_iter_binary( &iter, &binary_subtype, &binary_length, &binary_buffer );
-
-                    handle->u.binary.length = binary_length;
-                    handle->u.binary.buffer = binary_buffer;
-                }break;
-            case BSON_TYPE_DATE_TIME:
-                {
-                    handle->type = e_hb_db_time;
-
-                    handle->u.time = bson_iter_time_t( &iter );
-                }break;
-            case BSON_TYPE_OID:
-                {
-                    handle->type = e_hb_db_oid;
-
-                    const bson_oid_t * value_oid = bson_iter_oid( &iter );
-
-                    handle->u.oid = value_oid->bytes;
-                }break;
-            default:
-                {
-                    mongoc_cursor_destroy( cursor );
-
-                    return HB_FAILURE;
-                }break;
             }
         }
     }
