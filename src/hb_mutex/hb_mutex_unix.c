@@ -1,5 +1,6 @@
 #include "hb_mutex.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 
 #include <errno.h>
