@@ -107,10 +107,6 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
 #endif
 
-#ifndef HB_SHAREDMEMORY_SIZE
-#define HB_SHAREDMEMORY_SIZE 65536
-#endif
-
 #if defined(WIN32)
 #   define HB_PLATFORM_WINDOWS
 #elif defined(__linux__) && !defined(__ANDROID__)
