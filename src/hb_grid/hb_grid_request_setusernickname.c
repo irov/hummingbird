@@ -47,7 +47,7 @@ int hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_p
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\": 0}" );
+    size_t response_data_size = sprintf( _response, "{\"code\":0}" );
 
     *_size = response_data_size;    
 

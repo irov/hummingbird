@@ -952,6 +952,11 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     bson_t fields;
     bson_init( &fields );
 
+    if( _oidcount != 0 )
+    {
+        BSON_APPEND_INT32( &fields, "_id", 1 );
+    }
+
     for( uint32_t index = 0; index != _fieldscount; ++index )
     {
         BSON_APPEND_INT32( &fields, _fields[index], 1 );
@@ -988,9 +993,44 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             return HB_FAILURE;
         }
 
+        uint32_t correct_index_oid = ~0U;
+
+        if( _oidcount != 0 )
+        {
+            if( bson_iter_find( &iter, "_id" ) == false )
+            {
+                mongoc_cursor_destroy( cursor );
+
+                return HB_FAILURE;
+            }
+
+            const bson_oid_t * oid = bson_iter_oid( &iter );
+
+            for( uint32_t index_correct = 0; index_correct != _oidcount; ++index_correct )
+            {
+                const hb_oid_t * correct_oid = _oids + index_correct;
+
+                if( memcmp( correct_oid->value, oid->bytes, 12 ) == 0 )
+                {
+                    correct_index_oid = index_correct;
+                }
+            }
+
+            if( correct_index_oid == ~0U )
+            {
+                mongoc_cursor_destroy( cursor );
+
+                return HB_FAILURE;
+            }
+        }
+        else
+        {
+            correct_index_oid = 0;
+        }
+
         for( uint32_t index_field = 0; index_field != _fieldscount; ++index_field )
         {
-            hb_db_value_handle_t * value = values->values + index_oid * _fieldscount + index_field;
+            hb_db_value_handle_t * value = values->values + correct_index_oid * _fieldscount + index_field;
             ++values->value_count;
 
             const char * field = _fields[index_field];
