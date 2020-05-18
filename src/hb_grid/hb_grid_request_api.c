@@ -32,7 +32,7 @@ int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handl
 
     if( out_data.successful == HB_TRUE )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": true, \"data\": %.*s, \"stat\": {\"memory_used\":%zu, \"call_used\":%u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"successful\":true,\"data\":%.*s,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
             , (int)out_data.response_size
             , out_data.response_data
             , out_data.memory_used
@@ -43,7 +43,7 @@ int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handl
     }
     else
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": false, \"method_found\": %s}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"successful\":false,\"method_found\":%s}"
             , out_data.method_found == HB_TRUE ? "true" : "false"
         );
 

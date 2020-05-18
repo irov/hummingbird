@@ -208,7 +208,13 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["leaderboard"][0]["score"], 250)
         self.assertEqual(jresult["leaderboard"][1]["nickname"], "alice")
         self.assertEqual(jresult["leaderboard"][1]["score"], 200)
-        pass        
+        self.assertEqual(jresult["leaderboard"][2]["nickname"], "jennifer")
+        self.assertEqual(jresult["leaderboard"][2]["score"], 150)
+        self.assertEqual(jresult["leaderboard"][3]["nickname"], "bob")
+        self.assertEqual(jresult["leaderboard"][3]["score"], 100)
+        self.assertEqual(jresult["leaderboard"][4]["nickname"], "dave")
+        self.assertEqual(jresult["leaderboard"][4]["score"], 50)
+        pass
     pass
 
 unittest.main()

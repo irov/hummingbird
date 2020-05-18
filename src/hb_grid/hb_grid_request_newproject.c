@@ -29,7 +29,7 @@ int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\": 0, \"pid\": \"%.*s\"}"
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"pid\":\"%.*s\"}"
         , (int)sizeof( pid16 )
         , pid16.value
     );

@@ -58,7 +58,7 @@ int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_proces
             return HTTP_BADREQUEST;
         }
 
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\"}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"token\":\"%.*s\"}"
             , (int)sizeof( token16 )
             , token16.value
         );
@@ -67,7 +67,7 @@ int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_proces
     }
     else
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"already exist\"}" );
+        size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"already exist\"}" );
 
         *_size = response_data_size;
     }

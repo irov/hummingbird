@@ -69,7 +69,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
 
         if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
         {
-            size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"error event onCreatUser\"}" );
+            size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"error event onCreatUser\"}" );
 
             *_size = response_data_size;
 
@@ -82,7 +82,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
             return HTTP_BADREQUEST;
         }
 
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %zu, \"call_used\": %u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
             , (int)sizeof( token16 )
             , token16.value
             , api_out_data.memory_used
