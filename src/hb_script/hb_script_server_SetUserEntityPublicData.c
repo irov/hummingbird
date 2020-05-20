@@ -8,7 +8,7 @@ int hb_script_server_SetUserEntityPublicData( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    lua_Integer pid = lua_tointeger( L, 1 );
+    lua_Integer uid = lua_tointeger( L, 1 );
 
     hb_db_values_handle_t * values;
 
@@ -17,7 +17,7 @@ int hb_script_server_SetUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_int32_value( values, "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid );
+    hb_db_make_uid_value( values, "uid", HB_UNKNOWN_STRING_SIZE, (hb_pid_t)uid );
     hb_db_make_oid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
     hb_db_make_oid_value( values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
 

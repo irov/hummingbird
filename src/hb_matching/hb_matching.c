@@ -361,7 +361,6 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         hb_db_destroy_values( new_world_values );
 
         hb_db_values_handle_t * count_world_values;
-
         if( hb_db_create_values( &count_world_values ) == HB_FAILURE )
         {
             return HB_FAILURE;

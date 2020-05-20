@@ -12,7 +12,7 @@
 
 #include <string.h>
 
-int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid )
+int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid )
 {
     hb_grid_process_upload_in_data_t in_data;
     if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
@@ -20,7 +20,7 @@ int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_ha
         return HTTP_BADREQUEST;
     }
 
-    if( hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_decode( _puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

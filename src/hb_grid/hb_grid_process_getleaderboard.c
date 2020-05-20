@@ -22,23 +22,34 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
     uint32_t descs_count;
     hb_oid_t oids[16];
     uint32_t scores[16];
-    if( hb_leaderboard_get( _process->cache, &token_handle.poid, _in->begin, _in->end, oids, scores, &descs_count ) == HB_FAILURE )
+    if( hb_leaderboard_get_global( _process->cache, &token_handle.poid, _in->begin, _in->end, oids, scores, &descs_count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    const char * fields[] = { "info_nickname" };
+    const char * fields[] = { "uid", "info_nickname" };
 
     hb_db_values_handle_t * values;
-    hb_db_gets_values_by_name( _process->db_client, "hb_users", oids, descs_count, fields, sizeof( fields ) / sizeof( fields[0] ), &values );
+    if( hb_db_gets_values_by_name( _process->db_client, "hb_users", oids, descs_count, fields, sizeof( fields ) / sizeof( fields[0] ), &values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     for( uint32_t index = 0; index != descs_count; ++index )
     {
         _out->descs[index].score = scores[index];
 
+        hb_pid_t uuid;
+        if( hb_db_get_uid_value( values, index * 2 + 0, &uuid ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        _out->descs[index].uuid = uuid;
+
         size_t nickname_len;
         const char * nickname;
-        if( hb_db_get_symbol_value( values, index, &nickname, &nickname_len ) == HB_FAILURE )
+        if( hb_db_get_symbol_value( values, index * 2 + 1, &nickname, &nickname_len ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

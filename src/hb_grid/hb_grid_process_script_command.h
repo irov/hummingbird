@@ -9,7 +9,7 @@ typedef struct hb_grid_process_script_command_in_data_t
 {
     hb_token_t token;
 
-    hb_pid_t pid;
+    hb_pid_t puid;
 
     char method[32];
 

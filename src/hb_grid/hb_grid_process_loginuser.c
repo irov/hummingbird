@@ -16,8 +16,6 @@
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
 {
-    HB_UNUSED( _process );
-
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects );
 
@@ -27,7 +25,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_FAILURE;
     }
 
-    hb_db_make_int32_value( values_project_found, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+    hb_db_make_uid_value( values_project_found, "uid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
     hb_oid_t project_oid;
     hb_bool_t project_exist;
@@ -57,7 +55,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_FAILURE;
     }
 
-    hb_db_make_int32_value( values_authentication, "pid", HB_UNKNOWN_STRING_SIZE, _in->pid );
+    hb_db_make_uid_value( values_authentication, "puid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
@@ -69,17 +67,29 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
+    const char * db_users_fields[] = { "uid" };
+    hb_db_values_handle_t * db_users_uid_handle;
+
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_users, values_authentication, &authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_oid_with_values( db_collection_users, values_authentication, &authentication_oid, db_users_fields, 1, &db_users_uid_handle, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( values_authentication );
 
+    hb_pid_t uuid;
+    if( hb_db_get_uid_value( db_users_uid_handle, 0, &uuid ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( db_users_uid_handle );    
+
     hb_db_destroy_collection( db_collection_users );
 
+    _out->uuid = uuid;
     _out->exist = authentication_exist;
 
     if( authentication_exist == HB_TRUE )

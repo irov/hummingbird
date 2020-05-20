@@ -219,7 +219,9 @@ hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _hand
 //////////////////////////////////////////////////////////////////////////
 static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_handle_t * _handles )
 {
-    for( uint32_t index = 0; index != _handles->value_count; ++index )
+    uint32_t value_count = _handles->value_count;
+
+    for( uint32_t index = 0; index != value_count; ++index )
     {
         const hb_db_value_handle_t * handle = _handles->values + index;
 
@@ -274,7 +276,10 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
 
     BSON_APPEND_OID( &query, "_id", &oid );
 
-    __hb_db_append_values( &query, _values );
+    if( __hb_db_append_values( &query, _values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_error_t error;
     if( mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error ) == false )
@@ -343,6 +348,17 @@ void hb_db_copy_values( hb_db_values_handle_t * _values, const hb_db_values_hand
     }
 
     _values->value_count += _source->value_count;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_pid_t _value )
+{
+    hb_db_value_handle_t * value = _values->values + _values->value_count;
+    ++_values->value_count;
+
+    value->type = e_hb_db_int32;
+    value->field = _field;
+    value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
+    value->u.i32 = (int32_t)_value;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value )
@@ -423,6 +439,25 @@ void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     value->u.binary.buffer = _sha1->value;
     value->u.binary.length = sizeof( hb_sha1_t );
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_pid_t * _value )
+{
+    if( _index >= _values->value_count )
+    {
+        return HB_FAILURE;
+    }
+
+    const hb_db_value_handle_t * value = _values->values + _index;
+
+    if( value->type != e_hb_db_int32 )
+    {
+        return HB_FAILURE;
+    }
+
+    *_value = (hb_pid_t)value->u.i32;
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_get_int32_value( const hb_db_values_handle_t * _values, uint32_t _index, int32_t * _value )
@@ -546,6 +581,24 @@ hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t __hb_db_find_iter( const bson_t * _data, bson_iter_t * _iter, const char * _key )
+{
+    if( bson_iter_find( _iter, _key ) == false )
+    {
+        if( bson_iter_init( _iter, _data ) == false )
+        {
+            return HB_FAILURE;
+        }
+
+        if( bson_iter_find( _iter, _key ) == false )
+        {
+            return HB_FAILURE;
+        }
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
@@ -553,7 +606,10 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     bson_t query;
     bson_init( &query );
 
-    __hb_db_append_values( &query, _query );
+    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_t fields;
     bson_init( &fields );
@@ -583,7 +639,7 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
         return HB_FAILURE;
     }
 
-    if( bson_iter_find( &iter, "_id" ) == false )
+    if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
     {
         mongoc_cursor_destroy( cursor );
 
@@ -623,12 +679,12 @@ hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, bson_iter_t * _iter, const char * _field )
+static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const bson_t * _data, bson_iter_t * _iter, const char * _field )
 {
     _value->field = _field;
     _value->field_length = strlen( _field );
 
-    if( bson_iter_find( _iter, _field ) == false )
+    if( __hb_db_find_iter( _data, _iter, _field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -704,14 +760,17 @@ hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, bson_iter_t *
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t * _values, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
 
     bson_t query;
     bson_init( &query );
 
-    __hb_db_append_values( &query, _query );
+    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_t fields;
     bson_init( &fields );
@@ -728,8 +787,6 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
     bson_destroy( &query );
     bson_destroy( &fields );
 
-    uint32_t cursor_count = 0;
-
     const bson_t * data;
     if( mongoc_cursor_next( cursor, &data ) == false )
     {
@@ -740,7 +797,13 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
         return HB_SUCCESSFUL;
     }
 
-    _values->cursor = cursor;
+    hb_db_values_handle_t * values;
+    if( hb_db_create_values( &values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    values->cursor = cursor;
 
     bson_iter_t iter;
     if( bson_iter_init( &iter, data ) == false )
@@ -750,35 +813,35 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
         return HB_FAILURE;
     }
 
-    if( bson_iter_find( &iter, "_id" ) == true )
+    if( _oid != HB_NULLPTR )
     {
+        if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
+        {
+            mongoc_cursor_destroy( cursor );
+
+            return HB_FAILURE;
+        }
+
         const bson_oid_t * oid = bson_iter_oid( &iter );
 
-        if( _oid != HB_NULLPTR )
-        {
-            memcpy( _oid->value, oid->bytes, sizeof( hb_oid_t ) );
-        }
+        memcpy( _oid->value, oid->bytes, sizeof( hb_oid_t ) );
     }
-    else
+
+    for( uint32_t index = 0; index != _fieldcount; ++index )
     {
-        for( uint32_t index = 0; index != _fieldcount; ++index )
+        hb_db_value_handle_t * value = values->values + index;
+        ++values->value_count;
+
+        const char * field = _fields[index];
+
+        if( __hb_db_get_bson_value( value, data, &iter, field ) == HB_FAILURE )
         {
-            hb_db_value_handle_t * value = _values->values + cursor_count * _fieldcount + index;
-            ++_values->value_count;
+            mongoc_cursor_destroy( cursor );
 
-            const char * field = _fields[index];
-
-            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
-            {
-                mongoc_cursor_destroy( cursor );
-
-                return HB_FAILURE;
-            }
+            return HB_FAILURE;
         }
-
-        ++cursor_count;
     }
-
+    
     bson_error_t error;
     if( mongoc_cursor_error( cursor, &error ) )
     {
@@ -791,6 +854,7 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
         return HB_FAILURE;
     }
 
+    *_values = values;
     *_exist = HB_TRUE;
 
     return HB_SUCCESSFUL;
@@ -803,7 +867,10 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
     bson_t query;
     bson_init( &query );
 
-    __hb_db_append_values( &query, _query );
+    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_t fields;
     bson_init( &fields );
@@ -851,7 +918,7 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
 
             const char * field = _fields[index];
 
-            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
+            if( __hb_db_get_bson_value( value, data, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
@@ -888,7 +955,10 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
     bson_t filter;
     bson_init( &filter );
 
-    __hb_db_append_values( &filter, _query );
+    if( __hb_db_append_values( &filter, _query ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_error_t error;
     int64_t count = mongoc_collection_count_documents( mongo_collection, &filter, HB_NULLPTR, HB_NULLPTR, HB_NULLPTR, &error );
@@ -904,7 +974,6 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
 
     return HB_SUCCESSFUL;
 }
-
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
 {
@@ -997,7 +1066,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
         if( _oidcount != 0 )
         {
-            if( bson_iter_find( &iter, "_id" ) == false )
+            if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
@@ -1035,7 +1104,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
             const char * field = _fields[index_field];
 
-            if( __hb_db_get_bson_value( value, &iter, field ) == HB_FAILURE )
+            if( __hb_db_get_bson_value( value, data, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
 
@@ -1123,7 +1192,10 @@ hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, 
     bson_t fields;
     bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields );
 
-    __hb_db_append_values( &fields, _handles );
+    if( __hb_db_append_values( &fields, _handles ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     bson_append_document_end( &update, &fields );
 
@@ -1222,7 +1294,7 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
         hb_db_values_handle_t * update_values;
         hb_db_create_values( &update_values );
 
-        hb_db_make_int32_value( update_values, "pid", HB_UNKNOWN_STRING_SIZE, pid );
+        hb_db_make_uid_value( update_values, "uid", HB_UNKNOWN_STRING_SIZE, pid );
 
         if( hb_db_update_values( _collection, _oid, update_values ) == HB_FAILURE )
         {
@@ -1237,7 +1309,7 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
         }
 
         hb_db_copy_values( count_values, _values );
-        hb_db_make_int32_value( count_values, "pid", HB_UNKNOWN_STRING_SIZE, pid );
+        hb_db_make_uid_value( count_values, "uid", HB_UNKNOWN_STRING_SIZE, pid );
 
         if( hb_db_count_values( _collection, count_values, &founds ) == HB_FAILURE )
         {
@@ -1306,7 +1378,7 @@ hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _handle, const 
         return HB_FAILURE;
     }
 
-    if( bson_iter_find( &iter, "script_code" ) == false )
+    if( __hb_db_find_iter( data, &iter, "script_code" ) == HB_FAILURE )
     {
         mongoc_cursor_destroy( cursor );
 

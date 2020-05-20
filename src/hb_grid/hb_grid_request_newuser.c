@@ -11,13 +11,13 @@
 
 #include <string.h>
 
-int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
+int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid )
 {
     hb_bool_t required_successful = HB_TRUE;
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+    hb_base16_decode( _puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
 
     {
         hb_json_handle_t * json_handle;
@@ -82,7 +82,8 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
             return HTTP_BADREQUEST;
         }
 
-        size_t response_data_size = sprintf( _response, "{\"code\":0,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+            , out_data.uuid
             , (int)sizeof( token16 )
             , token16.value
             , api_out_data.memory_used

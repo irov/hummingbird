@@ -7,7 +7,7 @@
 
 typedef struct hb_grid_process_loginuser_in_data_t
 {
-    hb_pid_t pid;
+    hb_pid_t puid;
 
     char login[128];
     char password[128];
@@ -18,6 +18,7 @@ typedef struct hb_grid_process_loginuser_out_data_t
 {
     hb_token_t token;
 
+    hb_pid_t uuid;
     hb_bool_t exist;
 } hb_grid_process_loginuser_out_data_t;
 

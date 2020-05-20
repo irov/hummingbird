@@ -33,12 +33,12 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
 extern int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
 extern int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
 extern int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid );
-extern int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
-extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid );
+extern int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid );
+extern int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid );
+extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid );
 extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _method );
 extern int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _world, const char * _method );
-extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
+extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid, const char * _method );
 extern int hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 extern int hb_grid_request_setleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 extern int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
@@ -140,9 +140,9 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         }
 
         const char * account_token = arg1;
-        const char * pid = arg2;
+        const char * puid = arg2;
 
-        response_code = hb_grid_request_upload( _request, process, response_data, &response_data_size, account_token, pid );
+        response_code = hb_grid_request_upload( _request, process, response_data, &response_data_size, account_token, puid );
     }
     else if( strcmp( cmd, "newuser" ) == 0 )
     {
@@ -153,9 +153,9 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             return;
         }
 
-        const char * pid = arg1;
+        const char * puid = arg1;
 
-        response_code = hb_grid_request_newuser( _request, process, response_data, &response_data_size, pid );
+        response_code = hb_grid_request_newuser( _request, process, response_data, &response_data_size, puid );
     }
     else if( strcmp( cmd, "loginuser" ) == 0 )
     {
@@ -166,9 +166,9 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             return;
         }
 
-        const char * pid = arg1;
+        const char * puid = arg1;
 
-        response_code = hb_grid_request_loginuser( _request, process, response_data, &response_data_size, pid );
+        response_code = hb_grid_request_loginuser( _request, process, response_data, &response_data_size, puid );
     }
     else if( strcmp( cmd, "api" ) == 0 )
     {
@@ -248,10 +248,10 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         }
 
         const char * account_token = arg1;
-        const char * pid = arg2;
+        const char * puid = arg2;
         const char * method = arg3;
 
-        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, pid, method );
+        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, puid, method );
     }
 
     evbuffer_add( output_buffer, response_data, response_data_size );

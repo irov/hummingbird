@@ -54,15 +54,15 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
 
     hb_db_destroy_values( project_values );
 
-    hb_pid_t pid;
-    if( hb_db_make_pid( db_collection_projects, &project_oid, HB_NULLPTR, &pid ) == HB_FAILURE )
+    hb_pid_t puid;
+    if( hb_db_make_pid( db_collection_projects, &project_oid, HB_NULLPTR, &puid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_collection( db_collection_projects );
 
-    _out->pid = pid;
+    _out->puid = puid;
 
     return HB_SUCCESSFUL;
 }

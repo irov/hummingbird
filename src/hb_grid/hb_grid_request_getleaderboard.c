@@ -62,7 +62,8 @@ int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_pr
             response_data_size += sprintf( _response + response_data_size, "," );
         }
 
-        response_data_size += sprintf( _response + response_data_size, "{\"nickname\":\"%s\",\"score\":%u}"
+        response_data_size += sprintf( _response + response_data_size, "{\"uid\":%u,\"nickname\":\"%s\",\"score\":%u}"
+            , out_data.descs[index].uuid
             , out_data.descs[index].nickname
             , out_data.descs[index].score
         );
