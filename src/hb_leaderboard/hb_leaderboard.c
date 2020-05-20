@@ -7,8 +7,23 @@
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_leaderboard_set( hb_cache_handle_t * _cache, const hb_oid_t * _poid, const hb_oid_t * _uoid, uint32_t _score )
+hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_handle_t * _cache, const hb_oid_t * _poid, const hb_oid_t * _uoid, uint32_t _score )
 {
+    hb_db_values_handle_t * values_update;
+    if( hb_db_create_values( &values_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_make_int32_value( values_update, "leaderboard_score", HB_UNKNOWN_STRING_SIZE, (int32_t)_score );
+
+    if( hb_db_update_values_by_name( _client, "hb_users", _uoid, values_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( values_update );
+
     hb_oid16_t poid16;
     hb_oid_base16_encode( _poid, &poid16 );
 
@@ -31,7 +46,7 @@ hb_result_t hb_leaderboard_set( hb_cache_handle_t * _cache, const hb_oid_t * _po
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_leaderboard_get( hb_cache_handle_t * _cache, const hb_oid_t * _poid, uint32_t _begin, uint32_t _end, hb_oid_t * _oids, uint32_t * _scores, uint32_t * _count )
+hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, const hb_oid_t * _poid, uint32_t _begin, uint32_t _end, hb_oid_t * _oids, uint32_t * _scores, uint32_t * _count )
 {
     if( _begin > _end )
     {
@@ -78,6 +93,33 @@ hb_result_t hb_leaderboard_get( hb_cache_handle_t * _cache, const hb_oid_t * _po
     }
 
     *_count = values_count / 2;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_leaderboard_get_user( hb_cache_handle_t * _cache, const hb_oid_t * _poid, const hb_oid_t * _uoid, uint32_t * _score )
+{
+    hb_oid16_t poid16;
+    hb_oid_base16_encode( _poid, &poid16 );
+
+    hb_oid16_t uoid16;
+    hb_oid_base16_encode( _uoid, &uoid16 );
+
+    uint32_t score;
+    hb_bool_t exist;
+    if( hb_cache_zrevrank( _cache, poid16.value, sizeof( hb_oid16_t ), uoid16.value, sizeof( hb_oid16_t ), &score, &exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( exist == HB_TRUE )
+    {
+        *_score = score;
+    }
+    else
+    {
+        *_score = 0;
+    }
 
     return HB_SUCCESSFUL;
 }

@@ -12,7 +12,7 @@ typedef struct hb_grid_process_newproject_in_data_t
 
 typedef struct hb_grid_process_newproject_out_data_t
 {
-    hb_pid_t pid;
+    hb_pid_t puid;
 } hb_grid_process_newproject_out_data_t;
 
 hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, const hb_grid_process_newproject_in_data_t * _in, hb_grid_process_newproject_out_data_t * _out );

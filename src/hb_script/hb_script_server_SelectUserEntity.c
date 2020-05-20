@@ -48,7 +48,7 @@ int hb_script_server_SelectUserEntity( lua_State * L )
     hb_db_make_oid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
     hb_db_make_oid_value( query, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
 
-    const char * db_fields[1] = {"pid"};
+    const char * db_fields[1] = {"uid"};
 
     uint32_t exists = 0;
     hb_db_values_handle_t * values[HB_SCRIPT_SELECT_USER_ENTITY_MAX];

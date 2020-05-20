@@ -8,18 +8,15 @@
 
 #include <string.h>
 
-int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method )
+int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid, const char * _method )
 {
-    HB_UNUSED( _process );
-    HB_UNUSED( _pid );
-
     hb_grid_process_script_command_in_data_t in_data;
     if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
+    hb_base16_decode( _puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
 
     strcpy( in_data.method, _method );
 

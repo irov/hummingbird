@@ -12,7 +12,7 @@ int __hb_script_server_SetAllowWorldTurn( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    lua_Integer pid = lua_tointeger( L, 1 );
+    lua_Integer uid = lua_tointeger( L, 1 );
 
     hb_db_values_handle_t * values_found;
     if( hb_db_create_values( &values_found ) == HB_FAILURE )
@@ -20,7 +20,7 @@ int __hb_script_server_SetAllowWorldTurn( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_int32_value( values_found, "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid );
+    hb_db_make_uid_value( values_found, "uid", HB_UNKNOWN_STRING_SIZE, (hb_pid_t)uid );
     hb_db_make_oid_value( values_found, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
 
     hb_bool_t exist;

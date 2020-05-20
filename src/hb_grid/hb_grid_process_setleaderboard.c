@@ -19,7 +19,7 @@ hb_result_t hb_grid_process_setleaderboard( hb_grid_process_handle_t * _process,
         return HB_FAILURE;
     }
 
-    if( hb_leaderboard_set( _process->cache, &token_handle.poid, &token_handle.uoid, _in->score ) == HB_FAILURE )
+    if( hb_leaderboard_set( _process->db_client, _process->cache, &token_handle.poid, &token_handle.uoid, _in->score ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

@@ -24,7 +24,7 @@ int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_proces
     }
 
     hb_pid16_t pid16;
-    if( hb_base16_encode( &out_data.pid, sizeof( out_data.pid ), pid16.value, sizeof( pid16 ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_encode( &out_data.puid, sizeof( out_data.puid ), pid16.value, sizeof( pid16 ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

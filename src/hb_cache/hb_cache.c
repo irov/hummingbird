@@ -72,14 +72,14 @@ void hb_cache_destroy( hb_cache_handle_t * _handle )
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _size )
+hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( _cache->context, "SET %b %b", _key, _keysize, _value, _size );
+    redisReply * reply = redisCommand( _cache->context, "SET %b %b", _key, _keysize, _value, _valuesize );
 
     if( reply == HB_NULLPTR )
     {
@@ -277,6 +277,45 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
     *_count = (uint32_t)reply->elements;
 
     freeReplyObject( reply );    
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_cache_zrevrank( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize, uint32_t * _score, hb_bool_t * _exist )
+{
+    redisReply * reply = redisCommand( _cache->context, "ZREVRANK %b %b", _key, _keysize, _value, _valuesize );
+
+    if( reply == HB_NULLPTR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' with error: '%s'"
+            , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( reply->type == REDIS_REPLY_NIL )
+    {
+        freeReplyObject( reply );
+
+        *_exist = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( reply->type != REDIS_REPLY_NIL )
+    {
+        freeReplyObject( reply );
+
+        return HB_FAILURE;
+    }
+
+    uint32_t score = (uint32_t)reply->integer;
+
+    *_score = score;
+    *_exist = HB_TRUE;
+
+    freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
 }
