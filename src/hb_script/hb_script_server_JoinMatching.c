@@ -47,7 +47,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
 
         lua_rawseti( L, -2, 3 );
 
-        lua_rawseti( L, -2, index + 1 );
+        lua_rawseti( L, -2, (int32_t)index + 1 );
     }
 
     if( hb_script_json_loads( L, _desc->data, _desc->data_size ) == HB_FAILURE )
