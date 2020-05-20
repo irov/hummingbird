@@ -68,7 +68,7 @@ int __hb_script_server_SelectUserEntity( lua_State * L )
         hb_db_get_int32_value( value, 0, &eid );
 
         lua_pushinteger( L, eid );
-        lua_rawseti( L, -2, index + 1 );
+        lua_rawseti( L, -2, (int32_t)index + 1 );
     }
 
     for( uint32_t index = 0; index != exists; ++index )
