@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-int __hb_script_server_CreateMatching( lua_State * L )
+int hb_script_server_CreateMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
@@ -18,9 +18,9 @@ int __hb_script_server_CreateMatching( lua_State * L )
     lua_Integer count = lua_tointegerx( L, 2, HB_NULLPTR );
     lua_Integer dispersion = lua_tointegerx( L, 3, HB_NULLPTR );
 
-    char json_data[10240];
+    char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
-    if( hb_script_json_dumps( L, 4, json_data, 10240, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, 4, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
@@ -32,7 +32,7 @@ int __hb_script_server_CreateMatching( lua_State * L )
     desc.wait_timeout = 10000;
 
     hb_bool_t exist;
-    if( hb_matching_create( script_handle->matching, script_handle->project_oid, name, name_len, &desc, json_data, json_data_size, &exist ) == HB_FAILURE )
+    if( hb_matching_room_create( script_handle->matching, script_handle->db_client, &script_handle->project_oid, name, name_len, &desc, json_data, json_data_size, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

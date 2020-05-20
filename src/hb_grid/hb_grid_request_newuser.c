@@ -13,6 +13,8 @@
 
 int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _pid )
 {
+    hb_bool_t required_successful = HB_TRUE;
+
     hb_grid_process_newuser_in_data_t in_data;
 
     hb_base16_decode( _pid, HB_UNKNOWN_STRING_SIZE, &in_data.pid, sizeof( in_data.pid ), HB_NULLPTR );
@@ -24,17 +26,22 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
             return HTTP_BADREQUEST;
         }
 
-        if( hb_json_copy_field_string( json_handle, "login", in_data.login, 128 ) == HB_FAILURE )
+        if( hb_json_copy_field_string_required( json_handle, "login", in_data.login, 128, &required_successful ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        if( hb_json_copy_field_string( json_handle, "password", in_data.password, 128 ) == HB_FAILURE )
+        if( hb_json_copy_field_string_required( json_handle, "password", in_data.password, 128, &required_successful ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
         hb_json_destroy( json_handle );
+    }
+
+    if( required_successful == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
     }
 
     hb_grid_process_newuser_out_data_t out_data;
@@ -49,7 +56,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
 
         api_in_data.data_size = 0;
 
-        hb_token_copy( api_in_data.token, out_data.token );
+        hb_token_copy( &api_in_data.token, &out_data.token );
 
         api_in_data.category = e_hb_node_event;
         strcpy( api_in_data.method, "onCreateUser" );
@@ -62,7 +69,7 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
 
         if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
         {
-            size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"error event onCreatUser\"}" );
+            size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"error event onCreatUser\"}" );
 
             *_size = response_data_size;
 
@@ -70,14 +77,14 @@ int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_h
         }
 
         hb_token16_t token16;
-        if( hb_token_base16_encode( out_data.token, &token16 ) == HB_FAILURE )
+        if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
         {
             return HTTP_BADREQUEST;
         }
 
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"token\": \"%.*s\", \"stat\": {\"memory_used\": %zu, \"call_used\": %u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
             , (int)sizeof( token16 )
-            , token16
+            , token16.value
             , api_out_data.memory_used
             , api_out_data.call_used
         );

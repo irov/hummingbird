@@ -27,18 +27,20 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     lua_createtable( L, _desc->users_count, 0 );
     for( uint32_t index = 0; index != _desc->users_count; ++index )
     {
-        const hb_matching_user_t * user = _desc->users[index];
+        const hb_matching_user_handle_t * user = _desc->users[index];
 
         lua_createtable( L, 3, 0 );
 
-        lua_pushinteger( L, user->apid );
+        hb_pid_t user_apid = hb_matching_user_get_apid( user );
+        lua_pushinteger( L, user_apid );
         lua_rawseti( L, -2, 1 );
 
-        lua_pushinteger( L, user->rating );
+        int32_t user_rating = hb_matching_user_get_rating( user );
+        lua_pushinteger( L, user_rating );
         lua_rawseti( L, -2, 2 );
 
         size_t user_public_data_size;
-        const void * user_public_data = hb_array_data( user->public_data, &user_public_data_size );
+        const void * user_public_data = hb_matching_user_get_public_data( user, &user_public_data_size );
 
         if( hb_script_json_loads( L, user_public_data, user_public_data_size ) == HB_FAILURE )
         {
@@ -74,7 +76,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-int __hb_script_server_JoinMatching( lua_State * L )
+int hb_script_server_JoinMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
@@ -82,15 +84,15 @@ int __hb_script_server_JoinMatching( lua_State * L )
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
-    char json_data[10240];
+    char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
-    if( hb_script_json_dumps( L, 3, json_data, 10240, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_bool_t exist;
-    if( hb_matching_join( script_handle->matching, script_handle->project_oid, name, name_len, script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
+    if( hb_matching_join( script_handle->matching, script_handle->db_client, &script_handle->project_oid, name, name_len, &script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

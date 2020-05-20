@@ -21,7 +21,7 @@ int __hb_script_server_SetAllowWorldTurn( lua_State * L )
     }
 
     hb_db_make_int32_value( values_found, "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid );
-    hb_db_make_oid_value( values_found, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
+    hb_db_make_oid_value( values_found, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
 
     hb_bool_t exist;
     hb_oid_t eoid;
@@ -37,27 +37,10 @@ int __hb_script_server_SetAllowWorldTurn( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    char json_data[HB_DATA_MAX_SIZE];
-    size_t json_data_size;
-    if( hb_script_json_dumps( L, 2, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
+    if( hb_script_json_set_public_data( L, 2, script_handle->db_collection_project_entities, &eoid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
-
-    hb_db_values_handle_t * values_update;
-    if( hb_db_create_values( &values_update ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_make_symbol_value( values_update, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
-
-    if( hb_db_update_values( script_handle->db_collection_project_entities, eoid, values_update ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_destroy_values( values_update );
 
     return 0;
 }

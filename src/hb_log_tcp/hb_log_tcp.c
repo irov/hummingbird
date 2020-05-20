@@ -2,6 +2,7 @@
 
 #include "hb_log_tcp.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_time.h"
 
 #include "evhttp.h"

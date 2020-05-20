@@ -166,7 +166,7 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
     case e_hb_json_integer:
         {
             int64_t value;
-            hb_json_to_integer( _value, &value );
+            hb_json_to_int64( _value, &value );
 
             lua_pushinteger( L, (lua_Integer)value );
         }break;
@@ -283,7 +283,7 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
         case e_hb_json_integer:
             {
                 int64_t value;
-                if( hb_json_to_integer( json_field, &value ) == HB_FAILURE )
+                if( hb_json_to_int64( json_field, &value ) == HB_FAILURE )
                 {
                     return HB_FAILURE;
                 }
@@ -326,9 +326,9 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle_t ** _json )
 {
-    char json_data[10240];
+    char json_data[HB_DATA_MAX_SIZE];
     size_t json_size;
-    if( hb_script_json_dumps( L, _index, json_data, 10240, &json_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, _index, json_data, HB_DATA_MAX_SIZE, &json_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -341,7 +341,7 @@ hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid, uint32_t * _count )
+hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, uint32_t * _count )
 {
     const char * fields[HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX];
     uint32_t fields_count = 0;
@@ -351,7 +351,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
         return HB_FAILURE;
     }
 
-    const char * db_fields[1] = {"public_data"};
+    const char * db_fields[] = {"public_data"};
 
     hb_db_values_handle_t * project_values;
     if( hb_db_get_values( _collection, _oid, db_fields, 1, &project_values ) == HB_FAILURE )
@@ -379,7 +379,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid )
 {
     char json_data[HB_DATA_MAX_SIZE];
     size_t json_data_size;
@@ -406,9 +406,9 @@ hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t _oid )
+hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid )
 {
-    const char * db_fields[1] = {"public_data"};
+    const char * db_fields[] = {"public_data"};
 
     hb_db_values_handle_t * user_values;
     if( hb_db_get_values( _collection, _oid, db_fields, 1, &user_values ) == HB_FAILURE )

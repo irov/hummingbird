@@ -1,10 +1,12 @@
 #include "hb_json.h"
 
 #include "hb_log/hb_log.h"
+#include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_file.h"
 
 #include "jansson.h"
 
+#include <string.h>
 #include <memory.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -84,9 +86,9 @@ void hb_json_destroy( hb_json_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
 {
-    char buffer[10240];
+    char buffer[HB_DATA_MAX_SIZE];
     size_t buffer_size;
-    if( hb_file_read( _file, buffer, 10240, &buffer_size ) == HB_FAILURE )
+    if( hb_file_read( _file, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -200,7 +202,7 @@ hb_result_t hb_json_to_oid16( hb_json_handle_t * _handle, hb_oid16_t * _oid )
         return HB_FAILURE;
     }
 
-    memcpy( *_oid, value, sizeof( hb_oid16_t ) );
+    memcpy( _oid->value, value, sizeof( hb_oid16_t ) );
 
     return HB_SUCCESSFUL;
 }
@@ -222,13 +224,68 @@ hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_integer( hb_json_handle_t * _handle, int64_t * _value )
+hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value )
+{
+    json_t * jvalue = _handle->jroot;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (int16_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_int32( hb_json_handle_t * _handle, int32_t * _value )
+{
+    json_t * jvalue = _handle->jroot;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (int32_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_uint16( hb_json_handle_t * _handle, uint16_t * _value )
+{
+    json_t * jvalue = _handle->jroot;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (uint16_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_uint32( hb_json_handle_t * _handle, uint32_t * _value )
+{
+    json_t * jvalue = _handle->jroot;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (uint32_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_int64( hb_json_handle_t * _handle, int64_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
     json_int_t value = json_integer_value( jvalue );
 
     *_value = (int64_t)value;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value )
+{
+    json_t * jvalue = _handle->jroot;
+
+    json_int_t value = json_integer_value( jvalue );
+
+    *_value = (uint64_t)value;
 
     return HB_SUCCESSFUL;
 }
@@ -289,12 +346,22 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity )
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, const char * _default )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        return HB_FAILURE;
+        size_t default_len = strlen( _default );
+
+        if( default_len > _capacity )
+        {
+            return HB_FAILURE;
+        }        
+
+        memcpy( _value, _default, default_len );
+        _value[default_len] = '\0';
+
+        return HB_SUCCESSFUL;
     }
 
     const char * value;
@@ -317,7 +384,40 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default )
+hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_result = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    const char * value;
+    size_t size;
+    if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( size > _capacity )
+    {
+        return HB_FAILURE;
+    }
+
+    memcpy( _value, value, size );
+    _value[size] = '\0';
+
+    hb_json_destroy( field );
+
+    //it's feature for requireds flags!
+    //*_result = HB_TRUE;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -327,12 +427,204 @@ hb_result_t hb_json_get_field_integer( hb_json_handle_t * _handle, const char * 
         return HB_SUCCESSFUL;
     }
 
-    if( hb_json_to_integer( field, _value ) == HB_FAILURE )
+    if( hb_json_to_int16( field, _value ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _key, int32_t * _value, int32_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_int32( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_int64( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_uint16( hb_json_handle_t * _handle, const char * _key, uint16_t * _value, uint16_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_uint16( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, uint32_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_uint32( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_uint64( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, uint64_t _default )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_value = _default;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_uint64( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_int32_required( hb_json_handle_t * _handle, const char * _key, int32_t * _value, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_result = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_int32( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    //it's feature for requireds flags!
+    //*_result = HB_TRUE;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_uint32_required( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_result = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_uint32( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    //it's feature for requireds flags!
+    //*_result = HB_TRUE;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_int64_required( hb_json_handle_t * _handle, const char * _key, int64_t * _value, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_result = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_int64( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    //it's feature for requreds flags!
+    //*_result = HB_TRUE;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        *_result = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_uint64( field, _value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    //it's feature for requreds flags!
+    //*_result = HB_TRUE;
 
     return HB_SUCCESSFUL;
 }

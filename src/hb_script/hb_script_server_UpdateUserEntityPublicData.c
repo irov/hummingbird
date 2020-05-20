@@ -4,7 +4,7 @@
 #include "hb_json/hb_json.h"
 #include "hb_utils/hb_oid.h"
 
-int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
+int hb_script_server_UpdateUserEntityPublicData( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
@@ -18,8 +18,8 @@ int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
     }
 
     hb_db_make_int32_value( values, "pid", HB_UNKNOWN_STRING_SIZE, (int32_t)pid );
-    hb_db_make_oid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-    hb_db_make_oid_value( values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+    hb_db_make_oid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
+    hb_db_make_oid_value( values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
 
     hb_bool_t exist;
     hb_oid_t eoid;
@@ -35,7 +35,7 @@ int __hb_script_server_UpdateUserEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    if( hb_script_json_update_public_data( L, 1, script_handle->db_collection_user_entities, eoid ) == HB_FAILURE )
+    if( hb_script_json_update_public_data( L, 1, script_handle->db_collection_user_entities, &eoid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
