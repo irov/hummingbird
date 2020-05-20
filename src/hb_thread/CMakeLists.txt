@@ -20,4 +20,4 @@ src
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log ${hb_thread_platform_extra_lib})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_memory hb_log ${hb_thread_platform_extra_lib})

@@ -10,6 +10,7 @@ src
     hb_script_json.c
     
     hb_script_handle.h
+    hb_script_handle.c
 )
 
 ADD_FILTER(

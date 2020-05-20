@@ -1,5 +1,6 @@
 #include "hb_grid.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
@@ -38,6 +39,9 @@ extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_
 extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _method );
 extern int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _world, const char * _method );
 extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _pid, const char * _method );
+extern int hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
+extern int hb_grid_request_setleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
+extern int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 ////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -78,10 +82,10 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char cmd[128] = {'\0'};
-    char arg1[128] = {'\0'};
-    char arg2[128] = {'\0'};
-    char arg3[128] = {'\0'};
+    char cmd[128] = { '\0' };
+    char arg1[128] = { '\0' };
+    char arg2[128] = { '\0' };
+    char arg3[128] = { '\0' };
     int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd, arg1, arg2, arg3 );
 
     if( count == 0 )
@@ -180,6 +184,45 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
         response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, method );
     }
+    else if( strcmp( cmd, "setusernickname" ) == 0 )
+    {
+        if( count != 2 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+
+        response_code = hb_grid_request_setusernickname( _request, process, response_data, &response_data_size, user_token );
+    }
+    else if( strcmp( cmd, "setleaderboard" ) == 0 )
+    {
+        if( count != 2 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+
+        response_code = hb_grid_request_setleaderboard( _request, process, response_data, &response_data_size, user_token );
+    }
+    else if( strcmp( cmd, "getleaderboard" ) == 0 )
+    {
+        if( count != 2 )
+        {
+            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+            return;
+        }
+
+        const char * user_token = arg1;
+
+        response_code = hb_grid_request_getleaderboard( _request, process, response_data, &response_data_size, user_token );
+    }
     else if( strcmp( cmd, "avatar" ) == 0 )
     {
         if( count != 3 )
@@ -208,7 +251,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         const char * pid = arg2;
         const char * method = arg3;
 
-        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, pid, method );        
+        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, pid, method );
     }
 
     evbuffer_add( output_buffer, response_data, response_data_size );
@@ -228,6 +271,14 @@ static void __hb_ev_thread_base( void * _ud )
     HB_UNUSED( _ud );
 
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
+
+    hb_db_client_handle_t * db_client;
+    if( hb_db_create_client( &db_client ) == HB_FAILURE )
+    {
+        return;
+    }
+
+    handle->db_client = db_client;
 
     struct event_base * base = event_base_new();
     HB_UNUSED( base );
@@ -253,13 +304,33 @@ static void __hb_ev_thread_base( void * _ud )
 
     event_base_dispatch( base );
 
+    hb_db_destroy_client( handle->db_client );
+
     evhttp_free( http_server );
+}
+//////////////////////////////////////////////////////////////////////////
+static void * __hb_memory_alloc( size_t _size, void * _ud )
+{
+    HB_UNUSED( _ud );
+
+    void * ptr = malloc( _size );
+
+    return ptr;
+}
+//////////////////////////////////////////////////////////////////////////
+static void __hb_memory_free( void * _ptr, void * _ud )
+{
+    HB_UNUSED( _ud );
+
+    free( _ptr );
 }
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
+
+    hb_memory_initialize( &__hb_memory_alloc, &__hb_memory_free, HB_NULLPTR );
 
     hb_log_initialize();
 
@@ -317,49 +388,18 @@ int main( int _argc, char * _argv[] )
             return EXIT_FAILURE;
         }
 
-        int64_t config_max_thread = 0;
-        hb_json_get_field_integer( json_handle, "max_thread", &config_max_thread, max_thread );
-        max_thread = (uint32_t)config_max_thread;
+        hb_json_get_field_uint32( json_handle, "max_thread", &max_thread, max_thread );
+        hb_json_copy_field_string( json_handle, "grid_uri", grid_uri, 128, grid_uri );
+        hb_json_get_field_uint16( json_handle, "grid_port", &grid_port, grid_port );
 
-        const char * config_grid_uri = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "grid_uri", &config_grid_uri, HB_NULLPTR, grid_uri );
-        strcpy( grid_uri, config_grid_uri );
-
-        int64_t config_grid_port = 0;
-        hb_json_get_field_integer( json_handle, "grid_port", &config_grid_port, grid_port );
-        grid_port = (uint16_t)config_grid_port;
-
-        const char * name = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "name", &name, HB_NULLPTR, config->name );
-        strcpy( config->name, name );
-
-        const char * cache_uri = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "cache_uri", &cache_uri, HB_NULLPTR, config->cache_uri );
-        strcpy( config->cache_uri, cache_uri );
-
-        int64_t cache_port = 0;
-        hb_json_get_field_integer( json_handle, "cache_port", &cache_port, config->cache_port );
-        config->cache_port = (uint16_t)cache_port;
-
-        int64_t cache_timeout = 0;
-        hb_json_get_field_integer( json_handle, "cache_timeout", &cache_timeout, config->cache_timeout );
-        config->cache_timeout = (uint16_t)cache_timeout;
-
-        const char * db_uri = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "db_uri", &db_uri, HB_NULLPTR, config->db_uri );
-        strcpy( config->db_uri, db_uri );
-
-        int64_t db_port = 0;
-        hb_json_get_field_integer( json_handle, "db_port", &db_port, config->db_port );
-        config->db_port = (uint16_t)db_port;
-
-        const char * log_uri = HB_NULLPTR;
-        hb_json_get_field_string( json_handle, "log_uri", &log_uri, HB_NULLPTR, config->log_uri );
-        strcpy( config->log_uri, log_uri );
-
-        int64_t log_port = 0;
-        hb_json_get_field_integer( json_handle, "log_port", &log_port, config->log_port );
-        config->log_port = (uint16_t)log_port;
+        hb_json_copy_field_string( json_handle, "name", config->name, 32, config->name );
+        hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, 128, config->cache_uri );
+        hb_json_get_field_uint16( json_handle, "cache_port", &config->cache_port, config->cache_port );
+        hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );
+        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, 128, config->db_uri );
+        hb_json_get_field_uint16( json_handle, "db_port", &config->db_port, config->db_port );
+        hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, 128, config->log_uri );
+        hb_json_get_field_uint16( json_handle, "log_port", &config->log_port, config->log_port );
 
         hb_json_destroy( json_handle );
     }
@@ -403,18 +443,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_cache_initialize( config->cache_uri, config->cache_port, config->cache_timeout ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [cache] component [uri %s:%u]"
-            , config->name
-            , config->cache_uri
-            , config->cache_port
-        );
-
-        return EXIT_FAILURE;
-    }
-
-    if( hb_db_initialze( config->name, config->db_uri, config->db_port ) == HB_FAILURE )
+    if( hb_db_initialze( config->db_uri, config->db_port ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
             , config->name
@@ -425,8 +454,8 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_matching_t * matching;
-    if( hb_matching_initialize( 1024, &matching ) == HB_FAILURE )
+    hb_matching_handle_t * matching;
+    if( hb_matching_create( 1024, &matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [matching] component"
             , config->name
@@ -450,8 +479,26 @@ int main( int _argc, char * _argv[] )
         process_handle->config = config;
         process_handle->matching = matching;
 
+        hb_cache_handle_t * cache;
+        if( hb_cache_create( config->cache_uri, config->cache_port, config->cache_timeout, &cache ) == HB_FAILURE )
+        {
+            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create [cache] component [uri %s:%u]"
+                , config->name
+                , config->cache_uri
+                , config->cache_port
+            );
+
+            continue;
+        }
+
+        process_handle->cache = cache;
+
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
         {
+            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create thread"
+                , config->name
+            );
+
             continue;
         }
 
@@ -471,14 +518,15 @@ int main( int _argc, char * _argv[] )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
+        hb_cache_destroy( process_handle->cache );
+
         hb_thread_destroy( process_handle->thread );
     }
 
     HB_DELETEN( process_handles );
 
-    hb_matching_finalize( matching );
+    hb_matching_destroy( matching );
 
-    hb_cache_finalize();
     hb_db_finalize();
 
     hb_log_tcp_finalize();

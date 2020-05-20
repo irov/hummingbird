@@ -2,6 +2,7 @@
 #include "hb_script_json.h"
 #include "hb_script_handle.h"
 
+#include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_utils/hb_oid.h"
@@ -10,27 +11,24 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-extern int __hb_script_server_GetProjectPublicData( lua_State * L );
-extern int __hb_script_server_SetProjectPublicData( lua_State * L );
-extern int __hb_script_server_UpdateProjectPublicData( lua_State * L );
-extern int __hb_script_server_GetCurrentUserPublicData( lua_State * L );
-extern int __hb_script_server_SetCurrentUserPublicData( lua_State * L );
-extern int __hb_script_server_UpdateCurrentUserPublicData( lua_State * L );
-extern int __hb_script_server_GetUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_SetUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_UpdateUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_CreateUserEntity( lua_State * L );
-extern int __hb_script_server_SelectUserEntity( lua_State * L );
-extern int __hb_script_server_GetUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_SetUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_UpdateUserEntityPublicData( lua_State * L );
-extern int __hb_script_server_CreateProjectEntity( lua_State * L );
-extern int __hb_script_server_GetProjectEntity( lua_State * L );
-extern int __hb_script_server_SelectProjectEntity( lua_State * L );
-extern int __hb_script_server_GetProjectEntityPublicData( lua_State * L );
-extern int __hb_script_server_SetProjectEntityPublicData( lua_State * L );
-extern int __hb_script_server_CreateMatching( lua_State * L );
-extern int __hb_script_server_JoinMatching( lua_State * L );
+extern int hb_script_server_GetProjectPublicData( lua_State * L );
+extern int hb_script_server_SetProjectPublicData( lua_State * L );
+extern int hb_script_server_UpdateProjectPublicData( lua_State * L );
+extern int hb_script_server_GetCurrentUserPublicData( lua_State * L );
+extern int hb_script_server_SetCurrentUserPublicData( lua_State * L );
+extern int hb_script_server_UpdateCurrentUserPublicData( lua_State * L );
+extern int hb_script_server_GetUserEntityPublicData( lua_State * L );
+extern int hb_script_server_SetUserEntityPublicData( lua_State * L );
+extern int hb_script_server_UpdateUserEntityPublicData( lua_State * L );
+extern int hb_script_server_CreateUserEntity( lua_State * L );
+extern int hb_script_server_SelectUserEntity( lua_State * L );
+extern int hb_script_server_CreateProjectEntity( lua_State * L );
+extern int hb_script_server_GetProjectEntity( lua_State * L );
+extern int hb_script_server_SelectProjectEntity( lua_State * L );
+extern int hb_script_server_GetProjectEntityPublicData( lua_State * L );
+extern int hb_script_server_SetProjectEntityPublicData( lua_State * L );
+extern int hb_script_server_CreateMatching( lua_State * L );
+extern int hb_script_server_JoinMatching( lua_State * L );
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_print( lua_State * L )
 {
@@ -62,9 +60,9 @@ static int __hb_lua_print( lua_State * L )
 //////////////////////////////////////////////////////////////////////////
 static int __hb_lua_json_dumps( lua_State * L )
 {
-    char buffer[10240];
+    char buffer[HB_DATA_MAX_SIZE];
     size_t buffer_size;
-    if( hb_script_json_dumps( L, -1, buffer, 10240, &buffer_size ) == HB_FAILURE )
+    if( hb_script_json_dumps( L, -1, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
@@ -81,28 +79,28 @@ static const struct luaL_Reg globalLib[] = {
 };
 //////////////////////////////////////////////////////////////////////////
 static const struct luaL_Reg serverLib[] = {
-    { "GetProjectPublicData", &__hb_script_server_GetProjectPublicData }
-    , { "SetProjectPublicData", &__hb_script_server_SetProjectPublicData }
-    , { "UpdateProjectPublicData", &__hb_script_server_UpdateProjectPublicData }
-    , { "GetCurrentUserPublicData", &__hb_script_server_GetCurrentUserPublicData }
-    , { "SetCurrentUserPublicData", &__hb_script_server_SetCurrentUserPublicData }
-    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "UpdateCurrentUserPublicData", &__hb_script_server_UpdateCurrentUserPublicData }
-    , { "CreateUserEntity", &__hb_script_server_CreateUserEntity }
-    , { "SelectUserEntity", &__hb_script_server_SelectUserEntity }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
-    , { "CreateProjectEntity", &__hb_script_server_CreateProjectEntity }
-    , { "SelectProjectEntity", &__hb_script_server_SelectProjectEntity }
-    , { "GetProjectEntity", &__hb_script_server_GetProjectEntity }
-    , { "SetUserEntityPublicData", &__hb_script_server_SetUserEntityPublicData }
-    , { "GetUserEntityPublicData", &__hb_script_server_GetUserEntityPublicData }
-    , { "UpdateUserEntityPublicData", &__hb_script_server_UpdateUserEntityPublicData }
-    , { "CreateMatching", &__hb_script_server_CreateMatching }
-    , { "JoinMatching", &__hb_script_server_JoinMatching }
+    { "GetProjectPublicData", &hb_script_server_GetProjectPublicData }
+    , { "SetProjectPublicData", &hb_script_server_SetProjectPublicData }
+    , { "UpdateProjectPublicData", &hb_script_server_UpdateProjectPublicData }
+    , { "GetCurrentUserPublicData", &hb_script_server_GetCurrentUserPublicData }
+    , { "SetCurrentUserPublicData", &hb_script_server_SetCurrentUserPublicData }
+    , { "UpdateCurrentUserPublicData", &hb_script_server_UpdateCurrentUserPublicData }
+    , { "GetUserEntityPublicData", &hb_script_server_GetUserEntityPublicData }
+    , { "SetUserEntityPublicData", &hb_script_server_SetUserEntityPublicData }
+    , { "UpdateCurrentUserPublicData", &hb_script_server_UpdateCurrentUserPublicData }
+    , { "CreateUserEntity", &hb_script_server_CreateUserEntity }
+    , { "SelectUserEntity", &hb_script_server_SelectUserEntity }
+    , { "SetUserEntityPublicData", &hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &hb_script_server_GetUserEntityPublicData }
+    , { "UpdateUserEntityPublicData", &hb_script_server_UpdateUserEntityPublicData }
+    , { "CreateProjectEntity", &hb_script_server_CreateProjectEntity }
+    , { "SelectProjectEntity", &hb_script_server_SelectProjectEntity }
+    , { "GetProjectEntity", &hb_script_server_GetProjectEntity }
+    , { "SetUserEntityPublicData", &hb_script_server_SetUserEntityPublicData }
+    , { "GetUserEntityPublicData", &hb_script_server_GetUserEntityPublicData }
+    , { "UpdateUserEntityPublicData", &hb_script_server_UpdateUserEntityPublicData }
+    , { "CreateMatching", &hb_script_server_CreateMatching }
+    , { "JoinMatching", &hb_script_server_JoinMatching }
     , { NULL, NULL } /* end of array */
 };
 //////////////////////////////////////////////////////////////////////////
@@ -161,11 +159,13 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _poid, const hb_oid_t _uoid, hb_matching_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t * _poid, const hb_oid_t * _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
-    if( hb_db_get_collection( "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
+    handle->db_client = _db;
+
+    if( hb_db_get_collection( _db, "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_user_entities"
@@ -174,7 +174,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_project_entities"
@@ -183,7 +183,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_users", &handle->db_collection_users ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_users", &handle->db_collection_users ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_users"
@@ -192,7 +192,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_projects", &handle->db_collection_projects ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_projects", &handle->db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_projects"
@@ -201,7 +201,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_matching", &handle->db_collection_matching ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_matching", &handle->db_collection_matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_matching"
@@ -210,7 +210,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_worlds", &handle->db_collection_worlds ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_worlds", &handle->db_collection_worlds ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_worlds"
@@ -219,7 +219,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( "hb", "hb_avatars", &handle->db_collection_avatars ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "hb_avatars", &handle->db_collection_avatars ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
             , "hb_avatars"
@@ -228,8 +228,9 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
         return HB_FAILURE;
     }
 
-    hb_oid_copy( handle->project_oid, _poid );
-    hb_oid_copy( handle->user_oid, _uoid );
+    hb_oid_copy( &handle->project_oid, _poid );
+    hb_oid_copy( &handle->user_oid, _uoid );
+
     handle->matching = _matching;
 
     if( setjmp( handle->panic_jump ) == 1 )
@@ -316,7 +317,7 @@ hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const 
 
     size_t script_data_size;
     hb_data_t script_data;
-    if( hb_storage_get_code( script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
+    if( hb_storage_get_code( _cache, _db, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
             , "hb_projects"
@@ -418,7 +419,11 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'", _method, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
+        , _method
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -498,7 +503,11 @@ hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _ev
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'", _event, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'"
+        , _event
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -544,7 +553,11 @@ hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call command '%s' data '%.*s'", _command, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call command '%s' data '%.*s'"
+        , _command
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 
@@ -612,7 +625,11 @@ hb_result_t hb_script_avatar_call( hb_script_handle_t * _handle, const char * _m
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'", _method, _datasize, (const char *)_data );
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
+        , _method
+        , _datasize
+        , (const char *)_data 
+    );
 
     lua_State * L = _handle->L;
 

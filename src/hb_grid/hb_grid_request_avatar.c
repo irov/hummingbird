@@ -12,7 +12,7 @@ int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_ha
     HB_UNUSED( _process );
 
     hb_grid_process_script_avatar_in_data_t in_data;
-    if( hb_token_base16_decode( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -33,7 +33,7 @@ int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_ha
 
     if( out_data.successful == HB_TRUE )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": true, \"data\": %.*s, \"stat\": {\"memory_used\":%zu, \"call_used\":%u}}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"successful\":true,\"data\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
             , (int)out_data.response_size
             , out_data.response_data
             , out_data.memory_used
@@ -44,7 +44,7 @@ int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_ha
     }
     else
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 0, \"successful\": false, \"method_found\": %s}"
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"successful\":false,\"method_found\":%s}"
             , out_data.method_found == HB_TRUE ? "true" : "false"
         );
 

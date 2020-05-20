@@ -12,7 +12,7 @@
 #define HB_SCRIPT_SELECT_PROJECT_ENTITY_MAX 32
 #endif
 
-int __hb_script_server_SelectProjectEntity( lua_State * L )
+int hb_script_server_SelectProjectEntity( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
@@ -44,7 +44,7 @@ int __hb_script_server_SelectProjectEntity( lua_State * L )
     }
 
     hb_db_make_symbol_value( query, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
-    hb_db_make_oid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
+    hb_db_make_oid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
 
     const char * db_fields[1] = { "pid" };
 

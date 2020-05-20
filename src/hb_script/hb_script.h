@@ -1,14 +1,15 @@
 #ifndef HB_SCRIPT_H_
 #define HB_SCRIPT_H_
 
-#include "hb_config/hb_config.h"
-
 #include "hb_db/hb_db.h"
 #include "hb_matching/hb_matching.h"
+#include "hb_cache/hb_cache.h"
+
+#include "hb_config/hb_config.h"
 
 typedef struct hb_script_handle_t hb_script_handle_t;
 
-hb_result_t hb_script_initialize( size_t _memorylimit, size_t _calllimit, const hb_oid_t _puid, const hb_oid_t _uuid, hb_matching_t * _matching, hb_script_handle_t ** _handle );
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _client, size_t _memorylimit, size_t _calllimit, const hb_oid_t * _puid, const hb_oid_t * _uuid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle );
 void hb_script_finalize( hb_script_handle_t * _handle );
 
 typedef struct hb_script_stat_t

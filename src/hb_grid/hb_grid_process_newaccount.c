@@ -18,7 +18,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     HB_UNUSED( _process );
 
     hb_db_collection_handle_t * db_collection_accounts;
-    if( hb_db_get_collection( "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -32,7 +32,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
 
-    hb_db_make_binary_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
+    hb_db_make_sha1_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
 
     hb_oid_t authentication_oid;
     hb_bool_t authentication_exist;
@@ -63,8 +63,8 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_make_binary_value( values_new, "login", HB_UNKNOWN_STRING_SIZE, login_sha1, 20 );
-    hb_db_make_binary_value( values_new, "password", HB_UNKNOWN_STRING_SIZE, password_sha1, 20 );
+    hb_db_make_sha1_value( values_new, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
+    hb_db_make_sha1_value( values_new, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
     hb_oid_t account_oid;
     if( hb_db_new_document( db_collection_accounts, values_new, &account_oid ) == HB_FAILURE )
@@ -74,10 +74,10 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
 
     hb_db_destroy_values( values_new );
 
-    hb_account_token_handle_t token_handle;
-    hb_oid_copy( token_handle.aoid, account_oid );
+    hb_account_token_t token_handle;
+    hb_oid_copy( &token_handle.aoid, &account_oid );
 
-    if( hb_token_generate( "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
+    if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
