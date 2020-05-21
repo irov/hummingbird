@@ -39,7 +39,7 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
     {
         _out->descs[index].score = scores[index];
 
-        hb_pid_t uuid;
+        hb_uid_t uuid;
         if( hb_db_get_uid_value( values, index * 2 + 0, &uuid ) == HB_FAILURE )
         {
             return HB_FAILURE;

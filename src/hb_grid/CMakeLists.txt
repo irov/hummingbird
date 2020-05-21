@@ -13,7 +13,8 @@ request
     hb_grid_request_command.c
     hb_grid_request_upload.c
     hb_grid_request_setusernickname.c
-    hb_grid_request_setleaderboard.c
+    hb_grid_request_setleaderscore.c
+    hb_grid_request_getleaderrank.c
     hb_grid_request_getleaderboard.c
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c
@@ -32,8 +33,10 @@ process
     hb_grid_process_newuser.c
     hb_grid_process_setusernickname.h
     hb_grid_process_setusernickname.c
-    hb_grid_process_setleaderboard.h
-    hb_grid_process_setleaderboard.c
+    hb_grid_process_setleaderscore.h
+    hb_grid_process_setleaderscore.c
+    hb_grid_process_getleaderrank.h
+    hb_grid_process_getleaderrank.c
     hb_grid_process_getleaderboard.h
     hb_grid_process_getleaderboard.c
     hb_grid_process_loginuser.h

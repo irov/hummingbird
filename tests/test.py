@@ -114,7 +114,7 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["code"], 0)
         pass
 
-    def __create_user(self, pid):
+    def __createuser(self, pid):
         login = hummingbird.make_uuid()
         password = "testuser"
 
@@ -150,14 +150,14 @@ class Testing(unittest.TestCase):
         pass
             
     def test_08_matching(self):
-        token0 = self.__create_user(Testing.pid)
-        token1 = self.__create_user(Testing.pid)
+        token0 = self.__createuser(Testing.pid)
+        token1 = self.__createuser(Testing.pid)
         
         self.__join_user(token0)
         self.__join_user(token1)
         pass
         
-    def __setusernickname_user(self, token, nickname):
+    def __setusernickname(self, token, nickname):
         print("----setusernickname---- token: {0} {1}".format(token, nickname))
         jresult = hummingbird.post("http://localhost:5555/setusernickname/{0}".format(token), nickname = nickname)
         print("response: ", jresult)
@@ -166,9 +166,9 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["code"], 0)
         pass
         
-    def __setleaderboard_user(self, token, score):
-        print("----setleaderboard---- token: {0} {1}".format(token, score))
-        jresult = hummingbird.post("http://localhost:5555/setleaderboard/{0}".format(token), score = score)
+    def __setleaderscore(self, token, score):
+        print("----setleaderscore---- token: {0} {1}".format(token, score))
+        jresult = hummingbird.post("http://localhost:5555/setleaderscore/{0}".format(token), score = score)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
@@ -176,23 +176,25 @@ class Testing(unittest.TestCase):
         pass
         
     def test_09_leaderboard(self):
-        token0 = self.__create_user(Testing.pid)
-        token1 = self.__create_user(Testing.pid)
-        token2 = self.__create_user(Testing.pid)
-        token3 = self.__create_user(Testing.pid)
-        token4 = self.__create_user(Testing.pid)
+        print("----leaderboard---- token:")
         
-        self.__setusernickname_user(token0, "bob")
-        self.__setusernickname_user(token1, "alice")
-        self.__setusernickname_user(token2, "dave")
-        self.__setusernickname_user(token3, "nick")
-        self.__setusernickname_user(token4, "jennifer")
+        token0 = self.__createuser(Testing.pid)
+        token1 = self.__createuser(Testing.pid)
+        token2 = self.__createuser(Testing.pid)
+        token3 = self.__createuser(Testing.pid)
+        token4 = self.__createuser(Testing.pid)
         
-        self.__setleaderboard_user(token0, 100)
-        self.__setleaderboard_user(token1, 200)
-        self.__setleaderboard_user(token2, 50)
-        self.__setleaderboard_user(token3, 250)
-        self.__setleaderboard_user(token4, 150)
+        self.__setusernickname(token0, "bob")
+        self.__setusernickname(token1, "alice")
+        self.__setusernickname(token2, "dave")
+        self.__setusernickname(token3, "nick")
+        self.__setusernickname(token4, "jennifer")
+        
+        self.__setleaderscore(token0, 100)
+        self.__setleaderscore(token1, 200)
+        self.__setleaderscore(token2, 50)
+        self.__setleaderscore(token3, 250)
+        self.__setleaderscore(token4, 150)
         pass
         
     def test_11_getleaderboard(self):
@@ -214,6 +216,24 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["leaderboard"][3]["score"], 100)
         self.assertEqual(jresult["leaderboard"][4]["nickname"], "dave")
         self.assertEqual(jresult["leaderboard"][4]["score"], 50)
+        pass
+        
+    def test_11_getleaderrank(self):
+        print("----getleaderrank----")
+        
+        token0 = self.__createuser(Testing.pid)
+        
+        self.__setusernickname(token0, "test")
+        
+        self.__setleaderscore(token0, 175)        
+        
+        print("----getleaderrank---- token: {0}".format(token0))
+        jresult = hummingbird.post("http://localhost:5555/getleaderrank/{0}".format(token0))
+        print("response: ", jresult)
+
+        self.assertIsNotNone(jresult)
+        self.assertIn("rank", jresult)
+        self.assertEqual(jresult["rank"], 2)
         pass
     pass
 

@@ -350,7 +350,7 @@ void hb_db_copy_values( hb_db_values_handle_t * _values, const hb_db_values_hand
     _values->value_count += _source->value_count;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_pid_t _value )
+void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_uid_t _value )
 {
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
@@ -441,7 +441,7 @@ void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field
     value->u.binary.length = sizeof( hb_sha1_t );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_pid_t * _value )
+hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_uid_t * _value )
 {
     if( _index >= _values->value_count )
     {
@@ -455,7 +455,7 @@ hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t
         return HB_FAILURE;
     }
 
-    *_value = (hb_pid_t)value->u.i32;
+    *_value = (hb_uid_t)value->u.i32;
 
     return HB_SUCCESSFUL;
 }
@@ -1279,22 +1279,22 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, cons
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid )
+hb_result_t hb_db_make_uid( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid )
 {
-    hb_pid_t pid = 0;
+    hb_uid_t uid = 0;
     uint32_t founds = 0;
     for( ; founds != 1; )
     {
         do
         {
-            pid = hb_rand_time();
-            pid &= 0x7fffffff;
-        } while( pid == 0 );
+            uid = hb_rand_time();
+            uid &= 0x7fffffff;
+        } while( uid == 0 );
 
         hb_db_values_handle_t * update_values;
         hb_db_create_values( &update_values );
 
-        hb_db_make_uid_value( update_values, "uid", HB_UNKNOWN_STRING_SIZE, pid );
+        hb_db_make_uid_value( update_values, "uid", HB_UNKNOWN_STRING_SIZE, uid );
 
         if( hb_db_update_values( _collection, _oid, update_values ) == HB_FAILURE )
         {
@@ -1309,7 +1309,7 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
         }
 
         hb_db_copy_values( count_values, _values );
-        hb_db_make_uid_value( count_values, "uid", HB_UNKNOWN_STRING_SIZE, pid );
+        hb_db_make_uid_value( count_values, "uid", HB_UNKNOWN_STRING_SIZE, uid );
 
         if( hb_db_count_values( _collection, count_values, &founds ) == HB_FAILURE )
         {
@@ -1324,12 +1324,12 @@ hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const
         }
     }
 
-    *_pid = pid;
+    *_uid = uid;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_make_pid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid )
+hb_result_t hb_db_make_uid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -1341,7 +1341,7 @@ hb_result_t hb_db_make_pid_by_name( const hb_db_client_handle_t * _client, const
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_make_pid( db_collection, _oid, _values, _pid );
+    hb_result_t result = hb_db_make_uid( db_collection, _oid, _values, _uid );
 
     hb_db_destroy_collection( db_collection );
 

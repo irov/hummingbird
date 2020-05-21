@@ -31,8 +31,8 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
 
         lua_createtable( L, 3, 0 );
 
-        hb_pid_t user_apid = hb_matching_user_get_apid( user );
-        lua_pushinteger( L, user_apid );
+        hb_uid_t user_auid = hb_matching_user_get_auid( user );
+        lua_pushinteger( L, user_auid );
         lua_rawseti( L, -2, 1 );
 
         int32_t user_rating = hb_matching_user_get_rating( user );

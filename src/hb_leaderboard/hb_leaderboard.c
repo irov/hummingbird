@@ -97,7 +97,7 @@ hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, const hb_oid_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_leaderboard_get_user( hb_cache_handle_t * _cache, const hb_oid_t * _poid, const hb_oid_t * _uoid, uint32_t * _score )
+hb_result_t hb_leaderboard_get_rank( hb_cache_handle_t * _cache, const hb_oid_t * _poid, const hb_oid_t * _uoid, uint32_t * _rank, hb_bool_t * _exist )
 {
     hb_oid16_t poid16;
     hb_oid_base16_encode( _poid, &poid16 );
@@ -105,21 +105,15 @@ hb_result_t hb_leaderboard_get_user( hb_cache_handle_t * _cache, const hb_oid_t 
     hb_oid16_t uoid16;
     hb_oid_base16_encode( _uoid, &uoid16 );
 
-    uint32_t score;
+    uint32_t rank;
     hb_bool_t exist;
-    if( hb_cache_zrevrank( _cache, poid16.value, sizeof( hb_oid16_t ), uoid16.value, sizeof( hb_oid16_t ), &score, &exist ) == HB_FAILURE )
+    if( hb_cache_zrevrank( _cache, poid16.value, sizeof( hb_oid16_t ), uoid16.value, sizeof( hb_oid16_t ), &rank, &exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( exist == HB_TRUE )
-    {
-        *_score = score;
-    }
-    else
-    {
-        *_score = 0;
-    }
+    *_rank = rank;
+    *_exist = exist;
 
     return HB_SUCCESSFUL;
 }

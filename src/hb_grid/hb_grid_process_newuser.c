@@ -119,8 +119,8 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
 
         hb_db_make_uid_value( puid_values, "puid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
-        hb_pid_t uuid;
-        if( hb_db_make_pid( db_collection_users, &user_oid, puid_values, &uuid ) == HB_FAILURE )
+        hb_uid_t uuid;
+        if( hb_db_make_uid( db_collection_users, &user_oid, puid_values, &uuid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

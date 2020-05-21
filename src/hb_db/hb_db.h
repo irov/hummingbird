@@ -27,7 +27,7 @@ void hb_db_destroy_values( hb_db_values_handle_t * _values );
 
 void hb_db_copy_values( hb_db_values_handle_t * _values, const hb_db_values_handle_t * _source );
 
-void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_pid_t _value );
+void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_uid_t _value );
 void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value );
 void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int64_t _value );
 void hb_db_make_symbol_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength );
@@ -36,7 +36,7 @@ void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field
 void hb_db_make_oid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_oid_t * _oid );
 void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_sha1_t * _sha1 );
 
-hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_pid_t * _value );
+hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_uid_t * _value );
 hb_result_t hb_db_get_int32_value( const hb_db_values_handle_t * _values, uint32_t _index, int32_t * _value );
 hb_result_t hb_db_get_uint32_value( const hb_db_values_handle_t * _values, uint32_t _index, uint32_t * _value );
 hb_result_t hb_db_get_int64_value( const hb_db_values_handle_t * _values, uint32_t _index, int64_t * _value );
@@ -62,8 +62,8 @@ hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, 
 
 hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const hb_sha1_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
 
-hb_result_t hb_db_make_pid( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid );
-hb_result_t hb_db_make_pid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_pid_t * _pid );
+hb_result_t hb_db_make_uid( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid );
+hb_result_t hb_db_make_uid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid );
 
 typedef struct hb_db_script_handle_t hb_db_script_handle_t;
 

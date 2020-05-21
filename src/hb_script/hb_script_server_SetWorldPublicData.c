@@ -20,7 +20,7 @@ int __hb_script_server_SetWorldPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_uid_value( values_found, "uid", HB_UNKNOWN_STRING_SIZE, (hb_pid_t)uid );
+    hb_db_make_uid_value( values_found, "uid", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)uid );
     hb_db_make_oid_value( values_found, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
 
     hb_bool_t exist;

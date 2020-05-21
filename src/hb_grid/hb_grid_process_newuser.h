@@ -7,7 +7,7 @@
 
 typedef struct hb_grid_process_newuser_in_data_t
 {
-    hb_pid_t puid;
+    hb_uid_t puid;
 
     char login[128];
     char password[128];
@@ -18,7 +18,7 @@ typedef struct hb_grid_process_newuser_out_data_t
 {
     hb_token_t token;
 
-    hb_pid_t uuid;
+    hb_uid_t uuid;
     hb_bool_t exist;
 } hb_grid_process_newuser_out_data_t;
 

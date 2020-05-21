@@ -17,7 +17,7 @@ typedef struct hb_grid_process_getleaderboard_in_data_t
 typedef struct hb_getleaderboard_desc_t
 {
     uint32_t score;
-    hb_pid_t uuid;
+    hb_uid_t uuid;
     char nickname[32];    
 } hb_getleaderboard_desc_t;
 
