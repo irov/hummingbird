@@ -39,12 +39,12 @@ typedef hb_result_e hb_result_t;
 typedef hb_error_code_e hb_error_code_t;
 
 typedef uint8_t hb_byte_t;
-typedef uint32_t hb_pid_t;
+typedef uint32_t hb_uid_t;
 
-typedef struct hb_pid16_t
+typedef struct hb_uid16_t
 {
     char value[8];
-} hb_pid16_t;
+} hb_uid16_t;
 
 typedef struct hb_oid_t
 {

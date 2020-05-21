@@ -27,7 +27,7 @@ typedef struct hb_matching_user_handle_t
 {
     hb_oid_t uoid;
     int32_t rating;
-    hb_pid_t apid;
+    hb_uid_t auid;
 
     hb_array_t * public_data;
 
@@ -368,8 +368,8 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
         hb_db_make_oid_value( count_world_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
 
-        hb_pid_t wpid;
-        if( hb_db_make_pid_by_name( _client, "hb_worlds", &woid, count_world_values, &wpid ) == HB_FAILURE )
+        hb_uid_t wuid;
+        if( hb_db_make_uid_by_name( _client, "hb_worlds", &woid, count_world_values, &wuid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -413,7 +413,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
             hb_db_make_oid_value( count_avatar_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
             hb_db_make_oid_value( count_avatar_values, "woid", HB_UNKNOWN_STRING_SIZE, &woid );
 
-            if( hb_db_make_pid_by_name( _client, "hb_avatars", &aoid, count_avatar_values, &matching_user->apid ) == HB_FAILURE )
+            if( hb_db_make_uid_by_name( _client, "hb_avatars", &aoid, count_avatar_values, &matching_user->auid ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
@@ -432,7 +432,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
         hb_matching_complete_desc_t desc;
         desc.name = _name;
-        desc.wpid = wpid;
+        desc.wuid = wuid;
         desc.users = user_matchings;
         desc.users_count = room_matching_count;
         hb_db_get_symbol_value( values, 0, &desc.data, &desc.data_size );
@@ -475,7 +475,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_bool_t * _exist, hb_pid_t * _apid )
+hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_bool_t * _exist, hb_uid_t * _auid )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -541,7 +541,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
 
         *_exist = HB_TRUE;
 
-        *_apid = user->apid;
+        *_auid = user->auid;
     }
 
     *_exist = HB_FALSE;
@@ -551,7 +551,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_pid_t _apid, hb_bool_t * _exist )
+hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_uid_t _auid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -610,7 +610,7 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
     {
         hb_matching_user_handle_t * user = it;
 
-        if( user->apid != _apid )
+        if( user->auid != _auid )
         {
             continue;
         }
@@ -643,9 +643,9 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_pid_t hb_matching_user_get_apid( const hb_matching_user_handle_t * _user )
+hb_uid_t hb_matching_user_get_auid( const hb_matching_user_handle_t * _user )
 {
-    return _user->apid;
+    return _user->auid;
 }
 //////////////////////////////////////////////////////////////////////////
 int32_t hb_matching_user_get_rating( const hb_matching_user_handle_t * _user )

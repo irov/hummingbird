@@ -23,15 +23,15 @@ int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_proces
         return HTTP_BADREQUEST;
     }
 
-    hb_pid16_t pid16;
-    if( hb_base16_encode( &out_data.puid, sizeof( out_data.puid ), pid16.value, sizeof( pid16 ), HB_NULLPTR ) == HB_FAILURE )
+    hb_uid16_t uid16;
+    if( hb_base16_encode( &out_data.puid, sizeof( out_data.puid ), uid16.value, sizeof( uid16 ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     size_t response_data_size = sprintf( _response, "{\"code\":0,\"pid\":\"%.*s\"}"
-        , (int)sizeof( pid16 )
-        , pid16.value
+        , (int)sizeof( uid16 )
+        , uid16.value
     );
 
     *_size = response_data_size;

@@ -130,15 +130,15 @@ int hb_script_server_CreateUserEntity( lua_State * L )
     hb_db_make_oid_value( count_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
     hb_db_make_oid_value( count_values, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
 
-    hb_pid_t pid;
-    if( hb_db_make_pid( script_handle->db_collection_user_entities, &eoid, count_values, &pid ) == HB_FAILURE )
+    hb_uid_t uid;
+    if( hb_db_make_uid( script_handle->db_collection_user_entities, &eoid, count_values, &uid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_db_destroy_values( count_values );
 
-    lua_pushinteger( L, pid );
+    lua_pushinteger( L, uid );
 
     return 1;
 }

@@ -1,6 +1,6 @@
 #include "hb_grid.h"
 
-#include "hb_grid_process_setleaderboard.h"
+#include "hb_grid_process_setleaderscore.h"
 
 #include "hb_token/hb_token.h"
 #include "hb_http/hb_http.h"
@@ -10,11 +10,11 @@
 
 #include <string.h>
 
-int hb_grid_request_setleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token )
+int hb_grid_request_setleaderscore( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token )
 {
     hb_bool_t required_successful = HB_TRUE;
 
-    hb_grid_process_setleaderboard_in_data_t in_data;
+    hb_grid_process_setleaderscore_in_data_t in_data;
 
     if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
     {
@@ -41,8 +41,8 @@ int hb_grid_request_setleaderboard( struct evhttp_request * _request, hb_grid_pr
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_setleaderboard_out_data_t out_data;
-    if( hb_grid_process_setleaderboard( _process, &in_data, &out_data ) == HB_FAILURE )
+    hb_grid_process_setleaderscore_out_data_t out_data;
+    if( hb_grid_process_setleadscore( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

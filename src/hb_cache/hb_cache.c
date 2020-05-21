@@ -303,7 +303,7 @@ hb_result_t hb_cache_zrevrank( const hb_cache_handle_t * _cache, const void * _k
         return HB_SUCCESSFUL;
     }
 
-    if( reply->type != REDIS_REPLY_NIL )
+    if( reply->type != REDIS_REPLY_INTEGER )
     {
         freeReplyObject( reply );
 

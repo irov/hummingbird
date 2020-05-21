@@ -46,15 +46,15 @@ int hb_script_server_GetProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    int32_t pid;
-    if( hb_db_get_int32_value( project_entity_values, 0, &pid ) == HB_FAILURE )
+    hb_uid_t uid;
+    if( hb_db_get_uid_value( project_entity_values, 0, &uid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
     hb_db_destroy_values( project_entity_values );
 
-    lua_pushinteger( L, pid );
+    lua_pushinteger( L, uid );
 
     return 1;
 }

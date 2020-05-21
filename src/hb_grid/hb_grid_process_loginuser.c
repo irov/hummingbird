@@ -79,7 +79,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_destroy_values( values_authentication );
 
-    hb_pid_t uuid;
+    hb_uid_t uuid;
     if( hb_db_get_uid_value( db_users_uid_handle, 0, &uuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
