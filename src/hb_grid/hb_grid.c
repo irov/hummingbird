@@ -478,6 +478,16 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    hb_messages_handle_t * messages;
+    if( hb_messages_create( &messages ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [messages] component"
+            , config->name
+        );
+
+        return EXIT_FAILURE;
+    }
+
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
     evutil_socket_t ev_socket = -1;
@@ -492,6 +502,7 @@ int main( int _argc, char * _argv[] )
 
         process_handle->config = config;
         process_handle->matching = matching;
+        process_handle->messages = messages;
 
         process_handle->cache = HB_NULLPTR;
         process_handle->thread = HB_NULLPTR;
@@ -551,6 +562,7 @@ int main( int _argc, char * _argv[] )
 
     HB_DELETEN( process_handles );
 
+    hb_messages_destroy( messages );
     hb_matching_destroy( matching );
 
     hb_db_finalize();

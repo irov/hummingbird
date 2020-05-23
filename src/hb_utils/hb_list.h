@@ -18,6 +18,8 @@ void hb_list_push_back( hb_list_t * _list, hb_list_element_t * _element );
 void hb_list_push_front( hb_list_t * _list, hb_list_element_t * _element );
 void hb_list_pop_back( hb_list_t * _list, hb_list_element_t ** _element );
 void hb_list_pop_front( hb_list_t * _list, hb_list_element_t ** _element );
+void hb_list_pop_element( hb_list_t * _list, hb_list_element_t * _element );
+uint32_t hb_list_count( const hb_list_t * _list );
 hb_bool_t hb_list_empty( const hb_list_t * _list );
 
 #endif
