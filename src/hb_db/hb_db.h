@@ -50,6 +50,7 @@ hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, c
 hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist );
 hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist );
 hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist );
+hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist );
 hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _query, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, uint32_t _limit, uint32_t * _exists );
 hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _query, uint32_t * _founds );
 hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values );

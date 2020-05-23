@@ -860,6 +860,25 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_find_oid_with_values( db_collection, _query, _oid, _fields, _fieldcount, _values, _exist );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, uint32_t _limit, uint32_t * _exists )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
