@@ -67,6 +67,9 @@ src
     
     hb_array.h
     hb_array.c
+    
+    hb_list.h
+    hb_list.c    
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

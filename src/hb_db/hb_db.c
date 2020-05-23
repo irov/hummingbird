@@ -1300,6 +1300,8 @@ hb_result_t hb_db_make_uid( const hb_db_collection_handle_t * _collection, const
         {
             return HB_FAILURE;
         }
+        
+        hb_db_destroy_values( update_values );
 
         hb_db_values_handle_t * count_values;
 
