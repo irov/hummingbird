@@ -224,8 +224,9 @@ hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const 
 
     if( hb_list_count( channel_handle->l_posts ) == channel_handle->maxpost )
     {
-        hb_messages_channel_post_handle_t * oldpost;
-        hb_list_pop_back( channel_handle->l_posts, &(hb_list_element_t *)oldpost );
+        hb_list_element_t * oldpost_element;
+        hb_list_pop_back( channel_handle->l_posts, &oldpost_element );
+        hb_messages_channel_post_handle_t * oldpost = (hb_messages_channel_post_handle_t *)oldpost_element;
 
         HB_DELETE( oldpost );
     }

@@ -30,7 +30,7 @@ typedef struct hb_matching_complete_desc_t
 
     hb_uid_t wuid;
 
-    const hb_matching_user_handle_t ** users;
+    const hb_matching_user_handle_t * const * users;
     uint32_t users_count;
     
     const char * data;
