@@ -8,17 +8,21 @@
 
 #include <string.h>
 
-int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid, const char * _method )
+hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
+    const char * account_token = _args->arg1;
+    const char * puid = _args->arg2;
+    const char * method = _args->arg3;
+
     hb_grid_process_script_command_in_data_t in_data;
-    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( account_token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_base16_decode( _puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
+    hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
 
-    strcpy( in_data.method, _method );
+    strcpy( in_data.method, method );
 
     if( hb_http_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
     {

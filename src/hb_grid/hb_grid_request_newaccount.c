@@ -13,8 +13,10 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size )
+hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
+    HB_UNUSED( _args );
+
     hb_bool_t required_successful = HB_TRUE;
 
     hb_grid_process_newaccount_in_data_t in_data;

@@ -4,6 +4,7 @@ ADD_FILTER(
 src
 	hb_grid.h
 	hb_grid.c
+    hb_grid_cmd.h
 )
 
 ADD_FILTER(

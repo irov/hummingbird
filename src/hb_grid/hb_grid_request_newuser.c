@@ -11,13 +11,15 @@
 
 #include <string.h>
 
-int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid )
+hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
+    const char * puid = _args->arg1;
+
     hb_bool_t required_successful = HB_TRUE;
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    hb_base16_decode( _puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
+    hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
 
     {
         hb_json_handle_t * json_handle;

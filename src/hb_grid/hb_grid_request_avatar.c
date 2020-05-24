@@ -7,18 +7,20 @@
 
 #include <string.h>
 
-int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _world, const char * _method )
+hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
-    HB_UNUSED( _process );
+    const char * user_token = _args->arg1;
+    const char * world_name = _args->arg2;
+    const char * method = _args->arg3;
 
     hb_grid_process_script_avatar_in_data_t in_data;
-    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( user_token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    strcpy( in_data.method, _method );
-    strcpy( in_data.world, _world );
+    strcpy( in_data.method, method );
+    strcpy( in_data.world, world_name );
 
     if( hb_http_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
     {
