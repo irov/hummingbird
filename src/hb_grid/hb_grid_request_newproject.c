@@ -7,12 +7,14 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 
-int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token )
+hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     HB_UNUSED( _request );
 
+    const char * account_token = _args->arg1;
+
     hb_grid_process_newproject_in_data_t in_data;
-    if( hb_token_base16_decode_string( _token, &in_data.token ) == HB_FAILURE )
+    if( hb_token_base16_decode_string( account_token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

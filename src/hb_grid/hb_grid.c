@@ -1,5 +1,7 @@
 #include "hb_grid.h"
 
+#include "hb_grid_cmd.h"
+
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
@@ -29,20 +31,6 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
 
     printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
-//////////////////////////////////////////////////////////////////////////
-extern int hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
-extern int hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size );
-extern int hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid );
-extern int hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid );
-extern int hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _puid );
-extern int hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _method );
-extern int hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _world, const char * _method );
-extern int hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token, const char * _puid, const char * _method );
-extern int hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_setleaderscore( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_getleaderrank( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
-extern int hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const char * _token );
 ////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -77,17 +65,16 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     hb_grid_process_handle_t * process = (hb_grid_process_handle_t *)_ud;
 
-    int32_t response_code = HTTP_OK;
+    hb_http_code_t response_code = HTTP_OK;
 
     size_t response_data_size = 2;
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char cmd[128] = {'\0'};
-    char arg1[128] = {'\0'};
-    char arg2[128] = {'\0'};
-    char arg3[128] = {'\0'};
-    int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd, arg1, arg2, arg3 );
+    char cmd_name[128];
+
+    hb_grid_process_cmd_args_t cmd_args;
+    int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd_name, cmd_args.arg1, cmd_args.arg2, cmd_args.arg3 );
 
     if( count == 0 )
     {
@@ -96,176 +83,36 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         return;
     }
 
-    if( strcmp( cmd, "newaccount" ) == 0 )
+    hb_bool_t cmd_found = HB_FALSE;
+
+    for( hb_grid_cmd_inittab_t
+        * cmd_inittab = grid_cmds,
+        *cmd_inittab_end = grid_cmds + sizeof( grid_cmds ) / sizeof( grid_cmds[0] );
+        cmd_inittab != cmd_inittab_end;
+        ++cmd_inittab )
     {
-        if( count != 1 )
+        if( strcmp( cmd_inittab->name, cmd_name ) != 0 )
+        {
+            continue;
+        }
+
+        if( cmd_inittab->args + 1 != count )
         {
             evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
             return;
         }
 
-        response_code = hb_grid_request_newaccount( _request, process, response_data, &response_data_size );
+        response_code = (*cmd_inittab->request)(_request, process, response_data, &response_data_size, &cmd_args);
+
+        cmd_found = HB_TRUE;
+
+        break;
     }
-    else if( strcmp( cmd, "loginaccount" ) == 0 )
+
+    if( cmd_found == HB_FALSE )
     {
-        if( count != 1 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        response_code = hb_grid_request_loginaccount( _request, process, response_data, &response_data_size );
-    }
-    else if( strcmp( cmd, "newproject" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * account_token = arg1;
-
-        response_code = hb_grid_request_newproject( _request, process, response_data, &response_data_size, account_token );
-    }
-    else if( strcmp( cmd, "upload" ) == 0 )
-    {
-        if( count != 3 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * account_token = arg1;
-        const char * puid = arg2;
-
-        response_code = hb_grid_request_upload( _request, process, response_data, &response_data_size, account_token, puid );
-    }
-    else if( strcmp( cmd, "newuser" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * puid = arg1;
-
-        response_code = hb_grid_request_newuser( _request, process, response_data, &response_data_size, puid );
-    }
-    else if( strcmp( cmd, "loginuser" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * puid = arg1;
-
-        response_code = hb_grid_request_loginuser( _request, process, response_data, &response_data_size, puid );
-    }
-    else if( strcmp( cmd, "api" ) == 0 )
-    {
-        if( count != 3 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-        const char * method = arg2;
-
-        response_code = hb_grid_request_api( _request, process, response_data, &response_data_size, user_token, method );
-    }
-    else if( strcmp( cmd, "setusernickname" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-
-        response_code = hb_grid_request_setusernickname( _request, process, response_data, &response_data_size, user_token );
-    }
-    else if( strcmp( cmd, "setleaderscore" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-
-        response_code = hb_grid_request_setleaderscore( _request, process, response_data, &response_data_size, user_token );
-    }
-    else if( strcmp( cmd, "getleaderrank" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-
-        response_code = hb_grid_request_getleaderrank( _request, process, response_data, &response_data_size, user_token );
-    }
-    else if( strcmp( cmd, "getleaderboard" ) == 0 )
-    {
-        if( count != 2 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-
-        response_code = hb_grid_request_getleaderboard( _request, process, response_data, &response_data_size, user_token );
-    }
-    else if( strcmp( cmd, "avatar" ) == 0 )
-    {
-        if( count != 3 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * user_token = arg1;
-        const char * world_name = arg2;
-        const char * method = arg3;
-
-        response_code = hb_grid_request_avatar( _request, process, response_data, &response_data_size, user_token, world_name, method );
-    }
-    else if( strcmp( cmd, "command" ) == 0 )
-    {
-        if( count != 4 )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-        const char * account_token = arg1;
-        const char * puid = arg2;
-        const char * method = arg3;
-
-        response_code = hb_grid_request_command( _request, process, response_data, &response_data_size, account_token, puid, method );
+        response_code = HTTP_NOTIMPLEMENTED;
     }
 
     evbuffer_add( output_buffer, response_data, response_data_size );

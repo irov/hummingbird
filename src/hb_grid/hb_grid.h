@@ -44,4 +44,11 @@ typedef struct hb_grid_process_handle_t
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;
 
+typedef struct hb_grid_process_cmd_args_t
+{    
+    char arg1[128];
+    char arg2[128];
+    char arg3[128];
+} hb_grid_process_cmd_args_t;
+
 #endif
