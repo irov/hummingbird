@@ -17,6 +17,9 @@ request
     hb_grid_request_setleaderscore.c
     hb_grid_request_getleaderrank.c
     hb_grid_request_getleaderboard.c
+    hb_grid_request_newmessageschannel.c
+    hb_grid_request_postmessageschannel.c
+    hb_grid_request_getmessageschannel.c
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c
     hb_grid_request_newproject.c
@@ -54,6 +57,8 @@ process
     hb_grid_process_script_event.c
     hb_grid_process_script_command.h
     hb_grid_process_script_command.c
+    hb_grid_process_newmessageschannel.h
+    hb_grid_process_newmessageschannel.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
