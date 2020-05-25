@@ -25,6 +25,7 @@ extern hb_http_code_t hb_grid_request_setusernickname( struct evhttp_request * _
 extern hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
 extern hb_http_code_t hb_grid_request_getleaderrank( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
 extern hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
+extern hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
 //////////////////////////////////////////////////////////////////////////
 static hb_grid_cmd_inittab_t grid_cmds[] =
 {
@@ -39,6 +40,7 @@ static hb_grid_cmd_inittab_t grid_cmds[] =
     { "setleaderscore", &hb_grid_request_setleaderscore, 1 },
     { "getleaderrank", &hb_grid_request_getleaderrank, 1 },
     { "getleaderboard", &hb_grid_request_getleaderboard, 1 },
+    { "newmessageschannel", &hb_grid_request_newmessageschannel, 1},
     { "avatar", &hb_grid_request_avatar, 2 },
     { "command", &hb_grid_request_command, 3 }
 };

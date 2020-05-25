@@ -71,7 +71,7 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
 
         if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
         {
-            size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"error event onCreatUser\"}" );
+            size_t response_data_size = sprintf( _response, "{\"code\":2}" );
 
             *_size = response_data_size;
 
@@ -96,7 +96,7 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
     }
     else
     {
-        size_t response_data_size = sprintf( _response, "{\"code\": 1, \"reason\": \"already exist\"}" );
+        size_t response_data_size = sprintf( _response, "{\"code\":1}" );
 
         *_size = response_data_size;
     }
