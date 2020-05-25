@@ -1,4 +1,4 @@
-#include "hb_grid_process_newmessageschannel.h"
+#include "hb_grid_process_getmessageschannel.h"
 
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
@@ -12,7 +12,7 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
-hb_result_t hb_grid_process_newmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_newmessageschannel_in_data_t * _in, hb_grid_process_newmessageschannel_out_data_t * _out )
+hb_result_t hb_grid_process_getmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_getmessageschannel_in_data_t * _in, hb_grid_process_getmessageschannel_out_data_t * _out )
 {
     HB_UNUSED( _process );
 
@@ -21,19 +21,16 @@ hb_result_t hb_grid_process_newmessageschannel( hb_grid_process_handle_t * _proc
         return HB_FAILURE;
     }
 
-    hb_account_token_t token_handle;
+    hb_user_token_t token_handle;
     if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_uid_t cuid;
-    if( hb_messages_new_channel( _process->messages, _process->db_client, _in->puid, _in->maxpost, &cuid ) == HB_FAILURE )
+    if( hb_messages_channel_get_posts( _process->messages, token_handle.puid, _in->cuid, _in->postid, _out->posts, 256, &_out->posts_count, &_out->code ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
-
-    _out->cuid = cuid;
 
     return HB_SUCCESSFUL;
 }

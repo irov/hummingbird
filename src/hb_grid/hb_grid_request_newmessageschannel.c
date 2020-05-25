@@ -26,7 +26,27 @@ hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _requ
 
     hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
 
-    in_data.maxpost = 256;
+    hb_bool_t required_successful = HB_TRUE;
+
+    {
+        hb_json_handle_t * json_handle;
+        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        if( hb_json_get_field_uint32_required( json_handle, "maxpost", &in_data.maxpost, &required_successful ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        hb_json_destroy( json_handle );
+    }
+
+    if( required_successful == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_grid_process_newmessageschannel_out_data_t out_data;
     if( hb_grid_process_newmessageschannel( _process, &in_data, &out_data ) == HB_FAILURE )
@@ -34,8 +54,8 @@ hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _requ
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"id\":%d}"
-        , out_data.muid
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u}"
+        , out_data.cuid
     );
 
     *_size = response_data_size;

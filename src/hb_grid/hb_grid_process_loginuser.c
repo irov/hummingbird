@@ -97,6 +97,8 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         hb_user_token_t token_handle;
         hb_oid_copy( &token_handle.uoid, &authentication_oid );
         hb_oid_copy( &token_handle.poid, &project_oid );
+        token_handle.uuid = uuid;
+        token_handle.puid = _in->puid;
 
         if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
         {

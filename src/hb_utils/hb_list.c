@@ -29,6 +29,16 @@ void hb_list_destroy( hb_list_t * _list )
     HB_DELETE( _list );
 }
 //////////////////////////////////////////////////////////////////////////
+hb_list_element_t * hb_list_get_begin( const hb_list_t * _list )
+{
+    return _list->next;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_list_element_t * hb_list_get_back( const hb_list_t * _list )
+{
+    return _list->prev;
+}
+//////////////////////////////////////////////////////////////////////////
 void hb_list_push_back( hb_list_t * _list, hb_list_element_t * _element )
 {
     ++_list->count;
