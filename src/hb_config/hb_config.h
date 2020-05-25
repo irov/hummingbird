@@ -33,6 +33,7 @@ typedef enum hb_error_code_e
     HB_ERROR_OK,
     HB_ERROR_INTERNAL,
     HB_ERROR_NOT_FOUND,
+    HB_ERROR_BAD_ARGUMENTS,
 } hb_error_code_e;
 
 typedef hb_result_e hb_result_t;
@@ -78,6 +79,8 @@ typedef struct hb_user_token_t
 {
     hb_oid_t uoid;
     hb_oid_t poid;
+    hb_uid_t uuid;
+    hb_uid_t puid;
 } hb_user_token_t;
 
 typedef struct hb_account_token_t

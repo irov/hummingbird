@@ -59,6 +59,10 @@ process
     hb_grid_process_script_command.c
     hb_grid_process_newmessageschannel.h
     hb_grid_process_newmessageschannel.c
+    hb_grid_process_getmessageschannel.h
+    hb_grid_process_getmessageschannel.c
+    hb_grid_process_postmessageschannel.h
+    hb_grid_process_postmessageschannel.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)

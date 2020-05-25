@@ -14,6 +14,8 @@ typedef struct hb_list_element_t
     struct hb_list_element_t * next;
 }hb_list_element_t;
 
+hb_list_element_t * hb_list_get_begin( const hb_list_t * _list );
+hb_list_element_t * hb_list_get_back( const hb_list_t * _list );
 void hb_list_push_back( hb_list_t * _list, hb_list_element_t * _element );
 void hb_list_push_front( hb_list_t * _list, hb_list_element_t * _element );
 void hb_list_pop_back( hb_list_t * _list, hb_list_element_t ** _element );

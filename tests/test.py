@@ -200,7 +200,7 @@ class Testing(unittest.TestCase):
     def test_11_getleaderboard(self):
         begin = 0
         end = 10
-        print("----getleaderboard---- token: {0} {1} {2}".format(Testing.user_token, begin, end))
+        print("----getleaderboard---- token: {0} beign: {1} end: {2}".format(Testing.user_token, begin, end))
         jresult = hummingbird.post("http://localhost:5555/getleaderboard/{0}".format(Testing.user_token), begin = begin, end = end)
         print("response: ", jresult)
 
@@ -225,7 +225,7 @@ class Testing(unittest.TestCase):
         
         self.__setusernickname(token0, "test")
         
-        self.__setleaderscore(token0, 175)        
+        self.__setleaderscore(token0, 175)
         
         print("----getleaderrank---- token: {0}".format(token0))
         jresult = hummingbird.post("http://localhost:5555/getleaderrank/{0}".format(token0))
@@ -234,6 +234,47 @@ class Testing(unittest.TestCase):
         self.assertIsNotNone(jresult)
         self.assertIn("rank", jresult)
         self.assertEqual(jresult["rank"], 2)
+        pass
+        
+    def __postmessagechannel(self, token, channel, message, metainfo):
+        print("----postmessageschannel---- token: {0} channel: {1}".format(token, channel))
+        jresult = hummingbird.post("http://localhost:5555/postmessageschannel/{0}".format(token), uid=channel, message=message, metainfo=metainfo)
+        print("response: ", jresult)
+        
+        self.assertIsNotNone(jresult)
+        self.assertEqual(jresult["code"], 0)
+        self.assertIn("postid", jresult)
+        
+        postid = jresult["postid"]
+        
+        return postid
+        pass
+        
+    def test_12_messages(self):
+        print("----messages----")
+        
+        print("----newmessageschannel---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
+        jresult = hummingbird.post("http://localhost:5555/newmessageschannel/{0}/{1}".format(Testing.account_token, Testing.pid), maxpost=64)
+        print("response: ", jresult)
+
+        self.assertIsNotNone(jresult)
+        self.assertEqual(jresult["code"], 0)
+        self.assertIn("uid", jresult)
+        
+        channel = jresult["uid"]
+        
+        token0 = self.__createuser(Testing.pid)
+        token1 = self.__createuser(Testing.pid)
+        
+        postid0 = self.__postmessagechannel(token0, channel, "Hello World!", "<hello>")
+        postid1 = self.__postmessagechannel(token1, channel, "Happy World!", "<happy>")
+        
+        print("----getmessageschannel---- token: {0}".format(token0))
+        jresult = hummingbird.post("http://localhost:5555/getmessageschannel/{0}".format(token0), uid=channel, postid=0)
+        print("response: ", jresult)
+
+        self.assertIsNotNone(jresult)
+        self.assertEqual(jresult["code"], 0)
         pass
     pass
 

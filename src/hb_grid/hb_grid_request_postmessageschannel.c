@@ -1,6 +1,6 @@
 #include "hb_grid.h"
 
-#include "hb_grid_process_newmessageschannel.h"
+#include "hb_grid_process_postmessageschannel.h"
 #include "hb_grid_process_script_event.h"
 
 #include "hb_token/hb_token.h"
@@ -15,30 +15,69 @@ hb_http_code_t hb_grid_request_postmessageschannel( struct evhttp_request * _req
 {
     HB_UNUSED( _request );
 
-    const char * account_token = _args->arg1;
-    const char * puid = _args->arg2;
+    const char * user_token = _args->arg1;
 
-    hb_grid_process_newmessageschannel_in_data_t in_data;
-    if( hb_token_base16_decode_string( account_token, &in_data.token ) == HB_FAILURE )
+    hb_grid_process_postmessageschannel_in_data_t in_data;
+
+    if( hb_token_base16_decode_string( user_token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
+    hb_bool_t required_successful = HB_TRUE;
 
-    in_data.maxpost = 256;
+    {
+        hb_json_handle_t * json_handle;
+        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
 
-    hb_grid_process_newmessageschannel_out_data_t out_data;
-    if( hb_grid_process_newmessageschannel( _process, &in_data, &out_data ) == HB_FAILURE )
+        if( hb_json_get_field_uint32_required( json_handle, "uid", &in_data.cuid, &required_successful ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        if( hb_json_copy_field_string_required( json_handle, "message", in_data.message, 256, &required_successful ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        if( hb_json_copy_field_string_required( json_handle, "metainfo", in_data.metainfo, 256, &required_successful ) == HB_FAILURE )
+        {
+            return HTTP_BADREQUEST;
+        }
+
+        hb_json_destroy( json_handle );
+    }
+
+    if( required_successful == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }    
+
+    hb_grid_process_postmessageschannel_out_data_t out_data;
+    if( hb_grid_process_postmessageschannel( _process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"id\":%d}"
-        , out_data.muid
-    );
+    if( out_data.code == HB_ERROR_OK )
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\":0,\"postid\":%u}"
+            , out_data.postid
+        );
 
-    *_size = response_data_size;
+        *_size = response_data_size;
+    }
+    else
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+            , out_data.code
+        );
+
+        *_size = response_data_size;
+    }
 
     return HTTP_OK;
 }

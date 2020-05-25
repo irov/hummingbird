@@ -9,6 +9,7 @@
 #include "hb_utils/hb_base16.h"
 
 #include <stdio.h>
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_messages_handle_t
@@ -27,9 +28,10 @@ typedef struct hb_messages_channel_post_handle_t
 {
     hb_list_element_t element;
 
-    uint32_t id;
+    uint32_t postid;
     hb_uid_t uuid;
-    hb_messages_post_t post;
+    char message[256];
+    char metainfo[256];
 } hb_messages_channel_post_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_messages_channel_handle_t
@@ -75,7 +77,7 @@ void hb_messages_destroy( hb_messages_handle_t * _handle )
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, uint32_t _maxpost, hb_uid_t * _muid )
+hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, uint32_t _maxpost, hb_uid_t * _cuid )
 {
     HB_UNUSED( _handle );
 
@@ -86,6 +88,7 @@ hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db
     }
 
     hb_db_make_uid_value( new_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
+    hb_db_make_int32_value( new_values, "maxpost", HB_UNKNOWN_STRING_SIZE, _maxpost );
 
     hb_oid_t moid;
     if( hb_db_new_document_by_name( _client, "hb_messages", new_values, &moid ) == HB_FAILURE )
@@ -93,33 +96,34 @@ hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db
         return HB_FAILURE;
     }
 
+    hb_db_destroy_values( new_values );
+
     hb_db_values_handle_t * uid_values;
     if( hb_db_create_values( &uid_values ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( uid_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
-    hb_db_make_int32_value( uid_values, "maxpost", HB_UNKNOWN_STRING_SIZE, _maxpost );    
+    hb_db_make_uid_value( uid_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );    
 
-    hb_uid_t muid;
-    if( hb_db_make_uid_by_name( _client, "hb_messages", &moid, uid_values, &muid ) == HB_FAILURE )
+    hb_uid_t cuid;
+    if( hb_db_make_uid_by_name( _client, "hb_messages", &moid, uid_values, &cuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( uid_values );
 
-    *_muid = muid;
+    *_cuid = cuid;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _muid, hb_messages_channel_handle_t ** _channel )
+static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _cuid, hb_messages_channel_handle_t ** _channel )
 {
     hb_messages_channel_key_t key;
     key.puid = _puid;
-    key.muid = _muid;
+    key.muid = _cuid;
 
     hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t * )hb_hashtable_find( _handle->ht_channel, &key, sizeof( hb_messages_channel_key_t ) );
 
@@ -131,7 +135,7 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
             return HB_FAILURE;
         }
 
-        hb_db_make_uid_value( find_values, "uid", HB_UNKNOWN_STRING_SIZE, _muid );
+        hb_db_make_uid_value( find_values, "uid", HB_UNKNOWN_STRING_SIZE, _cuid );
         hb_db_make_uid_value( find_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
         
         const char * fields[] = { "maxpost" };
@@ -190,14 +194,12 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _muid, hb_uid_t _uuid, const hb_messages_post_t * _post, uint32_t * _postid, hb_error_code_t * _code )
+hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _cuid, const hb_messages_post_t * _post, uint32_t * _postid, hb_error_code_t * _code )
 {
-    HB_UNUSED( _uuid );
-
     hb_mutex_lock( _handle->mutex );
 
     hb_messages_channel_handle_t * channel_handle;
-    if( __hb_messages_get_channel( _handle, _client, _puid, _muid, &channel_handle ) == HB_FAILURE )
+    if( __hb_messages_get_channel( _handle, _client, _puid, _cuid, &channel_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -216,9 +218,10 @@ hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const 
     uint32_t newid = ++channel_handle->enumerator;
 
     hb_messages_channel_post_handle_t * post = HB_NEW( hb_messages_channel_post_handle_t );
-    post->id = newid;
-    post->uuid = _uuid;
-    post->post = *_post;
+    post->postid = newid;
+    post->uuid = _post->uuid;
+    strcpy( post->message, _post->message );
+    strcpy( post->metainfo, _post->metainfo );
 
     hb_list_push_front( channel_handle->l_posts, &post->element );
 
@@ -235,6 +238,70 @@ hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const 
 
     *_postid = newid;
     *_code = HB_ERROR_OK;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_messages_channel_get_posts( hb_messages_handle_t * _handle, hb_uid_t _puid, hb_uid_t _cuid, uint32_t _postid, hb_messages_get_t * _post, size_t _postcapacity, uint32_t * _count, hb_error_code_t * _code )
+{
+    hb_messages_channel_key_t key;
+    key.puid = _puid;
+    key.muid = _cuid;
+
+    hb_mutex_lock( _handle->mutex );
+
+    hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t *)hb_hashtable_find( _handle->ht_channel, &key, sizeof( hb_messages_channel_key_t ) );
+
+    hb_mutex_unlock( _handle->mutex );
+
+    if( channel_handle == HB_NULLPTR )
+    {
+        *_code = HB_ERROR_NOT_FOUND;
+
+        return HB_SUCCESSFUL;
+    }
+
+    *_code = HB_ERROR_OK;
+
+    uint32_t count = 0;
+
+    hb_mutex_lock( _handle->mutex );
+
+    for( hb_list_element_t * element = hb_list_get_begin( channel_handle->l_posts );
+        element != HB_NULLPTR;
+        element = element->next )
+    {
+        hb_messages_channel_post_handle_t * post = (hb_messages_channel_post_handle_t *)element;
+
+        if( post->postid == _postid )
+        {
+            break;
+        }
+
+        if( post->postid < _postid )
+        {            
+            *_code = HB_ERROR_BAD_ARGUMENTS;
+
+            break;
+        }
+
+        if( _postcapacity-- == 0 )
+        {
+            break;
+        }
+
+        hb_messages_get_t * p = _post++;
+        p->postid = post->postid;
+        p->uuid = post->uuid;
+        p->message = post->message;
+        p->metainfo = post->metainfo;
+
+        ++count;
+    }
+
+    hb_mutex_unlock( _handle->mutex );
+
+    *_count = count;
 
     return HB_SUCCESSFUL;
 }

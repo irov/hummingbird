@@ -14,14 +14,14 @@ hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request,
 {
     const char * user_token = _args->arg1;
 
-    hb_bool_t required_successful = HB_TRUE;
-
     hb_grid_process_setleaderscore_in_data_t in_data;
 
     if( hb_token_base16_decode_string( user_token, &in_data.token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
+
+    hb_bool_t required_successful = HB_TRUE;
 
     {
         hb_json_handle_t * json_handle;
