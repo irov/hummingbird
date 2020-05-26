@@ -15,7 +15,7 @@
 typedef struct hb_messages_handle_t
 {
     hb_mutex_handle_t * mutex;
-    hb_hashtable_t * ht_channel;
+    hb_hashtable_t * ht_channels;
 } hb_messages_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_messages_channel_key_t
@@ -54,7 +54,7 @@ hb_result_t hb_messages_create( hb_messages_handle_t ** _handle )
         return HB_FAILURE;
     }
 
-    handle->ht_channel = ht_channel;
+    handle->ht_channels = ht_channel;
 
     hb_mutex_handle_t * mutex;
     if( hb_mutex_create( &mutex ) == HB_FAILURE )
@@ -71,7 +71,7 @@ hb_result_t hb_messages_create( hb_messages_handle_t ** _handle )
 //////////////////////////////////////////////////////////////////////////
 void hb_messages_destroy( hb_messages_handle_t * _handle )
 {
-    hb_hashtable_destroy( _handle->ht_channel );
+    hb_hashtable_destroy( _handle->ht_channels );
     hb_mutex_destroy( _handle->mutex );
 
     HB_DELETE( _handle );
@@ -125,7 +125,7 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
     key.puid = _puid;
     key.muid = _cuid;
 
-    hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t * )hb_hashtable_find( _handle->ht_channel, &key, sizeof( hb_messages_channel_key_t ) );
+    hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t * )hb_hashtable_find( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ) );
 
     if( channel_handle == HB_NULLPTR )
     {
@@ -183,7 +183,7 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
 
         channel_handle->mutex = mutex;
 
-        if( hb_hashtable_emplace( _handle->ht_channel, &key, sizeof( hb_messages_channel_key_t ), channel_handle ) == HB_FAILURE )
+        if( hb_hashtable_emplace( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ), channel_handle ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -250,7 +250,7 @@ hb_result_t hb_messages_channel_get_posts( hb_messages_handle_t * _handle, hb_ui
 
     hb_mutex_lock( _handle->mutex );
 
-    hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t *)hb_hashtable_find( _handle->ht_channel, &key, sizeof( hb_messages_channel_key_t ) );
+    hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t *)hb_hashtable_find( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ) );
 
     hb_mutex_unlock( _handle->mutex );
 
