@@ -25,7 +25,7 @@ hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process
         return HB_FAILURE;
     }
 
-    hb_db_make_symbol_value( values_update, "info_nickname", HB_UNKNOWN_STRING_SIZE, _in->nickname, HB_UNKNOWN_STRING_SIZE );
+    hb_db_make_string_value( values_update, "info_nickname", HB_UNKNOWN_STRING_SIZE, _in->nickname, HB_UNKNOWN_STRING_SIZE );
 
     if( hb_db_update_values_by_name( _process->db_client, "hb_users", &token_handle.uoid, values_update ) == HB_FAILURE )
     {

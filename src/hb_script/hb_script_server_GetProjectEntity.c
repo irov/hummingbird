@@ -26,7 +26,7 @@ int hb_script_server_GetProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_symbol_value( query_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
+    hb_db_make_string_value( query_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
     hb_db_make_oid_value( query_values, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
 
     hb_bool_t exist;

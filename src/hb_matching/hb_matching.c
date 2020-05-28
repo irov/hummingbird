@@ -94,7 +94,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     }
 
     hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-    hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
+    hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
     hb_bool_t exist;
     if( hb_db_find_oid( db_collection_matching, find_values, HB_NULLPTR, &exist ) == HB_FAILURE )
@@ -120,12 +120,12 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     }
 
     hb_db_make_oid_value( room_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-    hb_db_make_symbol_value( room_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
+    hb_db_make_string_value( room_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
     hb_db_make_int32_value( room_values, "count", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->matching_count );
     hb_db_make_int32_value( room_values, "dispersion", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->matching_dispersion );
     hb_db_make_int32_value( room_values, "join_timeout", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->join_timeout );
     hb_db_make_int32_value( room_values, "wait_timeout", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->wait_timeout );
-    hb_db_make_symbol_value( room_values, "public_data", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
+    hb_db_make_string_value( room_values, "public_data", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
 
     hb_oid_t moid;
     if( hb_db_new_document( db_collection_matching, room_values, &moid ) == HB_FAILURE )
@@ -182,7 +182,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     }
 
     hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-    hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
+    hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
     hb_oid_t moid;
     hb_bool_t exist;
@@ -435,7 +435,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         desc.wuid = wuid;
         desc.users = user_matchings;
         desc.users_count = room_matching_count;
-        hb_db_get_symbol_value( values, 0, &desc.data, &desc.data_size );
+        hb_db_get_string_value( values, 0, &desc.data, &desc.data_size );
         desc.ud = _ud;
 
         hb_result_t result = (*_complete)(&desc);
@@ -500,7 +500,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     }
 
     hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-    hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
+    hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
     hb_oid_t moid;
     hb_bool_t exist;
@@ -576,7 +576,7 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
     }
 
     hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-    hb_db_make_symbol_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
+    hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
     hb_oid_t moid;
     hb_bool_t exist;

@@ -30,7 +30,7 @@ void hb_db_copy_values( hb_db_values_handle_t * _values, const hb_db_values_hand
 void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_uid_t _value );
 void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value );
 void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int64_t _value );
-void hb_db_make_symbol_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength );
+void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength );
 void hb_db_make_binary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength );
 void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_time_t _time );
 void hb_db_make_oid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_oid_t * _oid );
@@ -40,9 +40,11 @@ hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t
 hb_result_t hb_db_get_int32_value( const hb_db_values_handle_t * _values, uint32_t _index, int32_t * _value );
 hb_result_t hb_db_get_uint32_value( const hb_db_values_handle_t * _values, uint32_t _index, uint32_t * _value );
 hb_result_t hb_db_get_int64_value( const hb_db_values_handle_t * _values, uint32_t _index, int64_t * _value );
-hb_result_t hb_db_get_symbol_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, size_t * _length );
+hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, size_t * _length );
+hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint32_t _index, char * _value, size_t _capacity );
 hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, const void ** _buffer, size_t * _length );
-hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _size );
+hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _capacity );
+hb_result_t hb_db_get_time_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_time_t * _value );
 
 hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _values, hb_oid_t * _newoid );
 hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _values, hb_oid_t * _newoid );

@@ -383,7 +383,7 @@ void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _fiel
     value->u.i64 = _value;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_make_symbol_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength )
+void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength )
 {
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
@@ -517,7 +517,7 @@ hb_result_t hb_db_get_int64_value( const hb_db_values_handle_t * _values, uint32
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_symbol_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, size_t * _length )
+hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, size_t * _length )
 {
     if( _index >= _values->value_count )
     {
@@ -533,6 +533,31 @@ hb_result_t hb_db_get_symbol_value( const hb_db_values_handle_t * _values, uint3
 
     *_value = value->u.symbol.buffer;
     *_length = value->u.symbol.length;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint32_t _index, char * _value, size_t _capacity )
+{
+    if( _index >= _values->value_count )
+    {
+        return HB_FAILURE;
+    }
+
+    const hb_db_value_handle_t * value = _values->values + _index;
+
+    if( value->type != e_hb_db_symbol )
+    {
+        return HB_FAILURE;
+    }
+
+    if( value->u.symbol.length != _capacity )
+    {
+        return HB_FAILURE;
+    }
+
+    memcpy( _value, value->u.symbol.buffer, value->u.symbol.length );
+    _value[value->u.symbol.length] = '\0';
 
     return HB_SUCCESSFUL;
 }
@@ -557,7 +582,7 @@ hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint3
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _size )
+hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _capacity )
 {
     if( _index >= _values->value_count )
     {
@@ -571,17 +596,36 @@ hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint
         return HB_FAILURE;
     }
 
-    if( value->u.binary.length != _size )
+    if( value->u.binary.length != _capacity )
     {
         return HB_FAILURE;
     }
 
-    memcpy( _buffer, value->u.binary.buffer, _size );
+    memcpy( _buffer, value->u.binary.buffer, value->u.binary.length );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t __hb_db_find_iter( const bson_t * _data, bson_iter_t * _iter, const char * _key )
+hb_result_t hb_db_get_time_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_time_t * _value )
+{
+    if( _index >= _values->value_count )
+    {
+        return HB_FAILURE;
+    }
+
+    const hb_db_value_handle_t * value = _values->values + _index;
+
+    if( value->type != e_hb_db_time )
+    {
+        return HB_FAILURE;
+    }
+
+    *_value = value->u.time;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_db_find_iter( const bson_t * _data, bson_iter_t * _iter, const char * _key )
 {
     if( bson_iter_find( _iter, _key ) == false )
     {

@@ -49,7 +49,7 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
 
         size_t nickname_len;
         const char * nickname;
-        if( hb_db_get_symbol_value( values, index * 2 + 1, &nickname, &nickname_len ) == HB_FAILURE )
+        if( hb_db_get_string_value( values, index * 2 + 1, &nickname, &nickname_len ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
