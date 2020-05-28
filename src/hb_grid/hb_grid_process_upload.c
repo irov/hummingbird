@@ -52,10 +52,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, &token_handle.aoid );
+    hb_db_make_uid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );
     hb_db_make_uid_value( values_project_found, "uid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
-    hb_oid_t project_oid;
+    hb_uid_t project_oid;
     hb_bool_t project_exist;
     if( hb_db_find_oid( db_collection_projects, values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
     {
@@ -74,7 +74,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     {
         const char * db_projects_fields[] = {"script_revision"};
 
-        if( hb_db_get_values( db_collection_projects, &project_oid, db_projects_fields, 1, &db_script_revision_handle ) == HB_FAILURE )
+        if( hb_db_get_values( db_collection_projects, project_oid, db_projects_fields, 1, &db_script_revision_handle ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -94,7 +94,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         return HB_FAILURE;
     }
 
-    hb_oid_t project_subversion_oid;
+    hb_uid_t project_subversion_oid;
 
     if( script_revision == 0 )
     {
@@ -115,7 +115,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         const char * db_projects_fields[] = {"script_sha1"};
 
         hb_db_values_handle_t * values_sha1;
-        if( hb_db_get_values( db_collection_projects, &project_oid, db_projects_fields, 1, &values_sha1 ) == HB_FAILURE )
+        if( hb_db_get_values( db_collection_projects, project_oid, db_projects_fields, 1, &values_sha1 ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -150,10 +150,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     }
 
     hb_db_make_sha1_value( values_update, "script_sha1", HB_UNKNOWN_STRING_SIZE, &sha1 );
-    hb_db_make_oid_value( values_update, "script_subversion", HB_UNKNOWN_STRING_SIZE, &project_subversion_oid );
+    hb_db_make_uid_value( values_update, "script_subversion", HB_UNKNOWN_STRING_SIZE, project_subversion_oid );
     hb_db_make_int64_value( values_update, "script_revision", HB_UNKNOWN_STRING_SIZE, script_revision + 1 );
 
-    hb_db_update_values( db_collection_projects, &project_oid, values_update );
+    hb_db_update_values( db_collection_projects, project_oid, values_update );
 
     hb_db_destroy_values( values_update );
 

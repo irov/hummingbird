@@ -271,37 +271,53 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_han
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _values, hb_oid_t * _newoid )
+hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, const hb_db_values_handle_t * _values, hb_uid_t * _newuid )
 {
     mongoc_collection_t * mongo_collection = _collection->mongo_collection;
 
-    bson_oid_t oid;
-    bson_oid_init( &oid, HB_NULLPTR );
-
-    bson_t query;
-    bson_init( &query );
-
-    BSON_APPEND_OID( &query, "_id", &oid );
-
-    if( __hb_db_append_values( &query, _values ) == HB_FAILURE )
+    hb_uid_t uid = 0;
+    for( ;; )
     {
-        return HB_FAILURE;
+        do
+        {
+            uid = hb_rand_time();
+            uid &= 0x7fffffff;
+        } while( uid == 0 );
+
+        bson_t query;
+        bson_init( &query );
+
+        BSON_APPEND_INT32( &query, "_id", uid );
+
+        if( __hb_db_append_values( &query, _values ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        bson_error_t error;
+        bool successful = mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error );
+
+        bson_destroy( &query );
+
+        if( successful == false )
+        {
+            if( error.code == 11000 )
+            {
+                continue;
+            }
+
+            return HB_FAILURE;
+        }        
+
+        break;
     }
 
-    bson_error_t error;
-    if( mongoc_collection_insert_one( mongo_collection, &query, HB_NULLPTR, HB_NULLPTR, &error ) == false )
-    {
-        return HB_FAILURE;
-    }
-
-    bson_destroy( &query );
-
-    memcpy( _newoid->value, oid.bytes, sizeof( hb_oid_t ) );
+    *_newuid = uid;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _values, hb_oid_t * _newoid )
+hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _values, hb_uid_t * _newuid )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -313,7 +329,7 @@ hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, c
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_new_document( db_collection, _values, _newoid );
+    hb_result_t result = hb_db_new_document( db_collection, _values, _newuid );
 
     hb_db_destroy_collection( db_collection );
 
@@ -423,17 +439,6 @@ void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     value->u.time = _time;
-}
-//////////////////////////////////////////////////////////////////////////
-void hb_db_make_oid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_oid_t * _oid )
-{
-    hb_db_value_handle_t * value = _values->values + _values->value_count;
-    ++_values->value_count;
-
-    value->type = e_hb_db_oid;
-    value->field = _field;
-    value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
-    value->u.oid = _oid->value;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_sha1_t * _sha1 )
@@ -650,7 +655,7 @@ static hb_result_t __hb_db_find_iter( const bson_t * _data, bson_iter_t * _iter,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _oid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
 
@@ -697,11 +702,11 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
         return HB_FAILURE;
     }
 
-    const bson_oid_t * oid = bson_iter_oid( &iter );
+    int32_t oid = bson_iter_int32( &iter );
 
     if( _oid != HB_NULLPTR )
     {
-        memcpy( _oid->value, oid->bytes, sizeof( hb_oid_t ) );
+        *_oid = oid;
     }
 
     mongoc_cursor_destroy( cursor );
@@ -711,7 +716,7 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _oid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -811,7 +816,7 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
 
@@ -873,9 +878,9 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
             return HB_FAILURE;
         }
 
-        const bson_oid_t * oid = bson_iter_oid( &iter );
+        int32_t oid = bson_iter_int32( &iter );
 
-        memcpy( _oid->value, oid->bytes, sizeof( hb_oid_t ) );
+        *_oid = oid;
     }
 
     for( uint32_t index = 0; index != _fieldcount; ++index )
@@ -911,7 +916,7 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_oid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
+hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -1045,7 +1050,7 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_uid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
 {
     if( _oidcount == 0 )
     {
@@ -1059,12 +1064,9 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
     if( _oidcount == 1 )
     {
-        const hb_oid_t * oid = _oids + 0;
+        hb_uid_t oid = _oids[0];
 
-        bson_oid_t boid;
-        bson_oid_init_from_data( &boid, oid->value );
-
-        BSON_APPEND_OID( &query, "_id", &boid );
+        BSON_APPEND_INT32( &query, "_id", oid );
     }
     else
     {
@@ -1076,12 +1078,9 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
         for( uint32_t index = 0; index != _oidcount; ++index )
         {
-            const hb_oid_t * oid = _oids + index;
+            hb_uid_t uid = _oids[index];
 
-            bson_oid_t boid;
-            bson_oid_init_from_data( &boid, oid->value );
-
-            BSON_APPEND_OID( &query_in, "$oid", &boid );
+            BSON_APPEND_INT32( &query_in, "$oid", uid );
         }
 
         bson_append_array_end( &query_id, &query_in );
@@ -1143,13 +1142,13 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
                 return HB_FAILURE;
             }
 
-            const bson_oid_t * oid = bson_iter_oid( &iter );
+            hb_uid_t oid = bson_iter_int32( &iter );
 
             for( uint32_t index_correct = 0; index_correct != _oidcount; ++index_correct )
             {
-                const hb_oid_t * correct_oid = _oids + index_correct;
+                hb_uid_t correct_oid = _oids[index_correct];
 
-                if( memcmp( correct_oid->value, oid->bytes, 12 ) == 0 )
+                if( correct_oid == oid )
                 {
                     correct_index_oid = index_correct;
                 }
@@ -1200,7 +1199,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_uid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -1219,14 +1218,14 @@ hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, co
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, hb_uid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
 {
-    hb_result_t result = hb_db_gets_values( _collection, _oid, 1, _fields, _count, _values );
+    hb_result_t result = hb_db_gets_values( _collection, &_oid, 1, _fields, _count, _values );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, const char * _name, hb_uid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -1245,16 +1244,13 @@ hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, con
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _handles )
+hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, hb_uid_t _oid, const hb_db_values_handle_t * _handles )
 {
     mongoc_collection_t * mongo_collection = _collection->mongo_collection;
 
-    bson_oid_t oid;
-    bson_oid_init_from_data( &oid, _oid->value );
-
     bson_t query;
     bson_init( &query );
-    BSON_APPEND_OID( &query, "_id", &oid );
+    BSON_APPEND_INT32( &query, "_id", _oid );
 
     bson_t update;
     bson_init( &update );
@@ -1281,7 +1277,7 @@ hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values )
+hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, const char * _name, hb_uid_t _oid, const hb_db_values_handle_t * _values )
 {
     hb_db_collection_handle_t * db_collection;
     if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
@@ -1347,77 +1343,6 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, cons
     mongoc_cursor_destroy( cursor );
 
     return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_make_uid( const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid )
-{
-    hb_uid_t uid = 0;
-    uint32_t founds = 0;
-    for( ; founds != 1; )
-    {
-        do
-        {
-            uid = hb_rand_time();
-            uid &= 0x7fffffff;
-        } while( uid == 0 );
-
-        hb_db_values_handle_t * update_values;
-        hb_db_create_values( &update_values );
-
-        hb_db_make_uid_value( update_values, "uid", HB_UNKNOWN_STRING_SIZE, uid );
-
-        if( hb_db_update_values( _collection, _oid, update_values ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-        
-        hb_db_destroy_values( update_values );
-
-        hb_db_values_handle_t * count_values;
-
-        if( hb_db_create_values( &count_values ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_db_copy_values( count_values, _values );
-        hb_db_make_uid_value( count_values, "uid", HB_UNKNOWN_STRING_SIZE, uid );
-
-        if( hb_db_count_values( _collection, count_values, &founds ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_db_destroy_values( count_values );
-
-        if( founds == 0 )
-        {
-            return HB_FAILURE;
-        }
-    }
-
-    *_uid = uid;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_make_uid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_oid_t * _oid, const hb_db_values_handle_t * _values, hb_uid_t * _uid )
-{
-    hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
-            , _name
-        );
-
-        return HB_FAILURE;
-    }
-
-    hb_result_t result = hb_db_make_uid( db_collection, _oid, _values, _uid );
-
-    hb_db_destroy_collection( db_collection );
-
-    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_script_handle_t

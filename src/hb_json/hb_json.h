@@ -25,7 +25,6 @@ typedef enum hb_json_type_t
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out );
 uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle );
-hb_result_t hb_json_to_oid16( hb_json_handle_t * _handle, hb_oid16_t * _oid );
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size );
 hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value );
 hb_result_t hb_json_to_int32( hb_json_handle_t * _handle, int32_t * _value );
@@ -35,7 +34,6 @@ hb_result_t hb_json_to_uint32( hb_json_handle_t * _handle, uint32_t * _value );
 hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value );
 hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value );
 
-hb_result_t hb_json_get_field_oid16( hb_json_handle_t * _handle, const char * _key, hb_oid16_t * _oid );
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default );
 hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, const char * _default );
 hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, hb_bool_t * _result );

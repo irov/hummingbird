@@ -38,8 +38,8 @@ typedef struct hb_script_handle_t
     hb_db_collection_handle_t * db_collection_worlds;
     hb_db_collection_handle_t * db_collection_avatars;
 
-    hb_oid_t project_oid;
-    hb_oid_t user_oid;
+    hb_uid_t project_oid;
+    hb_uid_t user_oid;
 
     hb_matching_handle_t * matching;
 } hb_script_handle_t;

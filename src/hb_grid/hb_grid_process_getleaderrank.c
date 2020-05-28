@@ -21,7 +21,7 @@ hb_result_t hb_grid_process_getleaderrank( hb_grid_process_handle_t * _process, 
 
     uint32_t rank;
     hb_bool_t exist;
-    if( hb_leaderboard_get_rank( _process->cache, &token_handle.poid, &token_handle.uoid, &rank, &exist ) == HB_FAILURE )
+    if( hb_leaderboard_get_rank( _process->cache, token_handle.puid, token_handle.uuid, &rank, &exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

@@ -8,7 +8,6 @@
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_base16.h"
 #include "hb_utils/hb_sha1.h"
-#include "hb_utils/hb_oid.h"
 
 #include <string.h>
 

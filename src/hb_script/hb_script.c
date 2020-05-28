@@ -5,7 +5,6 @@
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_storage/hb_storage.h"
-#include "hb_utils/hb_oid.h"
 
 #include <malloc.h>
 #include <string.h>
@@ -202,7 +201,7 @@ static hb_result_t __hb_script_load( hb_script_handle_t * _handle, const void * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, const hb_oid_t * _poid )
+static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_uid_t _poid )
 {
     const char * db_projects_fields[] = {"script_sha1"};
 
@@ -252,7 +251,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t * _poid, const hb_oid_t * _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, hb_uid_t _poid, hb_uid_t _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
@@ -322,8 +321,8 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
         return HB_FAILURE;
     }
 
-    hb_oid_copy( &handle->project_oid, _poid );
-    hb_oid_copy( &handle->user_oid, _uoid );
+    handle->project_oid = _poid;
+    handle->user_oid = _uoid;
 
     handle->matching = _matching;
 

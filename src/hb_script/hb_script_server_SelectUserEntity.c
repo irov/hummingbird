@@ -2,7 +2,6 @@
 #include "hb_script_json.h"
 
 #include "hb_json/hb_json.h"
-#include "hb_utils/hb_oid.h"
 #include "hb_utils/hb_rand.h"
 #include "hb_utils/hb_base16.h"
 
@@ -45,8 +44,8 @@ int hb_script_server_SelectUserEntity( lua_State * L )
     }
 
     hb_db_make_string_value( query, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
-    hb_db_make_oid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, &script_handle->project_oid );
-    hb_db_make_oid_value( query, "uoid", HB_UNKNOWN_STRING_SIZE, &script_handle->user_oid );
+    hb_db_make_uid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
+    hb_db_make_uid_value( query, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
 
     const char * db_fields[1] = {"uid"};
 
