@@ -34,6 +34,7 @@ typedef struct hb_grid_process_handle_t
     evutil_socket_t * ev_socket;
 
     hb_thread_handle_t * thread;
+    hb_db_handle_t * db;
     hb_db_client_handle_t * db_client;
 
     hb_grid_config_t * config;

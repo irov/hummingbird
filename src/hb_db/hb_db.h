@@ -5,13 +5,15 @@
 
 #include "hb_utils/hb_time.h"
 
-hb_result_t hb_db_initialze( const char * _uri, uint16_t _port );
-void hb_db_finalize();
+typedef struct hb_db_handle_t hb_db_handle_t;
+
+hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t ** _handle );
+void hb_db_finalize( hb_db_handle_t * _handle );
 
 typedef struct hb_db_client_handle_t hb_db_client_handle_t;
 
-hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle );
-void hb_db_destroy_client( hb_db_client_handle_t * _handle );
+hb_result_t hb_db_create_client( hb_db_handle_t * _handle, hb_db_client_handle_t ** _client );
+void hb_db_destroy_client( hb_db_handle_t * _handle, hb_db_client_handle_t * _client );
 
 typedef struct hb_db_collection_handle_t hb_db_collection_handle_t;
 

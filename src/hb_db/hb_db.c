@@ -77,10 +77,15 @@ typedef struct hb_db_collection_handle_t
     mongoc_collection_t * mongo_collection;
 } hb_db_collection_handle_t;
 //////////////////////////////////////////////////////////////////////////
-mongoc_client_pool_t * g_mongo_pool = HB_NULLPTR;
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_initialze( const char * _uri, uint16_t _port )
+typedef struct hb_db_handle_t
 {
+    mongoc_client_pool_t * mongo_pool;
+} hb_db_handle_t;
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t ** _handle )
+{
+    hb_db_handle_t * handle = HB_NEW( hb_db_handle_t );
+
     mongoc_init();
 
     mongoc_uri_t * mongoc_uri = mongoc_uri_new_for_host_port( _uri, _port );
@@ -129,39 +134,41 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port )
         mongoc_client_destroy( mongo_client );
 
         return HB_FAILURE;
-    }
+    }    
 
-    g_mongo_pool = mongo_pool;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-void hb_db_finalize()
-{
-    mongoc_client_pool_destroy( g_mongo_pool );
-    g_mongo_pool = HB_NULLPTR;
-    
-    mongoc_cleanup();
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_create_client( hb_db_client_handle_t ** _handle )
-{
-    hb_db_client_handle_t * handle = HB_NEW( hb_db_client_handle_t );
-
-    mongoc_client_t * mongo_client = mongoc_client_pool_pop( g_mongo_pool );
-    handle->mongo_client = mongo_client;
+    handle->mongo_pool = mongo_pool;
 
     *_handle = handle;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_destroy_client( hb_db_client_handle_t * _handle )
+void hb_db_finalize( hb_db_handle_t * _handle )
 {
-    mongoc_client_t * mongo_client = _handle->mongo_client;
-    mongoc_client_pool_push( g_mongo_pool, mongo_client );
+    mongoc_client_pool_destroy( _handle->mongo_pool );
+    _handle->mongo_pool = HB_NULLPTR;
+    
+    mongoc_cleanup();
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_create_client( hb_db_handle_t * _handle, hb_db_client_handle_t ** _client )
+{
+    hb_db_client_handle_t * handle = HB_NEW( hb_db_client_handle_t );
 
-    HB_DELETE( _handle );
+    mongoc_client_t * mongo_client = mongoc_client_pool_pop( _handle->mongo_pool );
+    handle->mongo_client = mongo_client;
+
+    *_client = handle;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_db_destroy_client( hb_db_handle_t * _handle, hb_db_client_handle_t * _client )
+{
+    mongoc_client_t * mongo_client = _client->mongo_client;
+    mongoc_client_pool_push( _handle->mongo_pool, mongo_client );
+
+    HB_DELETE( _client );
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_get_collection( const hb_db_client_handle_t * _client, const char * _db, const char * _name, hb_db_collection_handle_t ** _handle )
