@@ -134,7 +134,7 @@ static void __hb_ev_thread_base( void * _ud )
     hb_grid_process_handle_t * handle = (hb_grid_process_handle_t *)_ud;
 
     hb_db_client_handle_t * db_client;
-    if( hb_db_create_client( &db_client ) == HB_FAILURE )
+    if( hb_db_create_client( handle->db, &db_client ) == HB_FAILURE )
     {
         return;
     }
@@ -165,7 +165,7 @@ static void __hb_ev_thread_base( void * _ud )
 
     event_base_dispatch( base );
 
-    hb_db_destroy_client( handle->db_client );
+    hb_db_destroy_client( handle->db, handle->db_client );
 
     evhttp_free( http_server );
 }
@@ -304,7 +304,8 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    if( hb_db_initialze( config->db_uri, config->db_port ) == HB_FAILURE )
+    hb_db_handle_t * db;
+    if( hb_db_initialze( config->db_uri, config->db_port, &db ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
             , config->name
@@ -347,6 +348,7 @@ int main( int _argc, char * _argv[] )
 
         process_handle->ev_socket = &ev_socket;
 
+        process_handle->db = db;
         process_handle->config = config;
         process_handle->matching = matching;
         process_handle->messages = messages;
@@ -412,7 +414,7 @@ int main( int _argc, char * _argv[] )
     hb_messages_destroy( messages );
     hb_matching_destroy( matching );
 
-    hb_db_finalize();
+    hb_db_finalize( db );
 
     hb_log_tcp_finalize();
 
