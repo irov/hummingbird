@@ -99,8 +99,8 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         hb_db_make_uid_value( values_user_new, "puid", HB_UNKNOWN_STRING_SIZE, _in->puid );
         hb_db_make_sha1_value( values_user_new, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
         hb_db_make_sha1_value( values_user_new, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
-        hb_db_make_symbol_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );        
-        hb_db_make_symbol_value( values_user_new, "info_nickname", HB_UNKNOWN_STRING_SIZE, "", HB_UNKNOWN_STRING_SIZE );
+        hb_db_make_string_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );        
+        hb_db_make_string_value( values_user_new, "info_nickname", HB_UNKNOWN_STRING_SIZE, "", HB_UNKNOWN_STRING_SIZE );
         hb_db_make_int32_value( values_user_new, "leaderboard_score", HB_UNKNOWN_STRING_SIZE, 0 );
 
         hb_oid_t user_oid;

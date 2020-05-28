@@ -19,7 +19,10 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
+    if( hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     {
         hb_json_handle_t * json_handle;

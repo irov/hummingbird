@@ -44,7 +44,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     hb_db_make_oid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, &token_handle.aoid );
     hb_db_make_int64_value( project_values, "script_revision", HB_UNKNOWN_STRING_SIZE, 0 );
     hb_db_make_int64_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );    
-    hb_db_make_symbol_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
+    hb_db_make_string_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
 
     hb_oid_t project_oid;
     if( hb_db_new_document( db_collection_projects, project_values, &project_oid ) == HB_FAILURE )

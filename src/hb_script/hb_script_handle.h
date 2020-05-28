@@ -4,6 +4,7 @@
 #include "hb_config/hb_config.h"
 
 #include "hb_db/hb_db.h"
+#include "hb_cache/hb_cache.h"
 #include "hb_matching/hb_matching.h"
 
 #include "lua.h"
@@ -25,6 +26,8 @@ typedef struct hb_script_handle_t
 
     uint32_t call_used;
     uint32_t call_limit;
+
+    const hb_cache_handle_t * cache;
 
     const hb_db_client_handle_t * db_client;
     hb_db_collection_handle_t * db_collection_projects;

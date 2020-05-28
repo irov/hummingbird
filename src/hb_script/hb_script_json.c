@@ -362,7 +362,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
     const char * public_data_symbol;
     size_t public_data_symbol_length;
 
-    if( hb_db_get_symbol_value( project_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
+    if( hb_db_get_string_value( project_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -394,7 +394,7 @@ hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const
         return HB_FAILURE;
     }
 
-    hb_db_make_symbol_value( values_update, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
+    hb_db_make_string_value( values_update, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
 
     if( hb_db_update_values( _collection, _oid, values_update ) == HB_FAILURE )
     {
@@ -419,7 +419,7 @@ hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, co
     const char * public_data_symbol;
     size_t public_data_symbol_length;
 
-    if( hb_db_get_symbol_value( user_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
+    if( hb_db_get_string_value( user_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -457,7 +457,7 @@ hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, co
         return HB_FAILURE;
     }
 
-    hb_db_make_symbol_value( update_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size );
+    hb_db_make_string_value( update_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_new_data, json_new_data_size );
 
     if( hb_db_update_values( _collection, _oid, update_values ) == HB_FAILURE )
     {

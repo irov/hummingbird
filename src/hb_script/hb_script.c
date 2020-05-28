@@ -159,10 +159,104 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_script_load( hb_script_handle_t * _handle, const void * _buffer, size_t _size )
+{
+    if( setjmp( _handle->panic_jump ) == 1 )
+    {
+        /* recovered from panic. log and return */
+
+        return HB_FAILURE;
+    }
+
+    lua_State * L = _handle->L;
+
+    int status = luaL_loadbufferx( L, _buffer, _size, "script", HB_NULLPTR );
+
+    if( status != LUA_OK )
+    {
+        const char * e = lua_tostring( L, -1 );
+        HB_LOG_MESSAGE_ERROR( "script", "invalid load buffer: %s"
+            , e
+        );
+
+        lua_pop( L, 1 );
+
+        return HB_FAILURE;
+    }
+
+    int ret = lua_pcallk( L, 0, 0, 0, 0, HB_NULLPTR );
+
+    if( ret != 0 )
+    {
+        const char * e = lua_tostring( L, -1 );
+
+        HB_LOG_MESSAGE_ERROR( "script", "invalid call buffer: %s"
+            , e
+        );
+
+        lua_pop( L, 1 );
+
+        return HB_FAILURE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, const hb_oid_t * _poid )
+{
+    const char * db_projects_fields[] = {"script_sha1"};
+
+    hb_db_values_handle_t * project_values;
+
+    if( hb_db_get_values( _handle->db_collection_projects, _poid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
+            , "hb_projects"
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_sha1_t script_sha1;
+    if( hb_db_copy_binary_value( project_values, 0, &script_sha1, sizeof( script_sha1 ) ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid data 'script_sha1'"
+            , "hb_projects"
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( project_values );
+
+    size_t script_data_size;
+    hb_data_t script_data;
+    if( hb_storage_get_code( _handle->cache, _handle->db_client, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
+            , "hb_projects"
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( __hb_script_load( _handle, script_data, script_data_size ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid load data"
+            , "hb_projects"
+        );
+
+        return HB_FAILURE;
+    }    
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, const hb_oid_t * _poid, const hb_oid_t * _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
+    handle->cache = _cache;
     handle->db_client = _db;
 
     if( hb_db_get_collection( _db, "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
@@ -290,48 +384,8 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
 
     *(hb_script_handle_t **)lua_getextraspace( L ) = handle;
 
-    const char * db_projects_fields[] = { "script_sha1" };
-
-    hb_db_values_handle_t * project_values;
-
-    if( hb_db_get_values( handle->db_collection_projects, _poid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values ) == HB_FAILURE )
+    if( __hb_script_load_project( handle, _poid ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
-            , "hb_projects"
-        );
-
-        return HB_FAILURE;
-    }
-
-    hb_sha1_t script_sha1;
-    if( hb_db_copy_binary_value( project_values, 0, &script_sha1, sizeof( script_sha1 ) ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid data 'script_sha1'"
-            , "hb_projects"
-        );
-
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_values( project_values );
-
-    size_t script_data_size;
-    hb_data_t script_data;
-    if( hb_storage_get_code( _cache, _db, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
-            , "hb_projects"
-        );
-
-        return HB_FAILURE;
-    }
-
-    if( hb_script_load( handle, script_data, script_data_size ) == HB_FAILURE )
-    {
-        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid load data"
-            , "hb_projects"
-        );
-
         return HB_FAILURE;
     }
 
@@ -367,49 +421,6 @@ void hb_script_stat( hb_script_handle_t * _handle, hb_script_stat_t * _stat )
     _stat->call_used = _handle->call_used;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_load( hb_script_handle_t * _handle, const void * _buffer, size_t _size )
-{
-    if( setjmp( _handle->panic_jump ) == 1 )
-    {
-        /* recovered from panic. log and return */
-
-        return HB_FAILURE;
-    }
-
-    lua_State * L = _handle->L;
-
-    int status = luaL_loadbufferx( L, _buffer, _size, "script", HB_NULLPTR );
-
-    if( status != LUA_OK )
-    {
-        const char * e = lua_tostring( L, -1 );
-        HB_LOG_MESSAGE_ERROR( "script", "invalid load buffer: %s"
-            , e
-        );
-
-        lua_pop( L, 1 );
-
-        return HB_FAILURE;
-    }
-
-    int ret = lua_pcallk( L, 0, 0, 0, 0, HB_NULLPTR );
-
-    if( ret != 0 )
-    {
-        const char * e = lua_tostring( L, -1 );
-
-        HB_LOG_MESSAGE_ERROR( "script", "invalid call buffer: %s"
-            , e
-        );
-
-        lua_pop( L, 1 );
-
-        return HB_FAILURE;
-    }
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
@@ -422,7 +433,7 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
     HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
         , _method
         , _datasize
-        , (const char *)_data 
+        , (const char *)_data
     );
 
     lua_State * L = _handle->L;
@@ -506,7 +517,7 @@ hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _ev
     HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'"
         , _event
         , _datasize
-        , (const char *)_data 
+        , (const char *)_data
     );
 
     lua_State * L = _handle->L;

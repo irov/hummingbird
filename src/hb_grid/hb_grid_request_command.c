@@ -20,7 +20,10 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
         return HTTP_BADREQUEST;
     }
 
-    hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR );
+    if( hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     strcpy( in_data.method, method );
 
