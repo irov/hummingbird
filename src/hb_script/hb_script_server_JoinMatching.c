@@ -3,7 +3,6 @@
 
 #include "hb_log/hb_log.h"
 #include "hb_json/hb_json.h"
-#include "hb_utils/hb_oid.h"
 #include "hb_utils/hb_rand.h"
 #include "hb_utils/hb_base16.h"
 
@@ -92,7 +91,7 @@ int hb_script_server_JoinMatching( lua_State * L )
     }
 
     hb_bool_t exist;
-    if( hb_matching_join( script_handle->matching, script_handle->db_client, &script_handle->project_oid, name, name_len, &script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
+    if( hb_matching_join( script_handle->matching, script_handle->db_client, script_handle->project_oid, name, name_len, script_handle->user_oid, (int32_t)rating, json_data, json_data_size, &exist, &__hb_matching_complete, (void *)L ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

@@ -20,9 +20,9 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
     }
 
     uint32_t descs_count;
-    hb_oid_t oids[16];
+    hb_uid_t oids[16];
     uint32_t scores[16];
-    if( hb_leaderboard_get_global( _process->cache, &token_handle.poid, _in->begin, _in->end, oids, scores, &descs_count ) == HB_FAILURE )
+    if( hb_leaderboard_get_global( _process->cache, token_handle.puid, _in->begin, _in->end, oids, scores, &descs_count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

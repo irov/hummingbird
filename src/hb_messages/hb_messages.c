@@ -5,7 +5,6 @@
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_hashtable.h"
 #include "hb_utils/hb_list.h"
-#include "hb_utils/hb_oid.h"
 #include "hb_utils/hb_base16.h"
 
 #include <stdio.h>
@@ -90,29 +89,13 @@ hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db
     hb_db_make_uid_value( new_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
     hb_db_make_int32_value( new_values, "maxpost", HB_UNKNOWN_STRING_SIZE, _maxpost );
 
-    hb_oid_t moid;
-    if( hb_db_new_document_by_name( _client, "hb_messages", new_values, &moid ) == HB_FAILURE )
+    hb_uid_t cuid;
+    if( hb_db_new_document_by_name( _client, "hb_messages", new_values, &cuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( new_values );
-
-    hb_db_values_handle_t * uid_values;
-    if( hb_db_create_values( &uid_values ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_make_uid_value( uid_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );    
-
-    hb_uid_t cuid;
-    if( hb_db_make_uid_by_name( _client, "hb_messages", &moid, uid_values, &cuid ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_values( uid_values );
 
     *_cuid = cuid;
 

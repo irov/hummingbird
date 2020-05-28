@@ -48,16 +48,6 @@ typedef struct hb_uid16_t
     char value[8];
 } hb_uid16_t;
 
-typedef struct hb_oid_t
-{
-    hb_byte_t value[12];
-} hb_oid_t;
-
-typedef struct hb_oid16_t
-{
-    char value[24];
-} hb_oid16_t;
-
 typedef struct hb_sha1_t
 {
     hb_byte_t value[20];
@@ -73,19 +63,17 @@ typedef struct hb_token16_t
     char value[28];
 } hb_token16_t;
 
-static const hb_oid_t HB_OID_NONE = { 0 };
+static const hb_uid_t HB_UID_NONE = 0;
 
 typedef struct hb_user_token_t
 {
-    hb_oid_t uoid;
-    hb_oid_t poid;
     hb_uid_t uuid;
     hb_uid_t puid;
 } hb_user_token_t;
 
 typedef struct hb_account_token_t
 {
-    hb_oid_t aoid;
+    hb_uid_t aoid;
 } hb_account_token_t;
 
 #ifndef HB_DATA_MAX_SIZE

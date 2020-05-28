@@ -5,7 +5,6 @@
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_hashtable.h"
 #include "hb_utils/hb_list.h"
-#include "hb_utils/hb_oid.h"
 #include "hb_utils/hb_base16.h"
 
 #include "string.h"
@@ -86,29 +85,13 @@ hb_result_t hb_events_new_topic( hb_events_handle_t * _handle, const hb_db_clien
 
     hb_db_make_time_value( new_values, "start", HB_UNKNOWN_STRING_SIZE, t );
 
-    hb_oid_t moid;
-    if( hb_db_new_document_by_name( _client, "hb_events", new_values, &moid ) == HB_FAILURE )
+    hb_uid_t tuid;
+    if( hb_db_new_document_by_name( _client, "hb_events", new_values, &tuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( new_values );
-
-    hb_db_values_handle_t * uid_values;
-    if( hb_db_create_values( &uid_values ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_make_uid_value( uid_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
-
-    hb_uid_t tuid;
-    if( hb_db_make_uid_by_name( _client, "hb_events", &moid, uid_values, &tuid ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_values( uid_values );
 
     *_tuid = tuid;
 

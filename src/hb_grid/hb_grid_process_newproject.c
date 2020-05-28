@@ -8,7 +8,6 @@
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_rand.h"
-#include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,24 +40,18 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, &token_handle.aoid );
+    hb_db_make_uid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );
     hb_db_make_int64_value( project_values, "script_revision", HB_UNKNOWN_STRING_SIZE, 0 );
     hb_db_make_int64_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );    
     hb_db_make_string_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
 
-    hb_oid_t project_oid;
-    if( hb_db_new_document( db_collection_projects, project_values, &project_oid ) == HB_FAILURE )
+    hb_uid_t puid;
+    if( hb_db_new_document( db_collection_projects, project_values, &puid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( project_values );
-
-    hb_uid_t puid;
-    if( hb_db_make_uid( db_collection_projects, &project_oid, HB_NULLPTR, &puid ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
 
     hb_db_destroy_collection( db_collection_projects );
 

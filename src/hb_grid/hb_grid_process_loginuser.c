@@ -7,7 +7,6 @@
 #include "hb_token/hb_token.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_sha1.h"
-#include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,7 +26,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_make_uid_value( values_project_found, "uid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
-    hb_oid_t project_oid;
+    hb_uid_t project_oid;
     hb_bool_t project_exist;
     if( hb_db_find_oid( db_collection_projects, values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
     {
@@ -70,7 +69,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     const char * db_users_fields[] = { "uid" };
     hb_db_values_handle_t * db_users_uid_handle;
 
-    hb_oid_t authentication_oid;
+    hb_uid_t authentication_oid;
     hb_bool_t authentication_exist;
     if( hb_db_find_oid_with_values( db_collection_users, values_authentication, &authentication_oid, db_users_fields, 1, &db_users_uid_handle, &authentication_exist ) == HB_FAILURE )
     {
@@ -95,8 +94,6 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     if( authentication_exist == HB_TRUE )
     {
         hb_user_token_t token_handle;
-        hb_oid_copy( &token_handle.uoid, &authentication_oid );
-        hb_oid_copy( &token_handle.poid, &project_oid );
         token_handle.uuid = uuid;
         token_handle.puid = _in->puid;
 

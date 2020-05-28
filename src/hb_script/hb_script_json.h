@@ -13,9 +13,9 @@ hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _s
 hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, size_t _size, const char ** _fields, uint32_t _fieldcount );
 hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle_t ** _json );
 
-hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid, uint32_t * _count );
-hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid );
-hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, const hb_oid_t * _oid );
+hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, hb_uid_t _oid, uint32_t * _count );
+hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, hb_uid_t _oid );
+hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, hb_uid_t _oid );
 
 hb_result_t hb_script_get_fields( lua_State * L, int32_t _index, const char ** _fieds, uint32_t * _count );
 

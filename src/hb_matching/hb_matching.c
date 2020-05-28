@@ -5,7 +5,6 @@
 #include "hb_db/hb_db.h"
 
 #include "hb_utils/hb_base64.h"
-#include "hb_utils/hb_oid.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -25,7 +24,7 @@ typedef enum hb_matching_user_status_e
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_matching_user_handle_t
 {
-    hb_oid_t uoid;
+    hb_uid_t uoid;
     int32_t rating;
     hb_uid_t auid;
 
@@ -70,7 +69,7 @@ void hb_matching_destroy( hb_matching_handle_t * _matching )
     HB_DELETE( _matching );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, size_t _datasize, hb_bool_t * _exist )
+hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _poid, const char * _name, size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, size_t _datasize, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -93,7 +92,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+    hb_db_make_uid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
     hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
     hb_bool_t exist;
@@ -119,7 +118,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( room_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+    hb_db_make_uid_value( room_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
     hb_db_make_string_value( room_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
     hb_db_make_int32_value( room_values, "count", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->matching_count );
     hb_db_make_int32_value( room_values, "dispersion", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->matching_dispersion );
@@ -127,7 +126,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     hb_db_make_int32_value( room_values, "wait_timeout", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->wait_timeout );
     hb_db_make_string_value( room_values, "public_data", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
 
-    hb_oid_t moid;
+    hb_uid_t moid;
     if( hb_db_new_document( db_collection_matching, room_values, &moid ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -143,7 +142,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     new_room->users_count = 0;
     new_room->users_capacity = 64;
 
-    hb_hashtable_emplace( _matching->ht, moid.value, sizeof( hb_oid_t ), new_room );
+    hb_hashtable_emplace( _matching->ht, &moid, sizeof( hb_uid_t ), new_room );
 
     hb_db_destroy_collection( db_collection_matching );
 
@@ -158,7 +157,7 @@ static int32_t __matching_user_cmp( const void * _left, const void * _right )
     return user_left->rating - user_right->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, uint32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
+hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _poid, const char * _name, size_t _namesize, hb_uid_t _uoid, uint32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -181,10 +180,10 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+    hb_db_make_uid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
     hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
-    hb_oid_t moid;
+    hb_uid_t moid;
     hb_bool_t exist;
     if( hb_db_find_oid( db_collection_matching, find_values, &moid, &exist ) == HB_FAILURE )
     {
@@ -202,14 +201,14 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
     *_exist = HB_TRUE;
 
-    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, moid.value, sizeof( hb_oid_t ) );
+    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, &moid, sizeof( hb_uid_t ) );
 
     if( room_found == HB_NULLPTR )
     {
         const char * fields[] = { "matching_count", "matching_dispersion", "join_timeout", "wait_timeout" };
 
         hb_db_values_handle_t * values;
-        if( hb_db_get_values( db_collection_matching, &moid, fields, sizeof( fields ) / sizeof( fields[0] ), &values ) == HB_FAILURE )
+        if( hb_db_get_values( db_collection_matching, moid, fields, sizeof( fields ) / sizeof( fields[0] ), &values ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -226,7 +225,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         new_room->users_count = 0;
         new_room->users_capacity = HB_MATCHING_ROOM_USERS_MAX;
 
-        if( hb_hashtable_emplace( _matching->ht, moid.value, sizeof( hb_oid_t ), new_room ) == HB_FAILURE )
+        if( hb_hashtable_emplace( _matching->ht, &moid, sizeof( hb_uid_t ), new_room ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -243,7 +242,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     {
         const hb_matching_user_handle_t * user = it;
 
-        if( hb_oid_cmp( &user->uoid, _uoid ) == HB_TRUE )
+        if( user->uoid == _uoid )
         {
             return HB_FAILURE;
         }
@@ -256,7 +255,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
     hb_matching_user_handle_t * new_user = room_found->users + room_found->users_count;
 
-    hb_oid_copy( &new_user->uoid, _uoid );
+    new_user->uoid = _uoid;
     new_user->rating = _rating;
     
     if( hb_array_create( _data, _datasize, &new_user->public_data ) == HB_FAILURE )
@@ -349,32 +348,16 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
             return HB_FAILURE;
         }
 
-        hb_db_make_oid_value( new_world_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-        hb_db_make_oid_value( new_world_values, "moid", HB_UNKNOWN_STRING_SIZE, &moid );
+        hb_db_make_uid_value( new_world_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+        hb_db_make_uid_value( new_world_values, "moid", HB_UNKNOWN_STRING_SIZE, moid );
 
-        hb_oid_t woid;
-        if( hb_db_new_document_by_name( _client, "hb_worlds", new_world_values, &woid ) == HB_FAILURE )
+        hb_uid_t wuid;
+        if( hb_db_new_document_by_name( _client, "hb_worlds", new_world_values, &wuid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
         hb_db_destroy_values( new_world_values );
-
-        hb_db_values_handle_t * count_world_values;
-        if( hb_db_create_values( &count_world_values ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_db_make_oid_value( count_world_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-
-        hb_uid_t wuid;
-        if( hb_db_make_uid_by_name( _client, "hb_worlds", &woid, count_world_values, &wuid ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_db_destroy_values( count_world_values );
 
         for( hb_matching_user_handle_t ** it_matching = user_matchings,
             **it_matching_end = user_matchings + room_matching_count;
@@ -390,42 +373,24 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
             hb_matching_user_handle_t * matching_user = *it_matching;
 
-            hb_db_make_oid_value( new_avatar_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-            hb_db_make_oid_value( new_avatar_values, "woid", HB_UNKNOWN_STRING_SIZE, &woid );
-            hb_db_make_oid_value( new_avatar_values, "uoid", HB_UNKNOWN_STRING_SIZE, &matching_user->uoid );
+            hb_db_make_uid_value( new_avatar_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+            hb_db_make_uid_value( new_avatar_values, "woid", HB_UNKNOWN_STRING_SIZE, wuid );
+            hb_db_make_uid_value( new_avatar_values, "uoid", HB_UNKNOWN_STRING_SIZE, matching_user->uoid );
             hb_db_make_int32_value( new_avatar_values, "rating", HB_UNKNOWN_STRING_SIZE, matching_user->rating );
 
-            hb_oid_t aoid;
-            if( hb_db_new_document_by_name( _client, "hb_avatars", new_avatar_values, &aoid ) == HB_FAILURE )
+            if( hb_db_new_document_by_name( _client, "hb_avatars", new_avatar_values, &matching_user->auid ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
 
             hb_db_destroy_values( new_avatar_values );
-
-            hb_db_values_handle_t * count_avatar_values;
-
-            if( hb_db_create_values( &count_avatar_values ) == HB_FAILURE )
-            {
-                return HB_FAILURE;
-            }
-
-            hb_db_make_oid_value( count_avatar_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
-            hb_db_make_oid_value( count_avatar_values, "woid", HB_UNKNOWN_STRING_SIZE, &woid );
-
-            if( hb_db_make_uid_by_name( _client, "hb_avatars", &aoid, count_avatar_values, &matching_user->auid ) == HB_FAILURE )
-            {
-                return HB_FAILURE;
-            }
-
-            hb_db_destroy_values( count_avatar_values );
         }
 
         const char * fields[] = { "public_data" };
 
         hb_db_values_handle_t * values;
 
-        if( hb_db_get_values( db_collection_matching, &moid, fields, 1, &values ) == HB_FAILURE )
+        if( hb_db_get_values( db_collection_matching, moid, fields, 1, &values ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -475,7 +440,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_bool_t * _exist, hb_uid_t * _auid )
+hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _poid, const char * _name, size_t _namesize, hb_uid_t _uoid, hb_bool_t * _exist, hb_uid_t * _auid )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -499,10 +464,10 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+    hb_db_make_uid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
     hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
-    hb_oid_t moid;
+    hb_uid_t moid;
     hb_bool_t exist;
     if( hb_db_find_oid( db_collection_matching, find_values, &moid, &exist ) == HB_FAILURE )
     {
@@ -518,7 +483,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
         return HB_SUCCESSFUL;
     }
 
-    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, &moid, sizeof( hb_oid_t ) );
+    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, &moid, sizeof( hb_uid_t ) );
 
     if( room_found == HB_NULLPTR )
     {
@@ -534,7 +499,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     {
         const hb_matching_user_handle_t * user = it;
 
-        if( hb_oid_cmp( &user->uoid, _uoid ) == HB_FALSE )
+        if( user->uoid != _uoid )
         {
             continue;
         }
@@ -551,7 +516,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, const hb_oid_t * _poid, const char * _name, size_t _namesize, const hb_oid_t * _uoid, hb_uid_t _auid, hb_bool_t * _exist )
+hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _poid, const char * _name, size_t _namesize, hb_uid_t _uoid, hb_uid_t _auid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_collection( _client, "hb", "hb_matching", &db_collection_matching ) == HB_FAILURE )
@@ -575,10 +540,10 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
         return HB_FAILURE;
     }
 
-    hb_db_make_oid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
+    hb_db_make_uid_value( find_values, "poid", HB_UNKNOWN_STRING_SIZE, _poid );
     hb_db_make_string_value( find_values, "name", HB_UNKNOWN_STRING_SIZE, _name, _namesize );
 
-    hb_oid_t moid;
+    hb_uid_t moid;
     hb_bool_t exist;
     if( hb_db_find_oid( db_collection_matching, find_values, &moid, &exist ) == HB_FAILURE )
     {
@@ -594,7 +559,7 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
         return HB_SUCCESSFUL;
     }
 
-    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, moid.value, sizeof( hb_oid_t ) );
+    hb_matching_room_handle_t * room_found = (hb_matching_room_handle_t *)hb_hashtable_find( _matching->ht, &moid, sizeof( hb_uid_t ) );
 
     if( room_found == HB_NULLPTR )
     {
@@ -615,7 +580,7 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
             continue;
         }
 
-        if( hb_oid_cmp( &user->uoid, _uoid ) == HB_FALSE )
+        if( user->uoid != _uoid )
         {
             *_exist = HB_FALSE;
 

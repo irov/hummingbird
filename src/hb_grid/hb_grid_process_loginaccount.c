@@ -7,7 +7,6 @@
 #include "hb_token/hb_token.h"
 #include "hb_utils/hb_getopt.h"
 #include "hb_utils/hb_sha1.h"
-#include "hb_utils/hb_oid.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,7 +38,7 @@ hb_result_t hb_grid_process_loginaccount( hb_grid_process_handle_t * _process, c
 
     hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
-    hb_oid_t authentication_oid;
+    hb_uid_t authentication_oid;
     hb_bool_t authentication_exist;
     if( hb_db_find_oid( db_collection_accounts, values_authentication, &authentication_oid, &authentication_exist ) == HB_FAILURE )
     {
@@ -55,7 +54,7 @@ hb_result_t hb_grid_process_loginaccount( hb_grid_process_handle_t * _process, c
     if( authentication_exist == HB_TRUE )
     {
         hb_account_token_t token_handle;
-        hb_oid_copy( &token_handle.aoid, &authentication_oid );
+        token_handle.aoid = authentication_oid;
 
         if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
         {

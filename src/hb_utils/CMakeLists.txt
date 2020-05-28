@@ -50,9 +50,6 @@ src
     hb_sleep.h
     ${hb_sleep_platform}
     
-    hb_oid.h
-    hb_oid.c
-    
     hb_uid.h
     hb_uid.c
     
