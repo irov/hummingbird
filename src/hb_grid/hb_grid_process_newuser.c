@@ -28,7 +28,7 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( values_project_found, "uid", HB_UNKNOWN_STRING_SIZE, _in->puid );
+    hb_db_make_uid_value( values_project_found, "_id", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
     hb_uid_t project_oid;
     hb_bool_t project_exist;

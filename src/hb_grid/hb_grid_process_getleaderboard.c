@@ -20,14 +20,14 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
     }
 
     uint32_t descs_count;
-    hb_uid_t oids[16];
-    uint32_t scores[16];
+    hb_uid_t oids[16] = {0};
+    uint32_t scores[16] = {0};
     if( hb_leaderboard_get_global( _process->cache, token_handle.puid, _in->begin, _in->end, oids, scores, &descs_count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    const char * fields[] = { "uid", "info_nickname" };
+    const char * fields[] = { "_id", "info_nickname" };
 
     hb_db_values_handle_t * values;
     if( hb_db_gets_values_by_name( _process->db_client, "hb_users", oids, descs_count, fields, sizeof( fields ) / sizeof( fields[0] ), &values ) == HB_FAILURE )

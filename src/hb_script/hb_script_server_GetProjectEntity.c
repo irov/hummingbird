@@ -37,7 +37,7 @@ int hb_script_server_GetProjectEntity( lua_State * L )
 
     hb_db_destroy_values( query_values );
 
-    const char * db_fields[1] = { "uid" };
+    const char * db_fields[1] = { "_id" };
 
     hb_db_values_handle_t * project_entity_values;
     if( hb_db_get_values( script_handle->db_collection_project_entities, eoid, db_fields, 1, &project_entity_values ) == HB_FAILURE )

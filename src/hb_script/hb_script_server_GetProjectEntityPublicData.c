@@ -19,7 +19,7 @@ int hb_script_server_GetProjectEntityPublicData( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_db_make_uid_value( values, "uid", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)euid );
+    hb_db_make_uid_value( values, "_id", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)euid );
     hb_db_make_uid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
 
     hb_bool_t exist;

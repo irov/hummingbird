@@ -126,7 +126,7 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
             return HB_FAILURE;
         }
 
-        hb_db_make_uid_value( find_values, "uid", HB_UNKNOWN_STRING_SIZE, _tuid );
+        hb_db_make_uid_value( find_values, "_id", HB_UNKNOWN_STRING_SIZE, _tuid );
         hb_db_make_uid_value( find_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
 
         const char * fields[] = {"name", "delay", "start"};
