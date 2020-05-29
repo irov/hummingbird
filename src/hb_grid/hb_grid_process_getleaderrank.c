@@ -4,6 +4,7 @@
 #include "hb_db/hb_db.h"
 #include "hb_leaderboard/hb_leaderboard.h"
 
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_getleaderrank( hb_grid_process_handle_t * _process, const hb_grid_process_getleaderrank_in_data_t * _in, hb_grid_process_getleaderrank_out_data_t * _out )
 {
     HB_UNUSED( _out );

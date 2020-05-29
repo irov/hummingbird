@@ -76,7 +76,6 @@ hb_result_t hb_events_new_topic( hb_events_handle_t * _handle, const hb_db_clien
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( new_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
     hb_db_make_string_value( new_values, "name", HB_UNKNOWN_STRING_SIZE, _name, HB_UNKNOWN_STRING_SIZE );
     hb_db_make_int32_value( new_values, "delay", HB_UNKNOWN_STRING_SIZE, _delay );
 
@@ -86,7 +85,7 @@ hb_result_t hb_events_new_topic( hb_events_handle_t * _handle, const hb_db_clien
     hb_db_make_time_value( new_values, "start", HB_UNKNOWN_STRING_SIZE, t );
 
     hb_uid_t tuid;
-    if( hb_db_new_document_by_name( _client, "hb_events", new_values, &tuid ) == HB_FAILURE )
+    if( hb_db_new_document_by_name( _client, _puid, "events", new_values, &tuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -127,13 +126,12 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
         }
 
         hb_db_make_uid_value( find_values, "_id", HB_UNKNOWN_STRING_SIZE, _tuid );
-        hb_db_make_uid_value( find_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
 
         const char * fields[] = {"name", "delay", "start"};
         hb_db_values_handle_t * fields_values;
 
         hb_bool_t exist;
-        if( hb_db_find_oid_with_values_by_name( _client, "hb_events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
+        if( hb_db_find_uid_with_values_by_name( _client, _puid, "hb_events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

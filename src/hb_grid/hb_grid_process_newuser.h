@@ -19,7 +19,7 @@ typedef struct hb_grid_process_newuser_out_data_t
     hb_token_t token;
 
     hb_uid_t uuid;
-    hb_bool_t exist;
+    hb_error_code_t code;
 } hb_grid_process_newuser_out_data_t;
 
 hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const hb_grid_process_newuser_in_data_t * _in, hb_grid_process_newuser_out_data_t * _out );

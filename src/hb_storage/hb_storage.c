@@ -10,7 +10,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const hb_db_client_handle_t * _db, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
+hb_result_t hb_storage_set( const hb_db_collection_handle_t * _collection, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize, hb_sha1_t * _sha1 )
 {
     size_t bound_size = hb_archive_bound( _codesize );
 
@@ -28,23 +28,15 @@ hb_result_t hb_storage_set( const hb_db_client_handle_t * _db, const void * _cod
 
     hb_sha1( archive_script_code_buffer, archive_script_code_size, _sha1 );
 
-    hb_db_collection_handle_t * db_collection_scripts;
-    if( hb_db_get_collection( _db, "hb", "hb_scripts", &db_collection_scripts ) == HB_FAILURE )
+    if( hb_db_upload_script( _collection, _sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
-
-    if( hb_db_upload_script( db_collection_scripts, _sha1, archive_script_code_buffer, archive_script_code_size, _source, _sourcesize ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_collection( db_collection_scripts );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_get_code( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, const hb_sha1_t * _sha1, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_storage_get_code( const hb_cache_handle_t * _cache, const hb_db_collection_handle_t * _collection, const hb_sha1_t * _sha1, void * _buffer, size_t _capacity, size_t * _size )
 {
     size_t cache_data_size;
     hb_data_t cache_data;
@@ -56,14 +48,8 @@ hb_result_t hb_storage_get_code( const hb_cache_handle_t * _cache, const hb_db_c
         }
     }
 
-    hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _db, "hb", "hb_scripts", &db_collection ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     hb_db_script_handle_t * db_script_data;
-    if( hb_db_load_script( db_collection, _sha1->value, &db_script_data ) == HB_FAILURE )
+    if( hb_db_load_script( _collection, _sha1->value, &db_script_data ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

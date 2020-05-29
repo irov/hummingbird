@@ -54,54 +54,54 @@ hb_http_code_t hb_grid_request_loginuser( struct evhttp_request * _request, hb_g
         return HTTP_BADREQUEST;
     }
 
-    if( out_data.exist == HB_TRUE )
+    if( out_data.code != HB_ERROR_OK )
     {
-        hb_grid_process_api_in_data_t api_in_data;
-
-        api_in_data.data_size = 0;
-
-        hb_token_copy( &api_in_data.token, &out_data.token );
-
-        api_in_data.category = e_hb_node_event;
-        strcpy( api_in_data.method, "onLoginUser" );
-
-        hb_grid_process_api_out_data_t api_out_data;
-        if( hb_grid_process_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
-        {
-            size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"error event onLoginUser\"}" );
-
-            *_size = response_data_size;
-
-            return HTTP_OK;
-        }
-
-        hb_token16_t token16;
-        if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
-            , out_data.uuid
-            , (int)sizeof( token16 )
-            , token16.value
-            , api_out_data.memory_used
-            , api_out_data.call_used
+        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+            , out_data.code
         );
 
         *_size = response_data_size;
     }
-    else
+
+    hb_grid_process_api_in_data_t api_in_data;
+
+    api_in_data.data_size = 0;
+
+    hb_token_copy( &api_in_data.token, &out_data.token );
+
+    api_in_data.category = e_hb_node_event;
+    strcpy( api_in_data.method, "onLoginUser" );
+
+    hb_grid_process_api_out_data_t api_out_data;
+    if( hb_grid_process_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":1}" );
+        return HTTP_BADREQUEST;
+    }
+
+    if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"error event onLoginUser\"}" );
 
         *_size = response_data_size;
+
+        return HTTP_OK;
     }
+
+    hb_token16_t token16;
+    if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
+    {
+        return HTTP_BADREQUEST;
+    }
+
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+        , out_data.uuid
+        , (int)sizeof( token16 )
+        , token16.value
+        , api_out_data.memory_used
+        , api_out_data.call_used
+    );
+
+    *_size = response_data_size;
 
     return HTTP_OK;
 }

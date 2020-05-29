@@ -13,31 +13,8 @@ int hb_script_server_GetProjectEntityPublicData( lua_State * L )
 
     lua_Integer euid = lua_tointeger( L, 1 );
 
-    hb_db_values_handle_t * values;
-    if( hb_db_create_values( &values ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_make_uid_value( values, "_id", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)euid );
-    hb_db_make_uid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-
-    hb_bool_t exist;
-    hb_uid_t eoid;
-    if( hb_db_find_oid( script_handle->db_collection_project_entities, values, &eoid, &exist ) == HB_FAILURE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    hb_db_destroy_values( values );
-
-    if( exist == HB_FALSE )
-    {
-        HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
     uint32_t fields_count;
-    if( hb_script_json_get_public_data( L, 2, script_handle->db_collection_project_entities, eoid, &fields_count ) == HB_FAILURE )
+    if( hb_script_json_get_public_data( L, 2, script_handle->db_collection_project_entities, (hb_uid_t)euid, &fields_count ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

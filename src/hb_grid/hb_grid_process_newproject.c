@@ -29,7 +29,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     }
 
     hb_db_collection_handle_t * db_collection_projects;
-    if( hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -40,7 +40,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );
+    hb_db_make_uid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.auid );
     hb_db_make_int64_value( project_values, "script_revision", HB_UNKNOWN_STRING_SIZE, 0 );
     hb_db_make_int64_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );    
     hb_db_make_string_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );

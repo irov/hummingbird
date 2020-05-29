@@ -17,12 +17,11 @@ int hb_script_server_GetUserEntityPublicData( lua_State * L )
     }
 
     hb_db_make_uid_value( values, "_id", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)euid );
-    hb_db_make_uid_value( values, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
-    hb_db_make_uid_value( values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_oid );
+    hb_db_make_uid_value( values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_uid );
 
     hb_bool_t exist;
     hb_uid_t eoid;
-    if( hb_db_find_oid( script_handle->db_collection_user_entities, values, &eoid, &exist ) == HB_FAILURE )
+    if( hb_db_find_uid( script_handle->db_collection_user_entities, values, &eoid, &exist ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

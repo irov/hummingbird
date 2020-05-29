@@ -11,7 +11,7 @@ int __hb_script_server_GetStatusMatching( lua_State * L )
 
     hb_bool_t exist;
     hb_uid_t auid;
-    if( hb_matching_found( script_handle->matching, script_handle->db_client, script_handle->project_oid, name, name_len, script_handle->user_oid, &exist, &auid ) == HB_FAILURE )
+    if( hb_matching_found( script_handle->matching, script_handle->db_client, script_handle->project_uid, name, name_len, script_handle->user_uid, &exist, &auid ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }

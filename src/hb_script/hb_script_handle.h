@@ -30,6 +30,7 @@ typedef struct hb_script_handle_t
     const hb_cache_handle_t * cache;
 
     const hb_db_client_handle_t * db_client;
+
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_collection_handle_t * db_collection_users;
     hb_db_collection_handle_t * db_collection_project_entities;
@@ -37,9 +38,10 @@ typedef struct hb_script_handle_t
     hb_db_collection_handle_t * db_collection_matching;
     hb_db_collection_handle_t * db_collection_worlds;
     hb_db_collection_handle_t * db_collection_avatars;
+    hb_db_collection_handle_t * db_collection_scripts;
 
-    hb_uid_t project_oid;
-    hb_uid_t user_oid;
+    hb_uid_t project_uid;
+    hb_uid_t user_uid;
 
     hb_matching_handle_t * matching;
 } hb_script_handle_t;
