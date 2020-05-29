@@ -12,6 +12,7 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_getmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_getmessageschannel_in_data_t * _in, hb_grid_process_getmessageschannel_out_data_t * _out )
 {
     HB_UNUSED( _process );

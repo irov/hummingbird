@@ -15,37 +15,17 @@
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
 {
-    hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( _process->db_client, "hb", "hb_projects", &db_collection_projects );
-
-    hb_db_values_handle_t * values_project_found;
-    if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_make_uid_value( values_project_found, "_id", HB_UNKNOWN_STRING_SIZE, _in->puid );
-
-    hb_uid_t project_oid;
     hb_bool_t project_exist;
-    if( hb_db_find_oid( db_collection_projects, values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
+    if( hb_db_exist_project_uid( _process->db_client, _in->puid, &project_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
-
-    hb_db_destroy_values( values_project_found );
-
-    hb_db_destroy_collection( db_collection_projects );
 
     if( project_exist == HB_FALSE )
     {
-        return HB_FAILURE;
-    }
+        _out->code = HB_ERROR_BAD_ARGUMENTS;
 
-    hb_db_collection_handle_t * db_collection_users;
-    if( hb_db_get_collection( _process->db_client, "hb", "hb_users", &db_collection_users ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
+        return HB_SUCCESSFUL;
     }
 
     hb_db_values_handle_t * values_authentication;
@@ -53,8 +33,6 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     {
         return HB_FAILURE;
     }
-
-    hb_db_make_uid_value( values_authentication, "puid", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
     hb_sha1_t login_sha1;
     hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
@@ -69,14 +47,23 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     const char * db_users_fields[] = { "_id" };
     hb_db_values_handle_t * db_users_uid_handle;
 
-    hb_uid_t authentication_oid;
+    hb_uid_t authentication_uid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid_with_values( db_collection_users, values_authentication, &authentication_oid, db_users_fields, 1, &db_users_uid_handle, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &authentication_uid, db_users_fields, 1, &db_users_uid_handle, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_db_destroy_values( values_authentication );
+
+    if( authentication_exist == HB_FALSE )
+    {
+        _out->code = HB_ERROR_NOT_FOUND;
+
+        hb_db_destroy_values( db_users_uid_handle );
+
+        return HB_SUCCESSFUL;
+    }
 
     hb_uid_t uuid;
     if( hb_db_get_uid_value( db_users_uid_handle, 0, &uuid ) == HB_FAILURE )
@@ -84,24 +71,20 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_FAILURE;
     }
 
-    hb_db_destroy_values( db_users_uid_handle );    
-
-    hb_db_destroy_collection( db_collection_users );
+    hb_db_destroy_values( db_users_uid_handle );
 
     _out->uuid = uuid;
-    _out->exist = authentication_exist;
 
-    if( authentication_exist == HB_TRUE )
+    hb_user_token_t token_handle;
+    token_handle.uuid = uuid;
+    token_handle.puid = _in->puid;
+
+    if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {
-        hb_user_token_t token_handle;
-        token_handle.uuid = uuid;
-        token_handle.puid = _in->puid;
-
-        if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        return HB_FAILURE;
     }
+
+    _out->code = HB_ERROR_OK;
 
     return HB_SUCCESSFUL;
 }

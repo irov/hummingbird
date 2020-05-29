@@ -43,7 +43,6 @@ int hb_script_server_SelectProjectEntity( lua_State * L )
     }
 
     hb_db_make_string_value( query, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
-    hb_db_make_uid_value( query, "poid", HB_UNKNOWN_STRING_SIZE, script_handle->project_oid );
 
     const char * db_fields[1] = { "_id" };
 

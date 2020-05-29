@@ -201,13 +201,13 @@ static hb_result_t __hb_script_load( hb_script_handle_t * _handle, const void * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_uid_t _poid )
+static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_uid_t _puid )
 {
     const char * db_projects_fields[] = {"script_sha1"};
 
     hb_db_values_handle_t * project_values;
 
-    if( hb_db_get_values( _handle->db_collection_projects, _poid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values ) == HB_FAILURE )
+    if( hb_db_get_values( _handle->db_collection_projects, _puid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values, HB_NULLPTR ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
             , "hb_projects"
@@ -230,7 +230,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
 
     size_t script_data_size;
     hb_data_t script_data;
-    if( hb_storage_get_code( _handle->cache, _handle->db_client, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
+    if( hb_storage_get_code( _handle->cache, _handle->db_collection_scripts, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
             , "hb_projects"
@@ -251,78 +251,87 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, hb_uid_t _poid, hb_uid_t _uoid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, hb_uid_t _puid, hb_uid_t _uuid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
     handle->cache = _cache;
     handle->db_client = _db;
 
-    if( hb_db_get_collection( _db, "hb", "hb_user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "user_entities", &handle->db_collection_user_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_user_entities"
+            , "user_entities"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "project_entities", &handle->db_collection_project_entities ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_project_entities"
+            , "project_entities"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_users", &handle->db_collection_users ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "users", &handle->db_collection_users ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_users"
+            , "users"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_projects", &handle->db_collection_projects ) == HB_FAILURE )
+    if( hb_db_get_collection( _db, "hb", "projects", &handle->db_collection_projects ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_projects"
+            , "projects"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_matching", &handle->db_collection_matching ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "matching", &handle->db_collection_matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_matching"
+            , "matching"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_worlds", &handle->db_collection_worlds ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "worlds", &handle->db_collection_worlds ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_worlds"
+            , "worlds"
         );
 
         return HB_FAILURE;
     }
 
-    if( hb_db_get_collection( _db, "hb", "hb_avatars", &handle->db_collection_avatars ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _db, _puid, "avatars", &handle->db_collection_avatars ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
-            , "hb_avatars"
+            , "avatars"
         );
 
         return HB_FAILURE;
     }
 
-    handle->project_oid = _poid;
-    handle->user_oid = _uoid;
+    if( hb_db_get_project_collection( _db, _puid, "scripts", &handle->db_collection_scripts ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "script", "invalid initialize script: db not found collection '%s'"
+            , "scripts"
+        );
+
+        return HB_FAILURE;
+    }    
+
+    handle->project_uid = _puid;
+    handle->user_uid = _uuid;
 
     handle->matching = _matching;
 
@@ -383,7 +392,7 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
 
     *(hb_script_handle_t **)lua_getextraspace( L ) = handle;
 
-    if( __hb_script_load_project( handle, _poid ) == HB_FAILURE )
+    if( __hb_script_load_project( handle, _puid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -397,6 +406,12 @@ void hb_script_finalize( hb_script_handle_t * _handle )
 {
     hb_db_destroy_collection( _handle->db_collection_users );
     hb_db_destroy_collection( _handle->db_collection_projects );
+    hb_db_destroy_collection( _handle->db_collection_project_entities );
+    hb_db_destroy_collection( _handle->db_collection_user_entities );
+    hb_db_destroy_collection( _handle->db_collection_matching );
+    hb_db_destroy_collection( _handle->db_collection_worlds );
+    hb_db_destroy_collection( _handle->db_collection_avatars );
+    hb_db_destroy_collection( _handle->db_collection_scripts );
 
     HB_LOG_MESSAGE_INFO( "script", "memory peak %d [max %d] %%%0.2f", _handle->memory_peak - _handle->memory_base, _handle->memory_limit - _handle->memory_base, (float)(_handle->memory_peak - _handle->memory_base) / (float)(_handle->memory_limit - _handle->memory_base) * 100.f );
     HB_LOG_MESSAGE_INFO( "script", "instruction %d [max %d] %%%0.2f", _handle->call_used, _handle->call_limit, (float)(_handle->call_used) / (float)(_handle->call_limit) * 100.f );

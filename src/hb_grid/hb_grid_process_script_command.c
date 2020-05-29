@@ -27,26 +27,8 @@ hb_result_t hb_grid_process_script_command( hb_grid_process_handle_t * _process,
         return HB_FAILURE;
     }
 
-    hb_db_values_handle_t * values_project_found;
-    if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_make_uid_value( values_project_found, "_id", HB_UNKNOWN_STRING_SIZE, _in->puid );
-    hb_db_make_uid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.aoid );    
-
-    hb_uid_t project_oid;
-    hb_bool_t project_exist;
-    if( hb_db_find_oid_by_name( _process->db_client, "hb_projects", values_project_found, &project_oid, &project_exist ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_values( values_project_found );
-
     hb_script_handle_t * script_handle;
-    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, project_oid, HB_UID_NONE, _process->matching, &script_handle ) == HB_FAILURE )
+    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _in->puid, HB_UID_NONE, _process->matching, &script_handle ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script" );
 

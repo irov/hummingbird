@@ -17,7 +17,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     HB_UNUSED( _process );
 
     hb_db_collection_handle_t * db_collection_accounts;
-    if( hb_db_get_collection( _process->db_client, "hb", "hb_accounts", &db_collection_accounts ) == HB_FAILURE )
+    if( hb_db_get_collection( _process->db_client, "hb", "accounts", &db_collection_accounts ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -33,9 +33,9 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
 
     hb_db_make_sha1_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
 
-    hb_uid_t authentication_oid;
+    hb_uid_t authentication_uid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_oid( db_collection_accounts, values_authentication, &authentication_oid, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_uid( db_collection_accounts, values_authentication, &authentication_uid, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -65,8 +65,8 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_db_make_sha1_value( values_new, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
     hb_db_make_sha1_value( values_new, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
-    hb_uid_t account_oid;
-    if( hb_db_new_document( db_collection_accounts, values_new, &account_oid ) == HB_FAILURE )
+    hb_uid_t account_uid;
+    if( hb_db_new_document( db_collection_accounts, values_new, &account_uid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -76,7 +76,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_db_destroy_collection( db_collection_accounts );
 
     hb_account_token_t token_handle;
-    token_handle.aoid = account_oid;
+    token_handle.auid = account_uid;
 
     if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {

@@ -21,7 +21,6 @@ typedef enum hb_db_value_type_e
     e_hb_db_utf8,
     e_hb_db_binary,
     e_hb_db_time,
-    e_hb_db_oid,
 } hb_db_value_type_e;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_value_handle_t
@@ -54,8 +53,6 @@ typedef struct hb_db_value_handle_t
         int32_t i32;
         int64_t i64;
         hb_time_t time;
-
-        const uint8_t * oid;
     } u;
 } hb_db_value_handle_t;
 //////////////////////////////////////////////////////////////////////////
@@ -186,6 +183,16 @@ hb_result_t hb_db_get_collection( const hb_db_client_handle_t * _client, const c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_get_project_collection( const hb_db_client_handle_t * _client, hb_uid_t _uid, const char * _name, hb_db_collection_handle_t ** _collection )
+{
+    char db_uid[64];
+    sprintf( db_uid, "hb_%d", _uid );
+
+    hb_result_t result = hb_db_get_collection( _client, db_uid, _name, _collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
 void hb_db_destroy_collection( hb_db_collection_handle_t * _handle )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
@@ -254,13 +261,6 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_han
             {
                 bson_append_time_t( _bson, handle->field, handle->field_length, (time_t)handle->u.time );
             }break;
-        case e_hb_db_oid:
-            {
-                bson_oid_t oid;
-                bson_oid_init_from_data( &oid, handle->u.oid );
-
-                bson_append_oid( _bson, handle->field, handle->field_length, &oid );
-            }break;
         default:
             {
                 return HB_FAILURE;
@@ -317,10 +317,10 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _values, hb_uid_t * _newuid )
+hb_result_t hb_db_new_document_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, const hb_db_values_handle_t * _values, hb_uid_t * _newuid )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -406,7 +406,7 @@ void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _fiel
     value->u.i64 = _value;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _buffer, size_t _bufferlength )
+void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _string, size_t _stringlength )
 {
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
@@ -414,8 +414,8 @@ void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _fie
     value->type = e_hb_db_symbol;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
-    value->u.symbol.buffer = _buffer;
-    value->u.symbol.length = _bufferlength == HB_UNKNOWN_STRING_SIZE ? strlen( _buffer ) : _bufferlength;
+    value->u.symbol.buffer = _string;
+    value->u.symbol.length = _stringlength == HB_UNKNOWN_STRING_SIZE ? strlen( _string ) : _stringlength;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_db_make_binary_value( hb_db_values_handle_t * _handles, const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength )
@@ -655,7 +655,75 @@ static hb_result_t __hb_db_find_iter( const bson_t * _data, bson_iter_t * _iter,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_exist_uid( const hb_db_collection_handle_t * _collection, hb_uid_t _uid, hb_bool_t * _exist )
+{
+    mongoc_collection_t * mongo_collection = _collection->mongo_collection;
+
+    bson_t query;
+    bson_init( &query );
+
+    bson_append_int32( &query, "_id", -1, _uid );
+
+    mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 1, 0, &query, HB_NULLPTR, HB_NULLPTR );
+
+    bson_destroy( &query );
+
+    const bson_t * data;
+    bool successful = mongoc_cursor_next( cursor, &data );
+    
+    mongoc_cursor_destroy( cursor );
+
+    if( successful == true )
+    {
+        *_exist = HB_TRUE;        
+    }
+    else
+    {
+        *_exist = HB_FALSE;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_exist_project_uid( const hb_db_client_handle_t * _client, hb_uid_t _uid, hb_bool_t * _exist )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_collection( _client, "hb", "projects", &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
+            , "projects"
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_exist_uid( db_collection, _uid, _exist );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_exist_uid_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, hb_uid_t _uid, hb_bool_t * _exist )
+{
+    hb_db_collection_handle_t * db_collection;
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
+            , _name
+        );
+
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_db_exist_uid( db_collection, _uid, _exist );
+
+    hb_db_destroy_collection( db_collection );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_find_uid( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _uid, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
 
@@ -702,11 +770,11 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
         return HB_FAILURE;
     }
 
-    int32_t oid = bson_iter_int32( &iter );
+    int32_t uid = bson_iter_int32( &iter );
 
-    if( _oid != HB_NULLPTR )
+    if( _uid != HB_NULLPTR )
     {
-        *_oid = oid;
+        *_uid = uid;
     }
 
     mongoc_cursor_destroy( cursor );
@@ -716,10 +784,10 @@ hb_result_t hb_db_find_oid( const hb_db_collection_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _oid, hb_bool_t * _exist )
+hb_result_t hb_db_find_uid_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _uid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -728,7 +796,7 @@ hb_result_t hb_db_find_oid_by_name( const hb_db_client_handle_t * _client, const
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_find_oid( db_collection, _query, _oid, _exist );
+    hb_result_t result = hb_db_find_uid( db_collection, _query, _uid, _exist );
 
     hb_db_destroy_collection( db_collection );
 
@@ -799,14 +867,6 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
 
             _value->u.time = bson_iter_time_t( _iter );
         }break;
-    case BSON_TYPE_OID:
-        {
-            _value->type = e_hb_db_oid;
-
-            const bson_oid_t * value_oid = bson_iter_oid( _iter );
-
-            _value->u.oid = value_oid->bytes;
-        }break;
     default:
         {
             return HB_FAILURE;
@@ -816,7 +876,7 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
+hb_result_t hb_db_find_uid_with_values( const hb_db_collection_handle_t * _handle, const hb_db_values_handle_t * _query, hb_uid_t * _uid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     mongoc_collection_t * mongo_collection = _handle->mongo_collection;
 
@@ -843,12 +903,29 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
     bson_destroy( &query );
     bson_destroy( &fields );
 
+    bson_error_t error;
+    if( mongoc_cursor_error( cursor, &error ) )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        if( error.code == 11000 )
+        {
+            *_exist = HB_FALSE;
+
+            return HB_SUCCESSFUL;
+        }
+
+        HB_LOG_MESSAGE_ERROR( "db", "find with values values error occurred: %s"
+            , error.message
+        );
+
+        return HB_FAILURE;
+    }
+
     const bson_t * data;
     if( mongoc_cursor_next( cursor, &data ) == false )
     {
         mongoc_cursor_destroy( cursor );
-
-        *_exist = HB_FALSE;
 
         return HB_SUCCESSFUL;
     }
@@ -869,7 +946,7 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
         return HB_FAILURE;
     }
 
-    if( _oid != HB_NULLPTR )
+    if( _uid != HB_NULLPTR )
     {
         if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
         {
@@ -878,9 +955,9 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
             return HB_FAILURE;
         }
 
-        int32_t oid = bson_iter_int32( &iter );
+        hb_uid_t uid = (hb_uid_t)bson_iter_int32( &iter );
 
-        *_oid = oid;
+        *_uid = uid;
     }
 
     for( uint32_t index = 0; index != _fieldcount; ++index )
@@ -897,18 +974,6 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
             return HB_FAILURE;
         }
     }
-    
-    bson_error_t error;
-    if( mongoc_cursor_error( cursor, &error ) )
-    {
-        HB_LOG_MESSAGE_ERROR( "db", "find with values values error occurred: %s"
-            , error.message 
-        );
-
-        mongoc_cursor_destroy( cursor );
-
-        return HB_FAILURE;
-    }
 
     *_values = values;
     *_exist = HB_TRUE;
@@ -916,10 +981,10 @@ hb_result_t hb_db_find_oid_with_values( const hb_db_collection_handle_t * _handl
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _oid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
+hb_result_t hb_db_find_uid_with_values_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, const hb_db_values_handle_t * _query, hb_uid_t * _uid, const char ** _fields, uint32_t _fieldcount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -928,7 +993,7 @@ hb_result_t hb_db_find_oid_with_values_by_name( const hb_db_client_handle_t * _c
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_find_oid_with_values( db_collection, _query, _oid, _fields, _fieldcount, _values, _exist );
+    hb_result_t result = hb_db_find_uid_with_values( db_collection, _query, _uid, _fields, _fieldcount, _values, _exist );
 
     hb_db_destroy_collection( db_collection );
 
@@ -1050,9 +1115,9 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_uid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, const hb_uid_t * _uids, uint32_t _uidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
-    if( _oidcount == 0 )
+    if( _uidcount == 0 )
     {
         return HB_SUCCESSFUL;
     }
@@ -1062,11 +1127,11 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     bson_t query;
     bson_init( &query );
 
-    if( _oidcount == 1 )
+    if( _uidcount == 1 )
     {
-        hb_uid_t oid = _oids[0];
+        hb_uid_t uid = _uids[0];
 
-        BSON_APPEND_INT32( &query, "_id", oid );
+        BSON_APPEND_INT32( &query, "_id", uid );
     }
     else
     {
@@ -1076,9 +1141,9 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         bson_t query_in;
         bson_append_array_begin( &query_id, "$in", -1, &query_in );
 
-        for( uint32_t index = 0; index != _oidcount; ++index )
+        for( uint32_t index = 0; index != _uidcount; ++index )
         {
-            hb_uid_t uid = _oids[index];
+            hb_uid_t uid = _uids[index];
 
             BSON_APPEND_INT32( &query_in, "$oid", uid );
         }
@@ -1090,7 +1155,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     bson_t fields;
     bson_init( &fields );
 
-    if( _oidcount != 0 )
+    if( _uidcount != 0 )
     {
         BSON_APPEND_INT32( &fields, "_id", 1 );
     }
@@ -1105,6 +1170,28 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     bson_destroy( &query );
     bson_destroy( &fields );
 
+    bson_error_t error;
+    if( mongoc_cursor_error( cursor, &error ) )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        if( error.code == 11000 )
+        {
+            if( _exist != HB_NULLPTR )
+            {
+                *_exist = HB_FALSE;
+            }
+
+            return HB_SUCCESSFUL;
+        }
+
+        HB_LOG_MESSAGE_ERROR( "db", "find with values values error occurred: %s"
+            , error.message
+        );
+
+        return HB_FAILURE;
+    }
+
     hb_db_values_handle_t * values;
     if( hb_db_create_values( &values ) == HB_FAILURE )
     {
@@ -1113,7 +1200,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
     values->cursor = cursor;
 
-    for( uint32_t index_oid = 0; index_oid != _oidcount; ++index_oid )
+    for( uint32_t index_uid = 0; index_uid != _uidcount; ++index_uid )
     {
         const bson_t * data;
         if( mongoc_cursor_next( cursor, &data ) == false )
@@ -1131,9 +1218,9 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             return HB_FAILURE;
         }
 
-        uint32_t correct_index_oid = ~0U;
+        uint32_t correct_index_uid = ~0U;
 
-        if( _oidcount != 0 )
+        if( _uidcount != 0 )
         {
             if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
             {
@@ -1142,19 +1229,19 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
                 return HB_FAILURE;
             }
 
-            hb_uid_t oid = bson_iter_int32( &iter );
+            hb_uid_t uid = bson_iter_int32( &iter );
 
-            for( uint32_t index_correct = 0; index_correct != _oidcount; ++index_correct )
+            for( uint32_t index_correct = 0; index_correct != _uidcount; ++index_correct )
             {
-                hb_uid_t correct_oid = _oids[index_correct];
+                hb_uid_t correct_uid = _uids[index_correct];
 
-                if( correct_oid == oid )
+                if( correct_uid == uid )
                 {
-                    correct_index_oid = index_correct;
+                    correct_index_uid = index_correct;
                 }
             }
 
-            if( correct_index_oid == ~0U )
+            if( correct_index_uid == ~0U )
             {
                 mongoc_cursor_destroy( cursor );
 
@@ -1163,12 +1250,12 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         }
         else
         {
-            correct_index_oid = 0;
+            correct_index_uid = 0;
         }
 
         for( uint32_t index_field = 0; index_field != _fieldscount; ++index_field )
         {
-            hb_db_value_handle_t * value = values->values + correct_index_oid * _fieldscount + index_field;
+            hb_db_value_handle_t * value = values->values + correct_index_uid * _fieldscount + index_field;
             ++values->value_count;
 
             const char * field = _fields[index_field];
@@ -1182,27 +1269,20 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         }
     }
 
-    bson_error_t error;
-    if( mongoc_cursor_error( cursor, &error ) )
-    {
-        HB_LOG_MESSAGE_ERROR( "db", "find with values values error occurred: %s"
-            , error.message
-        );
-
-        mongoc_cursor_destroy( cursor );
-
-        return HB_FAILURE;
-    }
-
     *_values = values;
+
+    if( _exist != HB_NULLPTR )
+    {
+        *_exist = HB_TRUE;
+    }
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, const char * _name, const hb_uid_t * _oids, uint32_t _oidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, const hb_uid_t * _uids, uint32_t _uidcount, const char ** _fields, uint32_t _fieldscount, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -1211,24 +1291,24 @@ hb_result_t hb_db_gets_values_by_name( const hb_db_client_handle_t * _client, co
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_gets_values( db_collection, _oids, _oidcount, _fields, _fieldscount, _values );
+    hb_result_t result = hb_db_gets_values( db_collection, _uids, _uidcount, _fields, _fieldscount, _values, _exist );
 
     hb_db_destroy_collection( db_collection );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, hb_uid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_get_values( const hb_db_collection_handle_t * _collection, hb_uid_t _uid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
-    hb_result_t result = hb_db_gets_values( _collection, &_oid, 1, _fields, _count, _values );
+    hb_result_t result = hb_db_gets_values( _collection, &_uid, 1, _fields, _count, _values, _exist );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, const char * _name, hb_uid_t _oid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values )
+hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, hb_uid_t _uid, const char ** _fields, uint32_t _count, hb_db_values_handle_t ** _values, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -1237,20 +1317,20 @@ hb_result_t hb_db_get_values_by_name( const hb_db_client_handle_t * _client, con
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_get_values( db_collection, _oid, _fields, _count, _values );
+    hb_result_t result = hb_db_get_values( db_collection, _uid, _fields, _count, _values, _exist );
 
     hb_db_destroy_collection( db_collection );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, hb_uid_t _oid, const hb_db_values_handle_t * _handles )
+hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, hb_uid_t _uid, const hb_db_values_handle_t * _handles )
 {
     mongoc_collection_t * mongo_collection = _collection->mongo_collection;
 
     bson_t query;
     bson_init( &query );
-    BSON_APPEND_INT32( &query, "_id", _oid );
+    BSON_APPEND_INT32( &query, "_id", _uid );
 
     bson_t update;
     bson_init( &update );
@@ -1277,10 +1357,10 @@ hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, const char * _name, hb_uid_t _oid, const hb_db_values_handle_t * _values )
+hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, uint32_t _puid, const char * _name, hb_uid_t _uid, const hb_db_values_handle_t * _values )
 {
     hb_db_collection_handle_t * db_collection;
-    if( hb_db_get_collection( _client, "hb", _name, &db_collection ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _client, _puid, _name, &db_collection ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "db", "invalid get collection '%s'"
             , _name
@@ -1289,7 +1369,7 @@ hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, 
         return HB_FAILURE;
     }
 
-    hb_result_t result = hb_db_update_values( db_collection, _oid, _values );
+    hb_result_t result = hb_db_update_values( db_collection, _uid, _values );
 
     hb_db_destroy_collection( db_collection );
 
