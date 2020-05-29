@@ -24,7 +24,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( values_project_found, "uid", HB_UNKNOWN_STRING_SIZE, _in->puid );
+    hb_db_make_uid_value( values_project_found, "_id", HB_UNKNOWN_STRING_SIZE, _in->puid );
 
     hb_uid_t project_oid;
     hb_bool_t project_exist;
@@ -66,7 +66,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
-    const char * db_users_fields[] = { "uid" };
+    const char * db_users_fields[] = { "_id" };
     hb_db_values_handle_t * db_users_uid_handle;
 
     hb_uid_t authentication_oid;

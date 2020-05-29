@@ -118,7 +118,7 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
             return HB_FAILURE;
         }
 
-        hb_db_make_uid_value( find_values, "uid", HB_UNKNOWN_STRING_SIZE, _cuid );
+        hb_db_make_uid_value( find_values, "_id", HB_UNKNOWN_STRING_SIZE, _cuid );
         hb_db_make_uid_value( find_values, "puid", HB_UNKNOWN_STRING_SIZE, _puid );
         
         const char * fields[] = { "maxpost" };

@@ -4,6 +4,7 @@
 #include "hb_utils/hb_base16.h"
 
 #include <stdio.h>
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_handle_t * _cache, hb_uid_t _poid, hb_uid_t _uoid, uint32_t _score )
@@ -69,10 +70,7 @@ hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, hb_uid_t _poi
         hb_uid_t * oid = _oids + index / 2;
         uint32_t * score = _scores + index / 2;
 
-        if( hb_base16_decode( value0->string, HB_UNKNOWN_STRING_SIZE, oid, sizeof( hb_uid_t ), HB_NULLPTR ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        memcpy( oid, value0->string, sizeof( hb_uid_t ) );
 
         if( sscanf( value1->string, "%u", score ) != 1 )
         {

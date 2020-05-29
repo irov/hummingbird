@@ -120,6 +120,13 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
+    if( reply->type != REDIS_REPLY_STRING )
+    {
+        freeReplyObject( reply );
+
+        return HB_FAILURE;
+    }
+
     if( reply->len > _capacity )
     {
         freeReplyObject( reply );

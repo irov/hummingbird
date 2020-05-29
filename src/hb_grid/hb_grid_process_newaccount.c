@@ -73,15 +73,15 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
 
     hb_db_destroy_values( values_new );
 
+    hb_db_destroy_collection( db_collection_accounts );
+
     hb_account_token_t token_handle;
     token_handle.aoid = account_oid;
 
     if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {
         return HB_FAILURE;
-    }
-
-    hb_db_destroy_collection( db_collection_accounts );
+    }    
 
     return HB_SUCCESSFUL;
 }
