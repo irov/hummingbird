@@ -51,12 +51,6 @@ process
     hb_grid_process_upload.c
     hb_grid_process_script_api.h
     hb_grid_process_script_api.c
-    hb_grid_process_script_avatar.h
-    hb_grid_process_script_avatar.c
-    hb_grid_process_script_event.h
-    hb_grid_process_script_event.c
-    hb_grid_process_script_command.h
-    hb_grid_process_script_command.c
     hb_grid_process_newmessageschannel.h
     hb_grid_process_newmessageschannel.c
     hb_grid_process_getmessageschannel.h

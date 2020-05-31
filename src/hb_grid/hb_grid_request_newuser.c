@@ -1,7 +1,7 @@
 #include "hb_grid.h"
 
 #include "hb_grid_process_newuser.h"
-#include "hb_grid_process_script_event.h"
+#include "hb_grid_process_script_api.h"
 
 #include "hb_token/hb_token.h"
 #include "hb_http/hb_http.h"
@@ -66,24 +66,26 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
         return HTTP_OK;
     }
 
-    hb_grid_process_api_in_data_t api_in_data;
+    hb_grid_process_script_api_in_data_t api_in_data;
 
+    api_in_data.puid = in_data.puid;
+    api_in_data.uuid = out_data.uuid;
     api_in_data.data_size = 0;
 
-    hb_token_copy( &api_in_data.token, &out_data.token );
-
-    api_in_data.category = e_hb_node_event;
+    strcpy( api_in_data.api, "event" );
     strcpy( api_in_data.method, "onCreateUser" );
 
-    hb_grid_process_api_out_data_t api_out_data;
-    if( hb_grid_process_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
+    hb_grid_process_script_api_out_data_t api_out_data;
+    if( hb_grid_process_script_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    if( api_out_data.successful == HB_FALSE && api_out_data.method_found == HB_TRUE )
+    if( api_out_data.code != HB_ERROR_OK )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":2}" );
+        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+            , api_out_data.code
+        );
 
         *_size = response_data_size;
 
