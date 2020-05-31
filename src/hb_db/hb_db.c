@@ -563,7 +563,7 @@ hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint
         return HB_FAILURE;
     }
 
-    if( value->u.symbol.length != _capacity )
+    if( value->u.symbol.length >= _capacity )
     {
         return HB_FAILURE;
     }
@@ -903,6 +903,16 @@ hb_result_t hb_db_find_uid_with_values( const hb_db_collection_handle_t * _handl
     bson_destroy( &query );
     bson_destroy( &fields );
 
+    const bson_t * data;
+    if( mongoc_cursor_next( cursor, &data ) == false )
+    {
+        mongoc_cursor_destroy( cursor );
+
+        *_exist = HB_FALSE;
+
+        return HB_SUCCESSFUL;
+    }
+
     bson_error_t error;
     if( mongoc_cursor_error( cursor, &error ) )
     {
@@ -920,14 +930,6 @@ hb_result_t hb_db_find_uid_with_values( const hb_db_collection_handle_t * _handl
         );
 
         return HB_FAILURE;
-    }
-
-    const bson_t * data;
-    if( mongoc_cursor_next( cursor, &data ) == false )
-    {
-        mongoc_cursor_destroy( cursor );
-
-        return HB_SUCCESSFUL;
     }
 
     hb_db_values_handle_t * values;

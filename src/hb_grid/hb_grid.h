@@ -6,6 +6,7 @@
 #include "hb_thread/hb_thread.h"
 #include "hb_matching/hb_matching.h"
 #include "hb_messages/hb_messages.h"
+#include "hb_events/hb_events.h"
 #include "hb_cache/hb_cache.h"
 
 #include "evhttp.h"
@@ -41,6 +42,7 @@ typedef struct hb_grid_process_handle_t
     
     hb_matching_handle_t * matching;
     hb_messages_handle_t * messages;
+    hb_events_handle_t * events;
 
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;

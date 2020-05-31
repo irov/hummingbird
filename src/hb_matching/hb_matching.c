@@ -75,7 +75,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
-            , "hb_matching"
+            , "matching"
         );
 
         return HB_FAILURE;
@@ -161,7 +161,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "matching", "invalid initialize script: db not found collection '%s'"
-            , "hb_matching"
+            , "matching"
         );
 
         return HB_FAILURE;

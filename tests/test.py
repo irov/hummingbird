@@ -124,6 +124,7 @@ class Testing(unittest.TestCase):
 
         self.assertIsNotNone(jresult)
         self.assertEqual(jresult["code"], 0)
+        self.assertIn("token", jresult)
 
         print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
         jresult = hummingbird.post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)
@@ -275,6 +276,45 @@ class Testing(unittest.TestCase):
 
         self.assertIsNotNone(jresult)
         self.assertEqual(jresult["code"], 0)
+        pass
+        
+    def __geteventstopic(self, token, topic):
+        print("----geteventstopic---- token: {0}".format(token))
+        jresult = hummingbird.post("http://localhost:5555/geteventstopic/{0}".format(token), uid=topic, index=-1)
+        print("response: ", jresult)
+        
+        self.assertIsNotNone(jresult)
+        self.assertEqual(jresult["code"], 0)
+        
+        index = jresult["index"]
+        message = jresult["message"]
+        
+        print("index: ", index)
+        print("message: ", message)
+        
+        return index
+        pass
+        
+    def test_13_events(self):
+        print("----events----")
+        
+        print("----neweventstopic---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
+        jresult = hummingbird.post("http://localhost:5555/neweventstopic/{0}/{1}".format(Testing.account_token, Testing.pid), name="daily", delay=5)
+        print("response: ", jresult)
+        
+        self.assertIsNotNone(jresult)
+        self.assertEqual(jresult["code"], 0)
+        self.assertIn("uid", jresult)
+        
+        topic = jresult["uid"]
+        
+        print("topic: ", topic)
+        
+        token0 = self.__createuser(Testing.pid)
+        
+        self.__geteventstopic(token0, topic)
+        self.__geteventstopic(token0, topic)
+        self.__geteventstopic(token0, topic)
         pass
     pass
 

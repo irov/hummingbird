@@ -61,7 +61,7 @@ hb_result_t hb_events_create( hb_events_handle_t ** _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_messages_destroy( hb_events_handle_t * _handle )
+void hb_events_destroy( hb_events_handle_t * _handle )
 {
     hb_hashtable_destroy( _handle->ht_topics );
     hb_mutex_destroy( _handle->mutex );
@@ -134,9 +134,18 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
         hb_db_values_handle_t * fields_values;
 
         hb_bool_t exist;
-        if( hb_db_find_uid_with_values_by_name( _client, _puid, "hb_events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
+        if( hb_db_find_uid_with_values_by_name( _client, _puid, "events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
         {
             return HB_FAILURE;
+        }
+
+        if( exist == HB_FALSE )
+        {
+            hb_db_destroy_values( find_values );
+
+            *_topic = HB_NULLPTR;
+
+            return HB_SUCCESSFUL;
         }
 
         char topic_name[32];
@@ -152,20 +161,13 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
         }
 
         hb_time_t topic_start;
-        if( hb_db_get_time_value( fields_values, 1, &topic_start ) == HB_FAILURE )
+        if( hb_db_get_time_value( fields_values, 2, &topic_start ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
         hb_db_destroy_values( fields_values );
         hb_db_destroy_values( find_values );
-
-        if( exist == HB_FALSE )
-        {
-            *_topic = HB_NULLPTR;
-
-            return HB_SUCCESSFUL;
-        }
 
         topic_handle = HB_NEW( hb_events_topic_handle_t );
 
@@ -193,7 +195,7 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _tuid, const char ** _message, hb_error_code_t * _code )
+hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _tuid, hb_events_topic_t * _topic, hb_error_code_t * _code )
 {
     hb_events_topic_handle_t * topic_handle;
     if( __hb_events_get_topic( _handle, _client, _puid, _tuid, &topic_handle ) == HB_FAILURE )
@@ -214,7 +216,8 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_ha
 
     if( topic_handle->index != ~0U && topic_handle->index == index )
     {
-        *_message = topic_handle->message;
+        _topic->index = topic_handle->index;
+        _topic->message = topic_handle->message;
 
         return HB_SUCCESSFUL;
     }
@@ -228,9 +231,9 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_ha
     }
 
     char data[HB_DATA_MAX_SIZE] = { 0 };
-    int data_len = sprintf( data, "{name=\"%s\",index=\"%u\"}"
+    int data_len = sprintf( data, "{\"name\":\"%s\",\"index\":%u}"
         , topic_handle->name
-        , topic_handle->index
+        , index
     );
 
     hb_error_code_t error;
@@ -243,7 +246,8 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_ha
 
     topic_handle->index = index;
 
-    *_message = topic_handle->message;
+    _topic->index = topic_handle->index;
+    _topic->message = topic_handle->message;
 
     return HB_SUCCESSFUL;
 }

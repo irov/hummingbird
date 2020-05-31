@@ -9,6 +9,12 @@ command.create = function(data)
     server.CreateMatching("game", 2, 50, {})
 end
 
+event.onEventsTopicUpdate = function(data)
+    print(data.name, data.index)
+    
+    return {name=data.name, index=data.index, update=true}
+end
+
 event.onCreateUser = function(data)
     local entity = server.CreateUserEntity("test", "", {a=1,b=2,c=3})
 
