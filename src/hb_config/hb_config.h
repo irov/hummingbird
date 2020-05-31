@@ -64,7 +64,7 @@ typedef struct hb_token16_t
     char value[28];
 } hb_token16_t;
 
-static const hb_uid_t HB_UID_NONE = 0;
+static const hb_uid_t HB_UID_NONE = (0);
 
 typedef struct hb_user_token_t
 {

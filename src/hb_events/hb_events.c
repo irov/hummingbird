@@ -1,5 +1,7 @@
 #include "hb_events.h"
 
+#include "hb_script/hb_script.h"
+
 #include "hb_mutex/hb_mutex.h"
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
@@ -8,6 +10,7 @@
 #include "hb_utils/hb_base16.h"
 
 #include "string.h"
+#include "stdio.h"
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_events_handle_t
@@ -168,10 +171,9 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
 
         topic_handle->start = topic_start;
         topic_handle->delay = topic_delay;
-        topic_handle->index = __hb_events_topic_index( topic_handle );
+        topic_handle->index = ~0U;
         memcpy( topic_handle->name, topic_name, 32 );
         
-
         hb_mutex_handle_t * mutex;
         if( hb_mutex_create( &mutex ) == HB_FAILURE )
         {
@@ -191,7 +193,7 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _tuid, const char ** _message, hb_error_code_t * _code )
+hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _tuid, const char ** _message, hb_error_code_t * _code )
 {
     hb_events_topic_handle_t * topic_handle;
     if( __hb_events_get_topic( _handle, _client, _puid, _tuid, &topic_handle ) == HB_FAILURE )
@@ -210,14 +212,34 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_db_clien
 
     uint32_t index = __hb_events_topic_index( topic_handle );
 
-    if( topic_handle->index == index )
+    if( topic_handle->index != ~0U && topic_handle->index == index )
     {
         *_message = topic_handle->message;
 
         return HB_SUCCESSFUL;
     }
 
-    //ToDo;
+    hb_script_handle_t * script_handle;
+    if( hb_script_initialize( _cache, _client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _puid, HB_UID_NONE, HB_NULLPTR, &script_handle ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script" );
+
+        return HB_FAILURE;
+    }
+
+    char data[HB_DATA_MAX_SIZE] = { 0 };
+    int data_len = sprintf( data, "{name=\"%s\",index=\"%u\"}"
+        , topic_handle->name
+        , topic_handle->index
+    );
+
+    hb_error_code_t error;
+    if( hb_script_api_call( script_handle, "event", "onEventsTopicUpdate", data, data_len, topic_handle->message, HB_DATA_MAX_SIZE, HB_NULLPTR, &error ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_script_finalize( script_handle );
 
     topic_handle->index = index;
 

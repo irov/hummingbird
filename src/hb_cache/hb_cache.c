@@ -1,6 +1,7 @@
 #include "hb_cache.h"
 
 #include "hb_memory/hb_memory.h"
+#include "hb_token/hb_token.h"
 #include "hb_log/hb_log.h"
 
 #pragma warning( push )
@@ -197,6 +198,27 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
     }
 
     freeReplyObject( reply );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _token, uint32_t _seconds, void * _value, size_t _capacity, size_t * _size )
+{
+    hb_token_t token;
+    if( hb_token_base16_decode_string( _token, &token ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_cache_expire_value( _cache, token.value, sizeof( hb_token_t ), _seconds ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( hb_cache_get_value( _cache, token.value, sizeof( hb_token_t ), _value, _capacity, _size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     return HB_SUCCESSFUL;
 }

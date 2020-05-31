@@ -16,50 +16,17 @@
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, const hb_grid_process_script_api_in_data_t * _in, hb_grid_process_script_api_out_data_t * _out )
 {
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_user_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     hb_script_handle_t * script_handle;
-    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, token_handle.puid, token_handle.uuid, _process->matching, &script_handle ) == HB_FAILURE )
+    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _in->puid, _in->uuid, _process->matching, &script_handle ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script" );
+        HB_LOG_MESSAGE_ERROR( "process", "invalid initialize script" );
 
         return HB_FAILURE;
     }
 
-    hb_error_code_t code;
-    if( hb_script_api_call( script_handle, _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &code ) == HB_FAILURE )
+    if( hb_script_api_call( script_handle, _in->api, _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &_out->code ) == HB_FAILURE )
     {
         return HB_FAILURE;
-    }
-
-    switch( code )
-    {
-    case HB_ERROR_OK:
-        {
-            _out->successful = HB_TRUE;
-            _out->method_found = HB_TRUE;
-        }break;
-    case HB_ERROR_INTERNAL:
-        {
-            _out->response_size = 0;
-            _out->successful = HB_FALSE;
-            _out->method_found = HB_TRUE;
-        }break;
-    case HB_ERROR_NOT_FOUND:
-        {
-            _out->response_size = 0;
-            _out->successful = HB_TRUE;
-            _out->method_found = HB_FALSE;
-        }break;
     }
 
     hb_script_stat_t stat;

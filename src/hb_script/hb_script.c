@@ -98,7 +98,11 @@ static const struct luaL_Reg serverLib[] = {
     , { "SetUserEntityPublicData", &hb_script_server_SetUserEntityPublicData }
     , { "GetUserEntityPublicData", &hb_script_server_GetUserEntityPublicData }
     , { "UpdateUserEntityPublicData", &hb_script_server_UpdateUserEntityPublicData }
-    , { "CreateMatching", &hb_script_server_CreateMatching }
+    , { NULL, NULL } /* end of array */
+};
+//////////////////////////////////////////////////////////////////////////
+static const struct luaL_Reg matchingLib[] = {
+    { "CreateMatching", &hb_script_server_CreateMatching }
     , { "JoinMatching", &hb_script_server_JoinMatching }
     , { NULL, NULL } /* end of array */
 };
@@ -380,6 +384,12 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
     lua_getglobal( L, "server" );
     luaL_setfuncs( L, serverLib, 0 );
 
+    if( handle->matching != HB_NULLPTR )
+    {
+        lua_getglobal( L, "server" );
+        luaL_setfuncs( L, matchingLib, 0 );
+    }
+
     handle->call_used = 0;
     handle->call_limit = _calllimit;
     lua_sethook( L, &__hb_lua_hook, LUA_MASKCOUNT, 1 );
@@ -435,7 +445,7 @@ void hb_script_stat( hb_script_handle_t * _handle, hb_script_stat_t * _stat )
     _stat->call_used = _handle->call_used;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
+hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
@@ -444,7 +454,8 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' method '%s' data '%.*s'"
+        , _api
         , _method
         , _datasize
         , (const char *)_data
@@ -454,7 +465,7 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
 
     int base = lua_gettop( L );
 
-    lua_getglobal( L, "api" );
+    lua_getglobal( L, _api );
 
     if( lua_getfield( L, -1, _method ) != LUA_TFUNCTION )
     {
@@ -494,224 +505,27 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _meth
 
     if( nresults == 1 && lua_type( L, -1 ) == LUA_TTABLE )
     {
-        if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
+        if( _result != HB_NULLPTR )
         {
-            return HB_FAILURE;
+            if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
         }
 
         lua_pop( L, 1 );
     }
     else if( nresults == 0 )
     {
-        strcpy( _result, "{}" );
-
-        *_resultsize = 2;
-    }
-    else
-    {
-        lua_pop( L, nresults );
-
-        return HB_FAILURE;
-    }
-
-    *_code = HB_ERROR_OK;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_event_call( hb_script_handle_t * _handle, const char * _event, const void * _data, size_t _datasize )
-{
-    if( setjmp( _handle->panic_jump ) == 1 )
-    {
-        /* recovered from panic. log and return */
-
-        return HB_FAILURE;
-    }
-
-    HB_LOG_MESSAGE_INFO( "script", "call event '%s' data '%.*s'"
-        , _event
-        , _datasize
-        , (const char *)_data
-    );
-
-    lua_State * L = _handle->L;
-
-    lua_getglobal( L, "event" );
-
-    if( lua_getfield( L, -1, _event ) != LUA_TFUNCTION )
-    {
-        return HB_SUCCESSFUL;
-    }
-
-    lua_remove( L, -2 );
-
-    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    int status = lua_pcallk( L, 1, 0, 0, 0, HB_NULLPTR );
-
-    if( status != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
-            , _event
-            , _datasize
-            , _data
-            , error_msg
-        );
-
-        return HB_FAILURE;
-    }
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_command_call( hb_script_handle_t * _handle, const char * _command, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
-{
-    if( setjmp( _handle->panic_jump ) == 1 )
-    {
-        /* recovered from panic. log and return */
-
-        return HB_FAILURE;
-    }
-
-    HB_LOG_MESSAGE_INFO( "script", "call command '%s' data '%.*s'"
-        , _command
-        , _datasize
-        , (const char *)_data 
-    );
-
-    lua_State * L = _handle->L;
-
-    lua_getglobal( L, "command" );
-
-    if( lua_getfield( L, -1, _command ) != LUA_TFUNCTION )
-    {
-        *_code = HB_ERROR_NOT_FOUND;
-
-        return HB_SUCCESSFUL;
-    }
-
-    lua_remove( L, -2 );
-
-    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    int status = lua_pcallk( L, 1, 1, 0, 0, HB_NULLPTR );
-
-    if( status != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
-            , _command
-            , _datasize
-            , _data
-            , error_msg
-        );
-
-        *_code = HB_ERROR_INTERNAL;
-
-        return HB_SUCCESSFUL;
-    }
-
-    if( lua_type( L, -1 ) == LUA_TTABLE )
-    {
-        if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
+        if( _result != HB_NULLPTR )
         {
-            return HB_FAILURE;
+            strcpy( _result, "{}" );
+
+            if( _resultsize != HB_NULLPTR )
+            {
+                *_resultsize = 2;
+            }
         }
-    }
-    else
-    {
-        strcpy( _result, "{}" );
-
-        *_resultsize = 2;
-    }
-
-    lua_pop( L, 1 );
-
-    *_code = HB_ERROR_OK;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_avatar_call( hb_script_handle_t * _handle, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
-{
-    if( setjmp( _handle->panic_jump ) == 1 )
-    {
-        /* recovered from panic. log and return */
-
-        return HB_FAILURE;
-    }
-
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' data '%.*s'"
-        , _method
-        , _datasize
-        , (const char *)_data 
-    );
-
-    lua_State * L = _handle->L;
-
-    int base = lua_gettop( L );
-
-    lua_getglobal( L, "avatar" );
-
-    if( lua_getfield( L, -1, _method ) != LUA_TFUNCTION )
-    {
-        *_code = HB_ERROR_NOT_FOUND;
-
-        return HB_SUCCESSFUL;
-    }
-
-    lua_remove( L, -2 );
-
-    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    int status = lua_pcallk( L, 1, LUA_MULTRET, 0, 0, HB_NULLPTR );
-
-    if( status != LUA_OK )
-    {
-        const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
-
-        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
-            , _method
-            , _datasize
-            , _data
-            , error_msg
-        );
-
-        *_code = HB_ERROR_INTERNAL;
-
-        return HB_SUCCESSFUL;
-    }
-
-    int top = lua_gettop( L );
-
-    int nresults = top - base;
-
-    if( nresults == 1 && lua_type( L, -1 ) == LUA_TTABLE )
-    {
-        if( hb_script_json_dumps( L, -1, _result, _capacity, _resultsize ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        lua_pop( L, 1 );
-    }
-    else if( nresults == 0 )
-    {
-        strcpy( _result, "{}" );
-
-        *_resultsize = 2;
     }
     else
     {

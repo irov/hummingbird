@@ -130,7 +130,10 @@ hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer,
         return HB_FAILURE;
     }
 
-    *_size = offset;
+    if( _size != HB_NULLPTR )
+    {
+        *_size = offset;
+    }
 
     return HB_SUCCESSFUL;
 }
