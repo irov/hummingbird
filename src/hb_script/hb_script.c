@@ -214,7 +214,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     if( hb_db_get_values( _handle->db_collection_projects, _puid, db_projects_fields, sizeof( db_projects_fields ) / sizeof( db_projects_fields[0] ), &project_values, HB_NULLPTR ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' not found 'script_sha1'"
-            , "hb_projects"
+            , "projects"
         );
 
         return HB_FAILURE;
@@ -224,7 +224,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     if( hb_db_copy_binary_value( project_values, 0, &script_sha1, sizeof( script_sha1 ) ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid data 'script_sha1'"
-            , "hb_projects"
+            , "projects"
         );
 
         return HB_FAILURE;
@@ -237,7 +237,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     if( hb_storage_get_code( _handle->cache, _handle->db_collection_scripts, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid get data from storage"
-            , "hb_projects"
+            , "projects"
         );
 
         return HB_FAILURE;
@@ -246,7 +246,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     if( __hb_script_load( _handle, script_data, script_data_size ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "node", "invalid initialize script: collection '%s' invalid load data"
-            , "hb_projects"
+            , "projects"
         );
 
         return HB_FAILURE;

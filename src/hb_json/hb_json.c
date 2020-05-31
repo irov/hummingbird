@@ -193,6 +193,11 @@ hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value,
 {
     json_t * jvalue = _handle->jroot;
 
+    if( json_is_string( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     const char * value = json_string_value( jvalue );
     size_t size = json_string_length( jvalue );
 
@@ -210,6 +215,11 @@ hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     json_int_t value = json_integer_value( jvalue );
 
     *_value = (int16_t)value;
@@ -220,6 +230,11 @@ hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value )
 hb_result_t hb_json_to_int32( hb_json_handle_t * _handle, int32_t * _value )
 {
     json_t * jvalue = _handle->jroot;
+
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
 
     json_int_t value = json_integer_value( jvalue );
 
@@ -232,6 +247,11 @@ hb_result_t hb_json_to_uint16( hb_json_handle_t * _handle, uint16_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     json_int_t value = json_integer_value( jvalue );
 
     *_value = (uint16_t)value;
@@ -242,6 +262,11 @@ hb_result_t hb_json_to_uint16( hb_json_handle_t * _handle, uint16_t * _value )
 hb_result_t hb_json_to_uint32( hb_json_handle_t * _handle, uint32_t * _value )
 {
     json_t * jvalue = _handle->jroot;
+
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
 
     json_int_t value = json_integer_value( jvalue );
 
@@ -254,6 +279,11 @@ hb_result_t hb_json_to_int64( hb_json_handle_t * _handle, int64_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     json_int_t value = json_integer_value( jvalue );
 
     *_value = (int64_t)value;
@@ -265,6 +295,11 @@ hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
+    if( json_is_integer( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     json_int_t value = json_integer_value( jvalue );
 
     *_value = (uint64_t)value;
@@ -275,6 +310,11 @@ hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value )
 hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
 {
     json_t * jvalue = _handle->jroot;
+
+    if( json_is_real( jvalue ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
 
     double value = json_real_value( jvalue );
 

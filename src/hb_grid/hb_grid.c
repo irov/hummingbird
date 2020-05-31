@@ -336,6 +336,9 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    hb_events_handle_t * events;
+    hb_events_create( &events );
+
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
     evutil_socket_t ev_socket = -1;
@@ -352,6 +355,7 @@ int main( int _argc, char * _argv[] )
         process_handle->config = config;
         process_handle->matching = matching;
         process_handle->messages = messages;
+        process_handle->events = events;
 
         process_handle->cache = HB_NULLPTR;
         process_handle->thread = HB_NULLPTR;
@@ -413,6 +417,7 @@ int main( int _argc, char * _argv[] )
 
     hb_messages_destroy( messages );
     hb_matching_destroy( matching );
+    hb_events_destroy( events );
 
     hb_db_finalize( db );
 

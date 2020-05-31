@@ -20,6 +20,8 @@ request
     hb_grid_request_newmessageschannel.c
     hb_grid_request_postmessageschannel.c
     hb_grid_request_getmessageschannel.c
+    hb_grid_request_neweventstopic.c
+    hb_grid_request_geteventstopic.c
     hb_grid_request_loginuser.c
     hb_grid_request_newuser.c
     hb_grid_request_newproject.c
@@ -78,6 +80,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_script)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_storage)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_leaderboard)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_messages)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_events)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_json)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_token)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_thread)

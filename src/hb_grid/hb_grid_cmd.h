@@ -28,6 +28,8 @@ extern hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _r
 extern hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
 extern hb_http_code_t hb_grid_request_postmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
 extern hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
+extern hb_http_code_t hb_grid_request_neweventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
+extern hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args );
 //////////////////////////////////////////////////////////////////////////
 static hb_grid_cmd_inittab_t grid_cmds[] =
 {
@@ -46,7 +48,9 @@ static hb_grid_cmd_inittab_t grid_cmds[] =
     { "postmessageschannel", &hb_grid_request_postmessageschannel, 1 },
     { "getmessageschannel", &hb_grid_request_getmessageschannel, 1 },
     { "avatar", &hb_grid_request_avatar, 2 },
-    { "command", &hb_grid_request_command, 3 }
+    { "command", &hb_grid_request_command, 3 },
+    { "neweventstopic", &hb_grid_request_neweventstopic, 2 },
+    { "geteventstopic", &hb_grid_request_geteventstopic, 1 },
 };
 //////////////////////////////////////////////////////////////////////////
 
