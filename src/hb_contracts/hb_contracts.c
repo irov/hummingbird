@@ -60,9 +60,23 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_contracts_new_records( hb_contracts_handle_t * _handle, hb_uid_t _puid, const void * _data, size_t _datasize )
+hb_result_t hb_contracts_new_records( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, const void * _data, size_t _datasize )
 {
-    HB_UNUSED( _puid );
+    hb_db_values_handle_t * new_values;
+    if( hb_db_create_values( &new_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_make_binary_value( new_values, "data", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
+
+    hb_uid_t tuid;
+    if( hb_db_new_document_by_name( _client, _puid, "contracts", new_values, &tuid ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( new_values );
 
     hb_json_handle_t * json_data;
     if( hb_json_create( _data, _datasize, &json_data ) == HB_FAILURE )
