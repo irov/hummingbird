@@ -120,74 +120,78 @@ static hb_result_t __hb_events_get_topic( hb_events_handle_t * _handle, const hb
 
     hb_events_topic_handle_t * topic_handle = (hb_events_topic_handle_t *)hb_hashtable_find( _handle->ht_topics, &key, sizeof( hb_events_topic_key_t ) );
 
-    if( topic_handle == HB_NULLPTR )
+    if( topic_handle != HB_NULLPTR )
     {
-        hb_db_values_handle_t * find_values;
-        if( hb_db_create_values( &find_values ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        *_topic = topic_handle;
 
-        hb_db_make_uid_value( find_values, "_id", HB_UNKNOWN_STRING_SIZE, _tuid );
+        return HB_SUCCESSFUL;
+    }
 
-        const char * fields[] = {"name", "delay", "start"};
-        hb_db_values_handle_t * fields_values;
+    hb_db_values_handle_t * find_values;
+    if( hb_db_create_values( &find_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-        hb_bool_t exist;
-        if( hb_db_find_uid_with_values_by_name( _client, _puid, "events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    hb_db_make_uid_value( find_values, "_id", HB_UNKNOWN_STRING_SIZE, _tuid );
 
-        if( exist == HB_FALSE )
-        {
-            hb_db_destroy_values( find_values );
+    const char * fields[] = {"name", "delay", "start"};
+    hb_db_values_handle_t * fields_values;
 
-            *_topic = HB_NULLPTR;
+    hb_bool_t exist;
+    if( hb_db_find_uid_with_values_by_name( _client, _puid, "events", find_values, HB_NULLPTR, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-            return HB_SUCCESSFUL;
-        }
-
-        char topic_name[32];
-        if( hb_db_copy_string_value( fields_values, 0, topic_name, 32 ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        uint32_t topic_delay;
-        if( hb_db_get_uint32_value( fields_values, 1, &topic_delay ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_time_t topic_start;
-        if( hb_db_get_time_value( fields_values, 2, &topic_start ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
-
-        hb_db_destroy_values( fields_values );
+    if( exist == HB_FALSE )
+    {
         hb_db_destroy_values( find_values );
 
-        topic_handle = HB_NEW( hb_events_topic_handle_t );
+        *_topic = HB_NULLPTR;
 
-        topic_handle->start = topic_start;
-        topic_handle->delay = topic_delay;
-        topic_handle->index = ~0U;
-        memcpy( topic_handle->name, topic_name, 32 );
+        return HB_SUCCESSFUL;
+    }
+
+    char topic_name[32];
+    if( hb_db_copy_string_value( fields_values, 0, topic_name, 32 ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    uint32_t topic_delay;
+    if( hb_db_get_uint32_value( fields_values, 1, &topic_delay ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_time_t topic_start;
+    if( hb_db_get_time_value( fields_values, 2, &topic_start ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( fields_values );
+    hb_db_destroy_values( find_values );
+
+    topic_handle = HB_NEW( hb_events_topic_handle_t );
+
+    topic_handle->start = topic_start;
+    topic_handle->delay = topic_delay;
+    topic_handle->index = ~0U;
+    memcpy( topic_handle->name, topic_name, 32 );
         
-        hb_mutex_handle_t * mutex;
-        if( hb_mutex_create( &mutex ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    hb_mutex_handle_t * mutex;
+    if( hb_mutex_create( &mutex ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-        topic_handle->mutex = mutex;
+    topic_handle->mutex = mutex;
 
-        if( hb_hashtable_emplace( _handle->ht_topics, &key, sizeof( hb_events_topic_key_t ), topic_handle ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    if( hb_hashtable_emplace( _handle->ht_topics, &key, sizeof( hb_events_topic_key_t ), topic_handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
     }
 
     *_topic = topic_handle;

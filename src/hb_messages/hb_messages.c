@@ -109,56 +109,60 @@ static hb_result_t __hb_messages_get_channel( hb_messages_handle_t * _handle, co
 
     hb_messages_channel_handle_t * channel_handle = (hb_messages_channel_handle_t * )hb_hashtable_find( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ) );
 
-    if( channel_handle == HB_NULLPTR )
-    {      
-        const char * fields[] = { "maxpost" };
-        hb_db_values_handle_t * fields_values;
+    if( channel_handle != HB_NULLPTR )
+    {
+        *_channel = channel_handle;
 
-        hb_bool_t exist;
-        if( hb_db_get_values_by_name( _client, _puid, "messages", _cuid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        return HB_SUCCESSFUL;
+    }
 
-        int32_t maxpost;
-        if( hb_db_get_int32_value( fields_values, 0, &maxpost ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    const char * fields[] = { "maxpost" };
+    hb_db_values_handle_t * fields_values;
 
-        hb_db_destroy_values( fields_values );
+    hb_bool_t exist;
+    if( hb_db_get_values_by_name( _client, _puid, "messages", _cuid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-        if( exist == HB_FALSE )
-        {
-            *_channel = HB_NULLPTR;
+    int32_t maxpost;
+    if( hb_db_get_int32_value( fields_values, 0, &maxpost ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-            return HB_SUCCESSFUL;
-        }
+    hb_db_destroy_values( fields_values );
 
-        channel_handle = HB_NEW( hb_messages_channel_handle_t );
+    if( exist == HB_FALSE )
+    {
+        *_channel = HB_NULLPTR;
 
-        hb_list_t * l;
-        if( hb_list_create( &l ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        return HB_SUCCESSFUL;
+    }
 
-        channel_handle->maxpost = (uint32_t)maxpost;
-        channel_handle->enumerator = 0;
-        channel_handle->l_posts = l;
+    channel_handle = HB_NEW( hb_messages_channel_handle_t );
 
-        hb_mutex_handle_t * mutex;
-        if( hb_mutex_create( &mutex ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    hb_list_t * l;
+    if( hb_list_create( &l ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
-        channel_handle->mutex = mutex;
+    channel_handle->maxpost = (uint32_t)maxpost;
+    channel_handle->enumerator = 0;
+    channel_handle->l_posts = l;
 
-        if( hb_hashtable_emplace( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ), channel_handle ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+    hb_mutex_handle_t * mutex;
+    if( hb_mutex_create( &mutex ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    channel_handle->mutex = mutex;
+
+    if( hb_hashtable_emplace( _handle->ht_channels, &key, sizeof( hb_messages_channel_key_t ), channel_handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
     }
 
     *_channel = channel_handle;
