@@ -5,7 +5,7 @@
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_hashtable.h"
-#include "hb_utils/hb_list.h"
+#include "hb_utils/hb_array.h"
 #include "hb_utils/hb_base16.h"
 
 #include "string.h"
@@ -18,11 +18,26 @@ typedef struct hb_contracts_handle_t
     hb_hashtable_t * ht_contracts;
 } hb_contracts_handle_t;
 //////////////////////////////////////////////////////////////////////////
+typedef struct hb_contracts_record_handle_t
+{
+    char name[32];
+    uint32_t time;
+    hb_json_handle_t * tags;
+    hb_json_handle_t * conditions;
+    hb_json_handle_t * pay;
+    hb_json_handle_t * reward;
+} hb_contracts_record_handle_t;
+//////////////////////////////////////////////////////////////////////////
 typedef struct hb_contracts_records_handle_t
+{
+    hb_array_t * array_records;
+} hb_contracts_records_handle_t;
+//////////////////////////////////////////////////////////////////////////
+typedef struct hb_contracts_records_vocabulary_handle_t
 {
     hb_mutex_handle_t * mutex;
     hb_hashtable_t * ht_records;
-} hb_contracts_records_handle_t;
+} hb_contracts_records_vocabulary_handle_t;
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_contracts_create( hb_contracts_handle_t ** _handle )
 {
@@ -55,15 +70,6 @@ void hb_contracts_destroy( hb_contracts_handle_t * _handle )
     hb_mutex_destroy( _handle->mutex );
 
     HB_DELETE( _handle );
-}
-//////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
-{
-    HB_UNUSED( _key );
-    HB_UNUSED( _value );
-    HB_UNUSED( _ud );
-
-    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_contracts_new_bank( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, const void * _data, size_t _datasize, hb_uid_t * _uid )
@@ -113,25 +119,21 @@ hb_result_t hb_contracts_new_records( hb_contracts_handle_t * _handle, const hb_
 
     hb_db_destroy_collection( db_collection_projects );
 
-    //hb_json_handle_t * json_data;
-    //if( hb_json_create( _data, _datasize, &json_data ) == HB_FAILURE )
-    //{
-    //    return HB_FAILURE;
-    //}
-
-    //if( hb_json_foreach( json_data, &__hb_json_visitor, _handle ) == HB_FAILURE )
-    //{
-    //    return HB_FAILURE;
-    //}
-
-    //hb_json_destroy( json_data );
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
+{
+    HB_UNUSED( _key );
+    HB_UNUSED( _value );
+    HB_UNUSED( _ud );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_contracts_records_handle_t ** _records )
+static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_contracts_records_vocabulary_handle_t ** _records )
 {
-    hb_contracts_records_handle_t * records_handle = (hb_contracts_records_handle_t *)hb_hashtable_find( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ) );
+    hb_contracts_records_vocabulary_handle_t * records_handle = (hb_contracts_records_vocabulary_handle_t *)hb_hashtable_find( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ) );
 
     if( records_handle != HB_NULLPTR )
     {
@@ -143,7 +145,7 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     hb_db_collection_handle_t * db_collection_projects;
     hb_db_get_collection( _client, "hb", "projects", &db_collection_projects );
 
-    const char * fields[] = { "records" };
+    const char * fields[] = {"records"};
     hb_db_values_handle_t * fields_values;
 
     hb_bool_t exist;
@@ -162,8 +164,14 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     }
 
     const void * data;
-    size_t data_len;
-    if( hb_db_get_binary_value( fields_values, 0, &data, &data_len ) == HB_FAILURE )
+    size_t datasize;
+    if( hb_db_get_binary_value( fields_values, 0, &data, &datasize ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_handle_t * json_data;
+    if( hb_json_create( data, datasize, &json_data ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -171,7 +179,7 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     hb_db_destroy_values( fields_values );
     hb_db_destroy_collection( db_collection_projects );
 
-    records_handle = HB_NEW( hb_contracts_records_handle_t );
+    records_handle = HB_NEW( hb_contracts_records_vocabulary_handle_t );
 
     hb_mutex_handle_t * mutex;
     if( hb_mutex_create( &mutex ) == HB_FAILURE )
@@ -180,6 +188,14 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     }
 
     records_handle->mutex = mutex;
+
+    if( hb_json_foreach( json_data, &__hb_json_visitor, _handle ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( json_data );
+
 
     if( hb_hashtable_emplace( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ), records_handle ) == HB_FAILURE )
     {
@@ -198,7 +214,7 @@ hb_result_t hb_contracts_new_contract( hb_contracts_handle_t * _handle, const hb
     HB_UNUSED( _category );
     HB_UNUSED( _name );
 
-    hb_contracts_records_handle_t * records_handle;
+    hb_contracts_records_vocabulary_handle_t * records_handle;
     if( __hb_contracts_get_records( _handle, _client, _puid, &records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
