@@ -8,7 +8,6 @@
 typedef struct hb_grid_process_upload_in_data_t
 {
     hb_token_t token;
-
     hb_uid_t puid;
 
     hb_source_t script_source;

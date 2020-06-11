@@ -337,7 +337,24 @@ int main( int _argc, char * _argv[] )
     }
 
     hb_events_handle_t * events;
-    hb_events_create( &events );
+    if( hb_events_create( &events ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [events] component"
+            , config->name
+        );
+
+        return EXIT_FAILURE;
+    }
+
+    hb_economics_handle_t * economics;
+    if( hb_economics_create( &economics ) == HB_FAILURE )
+    {
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [economics] component"
+            , config->name
+        );
+
+        return EXIT_FAILURE;
+    }
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
@@ -356,6 +373,7 @@ int main( int _argc, char * _argv[] )
         process_handle->matching = matching;
         process_handle->messages = messages;
         process_handle->events = events;
+        process_handle->economics = economics;
 
         process_handle->cache = HB_NULLPTR;
         process_handle->thread = HB_NULLPTR;
@@ -418,6 +436,7 @@ int main( int _argc, char * _argv[] )
     hb_messages_destroy( messages );
     hb_matching_destroy( matching );
     hb_events_destroy( events );
+    hb_economics_destroy( economics );
 
     hb_db_finalize( db );
 

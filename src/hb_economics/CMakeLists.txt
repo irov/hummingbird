@@ -1,9 +1,9 @@
-PROJECT(hb_contracts C)
+PROJECT(hb_economics C)
 
 ADD_FILTER(
 src
-	hb_contracts.h
-	hb_contracts.c
+	hb_economics.h
+	hb_economics.c
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

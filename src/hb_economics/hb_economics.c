@@ -1,4 +1,4 @@
-#include "hb_contracts.h"
+#include "hb_economics.h"
 
 #include "hb_json/hb_json.h"
 #include "hb_mutex/hb_mutex.h"
@@ -12,13 +12,13 @@
 #include "stdio.h"
 
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_contracts_handle_t
+typedef struct hb_economics_handle_t
 {
     hb_mutex_handle_t * mutex;
     hb_hashtable_t * ht_contracts;
-} hb_contracts_handle_t;
+} hb_economics_handle_t;
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_contracts_record_handle_t
+typedef struct hb_economics_record_handle_t
 {
     char name[32];
     uint32_t time;
@@ -26,22 +26,22 @@ typedef struct hb_contracts_record_handle_t
     hb_json_handle_t * conditions;
     hb_json_handle_t * pay;
     hb_json_handle_t * reward;
-} hb_contracts_record_handle_t;
+} hb_economics_record_handle_t;
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_contracts_records_handle_t
+typedef struct hb_economics_records_handle_t
 {
     hb_array_t * array_records;
-} hb_contracts_records_handle_t;
+} hb_economics_records_handle_t;
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_contracts_records_vocabulary_handle_t
+typedef struct hb_economics_records_vocabulary_handle_t
 {
     hb_mutex_handle_t * mutex;
     hb_hashtable_t * ht_records;
-} hb_contracts_records_vocabulary_handle_t;
+} hb_economics_records_vocabulary_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_contracts_create( hb_contracts_handle_t ** _handle )
+hb_result_t hb_economics_create( hb_economics_handle_t ** _handle )
 {
-    hb_contracts_handle_t * handle = HB_NEW( hb_contracts_handle_t );
+    hb_economics_handle_t * handle = HB_NEW( hb_economics_handle_t );
 
     hb_hashtable_t * ht_contracts;
     if( hb_hashtable_create( 1024, &ht_contracts ) == HB_FAILURE )
@@ -64,7 +64,7 @@ hb_result_t hb_contracts_create( hb_contracts_handle_t ** _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_contracts_destroy( hb_contracts_handle_t * _handle )
+void hb_economics_destroy( hb_economics_handle_t * _handle )
 {
     hb_hashtable_destroy( _handle->ht_contracts );
     hb_mutex_destroy( _handle->mutex );
@@ -72,7 +72,7 @@ void hb_contracts_destroy( hb_contracts_handle_t * _handle )
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_contracts_new_bank( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, const void * _data, size_t _datasize, hb_uid_t * _uid )
+hb_result_t hb_economics_new_bank( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, const void * _data, size_t _datasize, hb_uid_t * _uid )
 {
     HB_UNUSED( _handle );
 
@@ -98,12 +98,15 @@ hb_result_t hb_contracts_new_bank( hb_contracts_handle_t * _handle, const hb_db_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_contracts_new_records( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, const void * _data, size_t _datasize )
+hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, const void * _data, size_t _datasize )
 {
     HB_UNUSED( _handle );
 
     hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( _client, "hb", "projects", &db_collection_projects );
+    if( hb_db_get_collection( _client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_db_values_handle_t * update_values;
     if( hb_db_create_values( &update_values ) == HB_FAILURE )
@@ -113,7 +116,10 @@ hb_result_t hb_contracts_new_records( hb_contracts_handle_t * _handle, const hb_
 
     hb_db_make_binary_value( update_values, "records", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
 
-    hb_db_update_values( db_collection_projects, _puid, update_values );
+    if( hb_db_update_values( db_collection_projects, _puid, update_values ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_db_destroy_values( update_values );
 
@@ -131,9 +137,9 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_contracts_records_vocabulary_handle_t ** _records )
+static hb_result_t __hb_economics_get_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_economics_records_vocabulary_handle_t ** _records )
 {
-    hb_contracts_records_vocabulary_handle_t * records_handle = (hb_contracts_records_vocabulary_handle_t *)hb_hashtable_find( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ) );
+    hb_economics_records_vocabulary_handle_t * records_handle = (hb_economics_records_vocabulary_handle_t *)hb_hashtable_find( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ) );
 
     if( records_handle != HB_NULLPTR )
     {
@@ -143,7 +149,10 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     }
 
     hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( _client, "hb", "projects", &db_collection_projects );
+    if( hb_db_get_collection( _client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     const char * fields[] = {"records"};
     hb_db_values_handle_t * fields_values;
@@ -179,7 +188,7 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     hb_db_destroy_values( fields_values );
     hb_db_destroy_collection( db_collection_projects );
 
-    records_handle = HB_NEW( hb_contracts_records_vocabulary_handle_t );
+    records_handle = HB_NEW( hb_economics_records_vocabulary_handle_t );
 
     hb_mutex_handle_t * mutex;
     if( hb_mutex_create( &mutex ) == HB_FAILURE )
@@ -196,7 +205,6 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
 
     hb_json_destroy( json_data );
 
-
     if( hb_hashtable_emplace( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ), records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -207,15 +215,15 @@ static hb_result_t __hb_contracts_get_records( hb_contracts_handle_t * _handle, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_contracts_new_contract( hb_contracts_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, hb_uid_t _buid, const char * _category, const char * _name )
+hb_result_t hb_economics_new_contract( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, hb_uid_t _buid, const char * _category, const char * _name )
 {
     HB_UNUSED( _uuid );
     HB_UNUSED( _buid );
     HB_UNUSED( _category );
     HB_UNUSED( _name );
 
-    hb_contracts_records_vocabulary_handle_t * records_handle;
-    if( __hb_contracts_get_records( _handle, _client, _puid, &records_handle ) == HB_FAILURE )
+    hb_economics_records_vocabulary_handle_t * records_handle;
+    if( __hb_economics_get_records( _handle, _client, _puid, &records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

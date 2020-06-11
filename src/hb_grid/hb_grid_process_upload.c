@@ -52,7 +52,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     hb_db_destroy_collection( db_collection_scripts );
 
     hb_db_collection_handle_t * db_collection_projects;
-    hb_db_get_collection( _process->db_client, "hb", "projects", &db_collection_projects );
+    if( hb_db_get_collection( _process->db_client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_db_values_handle_t * values_project_found;
     if( hb_db_create_values( &values_project_found ) == HB_FAILURE )
@@ -114,7 +117,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
 
         hb_db_make_sha1_value( values_new, "sha1", HB_UNKNOWN_STRING_SIZE, &sha1 );
 
-        hb_db_new_document( db_collection_source_subversion, values_new, &project_subversion_uid );
+        if( hb_db_new_document( db_collection_source_subversion, values_new, &project_subversion_uid ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
 
         hb_db_destroy_values( values_new );
     }
@@ -130,7 +136,6 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
 
         const void * script_sha1_binary;
         size_t script_sha1_binary_length;
-
         if( hb_db_get_binary_value( values_sha1, 0, &script_sha1_binary, &script_sha1_binary_length ) == HB_FAILURE )
         {
             return HB_FAILURE;
@@ -145,7 +150,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         hb_db_make_sha1_value( values_new, "sha1", HB_UNKNOWN_STRING_SIZE, &sha1 );
         hb_db_make_binary_value( values_new, "prev", HB_UNKNOWN_STRING_SIZE, script_sha1_binary, script_sha1_binary_length );
 
-        hb_db_new_document( db_collection_source_subversion, values_new, &project_subversion_uid );
+        if( hb_db_new_document( db_collection_source_subversion, values_new, &project_subversion_uid ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
 
         hb_db_destroy_values( values_sha1 );
         hb_db_destroy_values( values_new );
@@ -161,7 +169,10 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     hb_db_make_uid_value( values_update, "script_subversion", HB_UNKNOWN_STRING_SIZE, project_subversion_uid );
     hb_db_make_int64_value( values_update, "script_revision", HB_UNKNOWN_STRING_SIZE, script_revision + 1 );
 
-    hb_db_update_values( db_collection_projects, project_uid, values_update );
+    if( hb_db_update_values( db_collection_projects, project_uid, values_update ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_db_destroy_values( values_update );
 
