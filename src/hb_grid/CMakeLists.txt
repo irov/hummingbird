@@ -20,6 +20,7 @@ request
     hb_grid_request_newmessageschannel.c
     hb_grid_request_postmessageschannel.c
     hb_grid_request_getmessageschannel.c
+    hb_grid_request_neweconomicsrecords.c
     hb_grid_request_neweventstopic.c
     hb_grid_request_geteventstopic.c
     hb_grid_request_loginuser.c
@@ -59,6 +60,8 @@ process
     hb_grid_process_getmessageschannel.c
     hb_grid_process_postmessageschannel.h
     hb_grid_process_postmessageschannel.c
+    hb_grid_process_neweconomicsrecords.h
+    hb_grid_process_neweconomicsrecords.c
 )
 
 INCLUDE_DIRECTORIES(${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install)
@@ -80,6 +83,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_script)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_storage)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_leaderboard)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_messages)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_economics)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_events)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_json)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_token)
