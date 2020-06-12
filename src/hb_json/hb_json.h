@@ -10,6 +10,11 @@ void hb_json_destroy( hb_json_handle_t * _handle );
 
 hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle );
 
+hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle );
+
+uint32_t hb_json_array_count( const hb_json_handle_t * _handle );
+hb_result_t hb_json_array_get( const hb_json_handle_t * _handle, uint32_t _index, hb_json_handle_t ** _out );
+
 typedef enum hb_json_type_t
 {
     e_hb_json_object,
@@ -23,6 +28,7 @@ typedef enum hb_json_type_t
 } hb_json_type_t;
 
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out );
+hb_result_t hb_json_get_field_required( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result );
 uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle );
 hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size );

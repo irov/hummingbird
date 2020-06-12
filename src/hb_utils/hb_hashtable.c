@@ -7,6 +7,8 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
+static void * HB_HASHTABLE_INVALID_PTR = (void *)(~0U);
+//////////////////////////////////////////////////////////////////////////
 typedef struct hb_hashtable_record_t
 {
     uint64_t hash;
@@ -89,7 +91,7 @@ static void __hb_hashtable_push( hb_hashtable_record_t * _records, size_t _capac
 
         hb_hashtable_record_t * record = _records + index;
 
-        if( record->element == HB_NULLPTR || record->element == (void *)(~0) )
+        if( record->element == HB_NULLPTR || record->element == HB_HASHTABLE_INVALID_PTR )
         {
             record->hash = _hash;
             memcpy( record->key, _key, _size );
@@ -114,7 +116,7 @@ static void __hb_hashtable_rebalance( hb_hashtable_t * _ht, size_t _capacity )
     {
         hb_hashtable_record_t * record = old_records + index;
 
-        if( record->element == HB_NULLPTR || record->element == (void *)(~0) )
+        if( record->element == HB_NULLPTR || record->element == HB_HASHTABLE_INVALID_PTR )
         {
             continue;
         }
@@ -184,7 +186,7 @@ static void * __hb_hashtable_change( hb_hashtable_record_t * _records, size_t _c
 
         if( record->hash == _hash && memcmp( record->key, _key, _size ) == 0 )
         {
-            if( record->element == (void *)(~0) )
+            if( record->element == HB_HASHTABLE_INVALID_PTR )
             {
                 record->element = _element;
 
@@ -256,10 +258,10 @@ static void * __hb_hashtable_pop( hb_hashtable_record_t * _records, size_t _capa
             return HB_NULLPTR;
         }
 
-        if( record->hash == _hash && memcmp( record->key, _key, _size ) == 0 && record->element != (void *)(~0) )
+        if( record->hash == _hash && memcmp( record->key, _key, _size ) == 0 && record->element != HB_HASHTABLE_INVALID_PTR )
         {
             void * pop_element = record->element;
-            record->element = (void *)(~0);
+            record->element = HB_HASHTABLE_INVALID_PTR;
 
             return pop_element;
         }
@@ -315,7 +317,7 @@ static void * __hb_hashtable_find( hb_hashtable_record_t * _records, size_t _cap
 
         if( record->hash == _hash && memcmp( record->key, _key, _size ) == 0 )
         {
-            if( record->element == (void *)(~0) )
+            if( record->element == HB_HASHTABLE_INVALID_PTR )
             {
                 return HB_NULLPTR;
             }
@@ -393,7 +395,7 @@ void hb_hashtable_clear( hb_hashtable_t * _ht )
     {
         hb_hashtable_record_t * record = values + index;
 
-        if( record->element == HB_NULLPTR || record->element == (void *)(~0) )
+        if( record->element == HB_NULLPTR || record->element == HB_HASHTABLE_INVALID_PTR )
         {
             continue;
         }

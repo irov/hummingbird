@@ -5,7 +5,7 @@
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_utils/hb_hashtable.h"
-#include "hb_utils/hb_array.h"
+#include "hb_utils/hb_vectorptr.h"
 #include "hb_utils/hb_base16.h"
 
 #include "string.h"
@@ -30,7 +30,7 @@ typedef struct hb_economics_record_handle_t
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_economics_records_handle_t
 {
-    hb_array_t * array_records;
+    hb_vectorptr_t * vector_records;
 } hb_economics_records_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_economics_records_vocabulary_handle_t
@@ -130,14 +130,77 @@ hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_
 //////////////////////////////////////////////////////////////////////////
 static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
 {
-    HB_UNUSED( _key );
-    HB_UNUSED( _value );
-    HB_UNUSED( _ud );
+    hb_economics_handle_t * handle = (hb_economics_handle_t *)_ud;
+
+    if( hb_json_is_array( _value ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_economics_records_handle_t * records = HB_NEW( hb_economics_records_handle_t );
+
+    uint32_t records_count = hb_json_array_count( _value );
+
+    hb_vectorptr_create( records_count, &records->vector_records );
+
+    for( uint32_t record_index = 0; record_index != records_count; ++record_index )
+    {
+        hb_json_handle_t * jrecord;
+        if( hb_json_array_get( _value, record_index, &jrecord ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        hb_economics_record_handle_t * record = HB_NEW( hb_economics_record_handle_t );
+
+        hb_bool_t required_successful = HB_TRUE;
+        if( hb_json_copy_field_string_required( jrecord, "name", record->name, 32, &required_successful ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( required_successful == HB_FALSE )
+        {
+            return HB_FAILURE;
+        }
+
+        hb_json_get_field_uint32( jrecord, "time", &record->time, 0U );
+
+        if( hb_json_get_field_required( jrecord, "tags", &record->tags, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( hb_json_get_field_required( jrecord, "conditions", &record->conditions, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( hb_json_get_field_required( jrecord, "pay", &record->pay, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( hb_json_get_field_required( jrecord, "reward", &record->reward, HB_NULLPTR ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( hb_vectorptr_set( records->vector_records, record_index, record ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+    }
+
+    if( hb_hashtable_emplace( handle->ht_contracts, _key, HB_UNKNOWN_STRING_SIZE, records ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_economics_get_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_economics_records_vocabulary_handle_t ** _records )
+static hb_result_t __hb_economics_cache_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_economics_records_vocabulary_handle_t ** _records )
 {
     hb_economics_records_vocabulary_handle_t * records_handle = (hb_economics_records_vocabulary_handle_t *)hb_hashtable_find( _handle->ht_contracts, &_puid, sizeof( hb_uid_t ) );
 
@@ -223,7 +286,7 @@ hb_result_t hb_economics_new_contract( hb_economics_handle_t * _handle, const hb
     HB_UNUSED( _name );
 
     hb_economics_records_vocabulary_handle_t * records_handle;
-    if( __hb_economics_get_records( _handle, _client, _puid, &records_handle ) == HB_FAILURE )
+    if( __hb_economics_cache_records( _handle, _client, _puid, &records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
