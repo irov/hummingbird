@@ -5,6 +5,7 @@
 #include "hb_utils/hb_sha1.h"
 #include "hb_utils/hb_base64.h"
 #include "hb_utils/hb_rand.h"
+#include "hb_utils/hb_vector.h"
 
 #include "mongoc/mongoc.h"
 
@@ -21,6 +22,7 @@ typedef enum hb_db_value_type_e
     e_hb_db_utf8,
     e_hb_db_binary,
     e_hb_db_time,
+    e_hb_db_dictionary,
 } hb_db_value_type_e;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_value_handle_t
@@ -53,6 +55,8 @@ typedef struct hb_db_value_handle_t
         int32_t i32;
         int64_t i64;
         hb_time_t time;
+
+        struct hb_db_values_handle_t * dict;
     } u;
 } hb_db_value_handle_t;
 //////////////////////////////////////////////////////////////////////////
@@ -231,6 +235,55 @@ hb_result_t hb_db_set_collection_expire( const hb_db_collection_handle_t * _hand
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_db_append_value( bson_t * _bson, const hb_db_value_handle_t * _handle )
+{
+    switch( _handle->type )
+    {
+    case e_hb_db_int32:
+        {
+            bson_append_int32( _bson, _handle->field, _handle->field_length, _handle->u.i32 );
+        }break;
+    case e_hb_db_int64:
+        {
+            bson_append_int64( _bson, _handle->field, _handle->field_length, _handle->u.i64 );
+        }break;
+    case e_hb_db_symbol:
+        {
+            bson_append_symbol( _bson, _handle->field, _handle->field_length, _handle->u.symbol.buffer, _handle->u.symbol.length );
+        }break;
+    case e_hb_db_binary:
+        {
+            bson_append_binary( _bson, _handle->field, _handle->field_length, BSON_SUBTYPE_BINARY, _handle->u.binary.buffer, _handle->u.binary.length );
+        }break;
+    case e_hb_db_time:
+        {
+            bson_append_time_t( _bson, _handle->field, _handle->field_length, (time_t)_handle->u.time );
+        }break;
+    case e_hb_db_dictionary:
+        {
+            bson_t dict;
+            bson_append_document_begin( _bson, _handle->field, _handle->field_length, &dict );
+
+            size_t dict_count = _handle->u.dict->value_count;
+
+            for( size_t dict_index = 0; dict_index != dict_count; ++dict_index )
+            {
+                hb_db_value_handle_t * dict_handle = _handle->u.dict->values + dict_index;
+
+                __hb_db_append_value( &dict, dict_handle );
+            }
+
+            bson_append_document_end( _bson, &dict );
+        }
+    default:
+        {
+            return HB_FAILURE;
+        }break;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_handle_t * _handles )
 {
     uint32_t value_count = _handles->value_count;
@@ -239,32 +292,9 @@ static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_han
     {
         const hb_db_value_handle_t * handle = _handles->values + index;
 
-        switch( handle->type )
+        if( __hb_db_append_value( _bson, handle ) == HB_FAILURE )
         {
-        case e_hb_db_int32:
-            {
-                bson_append_int32( _bson, handle->field, handle->field_length, handle->u.i32 );
-            }break;
-        case e_hb_db_int64:
-            {
-                bson_append_int64( _bson, handle->field, handle->field_length, handle->u.i64 );
-            }break;
-        case e_hb_db_symbol:
-            {
-                bson_append_symbol( _bson, handle->field, handle->field_length, handle->u.symbol.buffer, handle->u.symbol.length );
-            }break;
-        case e_hb_db_binary:
-            {
-                bson_append_binary( _bson, handle->field, handle->field_length, BSON_SUBTYPE_BINARY, handle->u.binary.buffer, handle->u.binary.length );
-            }break;
-        case e_hb_db_time:
-            {
-                bson_append_time_t( _bson, handle->field, handle->field_length, (time_t)handle->u.time );
-            }break;
-        default:
-            {
-                return HB_FAILURE;
-            }break;
+            return HB_FAILURE;
         }
     }
 
@@ -451,6 +481,25 @@ void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
     value->u.binary.buffer = _sha1->value;
     value->u.binary.length = sizeof( hb_sha1_t );
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_db_values_handle_t ** _dictionary )
+{
+    hb_db_value_handle_t * value = _values->values + _values->value_count;
+    ++_values->value_count;
+
+    value->type = e_hb_db_dictionary;
+    value->field = _field;
+    value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
+    
+    if( hb_db_create_values( &value->u.dict ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    *_dictionary = value->u.dict;
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_uid_t * _value )

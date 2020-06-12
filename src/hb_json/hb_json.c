@@ -13,7 +13,7 @@
 typedef struct hb_json_handle_t
 {
     json_t * jroot;
-}hb_json_handle_t;
+} hb_json_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_json_load_data_t
 {
@@ -130,6 +130,37 @@ hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle )
+{
+    return json_is_array( _handle->jroot );
+}
+//////////////////////////////////////////////////////////////////////////
+uint32_t hb_json_array_count( const hb_json_handle_t * _handle )
+{
+    size_t size = json_array_size( _handle->jroot );
+
+    return (uint32_t)size;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_array_get( const hb_json_handle_t * _handle, uint32_t _index, hb_json_handle_t ** _out )
+{
+    json_t * jvalue = json_array_get( _handle->jroot, (size_t)_index );
+
+    if( jvalue == HB_NULLPTR )
+    {
+        return HB_FAILURE;
+    }
+
+    json_incref( jvalue );
+
+    hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
+    handle->jroot = jvalue;
+
+    *_out = handle;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out )
 {
     json_t * jroot = _handle->jroot;
@@ -147,6 +178,35 @@ hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb
     handle->jroot = jvalue;
 
     *_out = handle;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_required( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result )
+{
+    json_t * jroot = _handle->jroot;
+
+    json_t * jvalue = json_object_get( jroot, _key );
+
+    if( jvalue == HB_NULLPTR )
+    {
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
+
+        return HB_SUCCESSFUL;
+    }
+
+    json_incref( jvalue );
+
+    hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
+    handle->jroot = jvalue;
+
+    *_out = handle;
+
+    //it's feature for requreds flags!
+    //*_result = HB_TRUE;
 
     return HB_SUCCESSFUL;
 }
@@ -393,7 +453,10 @@ hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, cons
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        *_result = HB_FALSE;
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
 
         return HB_SUCCESSFUL;
     }
@@ -546,7 +609,10 @@ hb_result_t hb_json_get_field_int32_required( hb_json_handle_t * _handle, const 
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        *_result = HB_FALSE;
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
 
         return HB_SUCCESSFUL;
     }
@@ -569,7 +635,10 @@ hb_result_t hb_json_get_field_uint32_required( hb_json_handle_t * _handle, const
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        *_result = HB_FALSE;
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
 
         return HB_SUCCESSFUL;
     }
@@ -592,7 +661,10 @@ hb_result_t hb_json_get_field_int64_required( hb_json_handle_t * _handle, const 
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        *_result = HB_FALSE;
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
 
         return HB_SUCCESSFUL;
     }
@@ -615,7 +687,10 @@ hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
-        *_result = HB_FALSE;
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
 
         return HB_SUCCESSFUL;
     }

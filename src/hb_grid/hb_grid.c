@@ -179,6 +179,15 @@ static void * __hb_memory_alloc( size_t _size, void * _ud )
     return ptr;
 }
 //////////////////////////////////////////////////////////////////////////
+static void * __hb_memory_realloc( void * _ptr, size_t _size, void * _ud )
+{
+    HB_UNUSED( _ud );
+
+    void * ptr = realloc( _ptr, _size );
+
+    return ptr;
+}
+//////////////////////////////////////////////////////////////////////////
 static void __hb_memory_free( void * _ptr, void * _ud )
 {
     HB_UNUSED( _ud );
@@ -191,7 +200,7 @@ int main( int _argc, char * _argv[] )
     HB_UNUSED( _argc );
     HB_UNUSED( _argv );
 
-    hb_memory_initialize( &__hb_memory_alloc, &__hb_memory_free, HB_NULLPTR );
+    hb_memory_initialize( &__hb_memory_alloc, &__hb_memory_realloc, &__hb_memory_free, HB_NULLPTR );
 
     hb_log_initialize();
 

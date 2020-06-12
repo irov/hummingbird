@@ -65,6 +65,12 @@ src
     hb_array.h
     hb_array.c
     
+    hb_vector.h
+    hb_vector.c
+    
+    hb_vectorptr.h
+    hb_vectorptr.c
+    
     hb_list.h
     hb_list.c    
 )
