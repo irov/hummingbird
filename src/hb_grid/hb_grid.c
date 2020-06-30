@@ -31,7 +31,7 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
 
     printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
 }
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
     const char * host = evhttp_request_get_host( _request );
@@ -220,11 +220,6 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 #endif
-
-    if( hb_log_tcp_initialize( "127.0.0.1", 5044 ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
 
     const char * config_file = HB_NULLPTR;
     hb_getopt( _argc, _argv, "--config", &config_file );
