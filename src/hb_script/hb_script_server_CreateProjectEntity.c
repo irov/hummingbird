@@ -107,8 +107,6 @@ int hb_script_server_CreateProjectEntity( lua_State * L )
     else
     {
         HB_SCRIPT_ERROR( L, "internal error" );
-
-        return 0;
     }
 
     lua_pushinteger( L, eoid );

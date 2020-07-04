@@ -162,21 +162,30 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
         {
             size_t length;
             const char * value;
-            hb_json_to_string( _value, &value, &length );
+            if( hb_json_to_string( _value, &value, &length ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
 
             lua_pushlstring( L, value, length );
         }break;
     case e_hb_json_integer:
         {
             int64_t value;
-            hb_json_to_int64( _value, &value );
+            if( hb_json_to_int64( _value, &value ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
 
             lua_pushinteger( L, (lua_Integer)value );
         }break;
     case e_hb_json_real:
         {
             double value;
-            hb_json_to_real( _value, &value );
+            if( hb_json_to_real( _value, &value ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
 
             lua_pushnumber( L, (lua_Number)value );
         }break;
