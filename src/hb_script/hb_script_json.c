@@ -48,7 +48,7 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char
         }break;
     case LUA_TTABLE:
         {
-            size_t len = lua_rawlen( L, _index );
+            lua_Unsigned len = lua_rawlen( L, _index );
 
             if( len == 0 )
             {
