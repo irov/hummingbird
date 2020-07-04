@@ -26,11 +26,6 @@ fast game server
 
 Удачи в сборке, и использованию!
 
-## dbdiagram.io            
-<a href="https://dbdiagram.io/embed/5e2d75ec9e76504e0ef0a92f">
-    <img src="https://user-images.githubusercontent.com/1975501/73135073-0214e180-4047-11ea-98fe-276648705883.png">
-</a>
-
 ### MongoDB
 https://www.mongodb.com/download-center/community
 ### Redis
