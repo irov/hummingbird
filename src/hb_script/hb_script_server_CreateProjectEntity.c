@@ -24,7 +24,8 @@ int hb_script_server_CreateProjectEntity( lua_State * L )
         HB_SCRIPT_ERROR( L, "internal error" );
     }
 
-    hb_uid_t eoid;
+    hb_uid_t eoid = HB_UID_NONE;
+
     if( name_len != 0 && parent_len == 0 )
     {
         hb_db_values_handle_t * find_values;
