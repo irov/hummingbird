@@ -95,3 +95,34 @@ hb_result_t hb_vectorptr_get( const hb_vectorptr_t * _vector, uint32_t _index, v
 
     return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////
+void hb_vectorptr_visit( const hb_vectorptr_t * _vector, hb_vectorptr_visit_t _visitor, void * _ud )
+{
+    uint32_t count = _vector->count;
+
+    for( uint32_t index = 0; index != count; ++index )
+    {
+        void * ptr = *HB_TMEMOFFSET( void **, _vector->data, HB_VECTORPTR_ELEMENT_SIZE * index );
+
+        (*_visitor)(index, ptr, _ud);
+    }
+}
+//////////////////////////////////////////////////////////////////////////
+void * hb_vectorptr_find( const hb_vectorptr_t * _vector, hb_vectorptr_find_t _find, const void * _ud )
+{
+    uint32_t count = _vector->count;
+
+    for( uint32_t index = 0; index != count; ++index )
+    {
+        void * ptr = *HB_TMEMOFFSET( void **, _vector->data, HB_VECTORPTR_ELEMENT_SIZE * index );
+
+        if( (*_find)(ptr, _ud) == HB_FALSE )
+        {
+            continue;
+        }
+
+        return ptr;
+    }
+
+    return HB_NULLPTR;
+}
