@@ -6,6 +6,7 @@
 #include "hb_log/hb_log.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
+#include "hb_http/hb_http.h"
 #include "hb_db/hb_db.h"
 #include "hb_storage/hb_storage.h"
 #include "hb_json/hb_json.h"
@@ -102,6 +103,50 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
             return;
         }
+
+#ifdef HB_DEBUG
+        if( hb_http_is_request_json( _request ) == HB_TRUE )
+        {
+            hb_json_handle_t * json_handle;
+            if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
+            {
+                evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+                return;
+            }
+
+            char json_string[HB_DATA_MAX_SIZE];
+            size_t json_string_size;
+            if( hb_json_dumps( json_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
+            {
+                evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+                return;
+            }
+
+            hb_json_destroy( json_handle );
+
+            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s] json: %.*s"
+                , cmd_name
+                , (cmd_inittab->args >= 1 ? cmd_args.arg1 : "")
+                , (cmd_inittab->args >= 2 ? cmd_args.arg2 : "")
+                , (cmd_inittab->args >= 3 ? cmd_args.arg3 : "")
+                , json_string_size
+                , json_string
+            );
+        }
+        else
+        {
+            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s] json: %.*s"
+                , cmd_name
+                , (cmd_inittab->args >= 1 ? cmd_args.arg1 : "")
+                , (cmd_inittab->args >= 2 ? cmd_args.arg2 : "")
+                , (cmd_inittab->args >= 3 ? cmd_args.arg3 : "")
+                , json_string_size
+                , json_string
+            );
+        }
+#endif
 
         response_code = (*cmd_inittab->request)(_request, process, response_data, &response_data_size, &cmd_args);
 
