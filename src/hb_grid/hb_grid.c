@@ -137,13 +137,11 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
         }
         else
         {
-            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s] json: %.*s"
+            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s]"
                 , cmd_name
                 , (cmd_inittab->args >= 1 ? cmd_args.arg1 : "")
                 , (cmd_inittab->args >= 2 ? cmd_args.arg2 : "")
                 , (cmd_inittab->args >= 3 ? cmd_args.arg3 : "")
-                , json_string_size
-                , json_string
             );
         }
 #endif

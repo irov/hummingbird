@@ -84,6 +84,11 @@ hb_bool_t hb_http_is_request_json( struct evhttp_request * _request )
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_http_get_request_json( struct evhttp_request * _request, hb_json_handle_t ** _handle )
 {
+    if( hb_http_is_request_json( _request ) == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
     hb_data_t data;
     size_t data_size;
     if( hb_http_get_request_data( _request, data, HB_DATA_MAX_SIZE, &data_size ) == HB_FAILURE )
