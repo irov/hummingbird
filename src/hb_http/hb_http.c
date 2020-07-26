@@ -63,6 +63,25 @@ hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_http_is_request_json( struct evhttp_request * _request )
+{
+    struct evkeyvalq * headers = evhttp_request_get_input_headers( _request );
+
+    const char * content_type = evhttp_find_header( headers, "Content-Type" );
+
+    if( content_type == HB_NULLPTR )
+    {
+        return HB_FALSE;
+    }
+
+    if( strcmp( content_type, "application/json" ) != 0 )
+    {
+        return HB_FALSE;
+    }
+
+    return HB_TRUE;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_http_get_request_json( struct evhttp_request * _request, hb_json_handle_t ** _handle )
 {
     hb_data_t data;
