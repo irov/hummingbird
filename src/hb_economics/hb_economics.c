@@ -140,7 +140,7 @@ hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
+static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t * _value, void * _ud )
 {
     hb_economics_records_vocabulary_handle_t * handle = (hb_economics_records_vocabulary_handle_t *)_ud;
 

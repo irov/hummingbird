@@ -598,6 +598,31 @@ hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint3
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, const hb_json_handle_t ** _value )
+{
+    if( _index >= _values->value_count )
+    {
+        return HB_FAILURE;
+    }
+
+    const hb_db_value_handle_t * value = _values->values + _index;
+
+    if( value->type != e_hb_db_symbol )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_handle_t * json_value;
+    if( hb_json_create( value->u.symbol.buffer, value->u.symbol.length, &json_value ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    *_value = json_value;
+    
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint32_t _index, char * _value, size_t _capacity )
 {
     if( _index >= _values->value_count )

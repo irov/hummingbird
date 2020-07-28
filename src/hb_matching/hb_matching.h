@@ -2,6 +2,7 @@
 #define HB_MATCHING_H_
 
 #include "hb_db/hb_db.h"
+#include "hb_json/hb_json.h"
 
 #include "hb_utils/hb_hashtable.h"
 #include "hb_utils/hb_array.h"
@@ -33,8 +34,7 @@ typedef struct hb_matching_complete_desc_t
     const hb_matching_user_handle_t * const * users;
     uint32_t users_count;
     
-    const char * data;
-    size_t data_size;
+    const hb_json_handle_t * json_data;
 
     void * ud;
 } hb_matching_complete_desc_t;

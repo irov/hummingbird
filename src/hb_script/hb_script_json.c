@@ -1,6 +1,8 @@
 #include "hb_script_json.h"
 
 #include <stdio.h>
+#include <memory.h>
+#include <string.h>
 
 #ifndef HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX
 #define HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX 16
@@ -138,7 +140,7 @@ hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _value, void * _ud )
+static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t * _value, void * _ud )
 {
     lua_State * L = (lua_State *)_ud;
 
@@ -211,7 +213,32 @@ static hb_result_t __hb_json_visitor( const char * _key, hb_json_handle_t * _val
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _size )
+hb_result_t hb_script_json_loads( lua_State * L, const hb_json_handle_t * _json )
+{
+    if( _json == HB_NULLPTR )
+    {
+        lua_createtable( L, 0, 0 );
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_is_object_empty( _json ) == HB_TRUE )
+    {
+        lua_createtable( L, 0, 0 );
+
+        return HB_SUCCESSFUL;
+    }
+
+    uint32_t json_count = hb_json_get_fields_count( _json );
+
+    lua_createtable( L, 0, json_count );
+
+    hb_result_t result = hb_json_foreach( _json, &__hb_json_visitor, (void *)L );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_loads_data( lua_State * L, const void * _data, size_t _size )
 {
     if( _size == 0 )
     {
@@ -219,40 +246,31 @@ hb_result_t hb_script_json_loads( lua_State * L, const char * _buffer, size_t _s
 
         return HB_SUCCESSFUL;
     }
+    else if( memcmp( _data, "{}", 2 ) == 0 )
+    {
+        lua_createtable( L, 0, 0 );
+
+        return HB_SUCCESSFUL;
+    }
 
     hb_json_handle_t * json_data;
-    if( hb_json_create( _buffer, _size, &json_data ) == HB_FAILURE )
+    if( hb_json_create( _data, _size, &json_data ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    uint32_t json_count = hb_json_get_fields_count( json_data );
-
-    lua_createtable( L, 0, json_count );
-
-    hb_result_t result = hb_json_foreach( json_data, &__hb_json_visitor, (void *)L );
+    hb_result_t result = hb_script_json_loads( L, json_data );
 
     hb_json_destroy( json_data );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, size_t _size, const char ** _fields, uint32_t _fieldcount )
+hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * _json, const char ** _fields, uint32_t _fieldcount )
 {
     if( _fieldcount == 0 )
     {
         return HB_SUCCESSFUL;
-    }
-
-    if( _size == 0 )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_json_handle_t * json_data;
-    if( hb_json_create( _buffer, _size, &json_data ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
     }
 
     for( uint32_t index = 0; index != _fieldcount; ++index )
@@ -260,7 +278,7 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
         const char * field = _fields[index];
 
         hb_json_handle_t * json_field = HB_NULLPTR;
-        if( hb_json_get_field( json_data, field, &json_field ) == HB_FAILURE )
+        if( hb_json_get_field( _json, field, &json_field ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -331,9 +349,35 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const char * _buffer, siz
         hb_json_destroy( json_field );
     }
 
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_json_load_fields_data( lua_State * L, const void * _data, size_t _size, const char ** _fields, uint32_t _fieldcount )
+{
+    if( _size == 0 )
+    {
+        lua_createtable( L, 0, 0 );
+
+        return HB_SUCCESSFUL;
+    }
+    else if( memcmp( _data, "{}", 2 ) == 0 )
+    {
+        lua_createtable( L, 0, 0 );
+
+        return HB_SUCCESSFUL;
+    }
+
+    hb_json_handle_t * json_data;
+    if( hb_json_create( _data, _size, &json_data ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_script_json_load_fields( L, json_data, _fields, _fieldcount );
+
     hb_json_destroy( json_data );
 
-    return HB_SUCCESSFUL;
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle_t ** _json )
@@ -379,7 +423,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
         return HB_FAILURE;
     }
 
-    if( hb_script_json_load_fields( L, public_data_symbol, public_data_symbol_length, fields, fields_count ) == HB_FAILURE )
+    if( hb_script_json_load_fields_data( L, public_data_symbol, public_data_symbol_length, fields, fields_count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

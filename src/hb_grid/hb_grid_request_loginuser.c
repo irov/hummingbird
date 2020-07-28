@@ -68,7 +68,7 @@ hb_http_code_t hb_grid_request_loginuser( struct evhttp_request * _request, hb_g
     api_in_data.puid = in_data.puid;
     api_in_data.uuid = out_data.uuid;
 
-    api_in_data.data_size = 0;
+    api_in_data.json_handle = HB_NULLPTR;
 
     strcpy( api_in_data.api, "event" );
     strcpy( api_in_data.method, "onLoginUser" );
