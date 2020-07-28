@@ -401,6 +401,8 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
         hb_result_t result = (*_complete)(&desc);
 
+        hb_json_destroy( desc.json_data );
+
         hb_db_destroy_values( values );
 
         if( result == HB_FAILURE )

@@ -75,7 +75,7 @@ hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t *
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_json_destroy( hb_json_handle_t * _handle )
+void hb_json_destroy( const hb_json_handle_t * _handle )
 {
     json_t * jroot = _handle->jroot;
 
