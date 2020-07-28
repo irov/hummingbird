@@ -13,8 +13,7 @@ typedef struct hb_grid_process_script_api_in_data_t
     char api[32];
     char method[32];
 
-    hb_data_t data;
-    size_t data_size;
+    hb_json_handle_t * json_handle;
 
 } hb_grid_process_script_api_in_data_t;
 

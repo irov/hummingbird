@@ -3,6 +3,8 @@
 
 #include "hb_config/hb_config.h"
 
+#include "hb_json/hb_json.h"
+
 #include "hb_utils/hb_time.h"
 
 typedef struct hb_db_handle_t hb_db_handle_t;
@@ -55,6 +57,7 @@ hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint
 hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, const void ** _buffer, size_t * _length );
 hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _capacity );
 hb_result_t hb_db_get_time_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_time_t * _value );
+hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, const hb_json_handle_t ** _value );
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

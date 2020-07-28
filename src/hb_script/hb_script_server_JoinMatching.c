@@ -41,7 +41,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
         size_t user_public_data_size;
         const void * user_public_data = hb_matching_user_get_public_data( user, &user_public_data_size );
 
-        if( hb_script_json_loads( L, user_public_data, user_public_data_size ) == HB_FAILURE )
+        if( hb_script_json_loads_data( L, user_public_data, user_public_data_size ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -51,7 +51,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
         lua_rawseti( L, -2, (int32_t)index + 1 );
     }
 
-    if( hb_script_json_loads( L, _desc->data, _desc->data_size ) == HB_FAILURE )
+    if( hb_script_json_loads( L, _desc->json_data ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -62,10 +62,8 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
+        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' with error: %s"
             , "onCreateWorld"
-            , _desc->data_size
-            , _desc->data
             , error_msg
         );
 

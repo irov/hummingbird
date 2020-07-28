@@ -445,7 +445,7 @@ void hb_script_stat( hb_script_handle_t * _handle, hb_script_stat_t * _stat )
     _stat->call_used = _handle->call_used;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
+hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api, const char * _method, const hb_json_handle_t * _json, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
@@ -454,11 +454,9 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api,
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "script", "call api '%s' method '%s' data '%.*s'"
+    HB_LOG_MESSAGE_INFO( "script", "call api '%s' method '%s'"
         , _api
         , _method
-        , _datasize
-        , (const char *)_data
     );
 
     lua_State * L = _handle->L;
@@ -476,7 +474,7 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api,
 
     lua_remove( L, -2 );
 
-    if( hb_script_json_loads( L, _data, _datasize ) == HB_FAILURE )
+    if( hb_script_json_loads( L, _json ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -487,10 +485,8 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api,
     {
         const char * error_msg = lua_tolstring( L, -1, HB_NULLPTR );
 
-        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' data '%.*s' with error: %s"
+        HB_LOG_MESSAGE_ERROR( "script", "call function '%s' with error: %s"
             , _method
-            , _datasize
-            , _data
             , error_msg
         );
 
@@ -537,4 +533,19 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api,
     *_code = HB_ERROR_OK;
 
     return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_script_api_call_data( hb_script_handle_t * _handle, const char * _api, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
+{
+    hb_json_handle_t * json_data;
+    if( hb_json_create( _data, _datasize, &json_data ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_result_t result = hb_script_api_call( _handle, _api, _method, json_data, _result, _capacity, _resultsize, _code );
+
+    hb_json_destroy( json_data );
+
+    return result;
 }

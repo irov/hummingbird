@@ -24,7 +24,7 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
     strcpy( in_data.api, "avatar" );
     strcpy( in_data.method, arg_method );
 
-    if( hb_http_get_request_data( _request, in_data.data, HB_DATA_MAX_SIZE, &in_data.data_size ) == HB_FAILURE )
+    if( hb_http_get_request_json( _request, &in_data.json_handle ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -34,6 +34,8 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
     {
         return HTTP_BADREQUEST;
     }
+
+    hb_json_destroy( in_data.json_handle );
 
     if( out_data.code != HB_ERROR_OK )
     {

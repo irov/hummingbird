@@ -394,7 +394,9 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         desc.wuid = wuid;
         desc.users = user_matchings;
         desc.users_count = room_matching_count;
-        hb_db_get_string_value( values, 0, &desc.data, &desc.data_size );
+
+        hb_db_get_json_value( values, 0, &desc.json_data );
+
         desc.ud = _ud;
 
         hb_result_t result = (*_complete)(&desc);

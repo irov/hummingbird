@@ -130,6 +130,21 @@ hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _c
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle )
+{
+    if( json_is_object( _handle->jroot ) == HB_FALSE )
+    {
+        return HB_FALSE;
+    }
+
+    if( json_object_size( _handle->jroot ) != 0 )
+    {
+        return HB_FALSE;
+    }
+
+    return HB_TRUE;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle )
 {
     return json_is_array( _handle->jroot );
@@ -161,7 +176,7 @@ hb_result_t hb_json_array_get( const hb_json_handle_t * _handle, uint32_t _index
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out )
+hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out )
 {
     json_t * jroot = _handle->jroot;
 
@@ -182,7 +197,7 @@ hb_result_t hb_json_get_field( hb_json_handle_t * _handle, const char * _key, hb
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_required( hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result )
+hb_result_t hb_json_get_field_required( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result )
 {
     json_t * jroot = _handle->jroot;
 
@@ -211,7 +226,7 @@ hb_result_t hb_json_get_field_required( hb_json_handle_t * _handle, const char *
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle )
+uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle )
 {
     json_t * jroot = _handle->jroot;
 
@@ -220,7 +235,7 @@ uint32_t hb_json_get_fields_count( hb_json_handle_t * _handle )
     return (uint32_t)jcount;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle )
+hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -249,7 +264,7 @@ hb_json_type_t hb_json_get_type( hb_json_handle_t * _handle )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value, size_t * _size )
+hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, size_t * _size )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -271,7 +286,7 @@ hb_result_t hb_json_to_string( hb_json_handle_t * _handle, const char ** _value,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value )
+hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -287,7 +302,7 @@ hb_result_t hb_json_to_int16( hb_json_handle_t * _handle, int16_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_int32( hb_json_handle_t * _handle, int32_t * _value )
+hb_result_t hb_json_to_int32( const hb_json_handle_t * _handle, int32_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -303,7 +318,7 @@ hb_result_t hb_json_to_int32( hb_json_handle_t * _handle, int32_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_uint16( hb_json_handle_t * _handle, uint16_t * _value )
+hb_result_t hb_json_to_uint16( const hb_json_handle_t * _handle, uint16_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -319,7 +334,7 @@ hb_result_t hb_json_to_uint16( hb_json_handle_t * _handle, uint16_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_uint32( hb_json_handle_t * _handle, uint32_t * _value )
+hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -335,7 +350,7 @@ hb_result_t hb_json_to_uint32( hb_json_handle_t * _handle, uint32_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_int64( hb_json_handle_t * _handle, int64_t * _value )
+hb_result_t hb_json_to_int64( const hb_json_handle_t * _handle, int64_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -351,7 +366,7 @@ hb_result_t hb_json_to_int64( hb_json_handle_t * _handle, int64_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value )
+hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -367,7 +382,7 @@ hb_result_t hb_json_to_uint64( hb_json_handle_t * _handle, uint64_t * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_real( hb_json_handle_t * _handle, double * _value )
+hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -708,7 +723,7 @@ hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_foreach( hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
+hb_result_t hb_json_foreach( const hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
 {
     json_t * jvalue = _handle->jroot;
 

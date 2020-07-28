@@ -241,7 +241,7 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_ha
     );
 
     hb_error_code_t error;
-    if( hb_script_api_call( script_handle, "event", "onEventsTopicUpdate", data, data_len, topic_handle->message, HB_DATA_MAX_SIZE, HB_NULLPTR, &error ) == HB_FAILURE )
+    if( hb_script_api_call_data( script_handle, "event", "onEventsTopicUpdate", data, data_len, topic_handle->message, HB_DATA_MAX_SIZE, HB_NULLPTR, &error ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

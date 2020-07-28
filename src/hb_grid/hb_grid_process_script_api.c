@@ -24,7 +24,7 @@ hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    if( hb_script_api_call( script_handle, _in->api, _in->method, _in->data, _in->data_size, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &_out->code ) == HB_FAILURE )
+    if( hb_script_api_call( script_handle, _in->api, _in->method, _in->json_handle, _out->response_data, HB_GRID_REQUEST_DATA_MAX_SIZE, &_out->response_size, &_out->code ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
