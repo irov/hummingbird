@@ -5,13 +5,13 @@
 
 typedef void * (*hb_memory_alloc_t)(size_t _size, void * _ud);
 typedef void * (*hb_memory_realloc_t)(void * _ptr, size_t _size, void * _ud);
-typedef void(*hb_memory_free_t)(void * _ptr, void * _ud);
+typedef void(*hb_memory_free_t)(const void * _ptr, void * _ud);
 
 void hb_memory_initialize( hb_memory_alloc_t _alloc, hb_memory_realloc_t _realloc, hb_memory_free_t _free, void * _ud );
 
 void * hb_memory_alloc( size_t _size );
 void * hb_memory_realloc( void * _ptr, size_t _size );
-void hb_memory_free( void * _ptr );
+void hb_memory_free( const void * _ptr );
 
 #ifndef HB_ALLOC
 #define HB_ALLOC(S) hb_memory_alloc((S))

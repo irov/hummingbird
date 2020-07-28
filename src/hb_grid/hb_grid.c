@@ -231,11 +231,11 @@ static void * __hb_memory_realloc( void * _ptr, size_t _size, void * _ud )
     return ptr;
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_memory_free( void * _ptr, void * _ud )
+static void __hb_memory_free( const void * _ptr, void * _ud )
 {
     HB_UNUSED( _ud );
 
-    free( _ptr );
+    free( (void *)_ptr );
 }
 //////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )

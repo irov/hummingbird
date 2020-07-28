@@ -30,7 +30,7 @@ void * hb_memory_realloc( void * _ptr, size_t _size )
     return ptr;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_memory_free( void * _ptr )
+void hb_memory_free( const void * _ptr )
 {
     g_free( _ptr, g_ud );
 }
