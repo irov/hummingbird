@@ -55,8 +55,9 @@ hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t *
 
     if( jroot == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "json", "json '%s' error line [%d] column [%d] position [%d]: %s"
-            , er.source
+        HB_LOG_MESSAGE_ERROR( "json", "json '%.*s' error line [%d] column [%d] position [%d]: %s"
+            , _size
+            , (const char *)_data
             , er.line
             , er.column
             , er.position
