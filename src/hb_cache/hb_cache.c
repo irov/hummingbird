@@ -264,6 +264,13 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
+    if( reply->type != REDIS_REPLY_ARRAY )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' return not array" );
+
+        return HB_FAILURE;
+    }
+
     for( size_t index = 0; index != reply->elements; ++index )
     {
         struct redisReply * element = *(reply->element + index);

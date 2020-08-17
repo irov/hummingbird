@@ -1195,6 +1195,23 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 {
     if( _uidcount == 0 )
     {
+        hb_db_values_handle_t * values;
+        if( hb_db_create_values( &values ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        values->cursor = HB_NULLPTR;
+
+        values->value_count = 0;
+
+        *_values = values;
+
+        if( _exist != HB_NULLPTR )
+        {
+            *_exist = HB_TRUE;
+        }
+
         return HB_SUCCESSFUL;
     }
 
