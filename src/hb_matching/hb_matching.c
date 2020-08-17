@@ -395,7 +395,10 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
         desc.users = user_matchings;
         desc.users_count = room_matching_count;
 
-        hb_db_get_json_value( values, 0, &desc.json_data );
+        if( hb_db_get_json_value( values, 0, &desc.json_data ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
 
         desc.ud = _ud;
 
