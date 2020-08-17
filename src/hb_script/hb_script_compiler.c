@@ -90,6 +90,8 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
 
     *_compilesize = desc.carriage;
 
+    HB_LOG_MESSAGE_INFO( "script", "successful compile script" );
+
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
