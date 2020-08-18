@@ -10,7 +10,7 @@ int hb_script_server_GetCurrentUserPublicData( lua_State * L )
     uint32_t fields_count;
     if( hb_script_json_get_public_data( L, 1, script_handle->db_collection_users, script_handle->user_uid, &fields_count ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     return fields_count;

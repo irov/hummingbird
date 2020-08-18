@@ -50,4 +50,10 @@ void hb_script_error( lua_State * L, const char * _format, ... );
 
 #define HB_SCRIPT_ERROR(L, ...) hb_script_error(L, __VA_ARGS__ )
 
+#ifdef HB_DEBUG
+#define HB_SCRIPT_ERROR_INTERNAL_ERROR(L) hb_script_error(L, "internal error in '%s' [%u]", HB_CODE_FILE, HB_CODE_LINE )
+#else
+#define HB_SCRIPT_ERROR_INTERNAL_ERROR(L) hb_script_error(L, "internal error" )
+#endif
+
 #endif

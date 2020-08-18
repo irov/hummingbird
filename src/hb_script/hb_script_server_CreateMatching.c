@@ -21,7 +21,7 @@ int hb_script_server_CreateMatching( lua_State * L )
     size_t json_data_size;
     if( hb_script_json_dumps( L, 4, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_matching_desc_t desc;
@@ -33,7 +33,7 @@ int hb_script_server_CreateMatching( lua_State * L )
     hb_bool_t exist;
     if( hb_matching_room_create( script_handle->matching, script_handle->db_client, script_handle->project_uid, name, name_len, &desc, json_data, json_data_size, &exist ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     if( exist == HB_TRUE )

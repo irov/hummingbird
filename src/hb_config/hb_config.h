@@ -111,4 +111,12 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #   error "undefine platform"
 #endif
 
+#ifndef HB_CODE_FILE
+#define HB_CODE_FILE __FILE__
+#endif
+
+#ifndef HB_CODE_LINE
+#define HB_CODE_LINE __LINE__
+#endif
+
 #endif
