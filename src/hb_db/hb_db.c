@@ -1067,7 +1067,15 @@ hb_result_t hb_db_find_uid_with_values( const hb_db_collection_handle_t * _handl
         }
     }
 
-    *_values = values;
+    if( _values != HB_NULLPTR )
+    {
+        *_values = values;
+    }
+    else
+    {
+        hb_db_destroy_values( values );
+    }
+
     *_exist = HB_TRUE;
 
     return HB_SUCCESSFUL;

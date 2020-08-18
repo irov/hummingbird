@@ -44,12 +44,9 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
-    const char * db_users_fields[] = { "_id" };
-    hb_db_values_handle_t * db_users_uid_handle;
-
     hb_uid_t authentication_uid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &authentication_uid, db_users_fields, 1, &db_users_uid_handle, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &authentication_uid, HB_NULLPTR, 0, HB_NULLPTR, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -63,18 +60,10 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_SUCCESSFUL;
     }
 
-    hb_uid_t uuid;
-    if( hb_db_get_uid_value( db_users_uid_handle, 0, &uuid ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_db_destroy_values( db_users_uid_handle );
-
-    _out->uuid = uuid;
+    _out->uuid = authentication_uid;
 
     hb_user_token_t token_handle;
-    token_handle.uuid = uuid;
+    token_handle.uuid = authentication_uid;
     token_handle.puid = _in->puid;
 
     if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
