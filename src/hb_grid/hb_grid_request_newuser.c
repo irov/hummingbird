@@ -3,6 +3,7 @@
 #include "hb_grid_process_newuser.h"
 #include "hb_grid_process_script_api.h"
 
+#include "hb_log/hb_log.h"
 #include "hb_token/hb_token.h"
 #include "hb_http/hb_http.h"
 #include "hb_json/hb_json.h"
@@ -84,13 +85,11 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
 
     if( api_out_data.code != HB_ERROR_OK )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
-            , api_out_data.code
+        HB_LOG_MESSAGE_WARNING( "grid", "project '%u' user '%u' create user without script event '%s'"
+            , api_in_data.puid
+            , api_in_data.uuid
+            , api_in_data.method
         );
-
-        *_size = response_data_size;
-
-        return HTTP_OK;
     }
 
     hb_token16_t token16;
