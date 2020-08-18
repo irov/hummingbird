@@ -1,4 +1,5 @@
 #include "hb_script_json.h"
+#include "hb_log/hb_log.h"
 
 #include <stdio.h>
 #include <memory.h>
@@ -535,6 +536,10 @@ hb_result_t hb_script_get_fields( lua_State * L, int32_t _index, const char ** _
     {
         if( field_iterator == HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX )
         {
+            HB_LOG_MESSAGE_ERROR( "script", "invalid get fields overflow [%u]"
+                , HB_SCRIPT_USER_PUBLIC_DATA_FIELD_MAX
+            );
+
             return HB_FAILURE;
         }
 

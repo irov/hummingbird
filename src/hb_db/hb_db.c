@@ -884,6 +884,10 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
 
     if( __hb_db_find_iter( _data, _iter, _field ) == HB_FAILURE )
     {
+        HB_LOG_MESSAGE_ERROR( "db", "invalid find iterator for '%s'"
+            , _field
+        );
+
         return HB_FAILURE;
     }
 
@@ -943,6 +947,11 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
         }break;
     default:
         {
+            HB_LOG_MESSAGE_ERROR( "db", "invalid get bson value for '%s' unknown type [%u]"
+                , _field
+                , type
+            );
+
             return HB_FAILURE;
         }break;
     }
@@ -1300,6 +1309,11 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         {
             mongoc_cursor_destroy( cursor );
 
+            HB_LOG_MESSAGE_ERROR( "db", "cursor not found next %s [%u]"
+                , _fields[index_uid]
+                , index_uid
+            );
+
             return HB_FAILURE;
         }
 
@@ -1307,6 +1321,10 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         if( bson_iter_init( &iter, data ) == false )
         {
             mongoc_cursor_destroy( cursor );
+
+            HB_LOG_MESSAGE_ERROR( "db", "invalid initialize iterator [uid %u]"
+                , index_uid
+            );
 
             return HB_FAILURE;
         }
@@ -1317,6 +1335,10 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         {
             if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
             {
+                HB_LOG_MESSAGE_ERROR( "db", "invalid initialize iterator for '_id' [%u]"
+                    , index_uid
+                );
+
                 mongoc_cursor_destroy( cursor );
 
                 return HB_FAILURE;
@@ -1338,6 +1360,10 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             {
                 mongoc_cursor_destroy( cursor );
 
+                HB_LOG_MESSAGE_ERROR( "db", "invalid find correct index [%u]"
+                    , index_uid
+                );
+
                 return HB_FAILURE;
             }
         }
@@ -1356,6 +1382,11 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             if( __hb_db_get_bson_value( value, data, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
+
+                HB_LOG_MESSAGE_ERROR( "db", "invalid get bson value for '%s' [%u]"
+                    , field
+                    , index_uid
+                );
 
                 return HB_FAILURE;
             }
