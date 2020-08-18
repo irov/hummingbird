@@ -22,7 +22,7 @@ int hb_script_server_SelectProjectEntity( lua_State * L )
 
     if( parent_len == 0 )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     if( limit < 0 )
@@ -39,7 +39,7 @@ int hb_script_server_SelectProjectEntity( lua_State * L )
     hb_db_values_handle_t * query;
     if( hb_db_create_values( &query ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_db_make_string_value( query, "name", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
@@ -50,7 +50,7 @@ int hb_script_server_SelectProjectEntity( lua_State * L )
     hb_db_values_handle_t * values[HB_SCRIPT_SELECT_PROJECT_ENTITY_MAX];
     if( hb_db_select_values( script_handle->db_collection_project_entities, query, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_db_destroy_values( query );

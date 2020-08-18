@@ -7,7 +7,7 @@ int hb_script_server_SetCurrentUserPublicData( lua_State * L )
 
     if( hb_script_json_set_public_data( L, 1, script_handle->db_collection_users, script_handle->user_uid ) == HB_FAILURE )
     { 
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     return 0;

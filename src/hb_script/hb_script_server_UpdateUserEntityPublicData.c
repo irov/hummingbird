@@ -13,7 +13,7 @@ int hb_script_server_UpdateUserEntityPublicData( lua_State * L )
 
     if( hb_db_create_values( &values ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_db_make_uid_value( values, "_id", HB_UNKNOWN_STRING_SIZE, (hb_uid_t)uid );
@@ -23,19 +23,19 @@ int hb_script_server_UpdateUserEntityPublicData( lua_State * L )
     hb_uid_t eoid;
     if( hb_db_find_uid( script_handle->db_collection_user_entities, values, &eoid, &exist ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_db_destroy_values( values );
 
     if( exist == HB_FALSE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     if( hb_script_json_update_public_data( L, 1, script_handle->db_collection_user_entities, eoid ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     return 0;

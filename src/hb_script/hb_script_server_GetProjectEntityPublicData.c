@@ -16,7 +16,7 @@ int hb_script_server_GetProjectEntityPublicData( lua_State * L )
     uint32_t fields_count;
     if( hb_script_json_get_public_data( L, 2, script_handle->db_collection_project_entities, (hb_uid_t)euid, &fields_count ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     return fields_count;

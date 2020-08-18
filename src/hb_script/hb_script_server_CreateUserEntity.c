@@ -21,7 +21,7 @@ int hb_script_server_CreateUserEntity( lua_State * L )
     size_t json_data_size;
     if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     hb_uid_t eoid = HB_UID_NONE;
@@ -32,7 +32,7 @@ int hb_script_server_CreateUserEntity( lua_State * L )
 
         if( hb_db_create_values( &find_values ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_make_uid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_uid );
@@ -41,21 +41,21 @@ int hb_script_server_CreateUserEntity( lua_State * L )
         hb_bool_t exist;
         if( hb_db_find_uid( script_handle->db_collection_user_entities, find_values, HB_NULLPTR, &exist ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_destroy_values( find_values );
 
         if( exist == HB_TRUE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_values_handle_t * new_values;
 
         if( hb_db_create_values( &new_values ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_make_string_value( new_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
@@ -65,7 +65,7 @@ int hb_script_server_CreateUserEntity( lua_State * L )
 
         if( hb_db_new_document( script_handle->db_collection_user_entities, new_values, &eoid ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_destroy_values( new_values );
@@ -75,7 +75,7 @@ int hb_script_server_CreateUserEntity( lua_State * L )
         hb_db_values_handle_t * find_values;
         if( hb_db_create_values( &find_values ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_make_uid_value( find_values, "uoid", HB_UNKNOWN_STRING_SIZE, script_handle->user_uid );
@@ -84,20 +84,20 @@ int hb_script_server_CreateUserEntity( lua_State * L )
         hb_bool_t exist;
         if( hb_db_find_uid( script_handle->db_collection_user_entities, find_values, HB_NULLPTR, &exist ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_destroy_values( find_values );
 
         if( exist == HB_FALSE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_values_handle_t * new_values;
         if( hb_db_create_values( &new_values ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_make_string_value( new_values, "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
@@ -106,14 +106,14 @@ int hb_script_server_CreateUserEntity( lua_State * L )
 
         if( hb_db_new_document( script_handle->db_collection_user_entities, new_values, &eoid ) == HB_FAILURE )
         {
-            HB_SCRIPT_ERROR( L, "internal error" );
+            HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
         }
 
         hb_db_destroy_values( new_values );
     }
     else
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     lua_pushinteger( L, eoid );

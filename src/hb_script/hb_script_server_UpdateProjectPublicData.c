@@ -9,7 +9,7 @@ int hb_script_server_UpdateProjectPublicData( lua_State * L )
 
     if( hb_script_json_update_public_data( L, 1, script_handle->db_collection_projects, script_handle->project_uid ) == HB_FAILURE )
     {
-        HB_SCRIPT_ERROR( L, "internal error" );
+        HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
     }
 
     return 0;
