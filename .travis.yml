@@ -31,7 +31,7 @@ script:
     
     - echo "Configured Downloads"
     - pushd ./cmake/downloads
-    - cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION -DHUMMINGBIRD_DOWNLOADS_SILENT=ON
+    - cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=$BUILD_CONFIGURATION -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION -DHUMMINGBIRD_DOWNLOADS_SILENT=ON
     - popd
     
     - echo "Downloads Dependencies"
@@ -41,7 +41,7 @@ script:
     
     - echo "Configured Dependencies"
     - pushd ./cmake/dependencies_unix
-    - cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION
+    - cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=$BUILD_CONFIGURATION -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION
     - popd
     
     - echo "Build Dependencies"
@@ -51,7 +51,7 @@ script:
     
     - echo "Configured Solution"
     - pushd ./cmake/hummingbird_unix
-    - cmake . -G "Unix Makefiles" -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION
+    - cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=$BUILD_CONFIGURATION -DCMAKE_CONFIGURATION_TYPES=$BUILD_CONFIGURATION
     - popd
     
     - echo "Build Solution"
