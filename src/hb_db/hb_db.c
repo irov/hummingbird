@@ -26,7 +26,7 @@ typedef enum hb_db_value_type_e
 } hb_db_value_type_e;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_value_handle_t
-{    
+{
     hb_db_value_type_e type;
 
     const char * field;
@@ -113,17 +113,16 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t *
         );
 
         return HB_FAILURE;
-    }    
+    }
 
     bson_t ping;
     bson_init( &ping );
 
     bson_append_int32( &ping, "ping", sizeof( "ping" ) - 1, 1 );
 
-    bson_error_t error;
-
     mongoc_client_t * mongo_client = mongoc_client_pool_pop( mongo_pool );
 
+    bson_error_t error;
     bool mongoc_ping = mongoc_client_command_simple( mongo_client, "admin", &ping, NULL, NULL, &error );
 
     mongoc_client_pool_push( mongo_pool, mongo_client );
@@ -134,8 +133,12 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t *
     {
         mongoc_client_destroy( mongo_client );
 
+        HB_LOG_MESSAGE_ERROR( "db", "invalid client command simple: %s"
+            , error.message
+        );
+
         return HB_FAILURE;
-    }    
+    }
 
     handle->mongo_pool = mongo_pool;
 
@@ -148,7 +151,7 @@ void hb_db_finalize( hb_db_handle_t * _handle )
 {
     mongoc_client_pool_destroy( _handle->mongo_pool );
     _handle->mongo_pool = HB_NULLPTR;
-    
+
     mongoc_cleanup();
 }
 //////////////////////////////////////////////////////////////////////////
@@ -336,8 +339,12 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
                 continue;
             }
 
+            HB_LOG_MESSAGE_ERROR( "db", "invalid new document: %s"
+                , error.message
+            );
+
             return HB_FAILURE;
-        }        
+        }
 
         break;
     }
@@ -491,7 +498,7 @@ hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const 
     value->type = e_hb_db_dictionary;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
-    
+
     if( hb_db_create_values( &value->u.dict ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -619,7 +626,7 @@ hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_
     }
 
     *_value = json_value;
-    
+
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -744,12 +751,12 @@ hb_result_t hb_db_exist_uid( const hb_db_collection_handle_t * _collection, hb_u
 
     const bson_t * data;
     bool successful = mongoc_cursor_next( cursor, &data );
-    
+
     mongoc_cursor_destroy( cursor );
 
     if( successful == true )
     {
-        *_exist = HB_TRUE;        
+        *_exist = HB_TRUE;
     }
     else
     {
@@ -1159,11 +1166,11 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
     bson_error_t error;
     if( mongoc_cursor_error( cursor, &error ) )
     {
-        HB_LOG_MESSAGE_ERROR( "db", "select values error occurred: %s"
-            , error.message 
-        );
-
         mongoc_cursor_destroy( cursor );
+
+        HB_LOG_MESSAGE_ERROR( "db", "select values error occurred: %s"
+            , error.message
+        );
 
         return HB_FAILURE;
     }
@@ -1192,6 +1199,10 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
 
     if( count < 0 )
     {
+        HB_LOG_MESSAGE_ERROR( "db", "invalid collection count documents error occurred: %s"
+            , error.message
+        );
+
         return HB_FAILURE;
     }
 
@@ -1317,7 +1328,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
                     , error.message
                     , index_uid
                     , _uidcount
-                );                
+                );
 
                 return HB_FAILURE;
             }
@@ -1486,18 +1497,28 @@ hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, 
     bson_init( &update );
 
     bson_t fields;
-    bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields );
+    if( bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields ) == false )
+    {
+        return HB_FAILURE;
+    }
 
     if( __hb_db_append_values( &fields, _handles ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    bson_append_document_end( &update, &fields );
+    if( bson_append_document_end( &update, &fields ) == false )
+    {
+        return HB_FAILURE;
+    }
 
     bson_error_t error;
     if( mongoc_collection_update_one( mongo_collection, &query, &update, HB_NULLPTR, HB_NULLPTR, &error ) == false )
     {
+        HB_LOG_MESSAGE_ERROR( "db", "update values: %s"
+            , error.message
+        );
+
         return HB_FAILURE;
     }
 
