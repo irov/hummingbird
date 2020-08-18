@@ -58,9 +58,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     if( authentication_exist == HB_FALSE )
     {
-        _out->code = HB_ERROR_NOT_FOUND;
-
-        hb_db_destroy_values( db_users_uid_handle );
+        _out->code = HB_ERROR_NOT_FOUND;        
 
         return HB_SUCCESSFUL;
     }
