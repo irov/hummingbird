@@ -1269,15 +1269,14 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
 
     mongoc_cursor_t * cursor = mongoc_collection_find( mongo_collection, MONGOC_QUERY_NONE, 0, 0, 0, &query, &fields, HB_NULLPTR );
 
-    bson_destroy( &query );
-    bson_destroy( &fields );
-
-    bson_error_t error;
-    if( mongoc_cursor_error( cursor, &error ) )
+    bson_error_t test_error;
+    if( mongoc_cursor_error( cursor, &test_error ) )
     {
         mongoc_cursor_destroy( cursor );
+        bson_destroy( &query );
+        bson_destroy( &fields );
 
-        if( error.code == 11000 )
+        if( test_error.code == 11000 )
         {
             if( _exist != HB_NULLPTR )
             {
@@ -1288,7 +1287,7 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         }
 
         HB_LOG_MESSAGE_ERROR( "db", "find with values values error occurred: %s"
-            , error.message
+            , test_error.message
         );
 
         return HB_FAILURE;
@@ -1307,11 +1306,27 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         const bson_t * data;
         if( mongoc_cursor_next( cursor, &data ) == false )
         {
+            bson_error_t error;
+            if( mongoc_cursor_error( cursor, &error ) )
+            {
+                mongoc_cursor_destroy( cursor );
+                bson_destroy( &query );
+                bson_destroy( &fields );
+
+                HB_LOG_MESSAGE_ERROR( "db", "cursor next error occurred: %s [%u:%u]"
+                    , error.message
+                    , index_uid
+                    , _uidcount
+                );                
+
+                return HB_FAILURE;
+            }
+
             mongoc_cursor_destroy( cursor );
 
-            HB_LOG_MESSAGE_ERROR( "db", "cursor not found next %s [%u]"
-                , _fields[index_uid]
+            HB_LOG_MESSAGE_ERROR( "db", "cursor not found next [%u:%u]"
                 , index_uid
+                , _uidcount
             );
 
             return HB_FAILURE;
@@ -1321,6 +1336,8 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         if( bson_iter_init( &iter, data ) == false )
         {
             mongoc_cursor_destroy( cursor );
+            bson_destroy( &query );
+            bson_destroy( &fields );
 
             HB_LOG_MESSAGE_ERROR( "db", "invalid initialize iterator [uid %u]"
                 , index_uid
@@ -1335,11 +1352,13 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
         {
             if( __hb_db_find_iter( data, &iter, "_id" ) == HB_FAILURE )
             {
+                mongoc_cursor_destroy( cursor );
+                bson_destroy( &query );
+                bson_destroy( &fields );
+
                 HB_LOG_MESSAGE_ERROR( "db", "invalid initialize iterator for '_id' [%u]"
                     , index_uid
                 );
-
-                mongoc_cursor_destroy( cursor );
 
                 return HB_FAILURE;
             }
@@ -1359,6 +1378,8 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             if( correct_index_uid == ~0U )
             {
                 mongoc_cursor_destroy( cursor );
+                bson_destroy( &query );
+                bson_destroy( &fields );
 
                 HB_LOG_MESSAGE_ERROR( "db", "invalid find correct index [%u]"
                     , index_uid
@@ -1382,6 +1403,8 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             if( __hb_db_get_bson_value( value, data, &iter, field ) == HB_FAILURE )
             {
                 mongoc_cursor_destroy( cursor );
+                bson_destroy( &query );
+                bson_destroy( &fields );
 
                 HB_LOG_MESSAGE_ERROR( "db", "invalid get bson value for '%s' [%u]"
                     , field
@@ -1399,6 +1422,9 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     {
         *_exist = HB_TRUE;
     }
+
+    bson_destroy( &query );
+    bson_destroy( &fields );
 
     return HB_SUCCESSFUL;
 }
