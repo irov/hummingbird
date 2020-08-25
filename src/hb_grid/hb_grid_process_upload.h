@@ -16,7 +16,7 @@ typedef struct hb_grid_process_upload_in_data_t
 
 typedef struct hb_grid_process_upload_out_data_t
 {
-    int64_t revision;
+    int32_t revision;
     uint32_t version;
 } hb_grid_process_upload_out_data_t;
 

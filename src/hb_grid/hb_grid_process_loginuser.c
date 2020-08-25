@@ -13,6 +13,38 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_db_get_project_public_data_revision( hb_grid_process_handle_t * _process, hb_uid_t _puid, int32_t * _public_data_revision )
+{
+    const char * fields[] = {"public_data_revision"};
+    hb_db_values_handle_t * fields_values;
+
+    hb_db_collection_handle_t * db_collection_projects;
+    if( hb_db_get_collection( _process->db_client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_bool_t exist;
+    if( hb_db_get_values( db_collection_projects, _puid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &exist ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( exist == HB_FALSE )
+    {
+        return HB_FAILURE;
+    }
+
+    int32_t public_data_revision;
+    hb_db_get_int32_value( fields_values, 0, &public_data_revision );
+
+    hb_db_destroy_values( fields_values );
+
+    *_public_data_revision = public_data_revision;
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
 {
     hb_bool_t project_exist;
@@ -44,9 +76,12 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_make_sha1_value( values_authentication, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
 
+    const char * fields[] = {"public_data"};
+    hb_db_values_handle_t * fields_values;
+
     hb_uid_t authentication_uid;
     hb_bool_t authentication_exist;
-    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &authentication_uid, HB_NULLPTR, 0, HB_NULLPTR, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &authentication_uid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -60,6 +95,20 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
         return HB_SUCCESSFUL;
     }
 
+    if( hb_db_copy_string_value( fields_values, 0, _out->user_public_data, HB_DATA_MAX_SIZE ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_db_destroy_values( fields_values );
+
+    int32_t project_public_data_revision;
+    if( __hb_db_get_project_public_data_revision( _process, _in->puid, &project_public_data_revision ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    _out->project_public_data_revision = project_public_data_revision;
     _out->uuid = authentication_uid;
 
     hb_user_token_t token_handle;

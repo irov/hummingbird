@@ -51,27 +51,20 @@ hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_
         return HTTP_BADREQUEST;
     }
 
-    if( out_data.exist == HB_FALSE )
+    if( out_data.code != HB_ERROR_OK )
     {
-        hb_token16_t token16;
-        if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        size_t response_data_size = sprintf( _response, "{\"code\":0,\"token\":\"%.*s\"}"
-            , (int)sizeof( token16 )
-            , token16.value
+        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+            , out_data.code
         );
 
         *_size = response_data_size;
-    }
-    else
-    {
-        size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"already exist\"}" );
 
-        *_size = response_data_size;
+        return HTTP_OK;
     }
+
+    size_t response_data_size = sprintf( _response, "{\"code\":0}" );
+
+    *_size = response_data_size;
 
     return HTTP_OK;
 }

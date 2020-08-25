@@ -76,9 +76,10 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
 
         hb_db_make_sha1_value( values_user_new, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
         hb_db_make_sha1_value( values_user_new, "password", HB_UNKNOWN_STRING_SIZE, &password_sha1 );
-        hb_db_make_string_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );        
         hb_db_make_string_value( values_user_new, "info_nickname", HB_UNKNOWN_STRING_SIZE, "", HB_UNKNOWN_STRING_SIZE );
         hb_db_make_int32_value( values_user_new, "leaderboard_score", HB_UNKNOWN_STRING_SIZE, 0 );
+        hb_db_make_string_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
+        hb_db_make_int32_value( values_user_new, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
 
         hb_uid_t uuid;
         if( hb_db_new_document( db_collection_users, values_user_new, &uuid ) == HB_FAILURE )
@@ -89,15 +90,6 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         hb_db_destroy_values( values_user_new );
 
         _out->uuid = uuid;
-
-        hb_user_token_t token_handle;
-        token_handle.uuid = uuid;
-        token_handle.puid = _in->puid;
-
-        if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
     }
 
     hb_db_destroy_collection( db_collection_users );

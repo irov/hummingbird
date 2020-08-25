@@ -14,9 +14,7 @@ typedef struct hb_grid_process_newaccount_in_data_t
 
 typedef struct hb_grid_process_newaccount_out_data_t
 {
-    hb_token_t token;
-
-    uint32_t exist;
+    hb_error_code_t code;
 } hb_grid_process_newaccount_out_data_t;
 
 hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, const hb_grid_process_newaccount_in_data_t * _in, hb_grid_process_newaccount_out_data_t * _out );

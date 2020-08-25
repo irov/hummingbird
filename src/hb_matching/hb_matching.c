@@ -123,6 +123,7 @@ hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_
     hb_db_make_int32_value( room_values, "join_timeout", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->join_timeout );
     hb_db_make_int32_value( room_values, "wait_timeout", HB_UNKNOWN_STRING_SIZE, (int32_t)_desc->wait_timeout );
     hb_db_make_string_value( room_values, "public_data", HB_UNKNOWN_STRING_SIZE, _data, _datasize );
+    hb_db_make_int32_value( room_values, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
 
     hb_uid_t muid;
     if( hb_db_new_document( db_collection_matching, room_values, &muid ) == HB_FAILURE )

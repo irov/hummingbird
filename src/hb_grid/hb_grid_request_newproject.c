@@ -25,6 +25,17 @@ hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_
         return HTTP_BADREQUEST;
     }
 
+    if( out_data.code != HB_ERROR_OK )
+    {
+        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+            , out_data.code
+        );
+
+        *_size = response_data_size;
+
+        return HTTP_OK;
+    }
+
     hb_uid16_t uid16;
     if( hb_base16_encode( &out_data.puid, sizeof( out_data.puid ), uid16.value, sizeof( uid16 ), HB_NULLPTR ) == HB_FAILURE )
     {

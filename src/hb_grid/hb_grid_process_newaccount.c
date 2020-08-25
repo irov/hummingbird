@@ -46,12 +46,12 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     {
         hb_db_destroy_collection( db_collection_accounts );
 
-        _out->exist = HB_TRUE;
+        _out->code = HB_ERROR_ALREADY_EXIST;
 
         return HB_SUCCESSFUL;
     }
 
-    _out->exist = HB_FALSE;
+    _out->code = HB_ERROR_OK;
 
     hb_sha1_t password_sha1;
     hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
@@ -74,14 +74,6 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     hb_db_destroy_values( values_new );
 
     hb_db_destroy_collection( db_collection_accounts );
-
-    hb_account_token_t token_handle;
-    token_handle.auid = account_uid;
-
-    if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }    
 
     return HB_SUCCESSFUL;
 }

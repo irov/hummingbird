@@ -91,6 +91,15 @@ hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'SET' with error: '%s'"
+            , reply->str
+        );
+
+        return HB_FAILURE;
+    }
+
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
@@ -109,6 +118,15 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' with error: '%s'"
             , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' with error: '%s'"
+            , reply->str
         );
 
         return HB_FAILURE;
@@ -165,6 +183,15 @@ hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void 
         return HB_FAILURE;
     }
 
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'INCRBY' with error: '%s'"
+            , reply->str
+        );
+
+        return HB_FAILURE;
+    }
+
     if( reply->type != REDIS_REPLY_INTEGER )
     {
         freeReplyObject( reply );
@@ -192,6 +219,15 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command 'EXPIRE' with error: '%s'"
             , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'EXPIRE' with error: '%s'"
+            , reply->str
         );
 
         return HB_FAILURE;
@@ -246,6 +282,15 @@ hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, 
         return HB_FAILURE;
     }
 
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZADD' with error: '%s'"
+            , reply->str
+        );
+
+        return HB_FAILURE;
+    }
+
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
@@ -264,6 +309,15 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' with error: '%s'"
+            , reply->str
+        );
+
+        return HB_FAILURE;
+    }
+
     if( reply->type != REDIS_REPLY_ARRAY )
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' return not array" );
@@ -273,7 +327,7 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
 
     for( size_t index = 0; index != reply->elements; ++index )
     {
-        struct redisReply * element = *(reply->element + index);
+        struct redisReply * element = reply->element[index];
 
         hb_cache_value_t * value = _values + index;
 
@@ -325,6 +379,15 @@ hb_result_t hb_cache_zrevrank( const hb_cache_handle_t * _cache, const void * _k
     {
         HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANGE' with error: '%s'"
             , _cache->context->errstr
+        );
+
+        return HB_FAILURE;
+    }
+
+    if( reply->type == REDIS_REPLY_ERROR )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'ZREVRANK' with error: '%s'"
+            , reply->str
         );
 
         return HB_FAILURE;

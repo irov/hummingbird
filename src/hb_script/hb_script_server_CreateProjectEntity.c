@@ -58,6 +58,7 @@ int hb_script_server_CreateProjectEntity( lua_State * L )
         hb_db_make_string_value( new_values, "name", HB_UNKNOWN_STRING_SIZE, name, name_len );
         hb_db_make_string_value( new_values, "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
         hb_db_make_string_value( new_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
+        hb_db_make_int32_value( new_values, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
         
         if( hb_db_new_document( script_handle->db_collection_project_entities, new_values, &eoid ) == HB_FAILURE )
         {
@@ -97,6 +98,7 @@ int hb_script_server_CreateProjectEntity( lua_State * L )
 
         hb_db_make_string_value( new_values, "parent", HB_UNKNOWN_STRING_SIZE, parent, parent_len );
         hb_db_make_string_value( new_values, "public_data", HB_UNKNOWN_STRING_SIZE, json_data, json_data_size );
+        hb_db_make_int32_value( new_values, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
 
         if( hb_db_new_document( script_handle->db_collection_project_entities, new_values, &eoid ) == HB_FAILURE )
         {

@@ -14,6 +14,12 @@
 #define HB_DB_VALUE_HANDLE_MAX_VALUES 16
 #endif
 //////////////////////////////////////////////////////////////////////////
+typedef enum hb_db_value_mode_e
+{
+    e_hb_db_mode_set,
+    e_hb_db_mode_inc,
+} hb_db_value_mode_e;
+//////////////////////////////////////////////////////////////////////////
 typedef enum hb_db_value_type_e
 {
     e_hb_db_int32,
@@ -27,6 +33,7 @@ typedef enum hb_db_value_type_e
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_db_value_handle_t
 {
+    hb_db_value_mode_e mode;
     hb_db_value_type_e type;
 
     const char * field;
@@ -265,7 +272,10 @@ static hb_result_t __hb_db_append_value( bson_t * _bson, const hb_db_value_handl
     case e_hb_db_dictionary:
         {
             bson_t dict;
-            bson_append_document_begin( _bson, _handle->field, _handle->field_length, &dict );
+            if( bson_append_document_begin( _bson, _handle->field, _handle->field_length, &dict ) == false )
+            {
+                return HB_FAILURE;
+            }
 
             size_t dict_count = _handle->u.dict->value_count;
 
@@ -276,7 +286,10 @@ static hb_result_t __hb_db_append_value( bson_t * _bson, const hb_db_value_handl
                 __hb_db_append_value( &dict, dict_handle );
             }
 
-            bson_append_document_end( _bson, &dict );
+            if( bson_append_document_end( _bson, &dict ) == false )
+            {
+                return HB_FAILURE;
+            }
         }
     default:
         {
@@ -287,13 +300,37 @@ static hb_result_t __hb_db_append_value( bson_t * _bson, const hb_db_value_handl
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_handle_t * _handles )
+static hb_bool_t __hb_db_has_values_mode( const hb_db_values_handle_t * _handles, hb_db_value_mode_e _mode )
 {
     uint32_t value_count = _handles->value_count;
 
     for( uint32_t index = 0; index != value_count; ++index )
     {
         const hb_db_value_handle_t * handle = _handles->values + index;
+
+        if( handle->mode != _mode )
+        {
+            continue;
+        }
+
+        return HB_TRUE;
+    }
+
+    return HB_FALSE;
+}
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_db_append_values( bson_t * _bson, const hb_db_values_handle_t * _handles, hb_db_value_mode_e _mode )
+{
+    uint32_t value_count = _handles->value_count;
+
+    for( uint32_t index = 0; index != value_count; ++index )
+    {
+        const hb_db_value_handle_t * handle = _handles->values + index;
+
+        if( handle->mode != _mode )
+        {
+            continue;
+        }
 
         if( __hb_db_append_value( _bson, handle ) == HB_FAILURE )
         {
@@ -322,7 +359,7 @@ hb_result_t hb_db_new_document( const hb_db_collection_handle_t * _collection, c
 
         BSON_APPEND_INT32( &query, "_id", uid );
 
-        if( __hb_db_append_values( &query, _values ) == HB_FAILURE )
+        if( __hb_db_append_values( &query, _values, e_hb_db_mode_set ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -415,6 +452,7 @@ void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field,
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_int32;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -426,6 +464,7 @@ void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _fiel
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_int32;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -437,6 +476,7 @@ void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _fiel
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_int64;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -448,6 +488,7 @@ void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _fie
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_symbol;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -460,6 +501,7 @@ void hb_db_make_binary_value( hb_db_values_handle_t * _handles, const char * _fi
     hb_db_value_handle_t * value = _handles->values + _handles->value_count;
     ++_handles->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_binary;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -472,6 +514,7 @@ void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_time;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -483,6 +526,7 @@ void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_binary;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -490,11 +534,24 @@ void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field
     value->u.binary.length = sizeof( hb_sha1_t );
 }
 //////////////////////////////////////////////////////////////////////////
+void hb_db_inc_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value )
+{
+    hb_db_value_handle_t * value = _values->values + _values->value_count;
+    ++_values->value_count;
+
+    value->mode = e_hb_db_mode_inc;
+    value->type = e_hb_db_int32;
+    value->field = _field;
+    value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
+    value->u.i32 = _value;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_db_values_handle_t ** _dictionary )
 {
     hb_db_value_handle_t * value = _values->values + _values->value_count;
     ++_values->value_count;
 
+    value->mode = e_hb_db_mode_set;
     value->type = e_hb_db_dictionary;
     value->field = _field;
     value->field_length = _fieldlength == HB_UNKNOWN_STRING_SIZE ? strlen( _field ) : _fieldlength;
@@ -811,7 +868,7 @@ hb_result_t hb_db_find_uid( const hb_db_collection_handle_t * _handle, const hb_
     bson_t query;
     bson_init( &query );
 
-    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    if( __hb_db_append_values( &query, _query, e_hb_db_mode_set ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -900,6 +957,8 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
 
     bson_type_t type = bson_iter_type( _iter );
 
+    _value->mode = e_hb_db_mode_set;
+
     switch( type )
     {
     case BSON_TYPE_INT32:
@@ -973,7 +1032,7 @@ hb_result_t hb_db_find_uid_with_values( const hb_db_collection_handle_t * _handl
     bson_t query;
     bson_init( &query );
 
-    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    if( __hb_db_append_values( &query, _query, e_hb_db_mode_set ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -1107,7 +1166,7 @@ hb_result_t hb_db_select_values( const hb_db_collection_handle_t * _handle, cons
     bson_t query;
     bson_init( &query );
 
-    if( __hb_db_append_values( &query, _query ) == HB_FAILURE )
+    if( __hb_db_append_values( &query, _query, e_hb_db_mode_set ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -1195,7 +1254,7 @@ hb_result_t hb_db_count_values( const hb_db_collection_handle_t * _handle, const
     bson_t filter;
     bson_init( &filter );
 
-    if( __hb_db_append_values( &filter, _query ) == HB_FAILURE )
+    if( __hb_db_append_values( &filter, _query, e_hb_db_mode_set ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -1257,10 +1316,16 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
     else
     {
         bson_t query_id;
-        bson_append_document_begin( &query, "_id", -1, &query_id );
+        if( bson_append_document_begin( &query, "_id", -1, &query_id ) == false )
+        {
+            return HB_FAILURE;
+        }
 
         bson_t query_in;
-        bson_append_array_begin( &query_id, "$in", -1, &query_in );
+        if( bson_append_array_begin( &query_id, "$in", -1, &query_in ) == false )
+        {
+            return HB_FAILURE;
+        }
 
         for( uint32_t index = 0; index != _uidcount; ++index )
         {
@@ -1269,14 +1334,21 @@ hb_result_t hb_db_gets_values( const hb_db_collection_handle_t * _collection, co
             BSON_APPEND_INT32( &query_in, "$oid", uid );
         }
 
-        bson_append_array_end( &query_id, &query_in );
-        bson_append_document_end( &query, &query_id );
+        if( bson_append_array_end( &query_id, &query_in ) == false )
+        {
+            return HB_FAILURE;
+        }
+
+        if( bson_append_document_end( &query, &query_id ) == false )
+        {
+            return HB_FAILURE;
+        }
     }
 
     bson_t fields;
     bson_init( &fields );
 
-    if( _uidcount != 0 )
+    if( _uidcount == 0 )
     {
         BSON_APPEND_INT32( &fields, "_id", 1 );
     }
@@ -1504,20 +1576,42 @@ hb_result_t hb_db_update_values( const hb_db_collection_handle_t * _collection, 
     bson_t update;
     bson_init( &update );
 
-    bson_t fields;
-    if( bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields ) == false )
+    if( __hb_db_has_values_mode( _handles, e_hb_db_mode_set ) == HB_TRUE )
     {
-        return HB_FAILURE;
+        bson_t fields;
+        if( bson_append_document_begin( &update, "$set", strlen( "$set" ), &fields ) == false )
+        {
+            return HB_FAILURE;
+        }
+
+        if( __hb_db_append_values( &fields, _handles, e_hb_db_mode_set ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( bson_append_document_end( &update, &fields ) == false )
+        {
+            return HB_FAILURE;
+        }
     }
 
-    if( __hb_db_append_values( &fields, _handles ) == HB_FAILURE )
+    if( __hb_db_has_values_mode( _handles, e_hb_db_mode_inc ) == HB_TRUE )
     {
-        return HB_FAILURE;
-    }
+        bson_t fields;
+        if( bson_append_document_begin( &update, "$inc", strlen( "$inc" ), &fields ) == false )
+        {
+            return HB_FAILURE;
+        }
 
-    if( bson_append_document_end( &update, &fields ) == false )
-    {
-        return HB_FAILURE;
+        if( __hb_db_append_values( &fields, _handles, e_hb_db_mode_inc ) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+
+        if( bson_append_document_end( &update, &fields ) == false )
+        {
+            return HB_FAILURE;
+        }
     }
 
     bson_error_t error;
