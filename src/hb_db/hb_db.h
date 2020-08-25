@@ -46,6 +46,8 @@ void hb_db_make_binary_value( hb_db_values_handle_t * _values, const char * _fie
 void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_time_t _time );
 void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_sha1_t * _sha1 );
 
+void hb_db_inc_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value );
+
 hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_db_values_handle_t ** _dictionary );
 
 hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_uid_t * _value );

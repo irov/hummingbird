@@ -97,10 +97,12 @@ hb_http_code_t hb_grid_request_loginuser( struct evhttp_request * _request, hb_g
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"user_data\":%s,\"project_data_revision\":%u,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
         , out_data.uuid
         , (int)sizeof( token16 )
         , token16.value
+        , out_data.user_public_data
+        , out_data.project_public_data_revision
         , api_out_data.memory_used
         , api_out_data.call_used
     );

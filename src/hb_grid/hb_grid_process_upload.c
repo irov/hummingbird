@@ -91,8 +91,8 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         }
     }
 
-    int64_t script_revision;
-    if( hb_db_get_int64_value( db_script_revision_handle, 0, &script_revision ) == HB_FAILURE )
+    int32_t script_revision;
+    if( hb_db_get_int32_value( db_script_revision_handle, 0, &script_revision ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -167,7 +167,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
 
     hb_db_make_sha1_value( values_update, "script_sha1", HB_UNKNOWN_STRING_SIZE, &sha1 );
     hb_db_make_uid_value( values_update, "script_subversion", HB_UNKNOWN_STRING_SIZE, project_subversion_uid );
-    hb_db_make_int64_value( values_update, "script_revision", HB_UNKNOWN_STRING_SIZE, script_revision + 1 );
+    hb_db_make_int32_value( values_update, "script_revision", HB_UNKNOWN_STRING_SIZE, script_revision + 1 );
 
     if( hb_db_update_values( db_collection_projects, project_uid, values_update ) == HB_FAILURE )
     {

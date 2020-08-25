@@ -92,16 +92,8 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
         );
     }
 
-    hb_token16_t token16;
-    if( hb_token_base16_encode( &out_data.token, &token16 ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
-
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\",\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
         , out_data.uuid
-        , (int)sizeof( token16 )
-        , token16.value
         , api_out_data.memory_used
         , api_out_data.call_used
     );

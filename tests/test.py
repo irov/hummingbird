@@ -124,7 +124,6 @@ class Testing(unittest.TestCase):
 
         self.assertIsNotNone(jresult)
         self.assertEqual(jresult["code"], 0)
-        self.assertIn("token", jresult)
 
         print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, login, password))
         jresult = hummingbird.post("http://localhost:5555/loginuser/{0}".format(pid), login = login, password = password)

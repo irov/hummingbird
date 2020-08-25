@@ -56,7 +56,7 @@ hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"revision\":%" SCNu64 "}", out_data.revision );
+    size_t response_data_size = sprintf( _response, "{\"code\":0,\"revision\":%" SCNu32 "}", out_data.revision );
 
     *_size = response_data_size;
 

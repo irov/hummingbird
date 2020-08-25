@@ -12,6 +12,8 @@ typedef struct hb_grid_process_newproject_in_data_t
 
 typedef struct hb_grid_process_newproject_out_data_t
 {
+    hb_error_code_t code;
+
     hb_uid_t puid;
 } hb_grid_process_newproject_out_data_t;
 
