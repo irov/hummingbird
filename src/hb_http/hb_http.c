@@ -28,9 +28,16 @@ hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multip
 
     size_t multipart_length = evbuffer_get_length( input_buffer );
 
+    if( multipart_length + 1 > HB_DATA_MAX_SIZE )
+    {
+        return HB_FAILURE;
+    }
+
     hb_data_t multipart;
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
     HB_UNUSED( copyout_buffer_size );
+
+    ((char *)multipart)[copyout_buffer_size] = '\0';
 
     if( hb_multipart_parse( boundary, boundary_size, multipart, multipart_length, _params, _capacity, _count ) == HB_FAILURE )
     {
@@ -46,7 +53,7 @@ hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _
 
     size_t multipart_length = evbuffer_get_length( input_buffer );
 
-    if( multipart_length > _capacity )
+    if( multipart_length + 1 > _capacity )
     {
         return HB_FAILURE;
     }
@@ -57,6 +64,8 @@ hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _
     {
         return HB_FAILURE;
     }
+
+    ((char *)_buffer)[copyout_buffer_size] = '\0';
 
     *_size = copyout_buffer_size;
 

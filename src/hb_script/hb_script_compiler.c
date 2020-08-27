@@ -20,7 +20,7 @@ typedef struct hb_script_writer_desc_t
     void * buffer;
 }hb_script_writer_desc_t;
 //////////////////////////////////////////////////////////////////////////
-static int s_writer( lua_State * L, const void * p, size_t size, void * u )
+static int __code_writer( lua_State * L, const void * p, size_t size, void * u )
 {
     HB_UNUSED( L );
 
@@ -68,7 +68,7 @@ hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code
     desc.capacity = _capacity;
     desc.buffer = _code;
 
-    int ret_dump = luaU_dump( L, f, &s_writer, &desc, 1 );
+    int ret_dump = luaU_dump( L, f, &__code_writer, &desc, 1 );
 
     if( ret_dump != LUA_OK )
     {
