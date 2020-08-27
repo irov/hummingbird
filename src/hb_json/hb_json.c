@@ -196,7 +196,9 @@ hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _k
 
     if( jvalue == HB_NULLPTR )
     {
-        return HB_FAILURE;
+        *_out = HB_NULLPTR;
+
+        return HB_SUCCESSFUL;
     }
 
     json_incref( jvalue );
@@ -415,6 +417,11 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         if( _default != HB_NULLPTR )
         {
             *_value = _default;
@@ -442,12 +449,17 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         size_t default_len = strlen( _default );
 
         if( default_len > _capacity )
         {
             return HB_FAILURE;
-        }        
+        }
 
         memcpy( _value, _default, default_len );
         _value[default_len] = '\0';
@@ -479,6 +491,11 @@ hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, cons
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
     {
         if( _result != HB_NULLPTR )
         {
@@ -516,6 +533,11 @@ hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _k
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         *_value = _default;
 
         return HB_SUCCESSFUL;
@@ -535,6 +557,11 @@ hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _k
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {        
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
     {
         *_value = _default;
 
@@ -556,6 +583,11 @@ hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _k
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         *_value = _default;
 
         return HB_SUCCESSFUL;
@@ -575,6 +607,11 @@ hb_result_t hb_json_get_field_uint16( hb_json_handle_t * _handle, const char * _
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
     {
         *_value = _default;
 
@@ -596,6 +633,11 @@ hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         *_value = _default;
 
         return HB_SUCCESSFUL;
@@ -616,6 +658,11 @@ hb_result_t hb_json_get_field_uint64( hb_json_handle_t * _handle, const char * _
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         *_value = _default;
 
         return HB_SUCCESSFUL;
@@ -635,6 +682,11 @@ hb_result_t hb_json_get_field_int32_required( hb_json_handle_t * _handle, const 
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
     {
         if( _result != HB_NULLPTR )
         {
@@ -662,6 +714,11 @@ hb_result_t hb_json_get_field_uint32_required( hb_json_handle_t * _handle, const
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         if( _result != HB_NULLPTR )
         {
             *_result = HB_FALSE;
@@ -688,6 +745,11 @@ hb_result_t hb_json_get_field_int64_required( hb_json_handle_t * _handle, const 
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
         if( _result != HB_NULLPTR )
         {
             *_result = HB_FALSE;
@@ -713,6 +775,11 @@ hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
     {
         if( _result != HB_NULLPTR )
         {
