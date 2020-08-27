@@ -45,6 +45,17 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle )
 {
+    if( _size == 0 )
+    {
+        hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
+
+        handle->jroot = json_object();
+
+        *_handle = handle;
+
+        return HB_SUCCESSFUL;
+    }
+
     hb_json_load_data_t jd;
     jd.buffer = (const hb_byte_t *)(_data);
     jd.carriage = 0;
