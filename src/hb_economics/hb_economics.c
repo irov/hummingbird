@@ -276,7 +276,7 @@ static hb_result_t __hb_economics_cache_records_vocabulary( hb_economics_handle_
 
     new_records_handle->mutex = mutex;
 
-    if( hb_json_foreach( json_data, &__hb_json_visitor, new_records_handle ) == HB_FAILURE )
+    if( hb_json_object_foreach( json_data, &__hb_json_visitor, new_records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

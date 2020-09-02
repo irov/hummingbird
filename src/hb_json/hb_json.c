@@ -802,7 +802,7 @@ hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_foreach( const hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud )
+hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_object_visitor_t _visitor, void * _ud )
 {
     json_t * jvalue = _handle->jroot;
 

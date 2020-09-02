@@ -58,7 +58,7 @@ hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update );
 hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size );
 
-typedef hb_result_t(*hb_json_visitor_t)(const char * _key, const hb_json_handle_t * _value, void * _ud);
-hb_result_t hb_json_foreach( const hb_json_handle_t * _handle, hb_json_visitor_t _visitor, void * _ud );
+typedef hb_result_t(*hb_json_object_visitor_t)(const char * _key, const hb_json_handle_t * _value, void * _ud);
+hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_object_visitor_t _visitor, void * _ud );
 
 #endif
