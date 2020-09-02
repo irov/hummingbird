@@ -151,9 +151,21 @@ static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t 
     {
     case e_hb_json_object:
         {
-            //ToDo
+            if( hb_json_is_object_empty( _value ) == HB_TRUE )
+            {
+                lua_createtable( L, 0, 0 );
 
-            return HB_FAILURE;
+                return HB_SUCCESSFUL;
+            }
+
+            uint32_t json_count = hb_json_get_fields_count( _value );
+
+            lua_createtable( L, 0, json_count );
+
+            if( hb_json_object_foreach( _value, &__hb_json_visitor, (void *)L ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
         }break;
     case e_hb_json_array:
         {
@@ -234,7 +246,7 @@ hb_result_t hb_script_json_loads( lua_State * L, const hb_json_handle_t * _json 
 
     lua_createtable( L, 0, json_count );
 
-    hb_result_t result = hb_json_foreach( _json, &__hb_json_visitor, (void *)L );
+    hb_result_t result = hb_json_object_foreach( _json, &__hb_json_visitor, (void *)L );
 
     return result;
 }
