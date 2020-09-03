@@ -2,6 +2,8 @@
 
 #include "hb_utils/hb_strstre.h"
 
+#include <string.h>
+
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multipart_params_handle_t * _params, uint32_t _capacity, uint32_t * _count )
 {
