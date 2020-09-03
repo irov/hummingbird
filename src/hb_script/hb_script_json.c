@@ -309,9 +309,21 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * 
         {
         case e_hb_json_object:
             {
-                //ToDo
+                if( hb_json_is_object_empty( json_field ) == HB_TRUE )
+                {
+                    lua_createtable( L, 0, 0 );
+                }
+                else
+                {
+                    uint32_t json_count = hb_json_get_fields_count( json_field );
 
-                return HB_FAILURE;
+                    lua_createtable( L, 0, json_count );
+
+                    if( hb_json_object_foreach( json_field, &__hb_json_visitor, (void *)L ) == HB_FAILURE )
+                    {
+                        return HB_FAILURE;
+                    }
+                }
             }break;
         case e_hb_json_array:
             {
