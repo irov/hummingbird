@@ -62,7 +62,7 @@ script:
     - pyenv install 3.6.0
     - pyenv global 3.6.0
     - python --version
-    - exec "./bin/hummingbird_unix/Unix Makefiles/hb_grid" &
+    - exec "./bin/hummingbird_unix/Unix Makefiles/$BUILD_CONFIGURATION/hb_grid" &
     - serverpid=$!
     - python "./tests/test.py" "./tests/test.lua"
     - kill -INT $serverpid
