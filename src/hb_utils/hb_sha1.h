@@ -5,6 +5,6 @@
 
 void hb_sha1_copy( hb_sha1_t * _dst, const hb_sha1_t * _src );
 
-void hb_sha1( const void * _buffer, const size_t _size, hb_sha1_t * _sha1 );
+void hb_sha1( const void * _buffer, const hb_size_t _size, hb_sha1_t * _sha1 );
 
 #endif

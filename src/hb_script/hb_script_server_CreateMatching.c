@@ -12,13 +12,13 @@ int hb_script_server_CreateMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    size_t name_len;
+    hb_size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer count = lua_tointegerx( L, 2, HB_NULLPTR );
     lua_Integer dispersion = lua_tointegerx( L, 3, HB_NULLPTR );
 
     char json_data[HB_DATA_MAX_SIZE];
-    size_t json_data_size;
+    hb_size_t json_data_size;
     if( hb_script_json_dumps( L, 4, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR_INTERNAL_ERROR( L );

@@ -22,23 +22,23 @@ static const hb_byte_t base16_decode_table[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //255
 };
 //////////////////////////////////////////////////////////////////////////
-size_t hb_base16_encode_size( size_t _size )
+hb_size_t hb_base16_encode_size( hb_size_t _size )
 {
-    size_t totalsize = _size * 2;
+    hb_size_t totalsize = _size * 2;
 
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-size_t hb_base16_decode_size( size_t _size )
+hb_size_t hb_base16_decode_size( hb_size_t _size )
 {
-    size_t totalsize = _size / 2;
+    hb_size_t totalsize = _size / 2;
 
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base16_encode( const void * _data, hb_size_t _size, char * _base16, hb_size_t _capacity, hb_size_t * _outsize )
 {
-    size_t totalsize = hb_base16_encode_size( _size );
+    hb_size_t totalsize = hb_base16_encode_size( _size );
 
     if( totalsize > _capacity )
     {
@@ -53,7 +53,7 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
 
     const hb_byte_t * data = (const hb_byte_t *)_data;
 
-    for( size_t i = 0, j = 0; i != _size;)
+    for( hb_size_t i = 0, j = 0; i != _size;)
     {
         hb_byte_t v = data[i++];
 
@@ -72,14 +72,14 @@ hb_result_t hb_base16_encode( const void * _data, size_t _size, char * _base16, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base16_decode( const char * _base16, size_t _size, void * _data, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base16_decode( const char * _base16, hb_size_t _size, void * _data, hb_size_t _capacity, hb_size_t * _outsize )
 {
     if( _size == HB_UNKNOWN_STRING_SIZE )
     {
         _size = strlen( _base16 );
     }
 
-    size_t totalsize = hb_base16_decode_size( _size );
+    hb_size_t totalsize = hb_base16_decode_size( _size );
 
     if( totalsize > _capacity )
     {
@@ -88,7 +88,7 @@ hb_result_t hb_base16_decode( const char * _base16, size_t _size, void * _data, 
 
     hb_byte_t * data = (hb_byte_t *)_data;
 
-    for( uint32_t i = 0, j = 0; i != _size;)
+    for( hb_size_t i = 0, j = 0; i != _size;)
     {
         hb_byte_t a = base16_decode_table[_base16[i++]];
         hb_byte_t b = base16_decode_table[_base16[i++]];

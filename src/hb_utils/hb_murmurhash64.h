@@ -3,6 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-uint64_t hb_murmurhash64( const void * _data, size_t _size );
+uint64_t hb_murmurhash64( const void * _data, hb_size_t _size );
 
 #endif

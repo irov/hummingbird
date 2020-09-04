@@ -8,10 +8,10 @@
 typedef struct hb_array_t
 {
     void * data;
-    size_t size;
+    hb_size_t size;
 } hb_array_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_array_create( const void * _data, size_t _size, hb_array_t ** _array )
+hb_result_t hb_array_create( const void * _data, hb_size_t _size, hb_array_t ** _array )
 {
     hb_array_t * array = HB_NEW( hb_array_t );
 
@@ -32,7 +32,7 @@ void hb_array_destroy( hb_array_t * _array )
     HB_DELETE( _array );
 }
 //////////////////////////////////////////////////////////////////////////
-const void * hb_array_data( hb_array_t * _array, size_t * _size )
+const void * hb_array_data( hb_array_t * _array, hb_size_t * _size )
 {
     *_size = _array->size;
 

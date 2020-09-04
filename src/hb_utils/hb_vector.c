@@ -8,11 +8,11 @@
 typedef struct hb_vector_t
 {
     void * data;
-    size_t elemsize;
+    hb_size_t elemsize;
     uint32_t count;
 } hb_vector_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_vector_create( size_t _elemsize, uint32_t _count, hb_vector_t ** _vector )
+hb_result_t hb_vector_create( hb_size_t _elemsize, uint32_t _count, hb_vector_t ** _vector )
 {
     if( _elemsize == 0 )
     {
@@ -53,7 +53,7 @@ uint32_t hb_vector_count( const hb_vector_t * _vector )
     return _vector->count;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_vector_resize( hb_vector_t * _vector, size_t _count )
+hb_result_t hb_vector_resize( hb_vector_t * _vector, hb_size_t _count )
 {
     if( _vector->count >= _count )
     {

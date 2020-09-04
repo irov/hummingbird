@@ -14,13 +14,13 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_script_writer_desc_t
 {
-    size_t carriage;
-    size_t capacity;
+    hb_size_t carriage;
+    hb_size_t capacity;
 
     void * buffer;
 }hb_script_writer_desc_t;
 //////////////////////////////////////////////////////////////////////////
-static int __code_writer( lua_State * L, const void * p, size_t size, void * u )
+static int __code_writer( lua_State * L, const void * p, hb_size_t size, void * u )
 {
     HB_UNUSED( L );
 
@@ -38,7 +38,7 @@ static int __code_writer( lua_State * L, const void * p, size_t size, void * u )
     return LUA_OK;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_compiler( const char * _source, size_t _size, void * _code, size_t _capacity, size_t * _compilesize )
+hb_result_t hb_script_compiler( const char * _source, hb_size_t _size, void * _code, hb_size_t _capacity, hb_size_t * _compilesize )
 {
     lua_State * L = luaL_newstate();
 

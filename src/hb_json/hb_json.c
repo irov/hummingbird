@@ -18,11 +18,11 @@ typedef struct hb_json_handle_t
 typedef struct hb_json_load_data_t
 {
     const hb_byte_t * buffer;
-    size_t carriage;
-    size_t capacity;
+    hb_size_t carriage;
+    hb_size_t capacity;
 } hb_json_load_data_t;
 //////////////////////////////////////////////////////////////////////////
-static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _ud )
+static hb_size_t __hb_json_load_callback( void * _buffer, hb_size_t _buflen, void * _ud )
 {
     hb_json_load_data_t * jd = (hb_json_load_data_t *)_ud;
 
@@ -43,7 +43,7 @@ static size_t __hb_json_load_callback( void * _buffer, size_t _buflen, void * _u
     return _buflen;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle )
+hb_result_t hb_json_create( const void * _data, hb_size_t _size, hb_json_handle_t ** _handle )
 {
     if( _size == 0 )
     {
@@ -99,7 +99,7 @@ void hb_json_destroy( const hb_json_handle_t * _handle )
 hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
 {
     char buffer[HB_DATA_MAX_SIZE];
-    size_t buffer_size;
+    hb_size_t buffer_size;
     if( hb_file_read( _file, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -126,11 +126,11 @@ hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
     json_t * jroot = _handle->jroot;
 
-    size_t sz = json_dumpb( jroot, _buffer, _capacity, JSON_COMPACT );
+    hb_size_t sz = json_dumpb( jroot, _buffer, _capacity, JSON_COMPACT );
 
     if( sz == 0 )
     {
@@ -157,6 +157,21 @@ hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle )
     return HB_TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_json_is_array_empty( const hb_json_handle_t * _handle )
+{
+    if( json_is_array( _handle->jroot ) == HB_FALSE )
+    {
+        return HB_FALSE;
+    }
+
+    if( json_array_size( _handle->jroot ) != 0 )
+    {
+        return HB_FALSE;
+    }
+
+    return HB_TRUE;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle )
 {
     return json_is_array( _handle->jroot );
@@ -164,14 +179,14 @@ hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_json_array_count( const hb_json_handle_t * _handle )
 {
-    size_t size = json_array_size( _handle->jroot );
+    hb_size_t size = json_array_size( _handle->jroot );
 
     return (uint32_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_array_get( const hb_json_handle_t * _handle, uint32_t _index, hb_json_handle_t ** _out )
 {
-    json_t * jvalue = json_array_get( _handle->jroot, (size_t)_index );
+    json_t * jvalue = json_array_get( _handle->jroot, (hb_size_t)_index );
 
     if( jvalue == HB_NULLPTR )
     {
@@ -244,7 +259,7 @@ uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle )
 {
     json_t * jroot = _handle->jroot;
 
-    size_t jcount = json_object_size( jroot );
+    hb_size_t jcount = json_object_size( jroot );
 
     return (uint32_t)jcount;
 }
@@ -278,7 +293,7 @@ hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, size_t * _size )
+hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size )
 {
     json_t * jvalue = _handle->jroot;
 
@@ -288,7 +303,7 @@ hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _
     }
 
     const char * value = json_string_value( jvalue );
-    size_t size = json_string_length( jvalue );
+    hb_size_t size = json_string_length( jvalue );
 
     *_value = value;
 
@@ -412,7 +427,7 @@ hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default )
+hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -444,7 +459,7 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, const char * _default )
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -454,7 +469,7 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
 
     if( field == HB_NULLPTR )
     {
-        size_t default_len = strlen( _default );
+        hb_size_t default_len = strlen( _default );
 
         if( default_len > _capacity )
         {
@@ -468,7 +483,7 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     }
 
     const char * value;
-    size_t size;
+    hb_size_t size;
     if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -487,7 +502,7 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, hb_bool_t * _result )
+hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, hb_bool_t * _result )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -506,7 +521,7 @@ hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, cons
     }
 
     const char * value;
-    size_t size;
+    hb_size_t size;
     if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -815,6 +830,27 @@ hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_ob
         hb_json_handle_t handle;
         handle.jroot = jelement;
         if( (*_visitor)(key, &handle, _ud) == HB_FAILURE )
+        {
+            return HB_FAILURE;
+        }
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_array_foreach( const hb_json_handle_t * _handle, hb_json_array_visitor_t _visitor, void * _ud )
+{
+    json_t * jvalue = _handle->jroot;
+    
+    hb_size_t array_size = json_array_size( jvalue );
+
+    for( hb_size_t index = 0; index != array_size; ++index )
+    {
+        json_t * jelement = json_array_get( jvalue, index );
+
+        hb_json_handle_t handle;
+        handle.jroot = jelement;
+        if( (*_visitor)(index, &handle, _ud) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

@@ -28,6 +28,6 @@ typedef struct hb_messages_get_t
     const char * metainfo;
 } hb_messages_get_t;
 
-hb_result_t hb_messages_channel_get_posts( hb_messages_handle_t * _handle, hb_uid_t _puid, hb_uid_t _cuid, uint32_t _postid, hb_messages_get_t * _post, size_t _postcapacity, uint32_t * _count, hb_error_code_t * _code );
+hb_result_t hb_messages_channel_get_posts( hb_messages_handle_t * _handle, hb_uid_t _puid, hb_uid_t _cuid, uint32_t _postid, hb_messages_get_t * _post, hb_size_t _postcapacity, uint32_t * _count, hb_error_code_t * _code );
 
 #endif

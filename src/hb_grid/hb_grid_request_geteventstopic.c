@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 
-hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     const char * arg_user_token = _args->arg1;
 
@@ -59,7 +59,7 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
 
     if( code != HB_ERROR_OK )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+        hb_size_t response_data_size = sprintf( _response, "{\"code\":%u}"
             , code
         );
 
@@ -70,7 +70,7 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
 
     if( index != ~0U && topic.index == index )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":0,\"index\":%u}"
+        hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"index\":%u}"
             , topic.index
         );
 
@@ -79,7 +79,7 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
         return HTTP_OK;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"index\":%u,\"message\":%s}"
+    hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"index\":%u,\"message\":%s}"
         , topic.index
         , topic.message
     );

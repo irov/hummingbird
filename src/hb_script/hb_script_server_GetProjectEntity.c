@@ -11,7 +11,7 @@ int hb_script_server_GetProjectEntity( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    size_t name_len;
+    hb_size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
 
     if( name_len == 0 )

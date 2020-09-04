@@ -30,7 +30,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         return HB_FAILURE;
     }
 
-    size_t code_size;
+    hb_size_t code_size;
     hb_data_t code_buffer;
     if( hb_script_compiler( _in->script_source, _in->script_source_size, code_buffer, HB_DATA_MAX_SIZE, &code_size ) == HB_FAILURE )
     {
@@ -135,7 +135,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
         }
 
         const void * script_sha1_binary;
-        size_t script_sha1_binary_length;
+        hb_size_t script_sha1_binary_length;
         if( hb_db_get_binary_value( values_sha1, 0, &script_sha1_binary, &script_sha1_binary_length ) == HB_FAILURE )
         {
             return HB_FAILURE;

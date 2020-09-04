@@ -20,9 +20,9 @@ typedef struct hb_grid_process_script_api_in_data_t
 typedef struct hb_grid_process_script_api_out_data_t
 {
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
-    size_t response_size;
+    hb_size_t response_size;
 
-    size_t memory_used;
+    hb_size_t memory_used;
     uint32_t call_used;
 
     hb_error_code_t code;

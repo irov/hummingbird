@@ -20,9 +20,9 @@ static const hb_byte_t base64_decode_table[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //255
 };
 //////////////////////////////////////////////////////////////////////////
-size_t hb_base64_encode_size( size_t _size )
+hb_size_t hb_base64_encode_size( hb_size_t _size )
 {
-    size_t totalsize = 4 * ((_size + 2) / 3);
+    hb_size_t totalsize = 4 * ((_size + 2) / 3);
 
     const uint32_t mod_table[] = {0, 2, 1};
 
@@ -33,9 +33,9 @@ size_t hb_base64_encode_size( size_t _size )
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-size_t hb_base64_decode_size( size_t _size )
+hb_size_t hb_base64_decode_size( hb_size_t _size )
 {
-    size_t totalsize = (_size + 3) / 4 * 3;
+    hb_size_t totalsize = (_size + 3) / 4 * 3;
 
     const uint32_t mod_table[] = {0, 3, 2, 1};
 
@@ -46,9 +46,9 @@ size_t hb_base64_decode_size( size_t _size )
     return totalsize;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base64_encode( const void * _data, size_t _size, char * _base64, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_encode( const void * _data, hb_size_t _size, char * _base64, hb_size_t _capacity, hb_size_t * _outsize )
 {
-    size_t totalsize = hb_base64_encode_size( _size );
+    hb_size_t totalsize = hb_base64_encode_size( _size );
 
     if( totalsize > _capacity )
     {
@@ -66,7 +66,7 @@ hb_result_t hb_base64_encode( const void * _data, size_t _size, char * _base64, 
 
     const hb_byte_t * data = (const hb_byte_t *)_data;
 
-    for( size_t i = 0, j = 0; i != _size;)
+    for( hb_size_t i = 0, j = 0; i != _size;)
     {
         uint32_t octet_a = i != _size ? data[i++] : 0;
         uint32_t octet_b = i != _size ? data[i++] : 0;
@@ -88,9 +88,9 @@ hb_result_t hb_base64_encode( const void * _data, size_t _size, char * _base64, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_base64_decode( const char * _base64, size_t _size, void * _data, size_t _capacity, size_t * _outsize )
+hb_result_t hb_base64_decode( const char * _base64, hb_size_t _size, void * _data, hb_size_t _capacity, hb_size_t * _outsize )
 {
-    size_t totalsize = hb_base64_decode_size( _size );
+    hb_size_t totalsize = hb_base64_decode_size( _size );
 
     if( totalsize > _capacity )
     {

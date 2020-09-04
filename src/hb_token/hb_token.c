@@ -35,7 +35,7 @@ hb_result_t hb_token_base16_decode_string( const char * _tokenstring, hb_token_t
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_token_generate( const hb_cache_handle_t * _cache, const char _prefix[2], const void * _value, size_t _size, uint32_t _expire, hb_token_t * _token )
+hb_result_t hb_token_generate( const hb_cache_handle_t * _cache, const char _prefix[2], const void * _value, hb_size_t _size, uint32_t _expire, hb_token_t * _token )
 {
     uint32_t rand_time = hb_rand_time();
     uint32_t increment = rand_time & 0x0000ffff;

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-hb_result_t hb_file_read( const char * _path, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_file_read( const char * _path, void * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
     FILE * f = fopen( _path, "rb" );
 
@@ -32,7 +32,7 @@ hb_result_t hb_file_read( const char * _path, void * _buffer, size_t _capacity, 
         return HB_FAILURE;
     }
 
-    size_t r = fread( _buffer, sz, 1, f );
+    hb_size_t r = fread( _buffer, sz, 1, f );
 
     fclose( f );
 

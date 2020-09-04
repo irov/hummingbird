@@ -19,10 +19,10 @@ typedef struct hb_script_handle_t
 
     jmp_buf panic_jump;
 
-    size_t memory_base;
-    size_t memory_used;
-    size_t memory_peak;
-    size_t memory_limit;
+    hb_size_t memory_base;
+    hb_size_t memory_used;
+    hb_size_t memory_peak;
+    hb_size_t memory_limit;
 
     uint32_t call_used;
     uint32_t call_limit;

@@ -14,24 +14,24 @@ typedef struct hb_hashtable_record_t
     uint64_t hash;
 
     uint8_t key[32];
-    size_t key_size;
+    hb_size_t key_size;
 
     void * element;
 } hb_hashtable_record_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_hashtable_t
 {
-    size_t size;
-    size_t capacity;
+    hb_size_t size;
+    hb_size_t capacity;
 
     hb_hashtable_record_t * records;
 } hb_hashtable_t;
 //////////////////////////////////////////////////////////////////////////
-static hb_hashtable_record_t * __hb_hashtable_newbuffer( size_t _capacity )
+static hb_hashtable_record_t * __hb_hashtable_newbuffer( hb_size_t _capacity )
 {
     hb_hashtable_record_t * new_records = HB_NEWN( hb_hashtable_record_t, _capacity );
 
-    for( size_t index = 0; index != _capacity; ++index )
+    for( hb_size_t index = 0; index != _capacity; ++index )
     {
         hb_hashtable_record_t * record = new_records + index;
 
@@ -44,7 +44,7 @@ static hb_hashtable_record_t * __hb_hashtable_newbuffer( size_t _capacity )
     return new_records;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_hashtable_create( size_t _capacity, hb_hashtable_t ** _ht )
+hb_result_t hb_hashtable_create( hb_size_t _capacity, hb_hashtable_t ** _ht )
 {
     hb_hashtable_t * ht = HB_NEW( hb_hashtable_t );
 
@@ -80,14 +80,14 @@ void hb_hashtable_destroy( hb_hashtable_t * _ht )
     HB_DELETE( _ht );
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_hashtable_push( hb_hashtable_record_t * _records, size_t _capacity, uint64_t _hash, const void * _key, size_t _size, void * _element )
+static void __hb_hashtable_push( hb_hashtable_record_t * _records, hb_size_t _capacity, uint64_t _hash, const void * _key, hb_size_t _size, void * _element )
 {
-    size_t hash_mask = _capacity - 1;
-    size_t mask = (size_t)_hash;
+    hb_size_t hash_mask = _capacity - 1;
+    hb_size_t mask = (hb_size_t)_hash;
 
     for( uint64_t probe = _hash; ; probe >>= 5 )
     {
-        size_t index = mask & hash_mask;
+        hb_size_t index = mask & hash_mask;
 
         hb_hashtable_record_t * record = _records + index;
 
@@ -101,18 +101,18 @@ static void __hb_hashtable_push( hb_hashtable_record_t * _records, size_t _capac
             break;
         }
 
-        mask = (mask << 2) + mask + (size_t)probe + 1;
+        mask = (mask << 2) + mask + (hb_size_t)probe + 1;
     }
 }
 //////////////////////////////////////////////////////////////////////////
-static void __hb_hashtable_rebalance( hb_hashtable_t * _ht, size_t _capacity )
+static void __hb_hashtable_rebalance( hb_hashtable_t * _ht, hb_size_t _capacity )
 {
-    size_t old_capacity = _ht->capacity;
+    hb_size_t old_capacity = _ht->capacity;
     hb_hashtable_record_t * old_records = _ht->records;
 
     hb_hashtable_record_t * new_records = __hb_hashtable_newbuffer( _capacity );
 
-    for( size_t index = 0; index != old_capacity; ++index )
+    for( hb_size_t index = 0; index != old_capacity; ++index )
     {
         hb_hashtable_record_t * record = old_records + index;
 
@@ -132,15 +132,15 @@ static void __hb_hashtable_rebalance( hb_hashtable_t * _ht, size_t _capacity )
 //////////////////////////////////////////////////////////////////////////
 static void __hb_hashtable_increase( hb_hashtable_t * _ht )
 {
-    size_t new_capacity = _ht->capacity << 1;
+    hb_size_t new_capacity = _ht->capacity << 1;
 
     __hb_hashtable_rebalance( _ht, new_capacity );
 }
 //////////////////////////////////////////////////////////////////////////
 static void __hb_hashtable_checkincrease( hb_hashtable_t * _ht )
 {
-    size_t test_size = _ht->size * 3 + 1;
-    size_t test_capacity = _ht->capacity * 2;
+    hb_size_t test_size = _ht->size * 3 + 1;
+    hb_size_t test_capacity = _ht->capacity * 2;
 
     if( test_size <= test_capacity )
     {
@@ -150,7 +150,7 @@ static void __hb_hashtable_checkincrease( hb_hashtable_t * _ht )
     __hb_hashtable_increase( _ht );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element )
+hb_result_t hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, hb_size_t _size, void * _element )
 {
     __hb_hashtable_checkincrease( _ht );
 
@@ -173,14 +173,14 @@ hb_result_t hb_hashtable_emplace( hb_hashtable_t * _ht, const void * _key, size_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_hashtable_change( hb_hashtable_record_t * _records, size_t _capacity, uint64_t _hash, const void * _key, size_t _size, void * _element )
+static void * __hb_hashtable_change( hb_hashtable_record_t * _records, hb_size_t _capacity, uint64_t _hash, const void * _key, hb_size_t _size, void * _element )
 {
-    size_t hash_mask = _capacity - 1;
-    size_t mask = (size_t)_hash;
+    hb_size_t hash_mask = _capacity - 1;
+    hb_size_t mask = (hb_size_t)_hash;
 
     for( uint64_t probe = _hash; ; probe >>= 5 )
     {
-        size_t index = mask & hash_mask;
+        hb_size_t index = mask & hash_mask;
 
         hb_hashtable_record_t * record = _records + index;
 
@@ -212,11 +212,11 @@ static void * __hb_hashtable_change( hb_hashtable_record_t * _records, size_t _c
             return HB_NULLPTR;
         }
 
-        mask = (mask << 2) + mask + (size_t)probe + 1;
+        mask = (mask << 2) + mask + (hb_size_t)probe + 1;
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void * hb_hashtable_change( hb_hashtable_t * _ht, const void * _key, size_t _size, void * _element )
+void * hb_hashtable_change( hb_hashtable_t * _ht, const void * _key, hb_size_t _size, void * _element )
 {
     if( _size == HB_UNKNOWN_STRING_SIZE )
     {
@@ -242,14 +242,14 @@ void * hb_hashtable_change( hb_hashtable_t * _ht, const void * _key, size_t _siz
     return change_element;
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_hashtable_pop( hb_hashtable_record_t * _records, size_t _capacity, uint64_t _hash, const void * _key, size_t _size )
+static void * __hb_hashtable_pop( hb_hashtable_record_t * _records, hb_size_t _capacity, uint64_t _hash, const void * _key, hb_size_t _size )
 {
-    size_t hash_mask = _capacity - 1;
-    size_t mask = (size_t)_hash;
+    hb_size_t hash_mask = _capacity - 1;
+    hb_size_t mask = (hb_size_t)_hash;
 
     for( uint64_t probe = _hash; ; probe >>= 5 )
     {
-        size_t index = mask & hash_mask;
+        hb_size_t index = mask & hash_mask;
 
         hb_hashtable_record_t * record = _records + index;
 
@@ -266,11 +266,11 @@ static void * __hb_hashtable_pop( hb_hashtable_record_t * _records, size_t _capa
             return pop_element;
         }
 
-        mask = (mask << 2) + mask + (size_t)probe + 1;
+        mask = (mask << 2) + mask + (hb_size_t)probe + 1;
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void * hb_hashtable_erase( hb_hashtable_t * _ht, const void * _key, size_t _size )
+void * hb_hashtable_erase( hb_hashtable_t * _ht, const void * _key, hb_size_t _size )
 {
     if( _ht->size == 0 )
     {
@@ -299,14 +299,14 @@ void * hb_hashtable_erase( hb_hashtable_t * _ht, const void * _key, size_t _size
     return erase_element;
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_hashtable_find( hb_hashtable_record_t * _records, size_t _capacity, uint64_t _hash, const void * _key, size_t _size )
+static void * __hb_hashtable_find( hb_hashtable_record_t * _records, hb_size_t _capacity, uint64_t _hash, const void * _key, hb_size_t _size )
 {
-    size_t hash_mask = _capacity - 1;
-    size_t mask = (size_t)_hash;
+    hb_size_t hash_mask = _capacity - 1;
+    hb_size_t mask = (hb_size_t)_hash;
 
     for( uint64_t probe = _hash; ; probe >>= 5 )
     {
-        size_t index = mask & hash_mask;
+        hb_size_t index = mask & hash_mask;
 
         hb_hashtable_record_t * record = _records + index;
 
@@ -325,11 +325,11 @@ static void * __hb_hashtable_find( hb_hashtable_record_t * _records, size_t _cap
             return record->element;
         }
 
-        mask = (mask << 2) + mask + (size_t)probe + 1;
+        mask = (mask << 2) + mask + (hb_size_t)probe + 1;
     }
 }
 //////////////////////////////////////////////////////////////////////////
-void * hb_hashtable_find( hb_hashtable_t * _ht, const void * _key, size_t _size )
+void * hb_hashtable_find( hb_hashtable_t * _ht, const void * _key, hb_size_t _size )
 {
     if( _ht->size == 0 )
     {
@@ -353,7 +353,7 @@ void * hb_hashtable_find( hb_hashtable_t * _ht, const void * _key, size_t _size 
     return find_element;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_hashtable_reserve( hb_hashtable_t * _ht, size_t _capacity )
+void hb_hashtable_reserve( hb_hashtable_t * _ht, hb_size_t _capacity )
 {
     if( _ht->capacity > _capacity )
     {
@@ -381,17 +381,17 @@ hb_bool_t hb_hashtable_empty( hb_hashtable_t * _ht )
     return HB_TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
-size_t hb_hashtable_size( hb_hashtable_t * _ht )
+hb_size_t hb_hashtable_size( hb_hashtable_t * _ht )
 {
     return _ht->size;
 }
 //////////////////////////////////////////////////////////////////////////
 void hb_hashtable_clear( hb_hashtable_t * _ht )
 {
-    size_t capacity = _ht->capacity;
+    hb_size_t capacity = _ht->capacity;
     hb_hashtable_record_t * values = _ht->records;
 
-    for( size_t index = 0; index != capacity; ++index )
+    for( hb_size_t index = 0; index != capacity; ++index )
     {
         hb_hashtable_record_t * record = values + index;
 

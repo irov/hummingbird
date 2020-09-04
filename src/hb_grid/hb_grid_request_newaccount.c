@@ -12,7 +12,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     HB_UNUSED( _args );
 
@@ -53,7 +53,7 @@ hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_
 
     if( out_data.code != HB_ERROR_OK )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+        hb_size_t response_data_size = sprintf( _response, "{\"code\":%u}"
             , out_data.code
         );
 
@@ -62,7 +62,7 @@ hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_
         return HTTP_OK;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0}" );
+    hb_size_t response_data_size = sprintf( _response, "{\"code\":0}" );
 
     *_size = response_data_size;
 

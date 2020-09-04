@@ -73,7 +73,7 @@ void hb_cache_destroy( hb_cache_handle_t * _handle )
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize )
+hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, const void * _value, hb_size_t _valuesize )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -105,7 +105,7 @@ hb_result_t hb_cache_set_value( const hb_cache_handle_t * _cache, const void * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, void * _value, size_t _capacity, size_t * _size )
+hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, void * _value, hb_size_t _capacity, hb_size_t * _size )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -165,7 +165,7 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint64_t _increment, uint64_t * _value )
+hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, uint64_t _increment, uint64_t * _value )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -206,7 +206,7 @@ hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _seconds )
+hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, uint32_t _seconds )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -238,7 +238,7 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _token, uint32_t _seconds, void * _value, size_t _capacity, size_t * _size )
+hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _token, uint32_t _seconds, void * _value, hb_size_t _capacity, hb_size_t * _size )
 {
     hb_token_t token;
     if( hb_token_base16_decode_string( _token, &token ) == HB_FAILURE )
@@ -259,7 +259,7 @@ hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize, uint32_t _score )
+hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, const void * _value, hb_size_t _valuesize, uint32_t _score )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -296,7 +296,7 @@ hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, uint32_t _begin, uint32_t _end, hb_cache_value_t * _values, uint32_t * _count )
+hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, uint32_t _begin, uint32_t _end, hb_cache_value_t * _values, uint32_t * _count )
 {
     redisReply * reply = redisCommand( _cache->context, "ZREVRANGE %b %u %u WITHSCORES", _key, _keysize, _begin, _end );
 
@@ -325,7 +325,7 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
         return HB_FAILURE;
     }
 
-    for( size_t index = 0; index != reply->elements; ++index )
+    for( hb_size_t index = 0; index != reply->elements; ++index )
     {
         struct redisReply * element = reply->element[index];
 
@@ -371,7 +371,7 @@ hb_result_t hb_cache_zrevrange( const hb_cache_handle_t * _cache, const void * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_zrevrank( const hb_cache_handle_t * _cache, const void * _key, size_t _keysize, const void * _value, size_t _valuesize, uint32_t * _score, hb_bool_t * _exist )
+hb_result_t hb_cache_zrevrank( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, const void * _value, hb_size_t _valuesize, uint32_t * _score, hb_bool_t * _exist )
 {
     redisReply * reply = redisCommand( _cache->context, "ZREVRANK %b %b", _key, _keysize, _value, _valuesize );
 

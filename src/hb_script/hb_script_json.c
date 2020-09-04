@@ -10,7 +10,7 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char * _buffer, size_t * _offset, size_t _capacity )
+static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char * _buffer, hb_size_t * _offset, hb_size_t _capacity )
 {
     HB_UNUSED( _capacity );
 
@@ -124,9 +124,9 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
-    size_t offset = 0;
+    hb_size_t offset = 0;
 
     if( __hb_script_json_value_dumps( L, _index, _buffer, &offset, _capacity ) == HB_FAILURE )
     {
@@ -141,7 +141,9 @@ hb_result_t hb_script_json_dumps( lua_State * L, int32_t _index, char * _buffer,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t * _value, void * _ud )
+static hb_result_t __hb_json_fields( const char * _key, const hb_json_handle_t * _value, void * _ud );
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_json_arrays( hb_size_t _index, const hb_json_handle_t * _value, void * _ud )
 {
     lua_State * L = (lua_State *)_ud;
 
@@ -162,20 +164,129 @@ static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t 
 
             lua_createtable( L, 0, json_count );
 
-            if( hb_json_object_foreach( _value, &__hb_json_visitor, (void *)L ) == HB_FAILURE )
+            if( hb_json_object_foreach( _value, &__hb_json_fields, (void *)L ) == HB_FAILURE )
             {
                 return HB_FAILURE;
             }
         }break;
     case e_hb_json_array:
         {
-            //ToDo
+            if( hb_json_is_array_empty( _value ) == HB_TRUE )
+            {
+                lua_createtable( L, 0, 0 );
 
-            return HB_FAILURE;
+                return HB_SUCCESSFUL;
+            }
+
+            uint32_t json_count = hb_json_array_count( _value );
+
+            lua_createtable( L, json_count, 0 );
+
+            if( hb_json_array_foreach( _value, &__hb_json_arrays, (void *)L ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
         }break;
     case e_hb_json_string:
         {
-            size_t length;
+            hb_size_t length;
+            const char * value;
+            if( hb_json_to_string( _value, &value, &length ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+
+            lua_pushlstring( L, value, length );
+        }break;
+    case e_hb_json_integer:
+        {
+            int64_t value;
+            if( hb_json_to_int64( _value, &value ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+
+            lua_pushinteger( L, (lua_Integer)value );
+        }break;
+    case e_hb_json_real:
+        {
+            double value;
+            if( hb_json_to_real( _value, &value ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+
+            lua_pushnumber( L, (lua_Number)value );
+        }break;
+    case e_hb_json_true:
+        {
+            lua_pushboolean( L, 1 );
+        }break;
+    case e_hb_json_false:
+        {
+            lua_pushboolean( L, 0 );
+        }break;
+    case e_hb_json_null:
+        {
+            lua_pushnil( L );
+        }break;
+    default:
+        return HB_FAILURE;
+        break;
+    }
+
+    lua_rawseti( L, -2, _index + 1 );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+static hb_result_t __hb_json_fields( const char * _key, const hb_json_handle_t * _value, void * _ud )
+{
+    lua_State * L = (lua_State *)_ud;
+
+    hb_json_type_t json_value_type = hb_json_get_type( _value );
+
+    switch( json_value_type )
+    {
+    case e_hb_json_object:
+        {
+            if( hb_json_is_object_empty( _value ) == HB_TRUE )
+            {
+                lua_createtable( L, 0, 0 );
+
+                return HB_SUCCESSFUL;
+            }
+
+            uint32_t json_count = hb_json_get_fields_count( _value );
+
+            lua_createtable( L, 0, json_count );
+
+            if( hb_json_object_foreach( _value, &__hb_json_fields, (void *)L ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+        }break;
+    case e_hb_json_array:
+        {
+            if( hb_json_is_array_empty( _value ) == HB_TRUE )
+            {
+                lua_createtable( L, 0, 0 );
+
+                return HB_SUCCESSFUL;
+            }
+
+            uint32_t json_count = hb_json_array_count( _value );
+
+            lua_createtable( L, json_count, 0 );
+
+            if( hb_json_array_foreach( _value, &__hb_json_arrays, (void *)L ) == HB_FAILURE )
+            {
+                return HB_FAILURE;
+            }
+        }break;
+    case e_hb_json_string:
+        {
+            hb_size_t length;
             const char * value;
             if( hb_json_to_string( _value, &value, &length ) == HB_FAILURE )
             {
@@ -246,12 +357,12 @@ hb_result_t hb_script_json_loads( lua_State * L, const hb_json_handle_t * _json 
 
     lua_createtable( L, 0, json_count );
 
-    hb_result_t result = hb_json_object_foreach( _json, &__hb_json_visitor, (void *)L );
+    hb_result_t result = hb_json_object_foreach( _json, &__hb_json_fields, (void *)L );
 
     return result;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_loads_data( lua_State * L, const void * _data, size_t _size )
+hb_result_t hb_script_json_loads_data( lua_State * L, const void * _data, hb_size_t _size )
 {
     if( _size == 0 )
     {
@@ -319,7 +430,7 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * 
 
                     lua_createtable( L, 0, json_count );
 
-                    if( hb_json_object_foreach( json_field, &__hb_json_visitor, (void *)L ) == HB_FAILURE )
+                    if( hb_json_object_foreach( json_field, &__hb_json_fields, (void *)L ) == HB_FAILURE )
                     {
                         return HB_FAILURE;
                     }
@@ -327,13 +438,25 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * 
             }break;
         case e_hb_json_array:
             {
-                //ToDo
+                if( hb_json_is_array_empty( json_field ) == HB_TRUE )
+                {
+                    lua_createtable( L, 0, 0 );
 
-                return HB_FAILURE;
+                    return HB_SUCCESSFUL;
+                }
+
+                uint32_t json_count = hb_json_array_count( json_field );
+
+                lua_createtable( L, json_count, 0 );
+
+                if( hb_json_array_foreach( json_field, &__hb_json_arrays, (void *)L ) == HB_FAILURE )
+                {
+                    return HB_FAILURE;
+                }
             }break;
         case e_hb_json_string:
             {
-                size_t length;
+                hb_size_t length;
                 const char * value;
                 if( hb_json_to_string( json_field, &value, &length ) == HB_FAILURE )
                 {
@@ -384,7 +507,7 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_json_load_fields_data( lua_State * L, const void * _data, size_t _size, const char ** _fields, uint32_t _fieldcount )
+hb_result_t hb_script_json_load_fields_data( lua_State * L, const void * _data, hb_size_t _size, const char ** _fields, uint32_t _fieldcount )
 {
     if( _size == 0 )
     {
@@ -415,7 +538,7 @@ hb_result_t hb_script_json_load_fields_data( lua_State * L, const void * _data, 
 hb_result_t hb_script_json_create( lua_State * L, int32_t _index, hb_json_handle_t ** _json )
 {
     char json_data[HB_DATA_MAX_SIZE];
-    size_t json_size;
+    hb_size_t json_size;
     if( hb_script_json_dumps( L, _index, json_data, HB_DATA_MAX_SIZE, &json_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -448,7 +571,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
     }
 
     const char * public_data_symbol;
-    size_t public_data_symbol_length;
+    hb_size_t public_data_symbol_length;
 
     if( hb_db_get_string_value( project_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
@@ -470,7 +593,7 @@ hb_result_t hb_script_json_get_public_data( lua_State * L, int32_t _index, const
 hb_result_t hb_script_json_set_public_data( lua_State * L, int32_t _index, const hb_db_collection_handle_t * _collection, hb_uid_t _uid )
 {
     char json_data[HB_DATA_MAX_SIZE];
-    size_t json_data_size;
+    hb_size_t json_data_size;
     if( hb_script_json_dumps( L, _index, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -506,7 +629,7 @@ hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, co
     }
 
     const char * public_data_symbol;
-    size_t public_data_symbol_length;
+    hb_size_t public_data_symbol_length;
 
     if( hb_db_get_string_value( user_values, 0, &public_data_symbol, &public_data_symbol_length ) == HB_FAILURE )
     {
@@ -533,7 +656,7 @@ hb_result_t hb_script_json_update_public_data( lua_State * L, int32_t _index, co
     }
 
     char json_new_data[HB_DATA_MAX_SIZE];
-    size_t json_new_data_size;
+    hb_size_t json_new_data_size;
     if( hb_json_dumps( json_data, json_new_data, HB_DATA_MAX_SIZE, &json_new_data_size ) == HB_FAILURE )
     {
         return HB_FAILURE;

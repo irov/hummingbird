@@ -3,7 +3,7 @@
 #include "hb_memory/hb_memory.h"
 
 //////////////////////////////////////////////////////////////////////////
-static const size_t HB_VECTORPTR_ELEMENT_SIZE = sizeof( void * );
+static const hb_size_t HB_VECTORPTR_ELEMENT_SIZE = sizeof( void * );
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_vectorptr_t
 {
@@ -46,7 +46,7 @@ uint32_t hb_vectorptr_count( const hb_vectorptr_t * _vector )
     return _vector->count;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_vectorptr_resize( hb_vectorptr_t * _vector, size_t _count )
+hb_result_t hb_vectorptr_resize( hb_vectorptr_t * _vector, hb_size_t _count )
 {
     if( _vector->count >= _count )
     {

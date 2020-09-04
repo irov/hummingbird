@@ -39,7 +39,7 @@ static int __hb_lua_print( lua_State * L )
     for( i = 1; i <= n; i++ )
     {
         const char * s;
-        size_t l;
+        hb_size_t l;
         lua_pushvalue( L, -1 );  /* function to be called */
         lua_pushvalue( L, i );   /* value to print */
         lua_call( L, 1, 1 );
@@ -60,7 +60,7 @@ static int __hb_lua_print( lua_State * L )
 static int __hb_lua_json_dumps( lua_State * L )
 {
     char buffer[HB_DATA_MAX_SIZE];
-    size_t buffer_size;
+    hb_size_t buffer_size;
     if( hb_script_json_dumps( L, -1, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR_INTERNAL_ERROR( L );
@@ -114,7 +114,7 @@ static int __hb_lua_panic( lua_State * L )
     longjmp( handle->panic_jump, 1 );
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_lua_alloc( void * ud, void * ptr, size_t osize, size_t nsize )
+static void * __hb_lua_alloc( void * ud, void * ptr, hb_size_t osize, hb_size_t nsize )
 {
     hb_script_handle_t * handle = (hb_script_handle_t *)ud;
 
@@ -162,7 +162,7 @@ static void __hb_lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_script_load( hb_script_handle_t * _handle, const void * _buffer, size_t _size )
+static hb_result_t __hb_script_load( hb_script_handle_t * _handle, const void * _buffer, hb_size_t _size )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
@@ -232,7 +232,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
 
     hb_db_destroy_values( project_values );
 
-    size_t script_data_size;
+    hb_size_t script_data_size;
     hb_data_t script_data;
     if( hb_storage_get_code( _handle->cache, _handle->db_collection_scripts, &script_sha1, script_data, sizeof( script_data ), &script_data_size ) == HB_FAILURE )
     {
@@ -255,7 +255,7 @@ static hb_result_t __hb_script_load_project( hb_script_handle_t * _handle, hb_ui
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, size_t _memorylimit, size_t _calllimit, hb_uid_t _puid, hb_uid_t _uuid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
+hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_client_handle_t * _db, hb_size_t _memorylimit, hb_size_t _calllimit, hb_uid_t _puid, hb_uid_t _uuid, hb_matching_handle_t * _matching, hb_script_handle_t ** _handle )
 {
     hb_script_handle_t * handle = HB_NEW( hb_script_handle_t );
 
@@ -394,7 +394,7 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
     handle->call_limit = _calllimit;
     lua_sethook( L, &__hb_lua_hook, LUA_MASKCOUNT, 1 );
 
-    size_t memory_used = handle->memory_used;
+    hb_size_t memory_used = handle->memory_used;
     handle->memory_base = memory_used;
     handle->memory_limit = memory_used + _memorylimit;
 
@@ -445,7 +445,7 @@ void hb_script_stat( hb_script_handle_t * _handle, hb_script_stat_t * _stat )
     _stat->call_used = _handle->call_used;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api, const char * _method, const hb_json_handle_t * _json, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
+hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api, const char * _method, const hb_json_handle_t * _json, char * _result, hb_size_t _capacity, hb_size_t * _resultsize, hb_error_code_t * _code )
 {
     if( setjmp( _handle->panic_jump ) == 1 )
     {
@@ -535,7 +535,7 @@ hb_result_t hb_script_api_call( hb_script_handle_t * _handle, const char * _api,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_api_call_data( hb_script_handle_t * _handle, const char * _api, const char * _method, const void * _data, size_t _datasize, char * _result, size_t _capacity, size_t * _resultsize, hb_error_code_t * _code )
+hb_result_t hb_script_api_call_data( hb_script_handle_t * _handle, const char * _api, const char * _method, const void * _data, hb_size_t _datasize, char * _result, hb_size_t _capacity, hb_size_t * _resultsize, hb_error_code_t * _code )
 {
     hb_json_handle_t * json_data;
     if( hb_json_create( _data, _datasize, &json_data ) == HB_FAILURE )

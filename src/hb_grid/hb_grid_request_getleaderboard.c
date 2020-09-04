@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     const char * user_token = _args->arg1;
 
@@ -54,7 +54,7 @@ hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = 0;
+    hb_size_t response_data_size = 0;
     response_data_size += sprintf( _response + response_data_size, "{\"code\":0,\"leaderboard\":[" );
 
     for( uint32_t index = 0; index != out_data.descs_count; ++index )

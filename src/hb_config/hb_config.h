@@ -19,8 +19,9 @@ typedef enum hb_bool_e
 } hb_bool_e;
 
 typedef uint32_t hb_bool_t;
+typedef size_t hb_size_t;
 
-static const size_t HB_UNKNOWN_STRING_SIZE = (~0U);
+static const hb_size_t HB_UNKNOWN_STRING_SIZE = (~0U);
 
 typedef enum hb_result_e
 {
