@@ -441,17 +441,17 @@ hb_result_t hb_script_json_load_fields( lua_State * L, const hb_json_handle_t * 
                 if( hb_json_is_array_empty( json_field ) == HB_TRUE )
                 {
                     lua_createtable( L, 0, 0 );
-
-                    return HB_SUCCESSFUL;
                 }
-
-                uint32_t json_count = hb_json_array_count( json_field );
-
-                lua_createtable( L, json_count, 0 );
-
-                if( hb_json_array_foreach( json_field, &__hb_json_arrays, (void *)L ) == HB_FAILURE )
+                else
                 {
-                    return HB_FAILURE;
+                    uint32_t json_count = hb_json_array_count( json_field );
+
+                    lua_createtable( L, json_count, 0 );
+
+                    if( hb_json_array_foreach( json_field, &__hb_json_arrays, (void *)L ) == HB_FAILURE )
+                    {
+                        return HB_FAILURE;
+                    }
                 }
             }break;
         case e_hb_json_string:
