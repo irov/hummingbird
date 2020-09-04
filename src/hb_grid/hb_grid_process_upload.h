@@ -11,7 +11,7 @@ typedef struct hb_grid_process_upload_in_data_t
     hb_uid_t puid;
 
     hb_source_t script_source;
-    size_t script_source_size;
+    hb_size_t script_source_size;
 } hb_grid_process_upload_in_data_t;
 
 typedef struct hb_grid_process_upload_out_data_t

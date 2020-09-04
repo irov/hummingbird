@@ -40,8 +40,8 @@ typedef struct hb_matching_room_handle_t
     hb_matching_desc_t desc;
 
     hb_matching_user_handle_t * users;
-    size_t users_count;
-    size_t users_capacity;
+    hb_size_t users_count;
+    hb_size_t users_capacity;
 } hb_matching_room_handle_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_matching_handle_t
@@ -69,7 +69,7 @@ void hb_matching_destroy( hb_matching_handle_t * _matching )
     HB_DELETE( _matching );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, size_t _datasize, hb_bool_t * _exist )
+hb_result_t hb_matching_room_create( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, hb_size_t _namesize, const hb_matching_desc_t * _desc, const void * _data, hb_size_t _datasize, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
@@ -156,7 +156,7 @@ static int32_t __matching_user_cmp( const void * _left, const void * _right )
     return user_left->rating - user_right->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, size_t _namesize, hb_uid_t _uuid, uint32_t _rating, const void * _data, size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
+hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, hb_size_t _namesize, hb_uid_t _uuid, uint32_t _rating, const void * _data, hb_size_t _datasize, hb_bool_t * _exist, hb_matching_complete_func_t _complete, void * _ud )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
@@ -442,7 +442,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, size_t _namesize, hb_uid_t _uuid, hb_bool_t * _exist, hb_uid_t * _auid )
+hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, hb_size_t _namesize, hb_uid_t _uuid, hb_bool_t * _exist, hb_uid_t * _auid )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
@@ -517,7 +517,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, size_t _namesize, hb_uid_t _uuid, hb_uid_t _auid, hb_bool_t * _exist )
+hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_client_handle_t * _client, hb_uid_t _puid, const char * _name, hb_size_t _namesize, hb_uid_t _uuid, hb_uid_t _auid, hb_bool_t * _exist )
 {
     hb_db_collection_handle_t * db_collection_matching;
     if( hb_db_get_project_collection( _client, _puid, "matching", &db_collection_matching ) == HB_FAILURE )
@@ -618,7 +618,7 @@ int32_t hb_matching_user_get_rating( const hb_matching_user_handle_t * _user )
     return _user->rating;
 }
 //////////////////////////////////////////////////////////////////////////
-const void * hb_matching_user_get_public_data( const hb_matching_user_handle_t * _user, size_t * _size )
+const void * hb_matching_user_get_public_data( const hb_matching_user_handle_t * _user, hb_size_t * _size )
 {
     const void * data = hb_array_data( _user->public_data, _size );
 

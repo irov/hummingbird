@@ -38,7 +38,7 @@ static hb_result_t __hb_matching_complete( const hb_matching_complete_desc_t * _
         lua_pushinteger( L, user_rating );
         lua_rawseti( L, -2, 2 );
 
-        size_t user_public_data_size;
+        hb_size_t user_public_data_size;
         const void * user_public_data = hb_matching_user_get_public_data( user, &user_public_data_size );
 
         if( hb_script_json_loads_data( L, user_public_data, user_public_data_size ) == HB_FAILURE )
@@ -77,12 +77,12 @@ int hb_script_server_JoinMatching( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    size_t name_len;
+    hb_size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
     lua_Integer rating = lua_tointegerx( L, 2, HB_NULLPTR );
 
     char json_data[HB_DATA_MAX_SIZE];
-    size_t json_data_size;
+    hb_size_t json_data_size;
     if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR_INTERNAL_ERROR( L );

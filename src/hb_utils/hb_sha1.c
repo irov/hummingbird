@@ -85,7 +85,7 @@ static void __hb_sha1_process( uint32_t * result, uint32_t * w )
     result[4] += e;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_sha1( const void * _buffer, const size_t _size, hb_sha1_t * _sha1 )
+void hb_sha1( const void * _buffer, const hb_size_t _size, hb_sha1_t * _sha1 )
 {
     uint32_t result[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0};
 

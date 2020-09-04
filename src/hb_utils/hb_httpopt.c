@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-hb_result_t hb_httpopt( const char * _http, size_t _size, const char * _name, const char ** _value, size_t * _valuesize )
+hb_result_t hb_httpopt( const char * _http, hb_size_t _size, const char * _name, const char ** _value, hb_size_t * _valuesize )
 {
     const char * base = _http;
 
@@ -12,7 +12,7 @@ hb_result_t hb_httpopt( const char * _http, size_t _size, const char * _name, co
         const char * chr_amp = strchr( base, '&' );
 
         const char * chr_equal_name = base;
-        size_t chr_equal_name_size = chr_equal - base;
+        hb_size_t chr_equal_name_size = chr_equal - base;
 
         if( chr_amp == HB_NULLPTR )
         {

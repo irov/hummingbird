@@ -3,6 +3,6 @@
 
 #include "hb_config/hb_config.h"
 
-hb_result_t hb_file_read( const char * _path, void * _buffer, size_t _capacity, size_t * _size );
+hb_result_t hb_file_read( const char * _path, void * _buffer, hb_size_t _capacity, hb_size_t * _size );
 
 #endif

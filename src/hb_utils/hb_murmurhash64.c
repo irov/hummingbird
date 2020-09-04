@@ -3,7 +3,7 @@
 /*
  * Wiki: https://en.wikipedia.org/wiki/MurmurHash
  */
-uint64_t hb_murmurhash64( const void * _data, size_t _size )
+uint64_t hb_murmurhash64( const void * _data, hb_size_t _size )
 {
     const uint64_t m = 0xc6a4a7935bd1e995;
     const uint64_t n = 0x248bab1ccf968043;

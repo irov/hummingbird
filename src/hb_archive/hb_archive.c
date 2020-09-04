@@ -6,14 +6,14 @@
 #include "lz4hc.h"
 
 //////////////////////////////////////////////////////////////////////////
-size_t hb_archive_bound( size_t _size )
+hb_size_t hb_archive_bound( hb_size_t _size )
 {
     int32_t size = LZ4_compressBound( (int)_size );
 
-    return (size_t)size;
+    return (hb_size_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_archive_compress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _compressSize )
+hb_result_t hb_archive_compress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * _compressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
@@ -31,12 +31,12 @@ hb_result_t hb_archive_compress( void * _buffer, size_t _capacity, const void * 
         return HB_FAILURE;
     }
 
-    *_compressSize = (size_t)compressSize;
+    *_compressSize = (hb_size_t)compressSize;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_archive_decompress( void * _buffer, size_t _capacity, const void * _source, size_t _size, size_t * _decompressSize )
+hb_result_t hb_archive_decompress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * _decompressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
@@ -52,7 +52,7 @@ hb_result_t hb_archive_decompress( void * _buffer, size_t _capacity, const void 
         return HB_FAILURE;
     }
 
-    *_decompressSize = (size_t)decompressSize;
+    *_decompressSize = (hb_size_t)decompressSize;
 
     return HB_SUCCESSFUL;
 }

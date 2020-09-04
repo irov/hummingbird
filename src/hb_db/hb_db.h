@@ -38,26 +38,26 @@ void hb_db_destroy_values( hb_db_values_handle_t * _values );
 
 void hb_db_copy_values( hb_db_values_handle_t * _values, const hb_db_values_handle_t * _source );
 
-void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_uid_t _value );
-void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value );
-void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int64_t _value );
-void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const char * _string, size_t _stringlength );
-void hb_db_make_binary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const void * _buffer, size_t _bufferlength );
-void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_time_t _time );
-void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, const hb_sha1_t * _sha1 );
+void hb_db_make_uid_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, hb_uid_t _value );
+void hb_db_make_int32_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, int32_t _value );
+void hb_db_make_int64_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, int64_t _value );
+void hb_db_make_string_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, const char * _string, hb_size_t _stringlength );
+void hb_db_make_binary_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, const void * _buffer, hb_size_t _bufferlength );
+void hb_db_make_time_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, hb_time_t _time );
+void hb_db_make_sha1_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, const hb_sha1_t * _sha1 );
 
-void hb_db_inc_int32_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, int32_t _value );
+void hb_db_inc_int32_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, int32_t _value );
 
-hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const char * _field, size_t _fieldlength, hb_db_values_handle_t ** _dictionary );
+hb_result_t hb_db_make_dictionary_value( hb_db_values_handle_t * _values, const char * _field, hb_size_t _fieldlength, hb_db_values_handle_t ** _dictionary );
 
 hb_result_t hb_db_get_uid_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_uid_t * _value );
 hb_result_t hb_db_get_int32_value( const hb_db_values_handle_t * _values, uint32_t _index, int32_t * _value );
 hb_result_t hb_db_get_uint32_value( const hb_db_values_handle_t * _values, uint32_t _index, uint32_t * _value );
 hb_result_t hb_db_get_int64_value( const hb_db_values_handle_t * _values, uint32_t _index, int64_t * _value );
-hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, size_t * _length );
-hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint32_t _index, char * _value, size_t _capacity );
-hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, const void ** _buffer, size_t * _length );
-hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, size_t _capacity );
+hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint32_t _index, const char ** _value, hb_size_t * _length );
+hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint32_t _index, char * _value, hb_size_t _capacity );
+hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, const void ** _buffer, hb_size_t * _length );
+hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, hb_size_t _capacity );
 hb_result_t hb_db_get_time_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_time_t * _value );
 hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, const hb_json_handle_t ** _value );
 
@@ -86,12 +86,12 @@ hb_result_t hb_db_update_values_by_name( const hb_db_client_handle_t * _client, 
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const hb_sha1_t * _sha1, const void * _code, size_t _codesize, const char * _source, size_t _sourcesize );
+hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _collection, const hb_sha1_t * _sha1, const void * _code, hb_size_t _codesize, const char * _source, hb_size_t _sourcesize );
 
 typedef struct hb_db_script_handle_t hb_db_script_handle_t;
 
 hb_result_t hb_db_load_script( const hb_db_collection_handle_t * _collection, const hb_byte_t * _sha1, hb_db_script_handle_t ** _script );
-const hb_byte_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, size_t * _size );
+const hb_byte_t * hb_db_get_script_data( const hb_db_script_handle_t * _script, hb_size_t * _size );
 
 void hb_db_close_script( hb_db_script_handle_t * _data );
 

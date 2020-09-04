@@ -84,7 +84,7 @@ void hb_economics_destroy( hb_economics_handle_t * _handle )
     HB_DELETE( _handle );
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_economics_new_bank( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, const void * _data, size_t _datasize, hb_uid_t * _buid )
+hb_result_t hb_economics_new_bank( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, hb_uid_t _uuid, const void * _data, hb_size_t _datasize, hb_uid_t * _buid )
 {
     HB_UNUSED( _handle );
 
@@ -110,7 +110,7 @@ hb_result_t hb_economics_new_bank( hb_economics_handle_t * _handle, const hb_db_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, const void * _data, size_t _datasize )
+hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_db_client_handle_t * _client, hb_uid_t _puid, const void * _data, hb_size_t _datasize )
 {
     HB_UNUSED( _handle );
 
@@ -140,7 +140,7 @@ hb_result_t hb_economics_new_records( hb_economics_handle_t * _handle, const hb_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-static hb_result_t __hb_json_visitor( const char * _key, const hb_json_handle_t * _value, void * _ud )
+static hb_result_t __hb_json_vocabulary( const char * _key, const hb_json_handle_t * _value, void * _ud )
 {
     hb_economics_records_vocabulary_handle_t * handle = (hb_economics_records_vocabulary_handle_t *)_ud;
 
@@ -251,7 +251,7 @@ static hb_result_t __hb_economics_cache_records_vocabulary( hb_economics_handle_
     }
 
     const void * data;
-    size_t datasize;
+    hb_size_t datasize;
     if( hb_db_get_binary_value( fields_values, 0, &data, &datasize ) == HB_FAILURE )
     {
         return HB_FAILURE;
@@ -276,7 +276,7 @@ static hb_result_t __hb_economics_cache_records_vocabulary( hb_economics_handle_
 
     new_records_handle->mutex = mutex;
 
-    if( hb_json_object_foreach( json_data, &__hb_json_visitor, new_records_handle ) == HB_FAILURE )
+    if( hb_json_object_foreach( json_data, &__hb_json_vocabulary, new_records_handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

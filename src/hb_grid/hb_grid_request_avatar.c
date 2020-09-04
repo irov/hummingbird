@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     const char * arg_user_token = _args->arg1;
     const char * arg_method = _args->arg2;
@@ -39,7 +39,7 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
 
     if( out_data.code != HB_ERROR_OK )
     {
-        size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+        hb_size_t response_data_size = sprintf( _response, "{\"code\":%u}"
             , out_data.code
         );
 
@@ -48,7 +48,7 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
         return HTTP_OK;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"data\":%.*s,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+    hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"data\":%.*s,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
         , (int)out_data.response_size
         , out_data.response_data
         , out_data.memory_used

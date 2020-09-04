@@ -11,14 +11,14 @@ int hb_script_server_CreateProjectEntity( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    size_t name_len;
+    hb_size_t name_len;
     const char * name = lua_tolstring( L, 1, &name_len );
 
-    size_t parent_len;
+    hb_size_t parent_len;
     const char * parent = lua_tolstring( L, 2, &parent_len );
 
     char json_data[HB_DATA_MAX_SIZE];
-    size_t json_data_size;
+    hb_size_t json_data_size;
     if( hb_script_json_dumps( L, 3, json_data, HB_DATA_MAX_SIZE, &json_data_size ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR_INTERNAL_ERROR( L );

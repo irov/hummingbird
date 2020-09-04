@@ -15,7 +15,7 @@ int hb_script_server_SelectProjectEntity( lua_State * L )
 {
     hb_script_handle_t * script_handle = *(hb_script_handle_t **)lua_getextraspace( L );
 
-    size_t parent_len;
+    hb_size_t parent_len;
     const char * parent = lua_tolstring( L, 1, &parent_len );
 
     lua_Integer limit = lua_tointeger( L, 2 );

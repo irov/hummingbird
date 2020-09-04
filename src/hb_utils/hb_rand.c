@@ -26,11 +26,11 @@ uint32_t hb_rand_time()
     return r;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_rand_hex_generate( const char * _vocabulary, size_t _count, char * _hex, size_t _size )
+void hb_rand_hex_generate( const char * _vocabulary, hb_size_t _count, char * _hex, hb_size_t _size )
 {
     uint32_t rand = hb_rand_time();
 
-    for( size_t index = 0; index != _size; ++index )
+    for( hb_size_t index = 0; index != _size; ++index )
     {
         uint32_t element = rand % (uint32_t)_count;
 

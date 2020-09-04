@@ -11,7 +11,7 @@ typedef struct hb_grid_process_neweconomicsrecords_in_data_t
     hb_uid_t puid;
 
     hb_source_t records_source;
-    size_t records_source_size;
+    hb_size_t records_source_size;
 } hb_grid_process_neweconomicsrecords_in_data_t;
 
 typedef struct hb_grid_process_neweconomicsrecords_out_data_t

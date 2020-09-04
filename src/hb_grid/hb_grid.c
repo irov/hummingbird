@@ -68,7 +68,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     hb_http_code_t response_code = HTTP_OK;
 
-    size_t response_data_size = 2;
+    hb_size_t response_data_size = 2;
     char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
@@ -116,7 +116,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             }
 
             char json_string[HB_DATA_MAX_SIZE];
-            size_t json_string_size;
+            hb_size_t json_string_size;
             if( hb_json_dumps( json_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
             {
                 evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
@@ -213,7 +213,7 @@ static void __hb_ev_thread_base( void * _ud )
     evhttp_free( http_server );
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_memory_alloc( size_t _size, void * _ud )
+static void * __hb_memory_alloc( hb_size_t _size, void * _ud )
 {
     HB_UNUSED( _ud );
 
@@ -222,7 +222,7 @@ static void * __hb_memory_alloc( size_t _size, void * _ud )
     return ptr;
 }
 //////////////////////////////////////////////////////////////////////////
-static void * __hb_memory_realloc( void * _ptr, size_t _size, void * _ud )
+static void * __hb_memory_realloc( void * _ptr, hb_size_t _size, void * _ud )
 {
     HB_UNUSED( _ud );
 

@@ -28,7 +28,7 @@ hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multip
 
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
 
-    size_t multipart_length = evbuffer_get_length( input_buffer );
+    hb_size_t multipart_length = evbuffer_get_length( input_buffer );
 
     if( multipart_length + 1 > HB_DATA_MAX_SIZE )
     {
@@ -49,11 +49,11 @@ hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multip
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _buffer, size_t _capacity, size_t * _size )
+hb_result_t hb_http_get_request_data( struct evhttp_request * _request, void * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
 
-    size_t multipart_length = evbuffer_get_length( input_buffer );
+    hb_size_t multipart_length = evbuffer_get_length( input_buffer );
 
     if( multipart_length + 1 > _capacity )
     {
@@ -101,7 +101,7 @@ hb_result_t hb_http_get_request_json( struct evhttp_request * _request, hb_json_
     }
 
     hb_data_t data;
-    size_t data_size;
+    hb_size_t data_size;
     if( hb_http_get_request_data( _request, data, HB_DATA_MAX_SIZE, &data_size ) == HB_FAILURE )
     {
         return HB_FAILURE;

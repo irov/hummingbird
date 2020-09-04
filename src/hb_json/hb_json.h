@@ -5,12 +5,13 @@
 
 typedef struct hb_json_handle_t hb_json_handle_t;
 
-hb_result_t hb_json_create( const void * _data, size_t _size, hb_json_handle_t ** _handle );
+hb_result_t hb_json_create( const void * _data, hb_size_t _size, hb_json_handle_t ** _handle );
 void hb_json_destroy( const hb_json_handle_t * _handle );
 
 hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle );
 
 hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle );
+hb_bool_t hb_json_is_array_empty( const hb_json_handle_t * _handle );
 hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle );
 
 uint32_t hb_json_array_count( const hb_json_handle_t * _handle );
@@ -32,7 +33,7 @@ hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _k
 hb_result_t hb_json_get_field_required( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result );
 uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle );
-hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, size_t * _size );
+hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size );
 hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * _value );
 hb_result_t hb_json_to_int32( const hb_json_handle_t * _handle, int32_t * _value );
 hb_result_t hb_json_to_int64( const hb_json_handle_t * _handle, int64_t * _value );
@@ -41,9 +42,9 @@ hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * _val
 hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * _value );
 hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value );
 
-hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, size_t * _size, const char * _default );
-hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, const char * _default );
-hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, size_t _capacity, hb_bool_t * _result );
+hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default );
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default );
+hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, hb_bool_t * _result );
 hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default );
 hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _key, int32_t * _value, int32_t _default );
 hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default );
@@ -56,9 +57,12 @@ hb_result_t hb_json_get_field_uint32_required( hb_json_handle_t * _handle, const
 hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, hb_bool_t * _result );
 
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update );
-hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, size_t _capacity, size_t * _size );
+hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * _size );
 
 typedef hb_result_t(*hb_json_object_visitor_t)(const char * _key, const hb_json_handle_t * _value, void * _ud);
 hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_object_visitor_t _visitor, void * _ud );
+
+typedef hb_result_t( *hb_json_array_visitor_t )(hb_size_t _index, const hb_json_handle_t * _value, void * _ud);
+hb_result_t hb_json_array_foreach( const hb_json_handle_t * _handle, hb_json_array_visitor_t _visitor, void * _ud );
 
 #endif

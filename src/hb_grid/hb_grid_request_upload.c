@@ -12,7 +12,7 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
     const char * account_token = _args->arg1;
     const char * puid = _args->arg2;
@@ -35,7 +35,7 @@ hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid
         return HTTP_BADREQUEST;
     }
 
-    size_t params_data_size;
+    hb_size_t params_data_size;
     const void * params_data;
     if( hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size ) == HB_FAILURE )
     {
@@ -56,7 +56,7 @@ hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid
         return HTTP_BADREQUEST;
     }
 
-    size_t response_data_size = sprintf( _response, "{\"code\":0,\"revision\":%" SCNu32 "}", out_data.revision );
+    hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"revision\":%" SCNu32 "}", out_data.revision );
 
     *_size = response_data_size;
 
