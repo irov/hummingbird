@@ -38,8 +38,15 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
         return HTTP_BADREQUEST;
     }
 
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+
     hb_grid_process_script_api_out_data_t out_data;
-    if( hb_grid_process_script_api( _process, &in_data, &out_data ) == HB_FAILURE )
+    hb_result_t result = hb_grid_process_script_api( _process, &in_data, &out_data );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -64,7 +71,7 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
         , out_data.call_used
     );
 
-    *_size = response_data_size;
+    *_size = response_data_size;    
 
     return HTTP_OK;
 }

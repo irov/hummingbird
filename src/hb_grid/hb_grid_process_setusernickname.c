@@ -8,17 +8,6 @@ hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process
 {
     HB_UNUSED( _out );
 
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_user_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     hb_db_values_handle_t * values_update;
     if( hb_db_create_values( &values_update ) == HB_FAILURE )
     {
@@ -27,7 +16,7 @@ hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process
 
     hb_db_make_string_value( values_update, "info_nickname", HB_UNKNOWN_STRING_SIZE, _in->nickname, HB_UNKNOWN_STRING_SIZE );
 
-    if( hb_db_update_values_by_name( _process->db_client, token_handle.puid, "users", token_handle.uuid, values_update ) == HB_FAILURE )
+    if( hb_db_update_values_by_name( _process->db_client, _in->puid, "users", _in->uuid, values_update ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

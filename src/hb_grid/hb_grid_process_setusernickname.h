@@ -7,7 +7,8 @@
 
 typedef struct hb_grid_process_setusernickname_in_data_t
 {
-    hb_token_t token;
+    hb_uid_t uuid;
+    hb_uid_t puid;
 
     char nickname[32];
 } hb_grid_process_setusernickname_in_data_t;

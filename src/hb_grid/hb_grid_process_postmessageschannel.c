@@ -14,25 +14,14 @@
 
 hb_result_t hb_grid_process_postmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_postmessageschannel_in_data_t * _in, hb_grid_process_postmessageschannel_out_data_t * _out )
 {
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_user_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     hb_messages_post_t post;
-    post.uuid = token_handle.uuid;
+    post.uuid = _in->uuid;
     post.message = _in->message;
     post.metainfo = _in->metainfo;
 
     uint32_t postid;
     hb_error_code_t code;
-    if( hb_messages_channel_new_post( _process->messages, _process->db_client, token_handle.puid, _in->cuid, &post, &postid, &code ) == HB_FAILURE )
+    if( hb_messages_channel_new_post( _process->messages, _process->db_client, _in->puid, _in->cuid, &post, &postid, &code ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

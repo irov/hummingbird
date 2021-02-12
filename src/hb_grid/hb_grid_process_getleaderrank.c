@@ -9,20 +9,9 @@ hb_result_t hb_grid_process_getleaderrank( hb_grid_process_handle_t * _process, 
 {
     HB_UNUSED( _out );
 
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_user_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     uint32_t rank;
     hb_bool_t exist;
-    if( hb_leaderboard_get_rank( _process->cache, token_handle.puid, token_handle.uuid, &rank, &exist ) == HB_FAILURE )
+    if( hb_leaderboard_get_rank( _process->cache, _in->puid, _in->uuid, &rank, &exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

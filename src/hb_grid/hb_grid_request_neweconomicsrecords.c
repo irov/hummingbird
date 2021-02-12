@@ -12,16 +12,20 @@
 
 hb_http_code_t hb_grid_request_neweconomicsrecords( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
-    const char * account_token = _args->arg1;
-    const char * puid = _args->arg2;
+    const char * arg_account_token = _args->arg1;
+    const char * arg_puid = _args->arg2;
 
-    hb_grid_process_neweconomicsrecords_in_data_t in_data;
-    if( hb_token_base16_decode_string( account_token, &in_data.token ) == HB_FAILURE )
+    hb_account_token_t token_handle;
+    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
-        return HTTP_BADREQUEST;
+        return HB_FAILURE;
     }
 
-    if( hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    hb_grid_process_neweconomicsrecords_in_data_t in_data;
+
+    in_data.auid = token_handle.auid;
+
+    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -33,9 +37,16 @@ hb_http_code_t hb_grid_request_neweconomicsrecords( struct evhttp_request * _req
         return HTTP_BADREQUEST;
     }
 
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+
     hb_size_t params_data_size;
     const void * params_data;
-    if( hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size ) == HB_FAILURE )
+    hb_result_t result = hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
