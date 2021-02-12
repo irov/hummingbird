@@ -7,7 +7,8 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_process_getmessageschannel_in_data_t
 {
-    hb_token_t token;    
+    hb_uid_t uuid;
+    hb_uid_t puid;
     hb_uid_t cuid;
     uint32_t postid;
 } hb_grid_process_getmessageschannel_in_data_t;

@@ -8,7 +8,8 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_process_getleaderboard_in_data_t
 {
-    hb_token_t token;
+    hb_uid_t uuid;
+    hb_uid_t puid;
 
     uint32_t begin;
     uint32_t end;

@@ -7,7 +7,7 @@
 
 typedef struct hb_grid_process_neweconomicsrecords_in_data_t
 {
-    hb_token_t token;
+    hb_uid_t auid;
     hb_uid_t puid;
 
     hb_source_t records_source;

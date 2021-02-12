@@ -7,7 +7,7 @@
 
 typedef struct hb_grid_process_newproject_in_data_t
 {
-    hb_token_t token;
+    hb_uid_t auid;
 } hb_grid_process_newproject_in_data_t;
 
 typedef struct hb_grid_process_newproject_out_data_t

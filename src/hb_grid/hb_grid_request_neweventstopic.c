@@ -56,8 +56,15 @@ hb_http_code_t hb_grid_request_neweventstopic( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+
     hb_uid_t tuid;
-    if( hb_events_new_topic( _process->events, _process->db_client, puid, name, delay, &tuid ) == HB_FAILURE )
+    hb_result_t result = hb_events_new_topic( _process->events, _process->db_client, puid, name, delay, &tuid );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

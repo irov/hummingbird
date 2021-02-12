@@ -17,19 +17,6 @@
 
 hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const hb_grid_process_upload_in_data_t * _in, hb_grid_process_upload_out_data_t * _out )
 {
-    HB_UNUSED( _process );
-
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_account_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     hb_size_t code_size;
     hb_data_t code_buffer;
     if( hb_script_compiler( _in->script_source, _in->script_source_size, code_buffer, HB_DATA_MAX_SIZE, &code_size ) == HB_FAILURE )
@@ -64,7 +51,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     }
 
     hb_db_make_uid_value( values_project_found, "_id", HB_UNKNOWN_STRING_SIZE, _in->puid );
-    hb_db_make_uid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, token_handle.auid );    
+    hb_db_make_uid_value( values_project_found, "aoid", HB_UNKNOWN_STRING_SIZE, _in->auid );    
 
     hb_uid_t project_uid;
     hb_bool_t project_exist;

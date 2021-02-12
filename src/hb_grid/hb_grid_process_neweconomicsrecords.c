@@ -16,17 +16,6 @@ hb_result_t hb_grid_process_neweconomicsrecords( hb_grid_process_handle_t * _pro
 {
     HB_UNUSED( _out );
 
-    if( hb_cache_expire_value( _process->cache, _in->token.value, sizeof( _in->token ), 1800 ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
-    hb_account_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, _in->token.value, sizeof( _in->token ), &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
-    {
-        return HB_FAILURE;
-    }
-
     if( hb_economics_new_records( _process->economics, _process->db_client, _in->puid, _in->records_source, _in->records_source_size ) == HB_FAILURE )
     {
         return HB_FAILURE;

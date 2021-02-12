@@ -14,16 +14,19 @@
 
 hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
-    const char * account_token = _args->arg1;
-    const char * puid = _args->arg2;
+    const char * arg_account_token = _args->arg1;
+    const char * arg_puid = _args->arg2;
 
-    hb_grid_process_upload_in_data_t in_data;
-    if( hb_token_base16_decode_string( account_token, &in_data.token ) == HB_FAILURE )
+    hb_account_token_t token_handle;
+    if( hb_cache_get_value( _process->cache, arg_account_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
-        return HTTP_BADREQUEST;
+        return HB_FAILURE;
     }
 
-    if( hb_base16_decode( puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    hb_grid_process_upload_in_data_t in_data;
+    in_data.auid = token_handle.auid;
+
+    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -50,8 +53,15 @@ hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid
     memcpy( in_data.script_source, params_data, params_data_size );
     in_data.script_source_size = params_data_size;
 
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+
     hb_grid_process_upload_out_data_t out_data;
-    if( hb_grid_process_upload( _process, &in_data, &out_data ) == HB_FAILURE )
+    hb_result_t result = hb_grid_process_upload( _process, &in_data, &out_data );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

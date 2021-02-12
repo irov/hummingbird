@@ -9,6 +9,7 @@
 #include "hb_events/hb_events.h"
 #include "hb_economics/hb_economics.h"
 #include "hb_cache/hb_cache.h"
+#include "hb_mutex/hb_mutex.h"
 
 #include "evhttp.h"
 #include "event2/thread.h"
@@ -28,6 +29,11 @@ typedef struct hb_grid_config_t
     uint16_t log_port;
 } hb_grid_config_t;
 
+typedef struct hb_grid_mutex_handle_t
+{
+    hb_mutex_handle_t * mutex;
+} hb_grid_mutex_handle_t;
+
 typedef struct hb_grid_process_handle_t
 {
     char grid_uri[128];
@@ -45,6 +51,9 @@ typedef struct hb_grid_process_handle_t
     hb_messages_handle_t * messages;
     hb_events_handle_t * events;
     hb_economics_handle_t * economics;
+
+    hb_grid_mutex_handle_t * mutex_handles;
+    uint32_t mutex_count;
 
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;

@@ -270,6 +270,7 @@ int main( int _argc, char * _argv[] )
     hb_grid_config_t * config = HB_NEW( hb_grid_config_t );
 
     uint32_t max_thread = 16;
+    uint32_t factor_mutex = 4;
 
     char grid_uri[128];
     strcpy( grid_uri, "127.0.0.1" );
@@ -297,6 +298,7 @@ int main( int _argc, char * _argv[] )
         }
 
         hb_json_get_field_uint32( json_handle, "max_thread", &max_thread, max_thread );
+        hb_json_get_field_uint32( json_handle, "factor_mutex", &factor_mutex, factor_mutex );
         hb_json_copy_field_string( json_handle, "grid_uri", grid_uri, 128, grid_uri );
         hb_json_get_field_uint16( json_handle, "grid_port", &grid_port, grid_port );
 
@@ -403,6 +405,18 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    hb_grid_mutex_handle_t * mutex_handles = HB_NEWN( hb_grid_mutex_handle_t, max_thread );
+
+    for( uint32_t i = 0; i != max_thread * factor_mutex; ++i )
+    {
+        hb_grid_mutex_handle_t * mutex_handle = mutex_handles + i;
+
+        if( hb_mutex_create( &mutex_handle->mutex ) == HB_FAILURE )
+        {
+            return EXIT_FAILURE;
+        }
+    }
+
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
 
     evutil_socket_t ev_socket = -1;
@@ -421,6 +435,9 @@ int main( int _argc, char * _argv[] )
         process_handle->messages = messages;
         process_handle->events = events;
         process_handle->economics = economics;
+
+        process_handle->mutex_handles = mutex_handles;
+        process_handle->mutex_count = max_thread * factor_mutex;
 
         process_handle->cache = HB_NULLPTR;
         process_handle->thread = HB_NULLPTR;
@@ -462,6 +479,14 @@ int main( int _argc, char * _argv[] )
             hb_thread_join( process_handle->thread );
         }
     }
+
+    for( uint32_t i = 0; i != max_thread * factor_mutex; ++i )
+    {
+        hb_grid_mutex_handle_t * mutex_handle = mutex_handles + i;
+
+        hb_mutex_destroy( mutex_handle->mutex );
+    }
+
 
     for( uint32_t i = 0; i != max_thread; ++i )
     {

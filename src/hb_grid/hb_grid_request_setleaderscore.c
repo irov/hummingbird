@@ -12,14 +12,17 @@
 
 hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
 {
-    const char * user_token = _args->arg1;
+    const char * arg_user_token = _args->arg1;
+
+    hb_user_token_t token_handle;
+    if( hb_cache_get_value( _process->cache, arg_user_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
 
     hb_grid_process_setleaderscore_in_data_t in_data;
-
-    if( hb_token_base16_decode_string( user_token, &in_data.token ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
+    in_data.uuid = token_handle.uuid;
+    in_data.puid = token_handle.puid;
 
     hb_bool_t required_successful = HB_TRUE;
 
@@ -43,8 +46,15 @@ hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.uuid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+
     hb_grid_process_setleaderscore_out_data_t out_data;
-    if( hb_grid_process_setleadscore( _process, &in_data, &out_data ) == HB_FAILURE )
+    hb_result_t result = hb_grid_process_setleadscore( _process, &in_data, &out_data );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

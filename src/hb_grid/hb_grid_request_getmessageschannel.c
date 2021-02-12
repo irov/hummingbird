@@ -14,11 +14,20 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
 {
     HB_UNUSED( _request );
 
-    const char * user_token = _args->arg1;
+    const char * arg_user_token = _args->arg1;
+
+    hb_user_token_t token_handle;
+    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_bool_t required_successful = HB_TRUE;
 
     hb_grid_process_getmessageschannel_in_data_t in_data;
 
-    hb_bool_t required_successful = HB_TRUE;
+    in_data.puid = token_handle.puid;
+    in_data.uuid = token_handle.uuid;
 
     {
         hb_json_handle_t * json_handle;
@@ -45,13 +54,15 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
         return HTTP_BADREQUEST;
     }
 
-    if( hb_token_base16_decode_string( user_token, &in_data.token ) == HB_FAILURE )
-    {
-        return HTTP_BADREQUEST;
-    }
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.uuid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
 
     hb_grid_process_getmessageschannel_out_data_t out_data;
-    if( hb_grid_process_getmessageschannel( _process, &in_data, &out_data ) == HB_FAILURE )
+    hb_result_t result = hb_grid_process_getmessageschannel( _process, &in_data, &out_data );
+
+    hb_mutex_unlock( mutex_handle->mutex );
+
+    if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
