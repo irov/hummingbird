@@ -40,6 +40,7 @@ typedef struct hb_grid_process_handle_t
     ev_uint16_t grid_port;
 
     evutil_socket_t * ev_socket;
+    hb_mutex_handle_t * mutex_ev_socket;
 
     hb_thread_handle_t * thread;
     hb_db_handle_t * db;

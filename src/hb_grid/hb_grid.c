@@ -194,10 +194,11 @@ static void __hb_ev_thread_base( void * _ud )
 
     evhttp_set_gencb( http_server, &__hb_grid_request, handle );
 
+    hb_mutex_lock( handle->mutex_ev_socket );
+
     if( *handle->ev_socket == -1 )
     {
         struct evhttp_bound_socket * bound_socket = evhttp_bind_socket_with_handle( http_server, handle->grid_uri, handle->grid_port );
-        HB_UNUSED( bound_socket );
 
         *handle->ev_socket = evhttp_bound_socket_get_fd( bound_socket );
     }
@@ -205,6 +206,8 @@ static void __hb_ev_thread_base( void * _ud )
     {
         evhttp_accept_socket( http_server, *handle->ev_socket );
     }
+
+    hb_mutex_unlock( handle->mutex_ev_socket );
 
     event_base_dispatch( base );
 
@@ -405,9 +408,11 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    hb_grid_mutex_handle_t * mutex_handles = HB_NEWN( hb_grid_mutex_handle_t, max_thread );
+    uint32_t mutex_handles_count = max_thread * factor_mutex;
 
-    for( uint32_t i = 0; i != max_thread * factor_mutex; ++i )
+    hb_grid_mutex_handle_t * mutex_handles = HB_NEWN( hb_grid_mutex_handle_t, mutex_handles_count );
+
+    for( uint32_t i = 0; i != mutex_handles_count; ++i )
     {
         hb_grid_mutex_handle_t * mutex_handle = mutex_handles + i;
 
@@ -415,6 +420,13 @@ int main( int _argc, char * _argv[] )
         {
             return EXIT_FAILURE;
         }
+    }
+
+    hb_mutex_handle_t * mutex_ev_socket;
+
+    if( hb_mutex_create( &mutex_ev_socket ) == HB_FAILURE )
+    {
+        return EXIT_FAILURE;
     }
 
     hb_grid_process_handle_t * process_handles = HB_NEWN( hb_grid_process_handle_t, max_thread );
@@ -428,6 +440,7 @@ int main( int _argc, char * _argv[] )
         process_handle->grid_port = grid_port;
 
         process_handle->ev_socket = &ev_socket;
+        process_handle->mutex_ev_socket = mutex_ev_socket;
 
         process_handle->db = db;
         process_handle->config = config;
@@ -464,11 +477,11 @@ int main( int _argc, char * _argv[] )
 
             continue;
         }
-
-        hb_sleep( 100 ); //hack
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "ready.." );
+
+    HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
     for( uint32_t i = 0; i != max_thread; ++i )
     {
@@ -479,8 +492,11 @@ int main( int _argc, char * _argv[] )
             hb_thread_join( process_handle->thread );
         }
     }
+        
+    hb_mutex_destroy( mutex_ev_socket );
+    mutex_ev_socket = HB_NULLPTR;
 
-    for( uint32_t i = 0; i != max_thread * factor_mutex; ++i )
+    for( uint32_t i = 0; i != mutex_handles_count; ++i )
     {
         hb_grid_mutex_handle_t * mutex_handle = mutex_handles + i;
 

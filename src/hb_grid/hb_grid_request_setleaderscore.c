@@ -15,7 +15,7 @@ hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request,
     const char * arg_user_token = _args->arg1;
 
     hb_user_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, arg_user_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
