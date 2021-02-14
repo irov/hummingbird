@@ -18,7 +18,7 @@ hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid
     const char * arg_puid = _args->arg2;
 
     hb_account_token_t token_handle;
-    if( hb_cache_get_value( _process->cache, arg_account_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
