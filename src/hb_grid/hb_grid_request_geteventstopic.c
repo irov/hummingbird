@@ -14,8 +14,8 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
 {
     const char * arg_user_token = _args->arg1;
 
-    hb_user_token_t token_handle;
-    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    hb_user_token_t user_token;
+    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -50,14 +50,13 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.uuid % _process->mutex_count;
-    hb_mutex_lock( mutex_handle->mutex );
+    hb_grid_process_lock( _process, user_token.uuid );
 
     hb_events_topic_t topic;
     hb_error_code_t code;
-    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, token_handle.puid, tuid, &topic, &code );
+    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, user_token.puid, tuid, &topic, &code );
 
-    hb_mutex_unlock( mutex_handle->mutex );
+    hb_grid_process_unlock( _process, user_token.uuid );
 
     if( result == HB_FAILURE )
     {

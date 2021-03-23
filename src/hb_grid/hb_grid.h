@@ -66,4 +66,7 @@ typedef struct hb_grid_process_cmd_args_t
     char arg3[128];
 } hb_grid_process_cmd_args_t;
 
+void hb_grid_process_lock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
+void hb_grid_process_unlock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
+
 #endif

@@ -241,6 +241,18 @@ static void __hb_memory_free( const void * _ptr, void * _ud )
     free( (void *)_ptr );
 }
 //////////////////////////////////////////////////////////////////////////
+void hb_grid_process_lock( hb_grid_process_handle_t * _process, hb_uid_t _uuid )
+{
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + _uuid % _process->mutex_count;
+    hb_mutex_lock( mutex_handle->mutex );
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_grid_process_unlock( hb_grid_process_handle_t * _process, hb_uid_t _uuid )
+{
+    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + _uuid % _process->mutex_count;
+    hb_mutex_unlock( mutex_handle->mutex );
+}
+//////////////////////////////////////////////////////////////////////////
 int main( int _argc, char * _argv[] )
 {
     HB_UNUSED( _argc );
@@ -492,7 +504,7 @@ int main( int _argc, char * _argv[] )
             hb_thread_join( process_handle->thread );
         }
     }
-        
+
     hb_mutex_destroy( mutex_ev_socket );
     mutex_ev_socket = HB_NULLPTR;
 

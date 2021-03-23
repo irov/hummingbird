@@ -13,22 +13,21 @@ hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_
 
     const char * arg_account_token = _args->arg1;
 
-    hb_account_token_t token_handle;
-    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &token_handle, sizeof( token_handle ), HB_NULLPTR ) == HB_FAILURE )
+    hb_account_token_t account_token;
+    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_grid_process_newproject_in_data_t in_data;
-    in_data.auid = token_handle.auid;
+    in_data.auid = account_token.auid;
 
-    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
-    hb_mutex_lock( mutex_handle->mutex );
+    hb_grid_process_lock( _process, account_token.auid );
 
     hb_grid_process_newproject_out_data_t out_data;
     hb_result_t result = hb_grid_process_newproject( _process, &in_data, &out_data );
 
-    hb_mutex_unlock( mutex_handle->mutex );
+    hb_grid_process_unlock( _process, account_token.auid );
 
     if( result == HB_FAILURE )
     {
