@@ -12,15 +12,15 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
     const char * arg_user_token = _args->arg1;
     const char * arg_method = _args->arg2;
 
-    hb_user_token_t token_handle;
-    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &token_handle, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
+    hb_user_token_t user_token;
+    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_grid_process_script_api_in_data_t in_data;
-    in_data.puid = token_handle.puid;
-    in_data.uuid = token_handle.uuid;
+    in_data.puid = user_token.puid;
+    in_data.uuid = user_token.uuid;
     strcpy( in_data.api, "avatar" );
     strcpy( in_data.method, arg_method );
 
@@ -29,13 +29,12 @@ hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.uuid % _process->mutex_count;
-    hb_mutex_lock( mutex_handle->mutex );
+    hb_grid_process_lock( _process, user_token.uuid );
 
     hb_grid_process_script_api_out_data_t out_data;
     hb_result_t result = hb_grid_process_script_api( _process, &in_data, &out_data );
 
-    hb_mutex_unlock( mutex_handle->mutex );
+    hb_grid_process_unlock( _process, user_token.uuid );
 
     if( result == HB_FAILURE )
     {

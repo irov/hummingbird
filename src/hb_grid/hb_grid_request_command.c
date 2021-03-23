@@ -14,8 +14,8 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
     const char * arg_puid = _args->arg2;
     const char * arg_method = _args->arg3;
 
-    hb_account_token_t token_handle;
-    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &token_handle, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
+    hb_account_token_t account_token;
+    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &account_token, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -38,13 +38,12 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_mutex_handle_t * mutex_handle = _process->mutex_handles + token_handle.auid % _process->mutex_count;
-    hb_mutex_lock( mutex_handle->mutex );
+    hb_grid_process_lock( _process, account_token.auid );
 
     hb_grid_process_script_api_out_data_t out_data;
     hb_result_t result = hb_grid_process_script_api( _process, &in_data, &out_data );
 
-    hb_mutex_unlock( mutex_handle->mutex );
+    hb_grid_process_unlock( _process, account_token.auid );
 
     if( result == HB_FAILURE )
     {

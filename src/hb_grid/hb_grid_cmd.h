@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_cmd_inittab_t
 {
-    char * name;
+    const char * name;
     hb_http_code_t(*request)(struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd);
     int32_t args;
 } hb_grid_cmd_inittab_t;
