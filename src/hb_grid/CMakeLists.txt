@@ -2,8 +2,10 @@ PROJECT(hb_grid C)
 
 ADD_FILTER(
 src
-	hb_grid.h
-	hb_grid.c
+    main.c
+
+    hb_grid.h
+    hb_grid.c
     hb_grid_cmd.h
 )
 
