@@ -253,7 +253,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-#ifdef WIN32
+#ifdef HB_PLATFORM_WINDOWS
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
@@ -530,7 +530,7 @@ int main( int _argc, char * _argv[] )
 
     HB_DELETE( config );
 
-#ifdef WIN32
+#ifdef HB_PLATFORM_WINDOWS
     WSACleanup();
 #endif
 
