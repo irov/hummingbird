@@ -24,7 +24,7 @@ hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multip
     const char * content_type_boundary = hb_strstre( content_type, "boundary=" );
 
     char boundary[64];
-    int boundary_size = sprintf( boundary, "--%s", content_type_boundary );
+    int32_t boundary_size = sprintf( boundary, "--%s", content_type_boundary );
 
     struct evbuffer * input_buffer = evhttp_request_get_input_buffer( _request );
 

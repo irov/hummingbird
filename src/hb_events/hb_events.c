@@ -235,7 +235,7 @@ hb_result_t hb_events_get_topic( hb_events_handle_t * _handle, const hb_cache_ha
     }
 
     char data[HB_DATA_MAX_SIZE] = { 0 };
-    int data_len = sprintf( data, "{\"name\":\"%s\",\"index\":%u}"
+    int32_t data_len = sprintf( data, "{\"name\":\"%s\",\"index\":%u}"
         , topic_handle->name
         , index
     );

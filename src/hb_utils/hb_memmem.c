@@ -26,7 +26,7 @@ const void * hb_memmem( const void * _buffer, hb_size_t _size, const void * _sub
 
     while( _size > step + _subsize )
     {
-        int r = memcmp( carriage, _subbuffer, _subsize );
+        int32_t r = memcmp( carriage, _subbuffer, _subsize );
 
         if( r == 0 )
         {
@@ -55,7 +55,7 @@ const void * hb_memmeme( const void * _buffer, hb_size_t _size, const void * _su
 
     while( _size > step + _subsize )
     {
-        int r = memcmp( carriage, _subbuffer, _subsize );
+        int32_t r = memcmp( carriage, _subbuffer, _subsize );
 
         if( r == 0 )
         {

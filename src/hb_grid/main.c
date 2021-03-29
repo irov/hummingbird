@@ -73,7 +73,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     char cmd_name[128];
 
     hb_grid_process_cmd_args_t cmd_args;
-    int count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd_name, cmd_args.arg1, cmd_args.arg2, cmd_args.arg3 );
+    int32_t count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd_name, cmd_args.arg1, cmd_args.arg2, cmd_args.arg3 );
 
     if( count == 0 )
     {
@@ -257,7 +257,7 @@ int main( int _argc, char * _argv[] )
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
-    int err = WSAStartup( wVersionRequested, &wsaData );
+    int32_t err = WSAStartup( wVersionRequested, &wsaData );
 
     if( err != 0 )
     {
