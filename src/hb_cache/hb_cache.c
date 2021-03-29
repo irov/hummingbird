@@ -26,7 +26,7 @@ typedef struct hb_cache_handle_t
     redisContext * context;
 } hb_cache_handle_t;
 //////////////////////////////////////////////////////////////////////////
-static const char * __hb_redis_reply_str( int _type )
+static const char * __hb_redis_reply_str( int32_t _type )
 {
     const char * reply_str[15] = {"unknown", "string", "array", "integer", "nil", "status", "error", "double", "bool", "map", "set", "attr", "push", "bignum", "verb"};
 

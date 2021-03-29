@@ -52,7 +52,7 @@ hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_
     }
 
     hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"pid\":\"%.*s\"}"
-        , (int)sizeof( uid16 )
+        , (int32_t)sizeof( uid16 )
         , uid16.value
     );
 

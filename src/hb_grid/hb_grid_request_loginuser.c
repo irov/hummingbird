@@ -109,7 +109,7 @@ hb_http_code_t hb_grid_request_loginuser( struct evhttp_request * _request, hb_g
 
     hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"token\":\"%.*s\", \"user_data_revision\":%d,\"user_data\":%s,\"project_data_revision\":%u,\"project_data\":%s,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
         , out_data.uuid
-        , (int)sizeof( token16 )
+        , (int32_t)sizeof( token16 )
         , token16.value
         , in_data.user_public_data_revision != out_data.user_public_data_revision ? out_data.user_public_data_revision : -1
         , in_data.user_public_data_revision != out_data.user_public_data_revision ? out_data.user_public_data : "{}"

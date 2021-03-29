@@ -31,9 +31,9 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level
     char message[2048];
 
 #ifdef HB_DEBUG
-    int message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"file\":\"%s\", \"line\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _file, _line, _message );
+    int32_t message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"file\":\"%s\", \"line\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _file, _line, _message );
 #else
-    int message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
+    int32_t message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
 #endif
 
     bufferevent_write( g_log_tcp_handle->bev_cnn, message, message_size );
@@ -47,7 +47,7 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
-    int err = WSAStartup( wVersionRequested, &wsaData );
+    int32_t err = WSAStartup( wVersionRequested, &wsaData );
 
     if( err != 0 )
     {
@@ -76,7 +76,7 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     struct event_base * base = event_base_new();
     struct bufferevent * bev_cnn = bufferevent_socket_new( base, -1, BEV_OPT_CLOSE_ON_FREE );
 
-    int error_connect = bufferevent_socket_connect( bev_cnn, (const struct sockaddr *) & sin, sizeof( sin ) );
+    int32_t error_connect = bufferevent_socket_connect( bev_cnn, (const struct sockaddr *) & sin, sizeof( sin ) );
 
     if( error_connect != 0 )
     {
