@@ -10,6 +10,14 @@ void hb_sha1_copy( hb_sha1_t * _dst, const hb_sha1_t * _src )
 //////////////////////////////////////////////////////////////////////////
 #define HB_SHA1_ROLL( value, steps ) ((value << steps) | (value >> (32 - steps)))
 //////////////////////////////////////////////////////////////////////////
+#define HB_SHA1_ABCDE(func, value) \
+	{const uint32_t t = HB_SHA1_ROLL(a, 5) + (func) + value + e + w[round]; \
+	e = d; \
+	d = c; \
+	c = HB_SHA1_ROLL(b, 30); \
+	b = a; \
+	a = t;}
+//////////////////////////////////////////////////////////////////////////
 static inline void __hb_sha1_clear( uint32_t * _buffer )
 {
     for( uint32_t
@@ -32,51 +40,39 @@ static void __hb_sha1_process( uint32_t * result, uint32_t * w )
 
     int32_t round = 0;
 
-#define HB_SHA1_ABCDE(func, value) \
-						{ \
-                const uint32_t t = HB_SHA1_ROLL(a, 5) + (func) + value + e + w[round]; \
-				e = d; \
-				d = c; \
-				c = HB_SHA1_ROLL(b, 30); \
-				b = a; \
-				a = t; \
-						}
-
-    while( round < 16 )
+    while( round != 16 )
     {
-        HB_SHA1_ABCDE( (b & c) | (~b & d), 0x5a827999 )
-            ++round;
+        HB_SHA1_ABCDE( (b & c) | (~b & d), 0x5a827999 );
+        ++round;
     }
 
-    while( round < 20 )
+    while( round != 20 )
     {
         w[round] = HB_SHA1_ROLL( (w[round - 3] ^ w[round - 8] ^ w[round - 14] ^ w[round - 16]), 1 );
-        HB_SHA1_ABCDE( (b & c) | (~b & d), 0x5a827999 )
-            ++round;
+        HB_SHA1_ABCDE( (b & c) | (~b & d), 0x5a827999 );
+        ++round;
     }
 
-    while( round < 40 )
+    while( round != 40 )
     {
         w[round] = HB_SHA1_ROLL( (w[round - 3] ^ w[round - 8] ^ w[round - 14] ^ w[round - 16]), 1 );
-        HB_SHA1_ABCDE( b ^ c ^ d, 0x6ed9eba1 )
-            ++round;
+        HB_SHA1_ABCDE( b ^ c ^ d, 0x6ed9eba1 );
+        ++round;
     }
 
-    while( round < 60 )
+    while( round != 60 )
     {
         w[round] = HB_SHA1_ROLL( (w[round - 3] ^ w[round - 8] ^ w[round - 14] ^ w[round - 16]), 1 );
-        HB_SHA1_ABCDE( (b & c) | (b & d) | (c & d), 0x8f1bbcdc )
-            ++round;
+        HB_SHA1_ABCDE( (b & c) | (b & d) | (c & d), 0x8f1bbcdc );
+        ++round;
     }
 
-    while( round < 80 )
+    while( round != 80 )
     {
         w[round] = HB_SHA1_ROLL( (w[round - 3] ^ w[round - 8] ^ w[round - 14] ^ w[round - 16]), 1 );
-        HB_SHA1_ABCDE( b ^ c ^ d, 0xca62c1d6 )
-            ++round;
+        HB_SHA1_ABCDE( b ^ c ^ d, 0xca62c1d6 );
+        ++round;
     }
-
-#undef HB_SHA1_ABCDE
 
     result[0] += a;
     result[1] += b;
@@ -93,7 +89,7 @@ void hb_sha1( const void * _buffer, const hb_size_t _size, hb_sha1_t * _sha1 )
 
     uint32_t w[80];
 
-    const int32_t endOfFullBlocks = _size - 64;
+    int32_t endOfFullBlocks = _size - 64;
     int32_t endCurrentBlock;
     int32_t currentBlock = 0;
 
@@ -103,10 +99,12 @@ void hb_sha1( const void * _buffer, const hb_size_t _size, hb_sha1_t * _sha1 )
 
         for( int32_t roundPos = 0; currentBlock < endCurrentBlock; currentBlock += 4 )
         {
-            w[roundPos++] = (uint32_t)sarray[currentBlock + 3]
-                | (((uint32_t)sarray[currentBlock + 2]) << 8)
-                | (((uint32_t)sarray[currentBlock + 1]) << 16)
-                | (((uint32_t)sarray[currentBlock]) << 24);
+            uint32_t w0 = ((uint32_t)sarray[currentBlock + 0]) << 24;
+            uint32_t w1 = ((uint32_t)sarray[currentBlock + 1]) << 16;
+            uint32_t w2 = ((uint32_t)sarray[currentBlock + 2]) << 8;
+            uint32_t w3 = ((uint32_t)sarray[currentBlock + 3]) << 0;
+
+            w[roundPos++] = w0 | w1 | w2 | w3;
         }
 
         __hb_sha1_process( result, w );
@@ -116,9 +114,9 @@ void hb_sha1( const void * _buffer, const hb_size_t _size, hb_sha1_t * _sha1 )
 
     __hb_sha1_clear( w );
 
-    int lastBlockBytes = 0;
+    int32_t lastBlockBytes = 0;
 
-    for( ; lastBlockBytes < endCurrentBlock; ++lastBlockBytes )
+    for( ; lastBlockBytes != endCurrentBlock; ++lastBlockBytes )
     {
         w[lastBlockBytes >> 2] |= (uint32_t)sarray[lastBlockBytes + currentBlock] << ((3 - (lastBlockBytes & 3)) << 3);
     }

@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////////////////////////
 hb_size_t hb_archive_bound( hb_size_t _size )
 {
-    int32_t size = LZ4_compressBound( (int)_size );
+    int32_t size = LZ4_compressBound( (int32_t)_size );
 
     return (hb_size_t)size;
 }
@@ -18,9 +18,9 @@ hb_result_t hb_archive_compress( void * _buffer, hb_size_t _capacity, const void
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
 
-    int compress_method = LZ4HC_CLEVEL_MAX;
+    int32_t compress_method = LZ4HC_CLEVEL_MAX;
 
-    int compressSize = LZ4_compress_HC( src_buffer, dst_buffer, (int32_t)_size, (int32_t)_capacity, compress_method );
+    int32_t compressSize = LZ4_compress_HC( src_buffer, dst_buffer, (int32_t)_size, (int32_t)_capacity, compress_method );
 
     if( compressSize < 0 )
     {
@@ -41,7 +41,7 @@ hb_result_t hb_archive_decompress( void * _buffer, hb_size_t _capacity, const vo
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
 
-    int decompressSize = LZ4_decompress_safe( src_buffer, dst_buffer, (int32_t)_size, (int32_t)_capacity );
+    int32_t decompressSize = LZ4_decompress_safe( src_buffer, dst_buffer, (int32_t)_size, (int32_t)_capacity );
 
     if( decompressSize < 0 )
     {

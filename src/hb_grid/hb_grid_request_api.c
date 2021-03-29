@@ -55,7 +55,7 @@ hb_http_code_t hb_grid_request_api( struct evhttp_request * _request, hb_grid_pr
     }
 
     hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"data\":%.*s,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
-        , (int)out_data.response_size
+        , (int32_t)out_data.response_size
         , out_data.response_data
         , out_data.memory_used
         , out_data.call_used

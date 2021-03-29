@@ -26,7 +26,7 @@ typedef struct hb_log_service_observer_desc_t
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_handle_t
 {
-    int32_t observer_count;
+    uint32_t observer_count;
     hb_log_service_observer_desc_t observers[HB_LOG_MAX_OBSERVER];
 
     hb_mutex_handle_t * mutex;
@@ -88,7 +88,7 @@ hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_remove_observer( hb_log_observer_t _observer, void ** _ud )
 {
-    for( int i = 0; i != HB_LOG_MAX_OBSERVER; ++i )
+    for( int32_t i = 0; i != HB_LOG_MAX_OBSERVER; ++i )
     {
         hb_log_service_observer_desc_t * desc = g_log_service_handle->observers + i;
 
@@ -112,9 +112,9 @@ hb_result_t hb_log_remove_observer( hb_log_observer_t _observer, void ** _ud )
 //////////////////////////////////////////////////////////////////////////
 static void __hb_log_message_args( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message )
 {
-    int count = g_log_service_handle->observer_count;
+    uint32_t count = g_log_service_handle->observer_count;
 
-    for( int i = 0; i != count; ++i )
+    for( uint32_t i = 0; i != count; ++i )
     {
         hb_log_service_observer_desc_t * desc = g_log_service_handle->observers + i;
 
@@ -138,7 +138,7 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
     va_start( args, _format );
 
     char message[HB_LOG_MAX_MESSAGE_SIZE];
-    int n = vsprintf( message, _format, args );
+    int32_t n = vsprintf( message, _format, args );
 
     va_end( args );
 
