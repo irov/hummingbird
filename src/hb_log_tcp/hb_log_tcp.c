@@ -43,7 +43,7 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 {
-#ifdef WIN32
+#ifdef HB_PLATFORM_WINDOWS
     const WORD wVersionRequested = MAKEWORD( 2, 2 );
 
     WSADATA wsaData;
@@ -57,14 +57,13 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 
     struct hostent * h = gethostbyname( _url );
 
-    if( !h )
+    if( h == HB_NULLPTR )
     {
         return HB_FAILURE;
     }
 
     if( h->h_addrtype != AF_INET )
     {
-        fprintf( stderr, "No ipv4 support, sorry." );
         return HB_FAILURE;
     }
 
@@ -76,9 +75,7 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     struct event_base * base = event_base_new();
     struct bufferevent * bev_cnn = bufferevent_socket_new( base, -1, BEV_OPT_CLOSE_ON_FREE );
 
-    int error_connect = bufferevent_socket_connect( bev_cnn, (const struct sockaddr *) & sin, sizeof( sin ) );
-
-    if( error_connect != 0 )
+    if( bufferevent_socket_connect( bev_cnn, (const struct sockaddr *)&sin, sizeof( sin ) ) == -1 )
     {
         bufferevent_free( bev_cnn );
         event_base_free( base );
@@ -117,7 +114,8 @@ void hb_log_tcp_finalize()
         g_log_tcp_handle = HB_NULLPTR;
     }
 
-#ifdef WIN32
+#ifdef HB_PLATFORM_WINDOWS
     WSACleanup();
 #endif
 }
+//////////////////////////////////////////////////////////////////////////
