@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 if test -f "/usr/local/bin/cmake"; then
     CMAKE=/usr/local/bin/cmake
