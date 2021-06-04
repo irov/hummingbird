@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sh ./make_solution_xcode.sh Debug
+sh ./make_solution.sh Debug

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sh ./make_solution_xcode.sh Release
+sh ./make_solution.sh Release
