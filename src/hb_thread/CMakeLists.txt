@@ -1,16 +1,9 @@
 PROJECT(hb_thread C)
 
-IF(WIN32)
+IF(HUMMINGBIRD_TARGET_WIN32)
     SET(hb_thread_platform hb_thread_win32.c)
     set(hb_thread_platform_extra_lib)
-ELSEIF(UNIX AND NOT ANDROID)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-    
-    set(hb_thread_platform_extra_lib Threads::Threads)
-
-    SET(hb_thread_platform hb_thread_pthread.c)
-ELSEIF(APPLE AND NOT IOS)
+ELSEIF(HUMMINGBIRD_TARGET_UNIX OR HUMMINGBIRD_TARGET_OSX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     
