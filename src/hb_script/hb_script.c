@@ -6,7 +6,6 @@
 #include "hb_log/hb_log.h"
 #include "hb_storage/hb_storage.h"
 
-#include <malloc.h>
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -138,13 +137,13 @@ static void * __hb_lua_alloc( void * ud, void * ptr, hb_size_t osize, hb_size_t 
 
     if( nsize == 0 )
     {
-        free( ptr );
+        HB_FREE( ptr );
 
         return HB_NULLPTR;
     }
     else
     {
-        void * nptr = realloc( ptr, nsize );
+        void * nptr = HB_REALLOC( ptr, nsize );
 
         return nptr;
     }
