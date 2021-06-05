@@ -336,6 +336,7 @@ int main( int _argc, char * _argv[] )
         if( hb_log_file_initialize( config->log_file ) == HB_FAILURE )
         {
             HB_LOG_MESSAGE_WARNING( "grid", "grid '%s' invalid initialize [log] file '%s'"
+                , config->name
                 , config->log_file
             );
         }
@@ -346,6 +347,7 @@ int main( int _argc, char * _argv[] )
         if( hb_log_tcp_initialize( config->log_uri, config->log_port ) == HB_FAILURE )
         {
             HB_LOG_MESSAGE_WARNING( "grid", "grid '%s' invalid initialize [log] uri '%s'"
+                , config->name
                 , config->log_uri
             );
         }
