@@ -18,6 +18,8 @@
 #include <WinSock2.h>
 #elif defined(HB_PLATFORM_LINUX)
 #include <sys/time.h>
+#elif defined(HB_PLATFORM_OSX)
+#include <sys/time.h>
 #endif
 
 //////////////////////////////////////////////////////////////////////////
