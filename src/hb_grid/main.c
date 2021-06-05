@@ -286,6 +286,21 @@ int main( int _argc, char * _argv[] )
     strcpy( config->log_uri, "127.0.0.1" );
     config->log_port = 5044;
 
+#ifndef HB_DEBUG
+    strcpy( config->log_file, "" );
+#else
+    hb_date_t date;
+    hb_date( &date );
+
+    sprintf( config->log_file, "log_grid_%u_%u_%u_%u_%u_%u.log"
+        , date.year
+        , date.mon
+        , date.mday
+        , date.hour
+        , date.min
+        , date.sec );
+#endif
+
     if( config_file != HB_NULLPTR )
     {
         hb_json_handle_t * json_handle;
@@ -309,30 +324,32 @@ int main( int _argc, char * _argv[] )
         hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );
         hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, 128, config->db_uri );
         hb_json_get_field_uint16( json_handle, "db_port", &config->db_port, config->db_port );
+        hb_json_copy_field_string( json_handle, "log_file", config->log_file, HB_MAX_PATH, config->log_file );
         hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, 128, config->log_uri );
         hb_json_get_field_uint16( json_handle, "log_port", &config->log_port, config->log_port );
 
         hb_json_destroy( json_handle );
     }
 
-#ifdef HB_DEBUG
-    hb_date_t date;
-    hb_date( &date );
-
-    char logfile[HB_MAX_PATH];
-    sprintf( logfile, "log_grid_%u_%u_%u_%u_%u_%u.log"
-        , date.year
-        , date.mon
-        , date.mday
-        , date.hour
-        , date.min
-        , date.sec );
-
-    if( hb_log_file_initialize( logfile ) == HB_FAILURE )
+    if( strcmp( config->log_file, "" ) != 0 )
     {
-        return EXIT_FAILURE;
+        if( hb_log_file_initialize( config->log_file ) == HB_FAILURE )
+        {
+            HB_LOG_MESSAGE_WARNING( "grid", "grid '%s' invalid initialize [log] file '%s'"
+                , config->log_file
+            );
+        }
     }
-#endif
+
+    if( strcmp( config->log_uri, "" ) != 0 )
+    {
+        if( hb_log_tcp_initialize( config->log_uri, config->log_port ) == HB_FAILURE )
+        {
+            HB_LOG_MESSAGE_WARNING( "grid", "grid '%s' invalid initialize [log] uri '%s'"
+                , config->log_uri
+            );
+        }
+    }
 
     HB_LOG_MESSAGE_INFO( "grid", "start grid with config:" );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
@@ -348,11 +365,6 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
-
-    if( hb_log_tcp_initialize( config->log_uri, config->log_port ) == HB_FAILURE )
-    {
-        return EXIT_FAILURE;
-    }
 
     hb_db_handle_t * db;
     if( hb_db_initialze( config->db_uri, config->db_port, &db ) == HB_FAILURE )

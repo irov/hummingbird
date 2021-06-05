@@ -25,6 +25,8 @@ typedef struct hb_grid_config_t
     char db_uri[128];
     uint16_t db_port;
 
+    char log_file[HB_MAX_PATH];
+
     char log_uri[128];
     uint16_t log_port;
 } hb_grid_config_t;
