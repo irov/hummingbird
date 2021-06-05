@@ -74,7 +74,7 @@ if(HUMMINGBIRD_DEPENDENCE_LIBEVENT)
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/libevent/include/event2/event-config.h"
-        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/libevent/install/event2/event-config.h"
+        "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/libevent/install/event2/event-config.h"
         COPYONLY
     )    
 endif()
@@ -107,25 +107,25 @@ if(HUMMINGBIRD_DEPENDENCE_MONGO)
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libmongoc/src/mongoc/mongoc-config.h"
-        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/mongoc/mongoc-config.h"
+        "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/mongo/install/mongoc/mongoc-config.h"
         COPYONLY
     )    
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libmongoc/src/mongoc/mongoc-version.h"
-        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/mongoc/mongoc-version.h"
+        "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/mongo/install/mongoc/mongoc-version.h"
         COPYONLY
     )    
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libbson/src/bson/bson-config.h"
-        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/bson/bson-config.h"
+        "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/mongo/install/bson/bson-config.h"
         COPYONLY
     )
     
     configure_file(
         "${HUMMINGBIRD_DEPENDENCIES_TEMP_DIRECTORY}/mongo/src/libbson/src/bson/bson-version.h"
-        "${HUMMINGBIRD_DEPENDENCIES_LIBRARY_DIRECTORY}/mongo/install/bson/bson-version.h"
+        "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/mongo/install/bson/bson-version.h"
         COPYONLY
     )
 endif()
