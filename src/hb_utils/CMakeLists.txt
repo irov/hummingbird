@@ -6,13 +6,15 @@ IF(WIN32)
 ELSEIF(UNIX AND NOT ANDROID)
     SET(hb_time_platform hb_time_unix.c)
     SET(hb_sleep_platform hb_sleep_unix.c)
+ELSEIF(APPLE AND NOT IOS)
+    SET(hb_time_platform hb_time_macos.c)
+    SET(hb_sleep_platform hb_sleep_macos.c)
 ENDIF()
-
 
 ADD_FILTER(
 src
-	hb_sha1.h
-	hb_sha1.c
+....hb_sha1.h
+....hb_sha1.c
     
     hb_rand.h
     hb_rand.c
@@ -35,8 +37,8 @@ src
     hb_multipart.h
     hb_multipart.c
 
-	hb_strstre.h
-	hb_strstre.c
+....hb_strstre.h
+....hb_strstre.c
     
     hb_time.h
     ${hb_time_platform}

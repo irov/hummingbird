@@ -108,6 +108,13 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #   define HB_PLATFORM_WINDOWS
 #elif defined(__linux__) && !defined(__ANDROID__)
 #   define HB_PLATFORM_LINUX
+#elif defined(__APPLE__)
+#   include "TargetConditionals.h"
+#   if TARGET_OS_OSX
+#       define HB_PLATFORM_OSX
+#   else
+#       error "unsuport apple platform"
+#   endif
 #else
 #   error "undefine platform"
 #endif

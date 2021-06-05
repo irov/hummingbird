@@ -1,7 +1,5 @@
 #include "hb_memory.h"
 
-#include <malloc.h>
-
 //////////////////////////////////////////////////////////////////////////
 static hb_memory_alloc_t g_alloc = HB_NULLPTR;
 static hb_memory_realloc_t g_realloc = HB_NULLPTR;
