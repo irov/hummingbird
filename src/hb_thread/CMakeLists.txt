@@ -9,13 +9,20 @@ ELSEIF(UNIX AND NOT ANDROID)
     
     set(hb_thread_platform_extra_lib Threads::Threads)
 
-    SET(hb_thread_platform hb_thread_unix.c)
+    SET(hb_thread_platform hb_thread_pthread.c)
+ELSEIF(APPLE AND NOT IOS)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    
+    set(hb_thread_platform_extra_lib Threads::Threads)
+
+    SET(hb_thread_platform hb_thread_pthread.c)
 ENDIF()
 
 ADD_FILTER(
 src
-	hb_thread.h
-	${hb_thread_platform}
+....hb_thread.h
+....${hb_thread_platform}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
