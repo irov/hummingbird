@@ -21,8 +21,8 @@ ENDIF()
 
 ADD_FILTER(
 src
-....hb_thread.h
-....${hb_thread_platform}
+    hb_thread.h
+    ${hb_thread_platform}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})

@@ -13,8 +13,8 @@ ENDIF()
 
 ADD_FILTER(
 src
-....hb_sha1.h
-....hb_sha1.c
+    hb_sha1.h
+    hb_sha1.c
     
     hb_rand.h
     hb_rand.c
@@ -37,8 +37,8 @@ src
     hb_multipart.h
     hb_multipart.c
 
-....hb_strstre.h
-....hb_strstre.c
+    hb_strstre.c
+    hb_strstre.h
     
     hb_time.h
     ${hb_time_platform}

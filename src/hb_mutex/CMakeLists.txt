@@ -21,8 +21,8 @@ ENDIF()
 
 ADD_FILTER(
 src
-....hb_mutex.h
-....${hb_mutex_platform}
+    hb_mutex.h
+    ${hb_mutex_platform}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
