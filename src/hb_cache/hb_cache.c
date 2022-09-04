@@ -52,7 +52,7 @@ hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeou
 
     if( c->err != REDIS_OK )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "connect url:'%s' port: %u get error [%s:%d]"
+        HB_LOG_MESSAGE_ERROR( "cache", "connect radis url:'%s' port: %u get error [%s:%d]"
             , _uri
             , _port
             , c->errstr
@@ -62,12 +62,22 @@ hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeou
         return HB_FAILURE;
     }
 
+    HB_LOG_MESSAGE_INFO( "cache", "connect radis url:'%s' port: %u successful"
+        , _uri
+        , _port
+    );
+
     if( redisEnableKeepAlive( c ) != REDIS_OK )
     {
         redisFree( c );
 
         return HB_FAILURE;
     }
+
+    HB_LOG_MESSAGE_INFO( "cache", "enable keep alive radis url:'%s' port: %u successful"
+        , _uri
+        , _port
+    );
 
     hb_cache_handle_t * handle = HB_NEW( hb_cache_handle_t );
     handle->context = c;
