@@ -8,7 +8,7 @@
 #include <string.h>
 
 #ifndef HB_SCRIPT_SELECT_USER_ENTITY_MAX
-#define HB_SCRIPT_SELECT_USER_ENTITY_MAX 32
+#define HB_SCRIPT_SELECT_USER_ENTITY_MAX 512
 #endif
 
 int hb_script_server_SelectUserEntity( lua_State * L )
@@ -18,22 +18,9 @@ int hb_script_server_SelectUserEntity( lua_State * L )
     hb_size_t parent_len;
     const char * parent = lua_tolstring( L, 1, &parent_len );
 
-    lua_Integer limit = lua_tointeger( L, 2 );
-
     if( parent_len == 0 )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
-    }
-
-    if( limit < 0 )
-    {
-        limit = HB_SCRIPT_SELECT_USER_ENTITY_MAX;
-    }
-    else if( limit > HB_SCRIPT_SELECT_USER_ENTITY_MAX )
-    {
-        HB_SCRIPT_ERROR( L, "limit max %u"
-            , HB_SCRIPT_SELECT_USER_ENTITY_MAX
-        );
     }
 
     hb_db_values_handle_t * query;
@@ -50,7 +37,7 @@ int hb_script_server_SelectUserEntity( lua_State * L )
 
     uint32_t exists = 0;
     hb_db_values_handle_t * values[HB_SCRIPT_SELECT_USER_ENTITY_MAX];
-    if( hb_db_select_values( script_handle->db_collection_user_entities, query, db_fields, 1, values, (uint32_t)limit, &exists ) == HB_FAILURE )
+    if( hb_db_select_values( script_handle->db_collection_user_entities, query, db_fields, 1, values, HB_SCRIPT_SELECT_USER_ENTITY_MAX, &exists ) == HB_FAILURE )
     {
         HB_SCRIPT_ERROR( L, "internal error" );
     }
