@@ -19,17 +19,7 @@ if (UNIX)
 endif ()
 
 # Set some nicer output dirs.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(JANSSON_TEMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/tmp)
-
-# Give the debug version a different postfix for windows,
-# so both the debug and release version can be built in the
-# same build-tree on Windows (MSVC).
-if (WIN32 AND NOT CMAKE_DEBUG_POSTFIX)
-   set(CMAKE_DEBUG_POSTFIX "_d")
-endif()
+set(JANSSON_TEMP_DIR ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/jansson/tmp)
 
 # This is how I thought it should go
 # set (JANSSON_VERSION "2.3.1")
