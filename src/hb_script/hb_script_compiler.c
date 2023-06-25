@@ -60,7 +60,7 @@ hb_result_t hb_script_compiler( const char * _source, hb_size_t _size, void * _c
         return HB_FAILURE;
     }
 
-    TValue * o = s2v( L->top - 1 );
+    TValue * o = s2v( L->top.p - 1 );
     const Proto * f = getproto( o );
 
     hb_script_writer_desc_t desc;
