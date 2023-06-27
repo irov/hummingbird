@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_file_read( const char * _path, void * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
     FILE * f = fopen( _path, "rb" );
@@ -36,10 +37,39 @@ hb_result_t hb_file_read( const char * _path, void * _buffer, hb_size_t _capacit
 
     fclose( f );
 
+    if( r != 1 )
+    {
+        HB_LOG_MESSAGE_CRITICAL( "file", "file '%s' invalid read [%zu bytes]"
+            , _path
+            , sz
+        );
+
+        return HB_FAILURE;
+    }
+
     if( _size != HB_NULLPTR )
     {
-        *_size = r;
+        *_size = sz;
     }
 
     return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_file_read_text( const char * _path, char * _buffer, hb_size_t _capacity, hb_size_t * _size )
+{
+    hb_size_t size;
+    if( hb_file_read( _path, _buffer, _capacity, &size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    _buffer[size] = '\0';
+    
+    if( _size != HB_NULLPTR )
+    {
+        *_size = size;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////

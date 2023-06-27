@@ -13,7 +13,7 @@ hb_size_t hb_archive_bound( hb_size_t _size )
     return (hb_size_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_archive_compress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * _compressSize )
+hb_result_t hb_archive_compress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * const _compressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;
@@ -36,7 +36,7 @@ hb_result_t hb_archive_compress( void * _buffer, hb_size_t _capacity, const void
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_archive_decompress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * _decompressSize )
+hb_result_t hb_archive_decompress( void * _buffer, hb_size_t _capacity, const void * _source, hb_size_t _size, hb_size_t * const _decompressSize )
 {
     char * dst_buffer = (char *)_buffer;
     const char * src_buffer = (const char *)_source;

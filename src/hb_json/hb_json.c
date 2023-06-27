@@ -100,7 +100,7 @@ hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
 {
     char buffer[HB_DATA_MAX_SIZE];
     hb_size_t buffer_size;
-    if( hb_file_read( _file, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
+    if( hb_file_read_text( _file, buffer, HB_DATA_MAX_SIZE, &buffer_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

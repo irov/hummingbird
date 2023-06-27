@@ -70,9 +70,9 @@ hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, hb_uid_t _pui
         hb_uid_t * uid = _uids + index / 2;
         uint32_t * score = _scores + index / 2;
 
-        memcpy( uid, value0->string, sizeof( hb_uid_t ) );
+        memcpy( uid, value0->str, sizeof( hb_uid_t ) );
 
-        if( sscanf( value1->string, "%u", score ) != 1 )
+        if( sscanf( value1->str, "%u", score ) != 1 )
         {
             return HB_FAILURE;
         }

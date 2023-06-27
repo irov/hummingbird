@@ -38,7 +38,7 @@ static int __code_writer( lua_State * L, const void * p, hb_size_t size, void * 
     return LUA_OK;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_script_compiler( const char * _source, hb_size_t _size, void * _code, hb_size_t _capacity, hb_size_t * _compilesize )
+hb_result_t hb_script_compiler( const char * _source, hb_size_t _size, void * _code, hb_size_t _capacity, hb_size_t * const _compilesize )
 {
     lua_State * L = luaL_newstate();
 
