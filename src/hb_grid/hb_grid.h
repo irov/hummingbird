@@ -22,7 +22,8 @@ typedef struct hb_grid_config_t
     uint16_t cache_port;
     uint16_t cache_timeout;
 
-    char db_uri[128];
+    char db_uri[1024];
+    char db_host[128];
     uint16_t db_port;
 
     char log_file[HB_MAX_PATH];

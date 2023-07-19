@@ -90,22 +90,44 @@ typedef struct hb_db_handle_t
     mongoc_client_pool_t * mongo_pool;
 } hb_db_handle_t;
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t ** _handle )
+hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _port, hb_db_handle_t ** _handle )
 {
     hb_db_handle_t * handle = HB_NEW( hb_db_handle_t );
 
     mongoc_init();
 
-    mongoc_uri_t * mongoc_uri = mongoc_uri_new_for_host_port( _uri, _port );
+    mongoc_uri_t * mongoc_uri = HB_NULLPTR;
 
-    if( mongoc_uri == HB_NULLPTR )
+    if( strlen( _uri ) != 0 )
+    {    
+        bson_error_t error;
+        mongoc_uri = mongoc_uri_new_with_error( _uri, &error );
+
+        if( mongoc_uri == HB_NULLPTR )
+       {
+            HB_LOG_MESSAGE_ERROR( "db", "failed to use uri: %s error domain: %u code: %u message: %s"
+                , _uri
+                , error.domain
+                , error.code
+                , error.message
+            );
+
+            return HB_FAILURE;
+        }
+    }
+    else
     {
-        HB_LOG_MESSAGE_ERROR( "db", "failed to use URI: %s:%u"
-            , _uri
-            , _port
-        );
+        mongoc_uri = mongoc_uri_new_for_host_port( _host, _port );
 
-        return HB_FAILURE;
+        if( mongoc_uri == HB_NULLPTR )
+        {
+            HB_LOG_MESSAGE_ERROR( "db", "failed to use host: %s port: %u"
+                , _host
+                , _port
+            );
+
+            return HB_FAILURE;
+        }
     }
 
     mongoc_client_pool_t * mongo_pool = mongoc_client_pool_new( mongoc_uri );
@@ -115,7 +137,7 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t *
     if( mongoc_client_pool_set_error_api( mongo_pool, MONGOC_ERROR_API_VERSION_2 ) == false )
     {
         HB_LOG_MESSAGE_ERROR( "db", "failed to set error api: %s:%u"
-            , _uri
+            , _host
             , _port
         );
 
@@ -148,7 +170,7 @@ hb_result_t hb_db_initialze( const char * _uri, uint16_t _port, hb_db_handle_t *
     }
 
     HB_LOG_MESSAGE_ERROR( "db", "create pool url:'%s' port:%u successful"
-        , _uri
+        , _host
         , _port
     );
 

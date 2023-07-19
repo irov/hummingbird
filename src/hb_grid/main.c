@@ -281,7 +281,8 @@ int main( int _argc, char * _argv[] )
     strcpy( config->cache_uri, "127.0.0.1" );
     config->cache_port = 6379;
     config->cache_timeout = 2000;
-    strcpy( config->db_uri, "127.0.0.1" );
+    strcpy( config->db_uri, "" );
+    strcpy( config->db_host, "127.0.0.1" );
     config->db_port = 27017;
     strcpy( config->log_uri, "127.0.0.1" );
     config->log_port = 5044;
@@ -321,8 +322,9 @@ int main( int _argc, char * _argv[] )
         hb_json_copy_field_string( json_handle, "name", config->name, 32, config->name );
         hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, 128, config->cache_uri );
         hb_json_get_field_uint16( json_handle, "cache_port", &config->cache_port, config->cache_port );
-        hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );
-        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, 128, config->db_uri );
+        hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );        
+        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, 1024, config->db_uri );
+        hb_json_copy_field_string( json_handle, "db_host", config->db_host, 128, config->db_host );
         hb_json_get_field_uint16( json_handle, "db_port", &config->db_port, config->db_port );
         hb_json_copy_field_string( json_handle, "log_file", config->log_file, HB_MAX_PATH, config->log_file );
         hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, 128, config->log_uri );
@@ -361,19 +363,21 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "name: %s", config->name );
     HB_LOG_MESSAGE_INFO( "grid", "cache_uri: %s", config->cache_uri );
     HB_LOG_MESSAGE_INFO( "grid", "cache_port: %u", config->cache_port );
-    HB_LOG_MESSAGE_INFO( "grid", "cache_timeout: %u", config->cache_timeout );
+    HB_LOG_MESSAGE_INFO( "grid", "cache_timeout: %u", config->cache_timeout );    
     HB_LOG_MESSAGE_INFO( "grid", "db_uri: %s", config->db_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "db_host: %s", config->db_host );
     HB_LOG_MESSAGE_INFO( "grid", "db_port: %u", config->db_port );
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
     hb_db_handle_t * db;
-    if( hb_db_initialze( config->db_uri, config->db_port, &db ) == HB_FAILURE )
+    if( hb_db_initialze( config->db_uri, config->db_host, config->db_port, &db ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component [uri %s:%u]"
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component uri: %s host: %s port: %u"
             , config->name
             , config->db_uri
+            , config->db_host
             , config->db_port
         );
 
