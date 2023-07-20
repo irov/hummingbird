@@ -1,0 +1,37 @@
+# FROM alpine:latest
+FROM debian:latest
+
+## install dependencies
+# RUN apk update
+# RUN apk add build-base
+# RUN apk add libexecinfo libexecinfo-dev
+# RUN apk add snappy
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  libsnappy-dev \
+  libssl-dev \
+  libz-dev \
+  openssl \
+  python3 \
+  cmake \
+  git 
+
+## optional soft for debugging 
+# RUN apt-get install -y tree
+
+## hb_grid build
+COPY . /hummingfab/
+# RUN git clone https://github.com/irov/hummingbird /hummingfab
+
+WORKDIR /hummingfab/build/downloads/
+RUN ./downloads_unix.bash
+RUN echo "========== DOWNLOAD UNIX ============="
+
+WORKDIR /hummingfab/build/unix/
+RUN ./build_dependencies_debug.bash
+RUN echo "========== BUID DEPENDENCIES ============="
+RUN ./build_solution_debug.bash
+RUN echo "========== BUID SOLUTION ============="
+
+WORKDIR /hummingfab/
+# RUN tree -d
