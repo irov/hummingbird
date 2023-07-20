@@ -1,22 +1,33 @@
 FROM debian:latest
 
-# install dependencies
+## install dependencies
 RUN apt-get update && apt-get install -y \
   build-essential \
-  # libevent-dev \
+  libsnappy-dev \
+  libssl-dev \
+  libz-dev \
+  openssl \
+  python3 \
   cmake \
   git 
 
+## optional soft for debugging 
+# RUN apt-get install -y tree
+
 # hb_grid build
-# COPY . /hummingfab
-RUN git clone https://github.com/irov/hummingbird /hummingfab
+COPY . /hummingfab/
+# RUN git clone https://github.com/irov/hummingbird /hummingfab
 
 WORKDIR /hummingfab/build/downloads/
-CMD ["./downloads_unix.bash"]
-CMD ["ls", "-la", "."]
+RUN ./downloads_unix.bash
+RUN echo "========== DOWNLOAD UNIX ============="
 
-# WORKDIR /hummingfab/build/unix/
-# RUN ["chmod", "+x", "build_dependencies_debug.bash"]
-# CMD ["./build_dependencies_debug.bash"]
-# RUN ["chmod", "+x", "build_solution_debug.bash"]
-# CMD ["./build_solution_debug.bash"]
+# CMD ln -n /usr/bin/python3.11 /usr/bin/python
+WORKDIR /hummingfab/build/unix/
+RUN ./build_dependencies_debug.bash
+RUN echo "========== BUID DEPENDENCIES ============="
+RUN ./build_solution_debug.bash
+RUN echo "========== BUID SOLUTION ============="
+
+WORKDIR /hummingfab/
+# RUN tree -d
