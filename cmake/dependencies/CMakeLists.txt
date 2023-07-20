@@ -40,6 +40,8 @@ if(HUMMINGBIRD_DEPENDENCE_OPENSSL)
     message("================openssl================")
     
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/openssl/CMakeLists.txt ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/openssl/CMakeLists.txt COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/openssl/ssl/CMakeLists.txt ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/openssl/ssl/CMakeLists.txt COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/openssl/crypto/CMakeLists.txt ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/openssl/crypto/CMakeLists.txt COPYONLY)
     
     set(WITH_APPS OFF CACHE BOOL "WITH_APPS" FORCE)
     set(MSVC_DYNAMIC_RUNTIME OFF CACHE BOOL "MSVC_DYNAMIC_RUNTIME" FORCE)

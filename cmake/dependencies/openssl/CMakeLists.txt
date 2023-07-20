@@ -197,13 +197,13 @@ if( WITH_APPS AND NOT ANDROID AND NOT IOS )
 endif()
 
 file( GLOB PUBLIC_HEADERS "${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/include/openssl/*.h" )
-install( FILES ${PUBLIC_HEADERS} DESTINATION include/openssl )
+install( FILES ${PUBLIC_HEADERS} DESTINATION ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/include/openssl )
 
 install( FILES
   FAQ LICENSE README README.ENGINE
-  DESTINATION share/openssl )
+  DESTINATION ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/share/openssl )
 
-install( DIRECTORY doc DESTINATION share )
+install( DIRECTORY doc DESTINATION ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/share )
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in
