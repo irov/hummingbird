@@ -169,9 +169,9 @@ set( CONF "
 #define OPENSSL_NO_EC_NISTP_64_GCC_128
 ${CONF}" )
 
-file( WRITE ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/opensslconf.h.cmake "${CONF}" )
+file( WRITE ${PROJECT_BINARY_DIR}/opensslconf.h.cmake "${CONF}" )
 
-configure_file( ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/opensslconf.h.cmake
+configure_file( ${PROJECT_BINARY_DIR}/openssl/opensslconf.h.cmake
   ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/include/openssl/opensslconf.h )
 # End configure public headers
 
