@@ -1,0 +1,22 @@
+FROM debian:latest
+
+# install dependencies
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  # libevent-dev \
+  cmake \
+  git 
+
+# hb_grid build
+# COPY . /hummingfab
+RUN git clone https://github.com/irov/hummingbird /hummingfab
+
+WORKDIR /hummingfab/build/downloads/
+CMD ["./downloads_unix.bash"]
+CMD ["ls", "-la", "."]
+
+# WORKDIR /hummingfab/build/unix/
+# RUN ["chmod", "+x", "build_dependencies_debug.bash"]
+# CMD ["./build_dependencies_debug.bash"]
+# RUN ["chmod", "+x", "build_solution_debug.bash"]
+# CMD ["./build_solution_debug.bash"]
