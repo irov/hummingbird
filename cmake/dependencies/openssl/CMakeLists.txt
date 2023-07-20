@@ -171,7 +171,7 @@ ${CONF}" )
 
 file( WRITE ${PROJECT_BINARY_DIR}/opensslconf.h.cmake "${CONF}" )
 
-configure_file( ${PROJECT_BINARY_DIR}/openssl/opensslconf.h.cmake
+configure_file( ${PROJECT_BINARY_DIR}/opensslconf.h.cmake
   ${HUMMINGBIRD_CONFIGURATION_DIRECTORY}/openssl/include/openssl/opensslconf.h )
 # End configure public headers
 
