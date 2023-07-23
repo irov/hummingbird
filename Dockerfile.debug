@@ -1,5 +1,11 @@
-# FROM alpine:latest
-FROM debian:latest
+# wip
+# FROM alpine:latest 
+
+# work
+FROM debian:latest 
+
+# for deploy server
+# FROM debian:buster 
 
 ## install dependencies
 # RUN apk update
@@ -24,12 +30,15 @@ COPY . /hummingfab/
 # RUN git clone https://github.com/irov/hummingbird /hummingfab
 
 WORKDIR /hummingfab/build/downloads/
+CMD ["chmod", "+x", "./downloads_unix.bash"]
 RUN ./downloads_unix.bash
 RUN echo "========== DOWNLOAD UNIX ============="
 
 WORKDIR /hummingfab/build/unix/
+CMD ["chmod", "+x", "./build_dependencies_debug.bash"]
 RUN ./build_dependencies_debug.bash
 RUN echo "========== BUID DEPENDENCIES ============="
+CMD ["chmod", "+x", "./build_solution_debug.bash"]
 RUN ./build_solution_debug.bash
 RUN echo "========== BUID SOLUTION ============="
 
