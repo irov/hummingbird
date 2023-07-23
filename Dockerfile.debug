@@ -26,21 +26,22 @@ RUN apt-get update && apt-get install -y \
 # RUN apt-get install -y tree
 
 ## hb_grid build
-COPY . /hummingfab/
-# RUN git clone https://github.com/irov/hummingbird /hummingfab
+# COPY . /hummingfab/
+RUN git clone https://github.com/irov/hummingbird /hummingfab
 
+RUN chown root -R /hummingfab
 WORKDIR /hummingfab/build/downloads/
-CMD ["chmod", "+x", "./downloads_unix.bash"]
-RUN ./downloads_unix.bash
+# CMD ["chmod", "+x", "./downloads_unix.bash"]
+RUN bash ./downloads_unix.bash
 RUN echo "========== DOWNLOAD UNIX ============="
 
 WORKDIR /hummingfab/build/unix/
-CMD ["chmod", "+x", "./build_dependencies_debug.bash"]
-RUN ./build_dependencies_debug.bash
+# CMD ["chmod", "+x", "./build_dependencies_debug.bash"]
+RUN bash ./build_dependencies_debug.bash
 RUN echo "========== BUID DEPENDENCIES ============="
-CMD ["chmod", "+x", "./build_solution_debug.bash"]
-RUN ./build_solution_debug.bash
+# CMD ["chmod", "+x", "./build_solution_debug.bash"]
+RUN bash ./build_solution_debug.bash
 RUN echo "========== BUID SOLUTION ============="
 
-WORKDIR /hummingfab/
+# WORKDIR /hummingfab/
 # RUN tree -d
