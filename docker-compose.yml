@@ -1,0 +1,13 @@
+service:
+  grid:
+    build: .
+    ports:
+      - "5555:5555"
+      # - "27017:27017"
+      # - "5044:5044"
+
+    # extra_hoshts:
+    
+    # connect local files (config) 
+    # volumes:
+

@@ -20,13 +20,28 @@ echoErr() {
 
 mkdir -p ./docker_tmp/
 cp "$file" ./docker_tmp/
+JSON_STRING=$( jq -n '{
+  "name": "hb_grid",
+  "max_thread": 1,
+  "grid_uri": "127.0.0.1",
+  "grid_port": 5555,
+  "cache_uri": "127.0.0.1",
+  "cache_port": 6379,
+  "db_uri": "127.0.0.1",
+  "db_port": 27017,
+  "log_uri": "127.0.0.1",
+  "log_port": 5044
+}')
+echo $JSON_STRING >> ./docker_tmp/debug.json
+
+
 echoMsg "=============== TEMP DIR CREATED ==============="
 
 docker build -f Dockerfile.debug -t hummingfab:debug .
 
 if rm -r ./docker_tmp; then
-  echoMsg "=============== DELTED TMP DIR ==============="
+  echoMsg "=============== TEMP DIR DELTED ==============="
 else
-  echoErr "tmp dir was not delete"
+  echoErr "!!!!!!!!!!! tmp dir was not delete !!!!!!!!"
 fi
 
