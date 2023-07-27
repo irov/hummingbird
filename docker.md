@@ -1,5 +1,8 @@
 # Docker
 
+## 
+
+
 ## Cheetsheet
 
 Build image
@@ -17,6 +20,7 @@ docker run -it --rm hummingfab:build
 ## Help
 
 - `docker rmi $(docker images --filter dangling=true -q)` - удалить <none> изображения
+- `docker run -d --name mongo-dev -p 27017:27017 --rm mongo` - запустить монгодб в фоне, под именем mongo-dev, с пробросом порта 27017, с автоудалением после завершения
 
 ## Exaples
 

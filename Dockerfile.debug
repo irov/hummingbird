@@ -2,15 +2,20 @@ FROM debian:latest
 ENV DEBUG=True
 # RUN apt-get update && apt-get install -y \
   
-COPY ./docker_tmp/ /hummingfab/
+COPY ./docker_tmp /hummingfab/
 
 WORKDIR /hummingfab/
-CMD "./hb_grid"
-
-EXPOSE 5555 # grid
-EXPOSE 27017 # mongodb?
-EXPOSE 5044 # redis?
-
-WORKDIR /hummingfab/
-ENTRYPOINT ["./hb_grid"]
+ENTRYPOINT ./hb_grid
 CMD ["--config", "debug.json"]
+
+# grid
+EXPOSE 5555 
+# cache (redis)
+EXPOSE 6379
+# mongodb
+EXPOSE 27017
+# logs
+EXPOSE 5044 
+
+
+
