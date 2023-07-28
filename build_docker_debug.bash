@@ -23,11 +23,11 @@ cp "$file" ./docker_tmp/
 JSON_STRING=$( jq -n '{
   "name": "hb_grid",
   "max_thread": 1,
-  "grid_uri": "127.0.0.1",
+  "grid_uri": "0.0.0.0",
   "grid_port": 5555,
-  "cache_uri": "127.0.0.1",
+  "cache_uri": "redis-dev",
   "cache_port": 6379,
-  "db_host": "127.0.0.1",
+  "db_host": "mongo-dev",
   "db_port": 27017,
   "log_uri": "127.0.0.1",
   "log_port": 5044

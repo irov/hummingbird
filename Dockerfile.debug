@@ -1,21 +1,22 @@
 FROM debian:latest
+LABEL org.opencontainers.image.title = "Hummingfab"
 ENV DEBUG=True
-# RUN apt-get update && apt-get install -y \
   
 COPY ./docker_tmp /hummingfab/
+# cache (redis)
+# EXPOSE 6379
+# mongodb
+# EXPOSE 27017
+# logs
+# EXPOSE 5044 
+
+
+EXPOSE 5555 
 
 WORKDIR /hummingfab/
-ENTRYPOINT ./hb_grid
-CMD ["--config", "debug.json"]
+ENTRYPOINT ["/hummingfab/hb_grid"]
+CMD ["--config", "./debug.json"]
 
 # grid
-EXPOSE 5555 
-# cache (redis)
-EXPOSE 6379
-# mongodb
-EXPOSE 27017
-# logs
-EXPOSE 5044 
-
-
+# EXPOSE 5555 
 

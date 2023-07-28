@@ -21,7 +21,10 @@ docker run -it --rm hummingfab:build
 
 - `docker rmi $(docker images --filter dangling=true -q)` - удалить <none> изображения
 - `docker run -d --name mongo-dev -p 27017:27017 --rm mongo` - запустить монгодб в фоне, под именем mongo-dev, с пробросом порта 27017, с автоудалением после завершения
+- `docker run --name redis-dev -p 6379:6379 -d redis` - запустить реди
 
+- `docker run --name mongo-dev -p 27017:27017 --network dev-network -d --rm mongo`
+- `docker run --name redis-dev -p 6379:6379 --network dev-network -d redis`
 ## Exaples
 
 ```
