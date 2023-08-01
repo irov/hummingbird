@@ -17,13 +17,12 @@ typedef struct hb_log_tcp_handle_t
     struct bufferevent * bev_cnn;
 }hb_log_tcp_handle_t;
 //////////////////////////////////////////////////////////////////////////
-static hb_log_tcp_handle_t * g_log_tcp_handle = HB_NULLPTR;
-//////////////////////////////////////////////////////////////////////////
 static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message, void * _ud )
 {
-    HB_UNUSED( _ud );
     HB_UNUSED( _file );
     HB_UNUSED( _line );
+
+    hb_log_tcp_handle_t * handle = (hb_log_tcp_handle_t *)_ud;
 
     hb_time_t t;
     hb_time( &t );
@@ -36,9 +35,9 @@ static void __hb_log_tcp_observer( const char * _category, hb_log_level_t _level
     int32_t message_size = sprintf( message, "{\"time\":%" SCNu64 ", \"category\":\"%s\", \"level\":%u, \"message\":\"%s\"}\r\n", t, _category, _level, _message );
 #endif
 
-    bufferevent_write( g_log_tcp_handle->bev_cnn, message, message_size );
+    bufferevent_write( handle->bev_cnn, message, message_size );
 
-    event_base_dispatch( g_log_tcp_handle->base );
+    event_base_dispatch( handle->base );
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
@@ -75,6 +74,13 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     struct event_base * base = event_base_new();
     struct bufferevent * bev_cnn = bufferevent_socket_new( base, -1, BEV_OPT_CLOSE_ON_FREE );
 
+    if( bev_cnn == HB_NULLPTR )
+    {
+        event_base_free( base );
+
+        return HB_FAILURE;
+    }
+
     if( bufferevent_socket_connect( bev_cnn, (const struct sockaddr *)&sin, sizeof( sin ) ) == -1 )
     {
         bufferevent_free( bev_cnn );
@@ -86,11 +92,11 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
     bufferevent_enable( bev_cnn, EV_WRITE );
     bufferevent_disable( bev_cnn, EV_READ );
 
-    g_log_tcp_handle = HB_NEW( hb_log_tcp_handle_t );
-    g_log_tcp_handle->base = base;
-    g_log_tcp_handle->bev_cnn = bev_cnn;
+    hb_log_tcp_handle_t * handle = HB_NEW( hb_log_tcp_handle_t );
+    handle->base = base;
+    handle->bev_cnn = bev_cnn;
 
-    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ERROR, &__hb_log_tcp_observer, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ERROR, &__hb_log_tcp_observer, handle ) == HB_FAILURE )
     {
         bufferevent_free( bev_cnn );
         event_base_free( base );
@@ -103,15 +109,13 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 //////////////////////////////////////////////////////////////////////////
 void hb_log_tcp_finalize()
 {
-    if( g_log_tcp_handle != HB_NULLPTR )
+    hb_log_tcp_handle_t * handle;
+    if( hb_log_remove_observer( &__hb_log_tcp_observer, &handle ) == HB_SUCCESSFUL )
     {
-        hb_log_remove_observer( &__hb_log_tcp_observer, HB_NULLPTR );
+        bufferevent_free( handle->bev_cnn );
+        event_base_free( handle->base );
 
-        bufferevent_free( g_log_tcp_handle->bev_cnn );
-        event_base_free( g_log_tcp_handle->base );
-
-        HB_DELETE( g_log_tcp_handle );
-        g_log_tcp_handle = HB_NULLPTR;
+        HB_DELETE( handle );
     }
 
 #ifdef HB_PLATFORM_WINDOWS

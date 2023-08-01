@@ -4,6 +4,7 @@
 
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
+#include "hb_log_console/hb_log_console.h"
 #include "hb_log_tcp/hb_log_tcp.h"
 #include "hb_log_file/hb_log_file.h"
 #include "hb_http/hb_http.h"
@@ -21,15 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
-static void __hb_log_observer( const char * _category, hb_log_level_t _level, const char * _file, uint32_t _line, const char * _message, void * _ud )
-{
-    HB_UNUSED( _ud );
-
-    const char * ls = hb_log_level_string[_level];
-
-    printf( "%s [%s:%u] %s: %s\n", ls, _file, _line, _category, _message );
-}
 //////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -248,7 +240,7 @@ int main( int _argc, char * _argv[] )
 
     hb_log_initialize();
 
-    if( hb_log_add_observer( HB_NULLPTR, HB_LOG_ALL, &__hb_log_observer, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_log_console_initialize() == HB_FAILURE )
     {
         return EXIT_FAILURE;
     }
@@ -569,7 +561,7 @@ int main( int _argc, char * _argv[] )
     WSACleanup();
 #endif
 
-    hb_log_remove_observer( &__hb_log_observer, HB_NULLPTR );
+    hb_log_console_finalize();
 
 #ifdef HB_DEBUG
     hb_log_file_finalize();
