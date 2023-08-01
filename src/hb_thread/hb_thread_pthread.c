@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <errno.h>
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_thread_proxy_t

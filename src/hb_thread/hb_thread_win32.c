@@ -6,6 +6,7 @@
 #include "hb_platform/hb_platform_windows.h"
 
 #include <process.h>
+#include <errno.h>
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_thread_proxy_t
