@@ -35,7 +35,16 @@ hb_result_t hb_thread_create( hb_thread_function_t _function, void * _ud, hb_thr
     proxy->ud = _ud;
 
     pthread_t id;
-    pthread_create( &id, HB_NULLPTR, &__hb_thread_proxy, proxy );
+    int err = pthread_create( &id, HB_NULLPTR, &__hb_thread_proxy, proxy );
+
+    if( err != 0 )
+    {
+        HB_LOG_MESSAGE_ERROR( "thread", "invalid create pthread errno: %d"
+            , errno
+        );
+
+        return HB_FAILURE;
+    }
     
     hb_thread_handle_t * handle = HB_NEW( hb_thread_handle_t );
 
@@ -64,3 +73,4 @@ void hb_thread_destroy( hb_thread_handle_t * _handle )
     HB_DELETE( _handle->proxy );
     HB_DELETE( _handle );
 }
+//////////////////////////////////////////////////////////////////////////
