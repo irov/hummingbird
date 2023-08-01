@@ -100,6 +100,10 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_MAX_PATH 260
 #endif
 
+#ifndef HB_MAX_URI
+#define HB_MAX_URI 2048
+#endif
+
 #ifndef HB_GRID_REQUEST_DATA_MAX_SIZE
 #define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
 #endif

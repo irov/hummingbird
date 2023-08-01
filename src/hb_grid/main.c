@@ -273,7 +273,7 @@ int main( int _argc, char * _argv[] )
     uint32_t max_thread = 16;
     uint32_t factor_mutex = 4;
 
-    char grid_uri[128];
+    char grid_uri[HB_MAX_URI];
     strcpy( grid_uri, "127.0.0.1" );
     uint16_t grid_port = 5555;
 
@@ -316,18 +316,18 @@ int main( int _argc, char * _argv[] )
 
         hb_json_get_field_uint32( json_handle, "max_thread", &max_thread, max_thread );
         hb_json_get_field_uint32( json_handle, "factor_mutex", &factor_mutex, factor_mutex );
-        hb_json_copy_field_string( json_handle, "grid_uri", grid_uri, 128, grid_uri );
+        hb_json_copy_field_string( json_handle, "grid_uri", grid_uri, HB_MAX_URI, grid_uri );
         hb_json_get_field_uint16( json_handle, "grid_port", &grid_port, grid_port );
 
         hb_json_copy_field_string( json_handle, "name", config->name, 32, config->name );
-        hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, 128, config->cache_uri );
+        hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, HB_MAX_URI, config->cache_uri );
         hb_json_get_field_uint16( json_handle, "cache_port", &config->cache_port, config->cache_port );
         hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );        
-        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, 1024, config->db_uri );
+        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, HB_MAX_URI, config->db_uri );
         hb_json_copy_field_string( json_handle, "db_host", config->db_host, 128, config->db_host );
         hb_json_get_field_uint16( json_handle, "db_port", &config->db_port, config->db_port );
         hb_json_copy_field_string( json_handle, "log_file", config->log_file, HB_MAX_PATH, config->log_file );
-        hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, 128, config->log_uri );
+        hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, HB_MAX_URI, config->log_uri );
         hb_json_get_field_uint16( json_handle, "log_port", &config->log_port, config->log_port );
 
         hb_json_destroy( json_handle );
@@ -480,19 +480,22 @@ int main( int _argc, char * _argv[] )
                 , config->cache_port
             );
 
-            continue;
+            return EXIT_FAILURE;
         }
 
         process_handle->cache = cache;
 
-        if( hb_thread_create( &__hb_ev_thread_base, process_handle, &process_handle->thread ) == HB_FAILURE )
+        hb_thread_handle_t * thread;
+        if( hb_thread_create( &__hb_ev_thread_base, process_handle, &thread ) == HB_FAILURE )
         {
             HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create thread"
                 , config->name
             );
 
-            continue;
+            return EXIT_FAILURE;
         }
+
+        process_handle->thread = thread;
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "ready.." );
