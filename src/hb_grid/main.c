@@ -384,6 +384,8 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    HB_LOG_MESSAGE_INFO( "grid", "[db] create" );
+
     hb_matching_handle_t * matching;
     if( hb_matching_create( 1024, &matching ) == HB_FAILURE )
     {
@@ -393,6 +395,8 @@ int main( int _argc, char * _argv[] )
 
         return EXIT_FAILURE;
     }
+
+    HB_LOG_MESSAGE_INFO( "grid", "[matching] create" );
 
     hb_messages_handle_t * messages;
     if( hb_messages_create( &messages ) == HB_FAILURE )
@@ -404,6 +408,8 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    HB_LOG_MESSAGE_INFO( "grid", "[messages] create" );
+
     hb_events_handle_t * events;
     if( hb_events_create( &events ) == HB_FAILURE )
     {
@@ -414,6 +420,8 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
+    HB_LOG_MESSAGE_INFO( "grid", "[events] create" );
+
     hb_economics_handle_t * economics;
     if( hb_economics_create( &economics ) == HB_FAILURE )
     {
@@ -423,6 +431,8 @@ int main( int _argc, char * _argv[] )
 
         return EXIT_FAILURE;
     }
+
+    HB_LOG_MESSAGE_INFO( "grid", "[economics] create" );
 
     uint32_t mutex_handles_count = max_thread * factor_mutex;
 
@@ -485,6 +495,8 @@ int main( int _argc, char * _argv[] )
 
         process_handle->cache = cache;
 
+        HB_LOG_MESSAGE_INFO( "grid", "[cache] create (%u)", i );
+
         hb_thread_handle_t * thread;
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &thread ) == HB_FAILURE )
         {
@@ -496,6 +508,8 @@ int main( int _argc, char * _argv[] )
         }
 
         process_handle->thread = thread;
+
+        HB_LOG_MESSAGE_INFO( "grid", "[thread] create (%u)", i );
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "ready.." );
