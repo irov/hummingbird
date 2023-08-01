@@ -363,6 +363,8 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
+    HB_LOG_MESSAGE_INFO( "grid", "[db] try..." );
+
     hb_db_handle_t * db;
     if( hb_db_initialze( config->db_uri, config->db_host, config->db_port, &db ) == HB_FAILURE )
     {
@@ -376,7 +378,9 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "[db] create" );
+    HB_LOG_MESSAGE_INFO( "grid", "[db] created" );
+
+    HB_LOG_MESSAGE_INFO( "grid", "[matching] try..." );
 
     hb_matching_handle_t * matching;
     if( hb_matching_create( 1024, &matching ) == HB_FAILURE )
@@ -388,7 +392,9 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "[matching] create" );
+    HB_LOG_MESSAGE_INFO( "grid", "[matching] created" );
+
+    HB_LOG_MESSAGE_INFO( "grid", "[messages] try..." );
 
     hb_messages_handle_t * messages;
     if( hb_messages_create( &messages ) == HB_FAILURE )
@@ -400,7 +406,9 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "[messages] create" );
+    HB_LOG_MESSAGE_INFO( "grid", "[messages] created" );
+
+    HB_LOG_MESSAGE_INFO( "grid", "[events] try..." );
 
     hb_events_handle_t * events;
     if( hb_events_create( &events ) == HB_FAILURE )
@@ -412,7 +420,9 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "[events] create" );
+    HB_LOG_MESSAGE_INFO( "grid", "[events] created" );
+
+    HB_LOG_MESSAGE_INFO( "grid", "[economics] try..." );
 
     hb_economics_handle_t * economics;
     if( hb_economics_create( &economics ) == HB_FAILURE )
@@ -424,7 +434,7 @@ int main( int _argc, char * _argv[] )
         return EXIT_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "[economics] create" );
+    HB_LOG_MESSAGE_INFO( "grid", "[economics] created" );
 
     uint32_t mutex_handles_count = max_thread * factor_mutex;
 
@@ -473,6 +483,8 @@ int main( int _argc, char * _argv[] )
         process_handle->cache = HB_NULLPTR;
         process_handle->thread = HB_NULLPTR;
 
+        HB_LOG_MESSAGE_INFO( "grid", "[cache] try... (%u)", i );
+
         hb_cache_handle_t * cache;
         if( hb_cache_create( config->cache_uri, config->cache_port, config->cache_timeout, &cache ) == HB_FAILURE )
         {
@@ -487,7 +499,9 @@ int main( int _argc, char * _argv[] )
 
         process_handle->cache = cache;
 
-        HB_LOG_MESSAGE_INFO( "grid", "[cache] create (%u)", i );
+        HB_LOG_MESSAGE_INFO( "grid", "[cache] created (%u)", i );
+
+        HB_LOG_MESSAGE_INFO( "grid", "[thread] try... (%u)", i );
 
         hb_thread_handle_t * thread;
         if( hb_thread_create( &__hb_ev_thread_base, process_handle, &thread ) == HB_FAILURE )
@@ -501,7 +515,7 @@ int main( int _argc, char * _argv[] )
 
         process_handle->thread = thread;
 
-        HB_LOG_MESSAGE_INFO( "grid", "[thread] create (%u)", i );
+        HB_LOG_MESSAGE_INFO( "grid", "[thread] created (%u)", i );
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "ready.." );

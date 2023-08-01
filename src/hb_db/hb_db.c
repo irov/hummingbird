@@ -94,7 +94,11 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 {
     hb_db_handle_t * handle = HB_NEW( hb_db_handle_t );
 
+    HB_LOG_MESSAGE_INFO( "db", "mongo try..." );
+
     mongoc_init();
+
+    HB_LOG_MESSAGE_INFO( "db", "mongo init" );
 
     mongoc_uri_t * mongoc_uri = HB_NULLPTR;
 
@@ -144,6 +148,8 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
         return HB_FAILURE;
     }
 
+    HB_LOG_MESSAGE_INFO( "db", "ping try..." );
+
     bson_t ping;
     bson_init( &ping );
 
@@ -160,16 +166,17 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 
     if( mongoc_ping == false )
     {
-        mongoc_client_destroy( mongo_client );
-
-        HB_LOG_MESSAGE_ERROR( "db", "invalid client command simple: %s"
+        HB_LOG_MESSAGE_ERROR( "db", "invalid ping error: %s [%u]"
             , error.message
+            , error.code
         );
 
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_ERROR( "db", "create pool url:'%s' port:%u successful"
+    HB_LOG_MESSAGE_INFO( "db", "ping successful" );
+
+    HB_LOG_MESSAGE_INFO( "db", "create pool url:'%s' port:%u successful"
         , _host
         , _port
     );
