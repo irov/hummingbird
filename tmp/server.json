@@ -1,0 +1,12 @@
+{
+  "max_thread": 0,
+  "grid_uri": "0.0.0.0",
+  "grid_port": 5555,
+  "name": "hb",
+  "cache_uri": "172.17.0.1",
+  "cache_port": 6379,
+  "db_host": "172.17.0.2",
+  "db_port": 27017,
+  "log_uri": "172.17.0.1",
+  "log_port": 5044
+}

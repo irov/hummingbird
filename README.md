@@ -31,4 +31,9 @@ https://www.mongodb.com/download-center/community
 ### Redis
 https://github.com/dmajkic/redis/downloads
 
+### Docker
+```
+docker-compose up
+```
+
 [![CodeFactor](https://www.codefactor.io/repository/github/irov/hummingbird/badge)](https://www.codefactor.io/repository/github/irov/hummingbird) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/21af5c85dcc1429bb380225862f5cc73)](https://www.codacy.com/manual/irov13/hummingbird?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=irov/hummingbird&amp;utm_campaign=Badge_Grade)

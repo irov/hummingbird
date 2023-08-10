@@ -1,4 +1,5 @@
-FROM debian:latest 
+# FROM debian:latest 
+FROM debian:12
 
 ENV DEBUG=True
 
