@@ -4,11 +4,13 @@ services:
   hb_grid:
     container_name: hb_grid
     image: takimoysha/hummingfab:v1.debug
+    restart: always
     ports:
       - "5555:5555"
     depends_on:
       - "mongo-dev"
       - "redis-dev"
+      - "fluentd-dev"
 
   mongo-dev:
     container_name: mongo-dev
@@ -26,4 +28,11 @@ services:
     volumes:
       - /var/tmp/redis-dev:/data
 
+  fluentd-dev:
+    container_name: fluentd-dev
+    image: fluent/fluentd:edge
+    ports:
+      - "24224:24224"
+    # volumes:
+    #   - /var/tmp/fluentd/log:/fluentd/log
 

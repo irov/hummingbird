@@ -31,8 +31,8 @@ JSON_STRING=$( jq -n '{
   "cache_port": 6379,
   "db_host": "mongo-dev",
   "db_port": 27017,
-  "log_uri": "127.0.0.1",
-  "log_port": 5044
+  "log_uri": "fluentd-dev",
+  "log_port": 24224
 }')
 echo $JSON_STRING > ./docker_tmp/debug.json
 echoMsg "=============== TEMP DIR CREATED ==============="
