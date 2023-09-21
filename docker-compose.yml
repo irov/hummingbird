@@ -1,13 +1,38 @@
-service:
-  grid:
-    build: .
+version: "3"
+
+services:
+  hb_grid:
+    container_name: hb_grid
+    image: takimoysha/hummingfab:v1.debug
+    restart: always
     ports:
       - "5555:5555"
-      # - "27017:27017"
-      # - "5044:5044"
+    depends_on:
+      - "mongo-dev"
+      - "redis-dev"
+      - "fluentd-dev"
 
-    # extra_hoshts:
-    
-    # connect local files (config) 
+  mongo-dev:
+    container_name: mongo-dev
+    image: mongo
+    ports: 
+      - "27017:27017"
+    volumes:
+      - /var/tmp/mongo-dev:/data/db
+
+  redis-dev:
+    container_name: redis-dev
+    image: redis
+    ports: 
+      - "6379:6379"
+    volumes:
+      - /var/tmp/redis-dev:/data
+
+  fluentd-dev:
+    container_name: fluentd-dev
+    image: fluent/fluentd:edge
+    ports:
+      - "24224:24224"
     # volumes:
+    #   - /var/tmp/fluentd/log:/fluentd/log
 

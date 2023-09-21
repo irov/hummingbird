@@ -1,7 +1,15 @@
 # Docker
 
-## 
+## Easy
+Скачать готовые сборки и запустить:
+```
+docker-compose up
+```
 
+Если нужно замонтировать папку логов для fluentd в docker-compose.yml раскомментировать volumes и указать host-путь, у которого есть разрешения на запись.
+```
+chmod o+w -R you_path_to_log
+```
 
 ## Cheetsheet
 

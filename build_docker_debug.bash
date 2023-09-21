@@ -13,14 +13,16 @@ echoErr() {
 
 
 mkdir -p ./bin/docker
-id=$(docker create hummingfab:builder)
+id=$(docker create takimoysha/hummingfab:builder)
 docker cp $id:/hummingfab/bin/ ./bin/docker
 
+timestamp=$(date +%s)
 file=$(find ./bin/docker/ -name hb_grid)
 mkdir -p ./docker_tmp/
 
 cp "$file" ./docker_tmp/
 JSON_STRING=$( jq -n '{
+  "mark": '"${timestamp}"',
   "name": "hb_grid",
   "max_thread": 1,
   "grid_uri": "0.0.0.0",
@@ -29,13 +31,13 @@ JSON_STRING=$( jq -n '{
   "cache_port": 6379,
   "db_host": "mongo-dev",
   "db_port": 27017,
-  "log_uri": "127.0.0.1",
-  "log_port": 5044
+  "log_uri": "fluentd-dev",
+  "log_port": 24224
 }')
-echo $JSON_STRING >> ./docker_tmp/debug.json
+echo $JSON_STRING > ./docker_tmp/debug.json
 echoMsg "=============== TEMP DIR CREATED ==============="
 
-docker build -f Dockerfile.debug -t hummingfab:debug .
+docker build -f Dockerfile.debug -t takimoysha/hummingfab:v1.debug .
 
 if rm -r ./docker_tmp; then
   echoMsg "=============== TEMP DIR DELTED ==============="
