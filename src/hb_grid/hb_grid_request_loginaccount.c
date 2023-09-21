@@ -66,7 +66,7 @@ hb_http_code_t hb_grid_request_loginaccount( struct evhttp_request * _request, h
     }
     else
     {
-        hb_size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"already exist\"}" );
+        hb_size_t response_data_size = sprintf( _response, "{\"code\":1,\"reason\":\"invalid login or password\"}" );
 
         *_size = response_data_size;
     }
