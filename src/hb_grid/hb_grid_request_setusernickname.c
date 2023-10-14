@@ -23,8 +23,8 @@ hb_http_code_t hb_grid_request_setusernickname( struct evhttp_request * _request
     hb_bool_t required_successful = HB_TRUE;
 
     hb_grid_process_setusernickname_in_data_t in_data;
-    in_data.uuid = user_token.uuid;
-    in_data.puid = user_token.puid;
+    in_data.user_uid = user_token.user_uid;
+    in_data.project_uid = user_token.project_uid;
 
     {
         hb_json_handle_t * json_handle;
@@ -46,12 +46,12 @@ hb_http_code_t hb_grid_request_setusernickname( struct evhttp_request * _request
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, user_token.uuid );
+    hb_grid_process_lock( _process, user_token.user_uid );
 
     hb_grid_process_setusernickname_out_data_t out_data;
     hb_result_t result = hb_grid_process_setusernickname( _process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, user_token.uuid );
+    hb_grid_process_unlock( _process, user_token.user_uid );
 
     if( result == HB_FAILURE )
     {

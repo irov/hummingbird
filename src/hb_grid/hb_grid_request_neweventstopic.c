@@ -56,12 +56,12 @@ hb_http_code_t hb_grid_request_neweventstopic( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, account_token.auid );
+    hb_grid_process_lock( _process, account_token.account_uid );
 
     hb_uid_t tuid;
     hb_result_t result = hb_events_new_topic( _process->events, _process->db_client, puid, name, delay, &tuid );
 
-    hb_grid_process_unlock( _process, account_token.auid );
+    hb_grid_process_unlock( _process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {

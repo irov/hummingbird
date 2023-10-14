@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_loginaccount( hb_grid_process_handle_t * _process, const hb_grid_process_loginaccount_in_data_t * _in, hb_grid_process_loginaccount_out_data_t * _out )
+hb_result_t hb_grid_process_loginaccount( hb_grid_process_handle_t * _process, const hb_grid_process_loginaccount_in_data_t * _in, hb_grid_process_loginaccount_out_data_t * const _out )
 {
     HB_UNUSED( _process );
 
@@ -54,7 +54,7 @@ hb_result_t hb_grid_process_loginaccount( hb_grid_process_handle_t * _process, c
     if( authentication_exist == HB_TRUE )
     {
         hb_account_token_t token_handle;
-        token_handle.auid = authentication_uid;
+        token_handle.account_uid = authentication_uid;
 
         if( hb_token_generate( _process->cache, "AR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
         {

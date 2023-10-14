@@ -7,7 +7,7 @@
 
 typedef struct hb_grid_process_loginuser_in_data_t
 {
-    hb_uid_t puid;
+    hb_uid_t project_uid;
 
     char login[128];
     char password[128];
@@ -21,7 +21,7 @@ typedef struct hb_grid_process_loginuser_out_data_t
 {
     hb_token_t token;
 
-    hb_uid_t uuid;
+    hb_uid_t user_uid;
     hb_error_code_t code;
 
     char user_public_data[HB_DATA_MAX_SIZE];
@@ -31,6 +31,6 @@ typedef struct hb_grid_process_loginuser_out_data_t
     int32_t project_public_data_revision;
 } hb_grid_process_loginuser_out_data_t;
 
-hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _data, hb_grid_process_loginuser_out_data_t * _out );
+hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _data, hb_grid_process_loginuser_out_data_t * const _out );
 
 #endif

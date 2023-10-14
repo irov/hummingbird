@@ -12,12 +12,12 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const hb_grid_process_newuser_in_data_t * _in, hb_grid_process_newuser_out_data_t * _out )
+hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const hb_grid_process_newuser_in_data_t * _in, hb_grid_process_newuser_out_data_t * const _out )
 {
     HB_UNUSED( _process );
 
     hb_bool_t project_exist;
-    if( hb_db_exist_project_uid( _process->db_client, _in->puid, &project_exist ) == HB_FAILURE )
+    if( hb_db_exist_project_uid( _process->db_client, _in->project_uid, &project_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -30,7 +30,7 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
     }
 
     hb_db_collection_handle_t * db_collection_users;
-    if( hb_db_get_project_collection( _process->db_client, _in->puid, "users", &db_collection_users ) == HB_FAILURE )
+    if( hb_db_get_project_collection( _process->db_client, _in->project_uid, "users", &db_collection_users ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -81,15 +81,15 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
         hb_db_make_string_value( values_user_new, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
         hb_db_make_int32_value( values_user_new, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
 
-        hb_uid_t uuid;
-        if( hb_db_new_document( db_collection_users, values_user_new, &uuid ) == HB_FAILURE )
+        hb_uid_t user_uid;
+        if( hb_db_new_document( db_collection_users, values_user_new, &user_uid ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
         hb_db_destroy_values( values_user_new );
 
-        _out->uuid = uuid;
+        _out->user_uid = user_uid;
     }
 
     hb_db_destroy_collection( db_collection_users );

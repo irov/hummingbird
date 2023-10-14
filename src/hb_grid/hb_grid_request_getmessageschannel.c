@@ -26,8 +26,8 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
 
     hb_grid_process_getmessageschannel_in_data_t in_data;
 
-    in_data.puid = user_token.puid;
-    in_data.uuid = user_token.uuid;
+    in_data.project_uid = user_token.project_uid;
+    in_data.user_uid = user_token.user_uid;
 
     {
         hb_json_handle_t * json_handle;
@@ -54,12 +54,12 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, user_token.uuid );
+    hb_grid_process_lock( _process, user_token.user_uid );
 
     hb_grid_process_getmessageschannel_out_data_t out_data;
     hb_result_t result = hb_grid_process_getmessageschannel( _process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, user_token.uuid );
+    hb_grid_process_unlock( _process, user_token.user_uid );
 
     if( result == HB_FAILURE )
     {
@@ -79,7 +79,7 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
 
             response_data_size += sprintf( _response + response_data_size, "{\"postid\":%u,\"uuid\":%u,\"message\":\"%s\",\"metainfo\":\"%s\"}"
                 , out_data.posts[index].postid
-                , out_data.posts[index].uuid
+                , out_data.posts[index].user_uid
                 , out_data.posts[index].message
                 , out_data.posts[index].metainfo
             );

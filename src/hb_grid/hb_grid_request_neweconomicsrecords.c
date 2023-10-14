@@ -23,9 +23,9 @@ hb_http_code_t hb_grid_request_neweconomicsrecords( struct evhttp_request * _req
 
     hb_grid_process_neweconomicsrecords_in_data_t in_data;
 
-    in_data.auid = account_token.auid;
+    in_data.account_uid = account_token.account_uid;
 
-    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -37,13 +37,13 @@ hb_http_code_t hb_grid_request_neweconomicsrecords( struct evhttp_request * _req
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, account_token.auid );
+    hb_grid_process_lock( _process, account_token.account_uid );
 
     hb_size_t params_data_size;
     const void * params_data;
     hb_result_t result = hb_multipart_get_value( multipart_params, multipart_params_count, "data", &params_data, &params_data_size );
 
-    hb_grid_process_unlock( _process, account_token.auid );
+    hb_grid_process_unlock( _process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {

@@ -12,7 +12,7 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
-hb_result_t hb_grid_process_newmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_newmessageschannel_in_data_t * _in, hb_grid_process_newmessageschannel_out_data_t * _out )
+hb_result_t hb_grid_process_newmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_newmessageschannel_in_data_t * _in, hb_grid_process_newmessageschannel_out_data_t * const _out )
 {
     hb_uid_t cuid;
     if( hb_messages_new_channel( _process->messages, _process->db_client, _in->puid, _in->maxpost, &cuid ) == HB_FAILURE )

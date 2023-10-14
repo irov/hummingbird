@@ -50,13 +50,13 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, user_token.uuid );
+    hb_grid_process_lock( _process, user_token.user_uid );
 
     hb_events_topic_t topic;
     hb_error_code_t code;
-    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, user_token.puid, tuid, &topic, &code );
+    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, user_token.project_uid, tuid, &topic, &code );
 
-    hb_grid_process_unlock( _process, user_token.uuid );
+    hb_grid_process_unlock( _process, user_token.user_uid );
 
     if( result == HB_FAILURE )
     {

@@ -12,16 +12,16 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
-hb_result_t hb_grid_process_postmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_postmessageschannel_in_data_t * _in, hb_grid_process_postmessageschannel_out_data_t * _out )
+hb_result_t hb_grid_process_postmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_postmessageschannel_in_data_t * _in, hb_grid_process_postmessageschannel_out_data_t * const _out )
 {
     hb_messages_post_t post;
-    post.uuid = _in->uuid;
+    post.user_uid = _in->user_uid;
     post.message = _in->message;
     post.metainfo = _in->metainfo;
 
     uint32_t postid;
     hb_error_code_t code;
-    if( hb_messages_channel_new_post( _process->messages, _process->db_client, _in->puid, _in->cuid, &post, &postid, &code ) == HB_FAILURE )
+    if( hb_messages_channel_new_post( _process->messages, _process->db_client, _in->project_uid, _in->cuid, &post, &postid, &code ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

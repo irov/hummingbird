@@ -24,7 +24,7 @@ typedef enum hb_matching_user_status_e
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_matching_user_handle_t
 {
-    hb_uid_t uuid;
+    hb_uid_t user_uid;
     int32_t rating;
     hb_uid_t auid;
 
@@ -240,7 +240,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
     {
         const hb_matching_user_handle_t * user = it;
 
-        if( user->uuid == _uuid )
+        if( user->user_uid == _uuid )
         {
             return HB_FAILURE;
         }
@@ -253,7 +253,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
 
     hb_matching_user_handle_t * new_user = room_found->users + room_found->users_count;
 
-    new_user->uuid = _uuid;
+    new_user->user_uid = _uuid;
     new_user->rating = _rating;
     
     if( hb_array_create( _data, _datasize, &new_user->public_data ) == HB_FAILURE )
@@ -371,7 +371,7 @@ hb_result_t hb_matching_join( hb_matching_handle_t * _matching, const hb_db_clie
             hb_matching_user_handle_t * matching_user = *it_matching;
 
             hb_db_make_uid_value( new_avatar_values, "woid", HB_UNKNOWN_STRING_SIZE, wuid );
-            hb_db_make_uid_value( new_avatar_values, "uoid", HB_UNKNOWN_STRING_SIZE, matching_user->uuid );
+            hb_db_make_uid_value( new_avatar_values, "uoid", HB_UNKNOWN_STRING_SIZE, matching_user->user_uid );
             hb_db_make_int32_value( new_avatar_values, "rating", HB_UNKNOWN_STRING_SIZE, matching_user->rating );
 
             if( hb_db_new_document_by_name( _client, _puid, "avatars", new_avatar_values, &matching_user->auid ) == HB_FAILURE )
@@ -500,7 +500,7 @@ hb_result_t hb_matching_found( hb_matching_handle_t * _matching, const hb_db_cli
     {
         const hb_matching_user_handle_t * user = it;
 
-        if( user->uuid != _uuid )
+        if( user->user_uid != _uuid )
         {
             continue;
         }
@@ -580,7 +580,7 @@ hb_result_t hb_matching_ready( hb_matching_handle_t * _matching, const hb_db_cli
             continue;
         }
 
-        if( user->uuid != _uuid )
+        if( user->user_uid != _uuid )
         {
             *_exist = HB_FALSE;
 

@@ -12,11 +12,11 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
-hb_result_t hb_grid_process_neweconomicsrecords( hb_grid_process_handle_t * _process, const hb_grid_process_neweconomicsrecords_in_data_t * _in, hb_grid_process_neweconomicsrecords_out_data_t * _out )
+hb_result_t hb_grid_process_neweconomicsrecords( hb_grid_process_handle_t * _process, const hb_grid_process_neweconomicsrecords_in_data_t * _in, hb_grid_process_neweconomicsrecords_out_data_t * const _out )
 {
     HB_UNUSED( _out );
 
-    if( hb_economics_new_records( _process->economics, _process->db_client, _in->puid, _in->records_source, _in->records_source_size ) == HB_FAILURE )
+    if( hb_economics_new_records( _process->economics, _process->db_client, _in->project_uid, _in->records_source, _in->records_source_size ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

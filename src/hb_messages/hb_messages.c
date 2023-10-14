@@ -28,7 +28,7 @@ typedef struct hb_messages_channel_post_handle_t
     hb_list_element_t element;
 
     uint32_t postid;
-    hb_uid_t uuid;
+    hb_uid_t user_uid;
     char message[256];
     char metainfo[256];
 } hb_messages_channel_post_handle_t;
@@ -195,7 +195,7 @@ hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const 
 
     hb_messages_channel_post_handle_t * post = HB_NEW( hb_messages_channel_post_handle_t );
     post->postid = newid;
-    post->uuid = _post->uuid;
+    post->user_uid = _post->user_uid;
     strcpy( post->message, _post->message );
     strcpy( post->metainfo, _post->metainfo );
 
@@ -268,7 +268,7 @@ hb_result_t hb_messages_channel_get_posts( hb_messages_handle_t * _handle, hb_ui
 
         hb_messages_get_t * p = _post++;
         p->postid = post->postid;
-        p->uuid = post->uuid;
+        p->user_uid = post->user_uid;
         p->message = post->message;
         p->metainfo = post->metainfo;
 

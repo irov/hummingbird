@@ -14,10 +14,10 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, const hb_grid_process_script_api_in_data_t * _in, hb_grid_process_script_api_out_data_t * _out )
+hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, const hb_grid_process_script_api_in_data_t * _in, hb_grid_process_script_api_out_data_t * const _out )
 {
     hb_script_handle_t * script_handle;
-    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _in->puid, _in->uuid, _process->matching, &script_handle ) == HB_FAILURE )
+    if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _in->project_uid, _in->user_uid, _process->matching, &script_handle ) == HB_FAILURE )
     {
         HB_LOG_MESSAGE_ERROR( "process", "invalid initialize script" );
 

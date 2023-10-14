@@ -7,10 +7,10 @@
 
 typedef struct hb_grid_process_neweconomicsrecords_in_data_t
 {
-    hb_uid_t auid;
-    hb_uid_t puid;
+    hb_uid_t account_uid;
+    hb_uid_t project_uid;
 
-    hb_source_t records_source;
+    char * records_source;
     hb_size_t records_source_size;
 } hb_grid_process_neweconomicsrecords_in_data_t;
 
@@ -19,6 +19,6 @@ typedef struct hb_grid_process_neweconomicsrecords_out_data_t
     uint32_t dummy;
 } hb_grid_process_neweconomicsrecords_out_data_t;
 
-hb_result_t hb_grid_process_neweconomicsrecords( hb_grid_process_handle_t * _process, const hb_grid_process_neweconomicsrecords_in_data_t * _in, hb_grid_process_neweconomicsrecords_out_data_t * _out );
+hb_result_t hb_grid_process_neweconomicsrecords( hb_grid_process_handle_t * _process, const hb_grid_process_neweconomicsrecords_in_data_t * _in, hb_grid_process_neweconomicsrecords_out_data_t * const _out );
 
 #endif

@@ -4,7 +4,7 @@
 #include "hb_db/hb_db.h"
 #include "hb_leaderboard/hb_leaderboard.h"
 
-hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process, const hb_grid_process_setusernickname_in_data_t * _in, hb_grid_process_setusernickname_out_data_t * _out )
+hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process, const hb_grid_process_setusernickname_in_data_t * _in, hb_grid_process_setusernickname_out_data_t * const _out )
 {
     HB_UNUSED( _out );
 
@@ -16,7 +16,7 @@ hb_result_t hb_grid_process_setusernickname( hb_grid_process_handle_t * _process
 
     hb_db_make_string_value( values_update, "info_nickname", HB_UNKNOWN_STRING_SIZE, _in->nickname, HB_UNKNOWN_STRING_SIZE );
 
-    if( hb_db_update_values_by_name( _process->db_client, _in->puid, "users", _in->uuid, values_update ) == HB_FAILURE )
+    if( hb_db_update_values_by_name( _process->db_client, _in->project_uid, "users", _in->user_uid, values_update ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

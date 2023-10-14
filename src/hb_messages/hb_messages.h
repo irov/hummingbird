@@ -13,7 +13,7 @@ hb_result_t hb_messages_new_channel( hb_messages_handle_t * _handle, const hb_db
 
 typedef struct hb_messages_post_t
 {
-    hb_uid_t uuid;
+    hb_uid_t user_uid;
     const char * message;
     const char * metainfo;
 } hb_messages_post_t;
@@ -23,7 +23,7 @@ hb_result_t hb_messages_channel_new_post( hb_messages_handle_t * _handle, const 
 typedef struct hb_messages_get_t
 {
     uint32_t postid;
-    hb_uid_t uuid;
+    hb_uid_t user_uid;
     const char * message;
     const char * metainfo;
 } hb_messages_get_t;

@@ -50,10 +50,10 @@ static hb_result_t __hb_db_get_project_public_data_revision( hb_grid_process_han
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * _out )
+hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, const hb_grid_process_loginuser_in_data_t * _in, hb_grid_process_loginuser_out_data_t * const _out )
 {
     hb_bool_t project_exist;
-    if( hb_db_exist_project_uid( _process->db_client, _in->puid, &project_exist ) == HB_FAILURE )
+    if( hb_db_exist_project_uid( _process->db_client, _in->project_uid, &project_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -85,7 +85,7 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
     hb_db_values_handle_t * fields_values;
 
     hb_bool_t authentication_exist;
-    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->puid, "users", values_authentication, &_out->uuid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &authentication_exist ) == HB_FAILURE )
+    if( hb_db_find_uid_with_values_by_name( _process->db_client, _in->project_uid, "users", values_authentication, &_out->user_uid, fields, sizeof( fields ) / sizeof( fields[0] ), &fields_values, &authentication_exist ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -111,14 +111,14 @@ hb_result_t hb_grid_process_loginuser( hb_grid_process_handle_t * _process, cons
 
     hb_db_destroy_values( fields_values );
 
-    if( __hb_db_get_project_public_data_revision( _process, _in->puid, _out->project_public_data, &_out->project_public_data_revision ) == HB_FAILURE )
+    if( __hb_db_get_project_public_data_revision( _process, _in->project_uid, _out->project_public_data, &_out->project_public_data_revision ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     hb_user_token_t token_handle;
-    token_handle.uuid = _out->uuid;
-    token_handle.puid = _in->puid;
+    token_handle.user_uid = _out->user_uid;
+    token_handle.project_uid = _in->project_uid;
 
     if( hb_token_generate( _process->cache, "UR", &token_handle, sizeof( token_handle ), 1800, &_out->token ) == HB_FAILURE )
     {

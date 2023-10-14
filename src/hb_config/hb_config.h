@@ -69,20 +69,19 @@ static const hb_uid_t HB_UID_NONE = (0);
 
 typedef struct hb_user_token_t
 {
-    hb_uid_t uuid;
-    hb_uid_t puid;
+    hb_uid_t user_uid;
+    hb_uid_t project_uid;
 } hb_user_token_t;
 
 typedef struct hb_account_token_t
 {
-    hb_uid_t auid;
+    hb_uid_t account_uid;
 } hb_account_token_t;
 
 #ifndef HB_DATA_MAX_SIZE
-#define HB_DATA_MAX_SIZE 10240
+#define HB_DATA_MAX_SIZE 102400
 #endif
 
-typedef char hb_source_t[HB_DATA_MAX_SIZE];
 typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 
 #ifndef HB_UNUSED

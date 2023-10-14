@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, const hb_grid_process_newproject_in_data_t * _in, hb_grid_process_newproject_out_data_t * _out )
+hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, const hb_grid_process_newproject_in_data_t * _in, hb_grid_process_newproject_out_data_t * const _out )
 {
     hb_db_collection_handle_t * db_collection_projects;
     if( hb_db_get_collection( _process->db_client, "hb", "projects", &db_collection_projects ) == HB_FAILURE )
@@ -27,9 +27,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
         return HB_FAILURE;
     }
 
-    hb_db_make_uid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, _in->auid );
-    hb_db_make_int32_value( project_values, "script_revision", HB_UNKNOWN_STRING_SIZE, 0 );
-    hb_db_make_int32_value( project_values, "script_version", HB_UNKNOWN_STRING_SIZE, 0 );    
+    hb_db_make_uid_value( project_values, "aoid", HB_UNKNOWN_STRING_SIZE, _in->account_uid );
     hb_db_make_string_value( project_values, "public_data", HB_UNKNOWN_STRING_SIZE, "{}", HB_UNKNOWN_STRING_SIZE );
     hb_db_make_int32_value( project_values, "public_data_revision", HB_UNKNOWN_STRING_SIZE, 0 );
 
@@ -44,7 +42,7 @@ hb_result_t hb_grid_process_newproject( hb_grid_process_handle_t * _process, con
     hb_db_destroy_collection( db_collection_projects );
 
     _out->code = HB_ERROR_OK;
-    _out->puid = puid;
+    _out->project_uid = puid;
 
     return HB_SUCCESSFUL;
 }

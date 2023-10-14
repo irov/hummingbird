@@ -24,7 +24,7 @@ hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _requ
     }
 
     hb_grid_process_newmessageschannel_in_data_t in_data;
-    in_data.auid = account_token.auid;
+    in_data.auid = account_token.account_uid;
 
     if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
     {
@@ -53,12 +53,12 @@ hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _requ
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, account_token.auid );
+    hb_grid_process_lock( _process, account_token.account_uid );
 
     hb_grid_process_newmessageschannel_out_data_t out_data;
     hb_result_t result = hb_grid_process_newmessageschannel( _process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, account_token.auid );
+    hb_grid_process_unlock( _process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {

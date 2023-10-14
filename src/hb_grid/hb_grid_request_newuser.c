@@ -20,7 +20,7 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -69,8 +69,8 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
 
     hb_grid_process_script_api_in_data_t api_in_data;
 
-    api_in_data.puid = in_data.puid;
-    api_in_data.uuid = out_data.uuid;
+    api_in_data.project_uid = in_data.project_uid;
+    api_in_data.user_uid = out_data.user_uid;
     
     api_in_data.json_handle = HB_NULLPTR;
 
@@ -86,14 +86,14 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
     if( api_out_data.code != HB_ERROR_OK )
     {
         HB_LOG_MESSAGE_WARNING( "grid", "project '%u' user '%u' create user without script event '%s'"
-            , api_in_data.puid
-            , api_in_data.uuid
+            , api_in_data.project_uid
+            , api_in_data.user_uid
             , api_in_data.method
         );
     }
 
     hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
-        , out_data.uuid
+        , out_data.user_uid
         , api_out_data.memory_used
         , api_out_data.call_used
     );

@@ -152,9 +152,6 @@ paths:
               code:
                 type: "integer"
                 format: "int32"
-              revision:
-                type: "integer"
-                format: "int64"
         400:
           description: invalid operation
   /newuser/{pid}:

@@ -20,14 +20,14 @@ hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_
     }
 
     hb_grid_process_newproject_in_data_t in_data;
-    in_data.auid = account_token.auid;
+    in_data.account_uid = account_token.account_uid;
 
-    hb_grid_process_lock( _process, account_token.auid );
+    hb_grid_process_lock( _process, account_token.account_uid );
 
     hb_grid_process_newproject_out_data_t out_data;
     hb_result_t result = hb_grid_process_newproject( _process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, account_token.auid );
+    hb_grid_process_unlock( _process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {
@@ -46,7 +46,7 @@ hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_
     }
 
     hb_uid16_t uid16;
-    if( hb_base16_encode( &out_data.puid, sizeof( out_data.puid ), uid16.value, sizeof( uid16 ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_encode( &out_data.project_uid, sizeof( out_data.project_uid ), uid16.value, sizeof( uid16 ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

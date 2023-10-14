@@ -27,8 +27,8 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
     }
 
     hb_grid_process_script_api_in_data_t in_data;
-    in_data.puid = puid;
-    in_data.uuid = HB_UID_NONE;
+    in_data.project_uid = puid;
+    in_data.user_uid = HB_UID_NONE;
 
     strcpy( in_data.api, "command" );
     strcpy( in_data.method, arg_method );
@@ -38,12 +38,12 @@ hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_gri
         return HTTP_BADREQUEST;
     }
 
-    hb_grid_process_lock( _process, account_token.auid );
+    hb_grid_process_lock( _process, account_token.account_uid );
 
     hb_grid_process_script_api_out_data_t out_data;
     hb_result_t result = hb_grid_process_script_api( _process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, account_token.auid );
+    hb_grid_process_unlock( _process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {

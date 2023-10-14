@@ -65,7 +65,7 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["code"], 0)
         pass
     
-    def test_04_command(self):    
+    def test_04_command(self):
         method = "create"
         data = dict(a=5, b=6, c="testp")
         print("----command---- token: {0} method: {1} data: {2}".format(Testing.account_token, method, data))
@@ -103,7 +103,7 @@ class Testing(unittest.TestCase):
         Testing.user_token = jresult["token"]
         pass
     
-    def test_07_api(self):    
+    def test_07_api(self):
         method = "test"
         data = dict(a=1, b=2, c="testc")
         print("----api---- token: {0} method: {1} data: {2}".format(Testing.user_token, method, data))
@@ -146,7 +146,7 @@ class Testing(unittest.TestCase):
         print("response: ", japi)
 
         self.assertIsNotNone(japi)
-        self.assertEqual(japi["code"], 0)        
+        self.assertEqual(japi["code"], 0)
         pass
             
     def test_08_matching(self):

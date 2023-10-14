@@ -181,6 +181,8 @@ endif()
 if(HUMMINGBIRD_DEPENDENCE_LUA)
     message("================lua================")
     
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/lua/linit.c ${HUMMINGBIRD_DEPENDENCIES_SOURCE_DIRECTORY}/lua/linit.c COPYONLY)
+    
     ADD_SUBDIRECTORY(lua)
 endif()
 
