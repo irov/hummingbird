@@ -32,7 +32,7 @@ https://www.mongodb.com/download-center/community
 https://github.com/dmajkic/redis/downloads
 
 ### Docker
-More in ./docker.md
+More in [[docker.md]]
 ```
 docker-compose up
 ```

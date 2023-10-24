@@ -24,7 +24,7 @@ cp "$file" ./docker_tmp/
 JSON_STRING=$( jq -n '{
   "mark": '"${timestamp}"',
   "name": "hb_grid",
-  "max_thread": 1,
+  "max_thread": 4,
   "grid_uri": "0.0.0.0",
   "grid_port": 5555,
   "cache_uri": "redis-dev",
