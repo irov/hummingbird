@@ -16,12 +16,12 @@ hb_result_t hb_grid_process_postmessageschannel( hb_grid_process_handle_t * _pro
 {
     hb_messages_post_t post;
     post.user_uid = _in->user_uid;
-    post.message = _in->message;
-    post.metainfo = _in->metainfo;
+    post.message = _in->messageschannel_message;
+    post.metainfo = _in->messageschannel_metainfo;
 
     uint32_t postid;
     hb_error_code_t code;
-    if( hb_messages_channel_new_post( _process->messages, _process->db_client, _in->project_uid, _in->cuid, &post, &postid, &code ) == HB_FAILURE )
+    if( hb_messages_channel_new_post( _process->messages, _process->db_client, _in->project_uid, _in->messageschannel_uid, &post, &postid, &code ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

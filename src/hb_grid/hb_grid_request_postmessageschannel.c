@@ -10,9 +10,26 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_postmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_postmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    const char * arg_user_token = _args->arg1;
+    hb_bool_t required = HB_TRUE;
+
+    const char * arg_user_token;
+    hb_json_get_field_string_required( _data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+
+    uint32_t arg_messageschannel_uid;
+    hb_json_get_field_uint32_required( _data, "messageschannel_uid", &arg_messageschannel_uid, &required );
+
+    const char * arg_messageschannel_message;
+    hb_json_get_field_string_required( _data, "messageschannel_message", &arg_messageschannel_message, HB_NULLPTR, &required );
+
+    const char * arg_messageschannel_metainfo;
+    hb_json_get_field_string_required( _data, "messageschannel_metainfo", &arg_messageschannel_metainfo, HB_NULLPTR, &required );
+
+    if( required == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_user_token_t user_token;
     if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
@@ -23,38 +40,9 @@ hb_http_code_t hb_grid_request_postmessageschannel( struct evhttp_request * _req
     hb_grid_process_postmessageschannel_in_data_t in_data;
     in_data.user_uid = user_token.user_uid;
     in_data.project_uid = user_token.project_uid;
-
-    hb_bool_t required_successful = HB_TRUE;
-
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "uid", &in_data.cuid, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "message", in_data.message, 256, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "metainfo", in_data.metainfo, 256, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }    
+    in_data.messageschannel_uid = arg_messageschannel_uid;
+    strncpy( in_data.messageschannel_message, arg_messageschannel_message, 256 );
+    strncpy( in_data.messageschannel_metainfo, arg_messageschannel_metainfo, 256 );
 
     hb_grid_process_lock( _process, user_token.user_uid );
 

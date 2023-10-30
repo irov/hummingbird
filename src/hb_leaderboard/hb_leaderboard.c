@@ -6,8 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_handle_t * _cache, hb_uid_t _puid, hb_uid_t _uuid, uint32_t _score )
+hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_handle_t * _cache, hb_uid_t _puid, hb_uid_t _uuid, uint64_t _score )
 {
     hb_db_values_handle_t * values_update;
     if( hb_db_create_values( &values_update ) == HB_FAILURE )
@@ -29,7 +32,7 @@ hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "leaderboard", "set project '%d' user '%d' score '%u'"
+    HB_LOG_MESSAGE_INFO( "leaderboard", "set project '%d' user '%d' score '%" PRIu64 "'"
         , _puid
         , _uuid
         , _score
@@ -38,7 +41,7 @@ hb_result_t hb_leaderboard_set( const hb_db_client_handle_t * _client, hb_cache_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, hb_uid_t _puid, uint32_t _begin, uint32_t _end, hb_uid_t * _uids, uint32_t * _scores, uint32_t * _count )
+hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, hb_uid_t _puid, uint32_t _begin, uint32_t _end, hb_uid_t * _uids, uint64_t * _scores, uint32_t * _count )
 {
     if( _begin > _end )
     {
@@ -68,11 +71,11 @@ hb_result_t hb_leaderboard_get_global( hb_cache_handle_t * _cache, hb_uid_t _pui
         hb_cache_value_t * value1 = values + index + 1;
 
         hb_uid_t * uid = _uids + index / 2;
-        uint32_t * score = _scores + index / 2;
+        uint64_t * score = _scores + index / 2;
 
         memcpy( uid, value0->str, sizeof( hb_uid_t ) );
 
-        if( sscanf( value1->str, "%u", score ) != 1 )
+        if( sscanf( value1->str, "%" SCNu64 "", score ) != 1 )
         {
             return HB_FAILURE;
         }

@@ -19,6 +19,8 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
 {
     HB_UNUSED( _out );
 
+    size_t s = strlen( _in->script_source );
+
     hb_size_t code_size;
     hb_data_t code_buffer;
     if( hb_script_compiler( _in->script_source, _in->script_source_size, code_buffer, HB_DATA_MAX_SIZE, &code_size ) == HB_FAILURE )

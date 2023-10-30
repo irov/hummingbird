@@ -10,7 +10,7 @@ typedef struct hb_grid_process_setusernickname_in_data_t
     hb_uid_t user_uid;
     hb_uid_t project_uid;
 
-    char nickname[32];
+    char nickname[32 + 1];
 } hb_grid_process_setusernickname_in_data_t;
 
 typedef struct hb_grid_process_setusernickname_out_data_t

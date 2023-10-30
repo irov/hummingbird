@@ -103,8 +103,8 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_MAX_URI 2048
 #endif
 
-#ifndef HB_GRID_REQUEST_DATA_MAX_SIZE
-#define HB_GRID_REQUEST_DATA_MAX_SIZE 2048
+#ifndef HB_GRID_RESPONSE_DATA_MAX_SIZE
+#define HB_GRID_RESPONSE_DATA_MAX_SIZE 10240
 #endif
 
 #if defined(WIN32)

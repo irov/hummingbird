@@ -10,7 +10,7 @@ typedef struct hb_grid_process_setleaderscore_in_data_t
     hb_uid_t user_uid;
     hb_uid_t project_uid;
 
-    uint32_t score;
+    uint64_t score;
 
 } hb_grid_process_setleaderscore_in_data_t;
 

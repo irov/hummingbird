@@ -9,8 +9,9 @@ typedef struct hb_grid_process_getmessageschannel_in_data_t
 {
     hb_uid_t user_uid;
     hb_uid_t project_uid;
-    hb_uid_t cuid;
-    uint32_t postid;
+
+    hb_uid_t messageschannel_uid;
+    uint32_t messageschannel_postid;
 } hb_grid_process_getmessageschannel_in_data_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_process_getmessageschannel_out_data_t

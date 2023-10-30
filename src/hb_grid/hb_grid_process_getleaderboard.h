@@ -11,14 +11,14 @@ typedef struct hb_grid_process_getleaderboard_in_data_t
     hb_uid_t user_uid;
     hb_uid_t project_uid;
 
-    uint32_t begin;
-    uint32_t end;
+    uint32_t leaderboard_begin;
+    uint32_t leaderboard_end;
 
 } hb_grid_process_getleaderboard_in_data_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_getleaderboard_desc_t
 {
-    uint32_t score;
+    uint64_t score;
     hb_uid_t user_uid;
     char nickname[32];
 } hb_getleaderboard_desc_t;

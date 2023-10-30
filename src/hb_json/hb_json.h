@@ -43,6 +43,7 @@ hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * _val
 hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value );
 
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default );
+hb_result_t hb_json_get_field_string_required( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, hb_bool_t * _result );
 hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default );
 hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, hb_bool_t * _result );
 hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default );

@@ -10,11 +10,23 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    HB_UNUSED( _request );
+    hb_bool_t required = HB_TRUE;
 
-    const char * arg_user_token = _args->arg1;
+    const char * arg_user_token;
+    hb_json_get_field_string_required( _data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+
+    uint32_t arg_messageschannel_uid;
+    hb_json_get_field_uint32_required( _data, "messageschannel_uid", &arg_messageschannel_uid, &required );
+
+    uint32_t arg_messageschannel_postid;
+    hb_json_get_field_uint32_required( _data, "messageschannel_postid", &arg_messageschannel_postid, &required );
+
+    if( required == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_user_token_t user_token;
     if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
@@ -22,37 +34,11 @@ hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _requ
         return HB_FAILURE;
     }
 
-    hb_bool_t required_successful = HB_TRUE;
-
     hb_grid_process_getmessageschannel_in_data_t in_data;
-
     in_data.project_uid = user_token.project_uid;
     in_data.user_uid = user_token.user_uid;
-
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "uid", &in_data.cuid, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "postid", &in_data.postid, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }
+    in_data.messageschannel_uid = arg_messageschannel_uid;
+    in_data.messageschannel_postid = arg_messageschannel_postid;
 
     hb_grid_process_lock( _process, user_token.user_uid );
 

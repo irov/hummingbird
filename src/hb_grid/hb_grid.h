@@ -62,13 +62,6 @@ typedef struct hb_grid_process_handle_t
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;
 
-typedef struct hb_grid_process_cmd_args_t
-{    
-    char arg1[128];
-    char arg2[128];
-    char arg3[128];
-} hb_grid_process_cmd_args_t;
-
 void hb_grid_process_lock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
 void hb_grid_process_unlock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
 

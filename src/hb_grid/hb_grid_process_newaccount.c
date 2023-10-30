@@ -29,7 +29,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     }
 
     hb_sha1_t login_sha1;
-    hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
+    hb_sha1( _in->account_login, strlen( _in->account_login ), &login_sha1 );
 
     hb_db_make_sha1_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
 
@@ -54,7 +54,7 @@ hb_result_t hb_grid_process_newaccount( hb_grid_process_handle_t * _process, con
     _out->code = HB_ERROR_OK;
 
     hb_sha1_t password_sha1;
-    hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
+    hb_sha1( _in->account_password, strlen( _in->account_password ), &password_sha1 );
 
     hb_db_values_handle_t * values_new;
     if( hb_db_create_values( &values_new ) == HB_FAILURE )

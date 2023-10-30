@@ -10,38 +10,24 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_http_code_t hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_loginaccount( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    HB_UNUSED( _args );
+    hb_bool_t required = HB_TRUE;
 
-    hb_bool_t required_successful = HB_TRUE;
+    const char * arg_account_login;
+    hb_json_get_field_string_required( _data, "account_login", &arg_account_login, HB_NULLPTR, &required );
 
-    hb_grid_process_loginaccount_in_data_t in_data;
+    const char * arg_account_password;
+    hb_json_get_field_string_required( _data, "account_password", &arg_account_password, HB_NULLPTR, &required );
 
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "login", in_data.login, 128, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "password", in_data.password, 128, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
+    if( required == HB_FALSE )
     {
         return HTTP_BADREQUEST;
     }
+
+    hb_grid_process_loginaccount_in_data_t in_data;
+    strncpy( in_data.account_login, arg_account_login, 128 );
+    strncpy( in_data.account_password, arg_account_password, 128 );
 
     hb_grid_process_loginaccount_out_data_t out_data;
     if( hb_grid_process_loginaccount( _process, &in_data, &out_data ) == HB_FAILURE )

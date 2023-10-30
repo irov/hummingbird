@@ -1,56 +1,56 @@
 #ifndef HB_GRID_CMD_H_
 #define HB_GRID_CMD_H_
 
-#include "hb_grid/hb_grid.h"
 #include "hb_config/hb_config.h"
+
+#include "hb_json/hb_json.h"
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_cmd_inittab_t
 {
     const char * name;
-    hb_http_code_t(*request)(struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd);
-    int32_t args;
+    hb_http_code_t( *request )(hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size);
 } hb_grid_cmd_inittab_t;
 //////////////////////////////////////////////////////////////////////////
-extern hb_http_code_t hb_grid_request_newaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_loginaccount( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_newproject( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_upload( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_loginuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_api( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_avatar( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_command( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_setusernickname( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_setleaderscore( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_getleaderrank( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_getleaderboard( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _cmd );
-extern hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args );
-extern hb_http_code_t hb_grid_request_postmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args );
-extern hb_http_code_t hb_grid_request_getmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args );
-extern hb_http_code_t hb_grid_request_neweventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args );
-extern hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args );
+extern hb_http_code_t hb_grid_request_newaccount( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_loginaccount( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_newproject( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_upload( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_loginuser( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_api( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_avatar( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_command( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_setusernickname( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_setleaderscore( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_getleaderrank( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_getleaderboard( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_postmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_neweventstopic( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
+extern hb_http_code_t hb_grid_request_geteventstopic( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size );
 //////////////////////////////////////////////////////////////////////////
 static hb_grid_cmd_inittab_t grid_cmds[] =
 {
-    { "newaccount", &hb_grid_request_newaccount, 0 },
-    { "loginaccount", &hb_grid_request_loginaccount, 0 },
-    { "newproject", &hb_grid_request_newproject, 1 },
-    { "upload", &hb_grid_request_upload, 2 },
-    { "newuser", &hb_grid_request_newuser, 1 },
-    { "loginuser", &hb_grid_request_loginuser, 1 },
-    { "api", &hb_grid_request_api, 2 },
-    { "setusernickname", &hb_grid_request_setusernickname, 1 },
-    { "setleaderscore", &hb_grid_request_setleaderscore, 1 },
-    { "getleaderrank", &hb_grid_request_getleaderrank, 1 },
-    { "getleaderboard", &hb_grid_request_getleaderboard, 1 },
-    { "newmessageschannel", &hb_grid_request_newmessageschannel, 2 },
-    { "postmessageschannel", &hb_grid_request_postmessageschannel, 1 },
-    { "getmessageschannel", &hb_grid_request_getmessageschannel, 1 },
-    { "avatar", &hb_grid_request_avatar, 2 },
-    { "command", &hb_grid_request_command, 3 },
-    { "neweventstopic", &hb_grid_request_neweventstopic, 2 },
-    { "geteventstopic", &hb_grid_request_geteventstopic, 1 },
+    { "newaccount", &hb_grid_request_newaccount },
+    { "loginaccount", &hb_grid_request_loginaccount },
+    { "newproject", &hb_grid_request_newproject },
+    { "upload", &hb_grid_request_upload },
+    { "newuser", &hb_grid_request_newuser },
+    { "loginuser", &hb_grid_request_loginuser },
+    { "api", &hb_grid_request_api },
+    { "setusernickname", &hb_grid_request_setusernickname },
+    { "setleaderscore", &hb_grid_request_setleaderscore },
+    { "getleaderrank", &hb_grid_request_getleaderrank },
+    { "getleaderboard", &hb_grid_request_getleaderboard },
+    { "newmessageschannel", &hb_grid_request_newmessageschannel },
+    { "postmessageschannel", &hb_grid_request_postmessageschannel },
+    { "getmessageschannel", &hb_grid_request_getmessageschannel },
+    { "avatar", &hb_grid_request_avatar },
+    { "command", &hb_grid_request_command },
+    { "neweventstopic", &hb_grid_request_neweventstopic },
+    { "geteventstopic", &hb_grid_request_geteventstopic },
 };
 //////////////////////////////////////////////////////////////////////////
 

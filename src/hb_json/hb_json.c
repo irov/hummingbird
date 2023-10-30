@@ -437,16 +437,22 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
 
     if( field == HB_NULLPTR )
     {
-        if( _default != HB_NULLPTR )
-        {
-            *_value = _default;
-
-            return HB_SUCCESSFUL;
-        }
-        else
+        if( _default == HB_NULLPTR )
         {
             return HB_FAILURE;
         }
+
+        *_value = _default;
+
+        if( _size != HB_NULLPTR )
+        {
+            if( _default != HB_NULLPTR )
+            {
+                *_size = strlen( _default );
+            }
+        }
+
+        return HB_SUCCESSFUL;        
     }
 
     if( hb_json_to_string( field, _value, _size ) == HB_FAILURE )
@@ -455,6 +461,37 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
     }
 
     hb_json_destroy( field );
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_get_field_string_required( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, hb_bool_t * _result )
+{
+    hb_json_handle_t * field;
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    if( field == HB_NULLPTR )
+    {
+        if( _result != HB_NULLPTR )
+        {
+            *_result = HB_FALSE;
+        }
+
+        return HB_SUCCESSFUL;
+    }
+
+    if( hb_json_to_string( field, _value, _size ) == HB_FAILURE )
+    {
+        return HB_FAILURE;
+    }
+
+    hb_json_destroy( field );
+
+    //it's feature for requireds flags!
+    //*_result = HB_TRUE;
 
     return HB_SUCCESSFUL;
 }

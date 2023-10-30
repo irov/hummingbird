@@ -138,7 +138,7 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
     va_start( args, _format );
 
     char message[HB_LOG_MAX_MESSAGE_SIZE];
-    int32_t n = vsprintf( message, _format, args );
+    int32_t n = vsnprintf( message, HB_LOG_MAX_MESSAGE_SIZE, _format, args );
 
     va_end( args );
 

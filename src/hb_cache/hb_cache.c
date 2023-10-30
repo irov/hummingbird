@@ -137,7 +137,9 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply == HB_NULLPTR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET %.*s' with error: '%s'"
+            , _keysize
+            , _key
             , _cache->context->errstr
         );
 
@@ -146,7 +148,9 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply->type == REDIS_REPLY_ERROR )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' with error: '%s'"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET %.*s' with error: '%s'"
+            , _keysize
+            , _key
             , reply->str
         );
 
@@ -155,7 +159,10 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply->type == REDIS_REPLY_NIL )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' return nil" );
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET %.*s' return nil"
+            , _keysize
+            , _key
+        );
 
         freeReplyObject( reply );
 
@@ -164,7 +171,9 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply->type != REDIS_REPLY_STRING )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' return '%s' not 'string'" 
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET %.*s' return '%s' not 'string'" 
+            , _keysize
+            , _key
             , __hb_redis_reply_str( reply->type )
         );
 
@@ -175,7 +184,9 @@ hb_result_t hb_cache_get_value( const hb_cache_handle_t * _cache, const void * _
 
     if( reply->len > _capacity )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET' return '%s' len %zu more capacity %zu"
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'GET %.*s' return '%s' len %zu more capacity %zu"
+            , _keysize
+            , _key
             , reply->str
             , reply->len
             , _capacity
@@ -205,7 +216,7 @@ hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void 
         _keysize = strlen( (const char *)_key );
     }
 
-    redisReply * reply = redisCommand( _cache->context, "INCRBY %b %" SCNu64, _key, _keysize, _increment );
+    redisReply * reply = redisCommand( _cache->context, "INCRBY %b %" PRIu64, _key, _keysize, _increment );
 
     if( reply == HB_NULLPTR )
     {
@@ -298,7 +309,7 @@ hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, const void * _value, hb_size_t _valuesize, uint32_t _score )
+hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, const void * _value, hb_size_t _valuesize, uint64_t _score )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -310,7 +321,7 @@ hb_result_t hb_cache_zadd( const hb_cache_handle_t * _cache, const void * _key, 
         _valuesize = strlen( (const char *)_value );
     }
 
-    redisReply * reply = redisCommand( _cache->context, "ZADD %b %u %b", _key, _keysize, _score, _value, _valuesize );
+    redisReply * reply = redisCommand( _cache->context, "ZADD %b %" PRIu64 " %b", _key, _keysize, _score, _value, _valuesize );
 
     if( reply == HB_NULLPTR )
     {

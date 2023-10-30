@@ -42,7 +42,7 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
     }
     
     hb_sha1_t login_sha1;
-    hb_sha1( _in->login, strlen( _in->login ), &login_sha1 );
+    hb_sha1( _in->user_login, strlen( _in->user_login ), &login_sha1 );
 
     hb_db_make_sha1_value( values_authentication, "login", HB_UNKNOWN_STRING_SIZE, &login_sha1 );
 
@@ -66,7 +66,7 @@ hb_result_t hb_grid_process_newuser( hb_grid_process_handle_t * _process, const 
     if( authentication_exist == HB_FALSE )
     {
         hb_sha1_t password_sha1;
-        hb_sha1( _in->password, strlen( _in->password ), &password_sha1 );
+        hb_sha1( _in->user_password, strlen( _in->user_password ), &password_sha1 );
 
         hb_db_values_handle_t * values_user_new;
         if( hb_db_create_values( &values_user_new ) == HB_FAILURE )

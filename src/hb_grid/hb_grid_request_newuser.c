@@ -12,43 +12,33 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    const char * arg_puid = _args->arg1;
+    hb_bool_t required = HB_TRUE;
 
-    hb_bool_t required_successful = HB_TRUE;
+    const char * arg_project_uid;
+    hb_json_get_field_string_required( _data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+
+    const char * arg_user_login;
+    hb_json_get_field_string_required( _data, "user_login", &arg_user_login, HB_NULLPTR, &required );
+
+    const char * arg_user_password;
+    hb_json_get_field_string_required( _data, "user_password", &arg_user_password, HB_NULLPTR, &required );
+
+    if( required == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "login", in_data.login, 128, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_copy_field_string_required( json_handle, "password", in_data.password, 128, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }
+    strncpy( in_data.user_login, arg_user_login, 128 );
+    strncpy( in_data.user_password, arg_user_password, 128 );
 
     hb_grid_process_newuser_out_data_t out_data;
     if( hb_grid_process_newuser( _process, &in_data, &out_data ) == HB_FAILURE )
@@ -72,7 +62,7 @@ hb_http_code_t hb_grid_request_newuser( struct evhttp_request * _request, hb_gri
     api_in_data.project_uid = in_data.project_uid;
     api_in_data.user_uid = out_data.user_uid;
     
-    api_in_data.json_handle = HB_NULLPTR;
+    api_in_data.json_args = HB_NULLPTR;
 
     strcpy( api_in_data.api, "event" );
     strcpy( api_in_data.method, "onCreateUser" );

@@ -59,20 +59,50 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     hb_http_code_t response_code = HTTP_OK;
 
     hb_size_t response_data_size = 2;
-    char response_data[HB_GRID_REQUEST_DATA_MAX_SIZE];
+    char response_data[HB_GRID_RESPONSE_DATA_MAX_SIZE];
     strcpy( response_data, "{}" );
 
-    char cmd_name[128];
+    char cmd_name[64 + 1];
+    int32_t count = sscanf( uri, "/%64[^'/']", cmd_name );
 
-    hb_grid_process_cmd_args_t cmd_args;
-    int32_t count = sscanf( uri, "/%[^'/']/%[^'/']/%[^'/']/%[^'/']", cmd_name, cmd_args.arg1, cmd_args.arg2, cmd_args.arg3 );
-
-    if( count == 0 )
+    if( count != 1 )
     {
         evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
 
         return;
     }
+
+    if( hb_http_is_request_json( _request ) == HB_FALSE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    hb_json_handle_t * json_handle;
+    if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+#ifdef HB_DEBUG
+    char json_string[HB_DATA_MAX_SIZE];
+    hb_size_t json_string_size;
+    if( hb_json_dumps( json_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
+    {
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+
+        return;
+    }
+
+    HB_LOG_MESSAGE_INFO( "grid", "request '%s' data: %.*s"
+        , cmd_name
+        , json_string_size
+        , json_string
+    );
+#endif
 
     hb_bool_t cmd_found = HB_FALSE;
 
@@ -87,66 +117,26 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             continue;
         }
 
-        if( cmd_inittab->args + 1 != count )
-        {
-            evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-            return;
-        }
-
-#ifdef HB_DEBUG
-        if( hb_http_is_request_json( _request ) == HB_TRUE )
-        {
-            hb_json_handle_t * json_handle;
-            if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-            {
-                evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-                return;
-            }
-
-            char json_string[HB_DATA_MAX_SIZE];
-            hb_size_t json_string_size;
-            if( hb_json_dumps( json_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
-            {
-                evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
-
-                return;
-            }
-
-            hb_json_destroy( json_handle );
-
-            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s] json: %.*s"
-                , cmd_name
-                , (cmd_inittab->args >= 1 ? cmd_args.arg1 : "")
-                , (cmd_inittab->args >= 2 ? cmd_args.arg2 : "")
-                , (cmd_inittab->args >= 3 ? cmd_args.arg3 : "")
-                , json_string_size
-                , json_string
-            );
-        }
-        else
-        {
-            HB_LOG_MESSAGE_INFO( "grid", "request '%s' cmds [%s] [%s] [%s]"
-                , cmd_name
-                , (cmd_inittab->args >= 1 ? cmd_args.arg1 : "")
-                , (cmd_inittab->args >= 2 ? cmd_args.arg2 : "")
-                , (cmd_inittab->args >= 3 ? cmd_args.arg3 : "")
-            );
-        }
-#endif
-
-        response_code = (*cmd_inittab->request)(_request, process, response_data, &response_data_size, &cmd_args);
+        response_code = (*cmd_inittab->request)(process, json_handle, response_data, &response_data_size);
 
         cmd_found = HB_TRUE;
 
         break;
     }
 
+    hb_json_destroy( json_handle );
+
     if( cmd_found == HB_FALSE )
     {
         response_code = HTTP_NOTIMPLEMENTED;
     }
+
+    HB_LOG_MESSAGE_INFO( "grid", "response '%s' code: %d data: %.*s"
+        , cmd_name
+        , response_code
+        , response_data_size
+        , response_data
+    );
 
     evbuffer_add( output_buffer, response_data, response_data_size );
 

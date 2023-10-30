@@ -10,42 +10,26 @@
 #include <string.h>
 #include <stdio.h>
 
-hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_geteventstopic( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    const char * arg_user_token = _args->arg1;
+    hb_bool_t required = HB_TRUE;
 
-    hb_user_token_t user_token;
-    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
+    const char * arg_user_token;
+    hb_json_get_field_string_required( _data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+
+    uint32_t arg_eventstopic_uid;
+    hb_json_get_field_uint32_required( _data, "eventstopic_uid", &arg_eventstopic_uid, &required );
+
+    uint32_t arg_eventstopic_index;
+    hb_json_get_field_uint32_required( _data, "eventstopic_index", &arg_eventstopic_index, &required );
+
+    if( required == HB_FALSE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_uid_t tuid;
-    uint32_t index;
-
-    hb_bool_t required_successful = HB_TRUE;
-
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "uid", &tuid, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "index", &index, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
+    hb_user_token_t user_token;
+    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -54,7 +38,7 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
 
     hb_events_topic_t topic;
     hb_error_code_t code;
-    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, user_token.project_uid, tuid, &topic, &code );
+    hb_result_t result = hb_events_get_topic( _process->events, _process->cache, _process->db_client, user_token.project_uid, arg_eventstopic_uid, &topic, &code );
 
     hb_grid_process_unlock( _process, user_token.user_uid );
 
@@ -74,7 +58,7 @@ hb_http_code_t hb_grid_request_geteventstopic( struct evhttp_request * _request,
         return HTTP_OK;
     }
 
-    if( index != ~0U && topic.index == index )
+    if( arg_eventstopic_index != ~0U && topic.index == arg_eventstopic_index )
     {
         hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"index\":%u}"
             , topic.index

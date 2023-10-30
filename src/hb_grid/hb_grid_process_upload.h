@@ -10,7 +10,7 @@ typedef struct hb_grid_process_upload_in_data_t
     hb_uid_t account_uid;
     hb_uid_t project_uid;
 
-    const void * script_source;
+    char script_source[HB_DATA_MAX_SIZE];
     hb_size_t script_source_size;
 } hb_grid_process_upload_in_data_t;
 

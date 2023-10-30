@@ -18,147 +18,48 @@ def __response_json(response):
         j = json.loads(d)
         
         return j
-    except json.decoder.JSONDecodeError as ex:
-        print("json.decoder.JSONDecodeError:", ex)
+    except json.decoder.JSONDecodeError as e:
+        print("except json.decoder.JSONDecodeError:", e)
         print("data:", d)
         pass
         
     return None
     pass
+    
+def __post_json(params):
+    try:
+        jd = json.dumps(params)
+        data = jd.encode('utf-8')
+        
+        return data
+    except json.decoder.JSONDecodeError as e:
+        print("except json.dumps.JSONDecodeError:", e)
+        print("params", params)
+        pass
+    
+    return None
+    pass
 
 def post(url, **params):
-    jd = json.dumps(params)
-    data = jd.encode('utf-8')
+    data = __post_json(params)
+    
+    if data is None:
+        print("post url '{0}' invalid json".format(url))
+        return None
+        pass
+    
     r = request.Request(url)
     r.add_header('Content-Type', 'application/json')
     r.add_header('Content-Length', len(data))
     try:
         response = request.urlopen(r, timeout=5, data=data)
     except HTTPError as e:
-        print("HTTPError: ", e.code, e.reason)
+        print("post url '{0}' HTTPError: {1} [{2}]".format(url, e.reason, e.code))
         return None
         pass
     
     j = __response_json(response)
     
-    return j
-    pass
-    
-class MultiPartForm:
-    """Accumulate the data to be used when posting a form."""
-
-    def __init__(self):
-        self.form_fields = []
-        self.files = []
-        # Use a large random byte string to separate
-        # parts of the MIME data.
-        self.boundary = uuid.uuid4().hex.encode('utf-8')
-        return
-
-    def get_content_type(self):
-        return 'multipart/form-data; boundary={}'.format(
-            self.boundary.decode('utf-8'))
-
-    def add_field(self, name, value):
-        """Add a simple field to the form data."""
-        self.form_fields.append((name, value))
-
-    def add_file(self, fieldname, filename, fileHandle,
-                 mimetype=None):
-        """Add a file to be uploaded."""
-        body = fileHandle.read()
-        if mimetype is None:
-            mimetype = (
-                mimetypes.guess_type(filename)[0] or
-                'application/octet-stream'
-            )
-        self.files.append((fieldname, filename, mimetype, body))
-        return
-
-    @staticmethod
-    def _form_data(name):
-        return ('Content-Disposition: form-data; '
-                'name="{}"\r\n').format(name).encode('utf-8')
-
-    @staticmethod
-    def _attached_file(name, filename):
-        return ('Content-Disposition: form-data; '
-                'name="{}"; filename="{}"\r\n').format(
-                    name, filename).encode('utf-8')
-
-    @staticmethod
-    def _content_type(ct):
-        return 'Content-Type: {}\r\n'.format(ct).encode('utf-8')
-
-    def __bytes__(self):
-        """Return a byte-string representing the form data,
-        including attached files.
-        """
-        buffer = io.BytesIO()
-        boundary = b'--' + self.boundary + b'\r\n'
-
-        # Add the form fields
-        for name, value in self.form_fields:
-            buffer.write(boundary)
-            buffer.write(self._form_data(name))
-            buffer.write(b'\r\n')
-            buffer.write(value.encode('utf-8'))
-            buffer.write(b'\r\n')
-
-        # Add the files to upload
-        for f_name, filename, f_content_type, body in self.files:
-            buffer.write(boundary)
-            buffer.write(self._attached_file(f_name, filename))
-            buffer.write(self._content_type(f_content_type))
-            buffer.write(b'\r\n')
-            buffer.write(body)
-            buffer.write(b'\r\n')
-
-        buffer.write(b'--' + self.boundary + b'--\r\n')
-        return buffer.getvalue()
-    
-def upload(url, filename, **fields):
-    form = MultiPartForm()
-    for k, v in fields.items():
-        form.add_field(k, v)
-
-    # Add a fake file
-    f = open(filename, 'rb')
-    form.add_file('data', filename, fileHandle=f)
-    data=bytes(form)
-    f.close()
-    r = request.Request(url, data=data)
-    r.add_header('Content-type', form.get_content_type())
-    r.add_header('Content-length', len(data))
-    
-    try:
-        response = request.urlopen(r, timeout=5)
-    except HTTPError as e:
-        print("HTTPError: ", e.code, e.reason)
-        return None
-        pass
-    
-    j = __response_json(response)
-    
-    return j
-    pass
-    
-def api(url, **params):
-    jd = json.dumps(params)
-    data = jd.encode('utf-8')
-    r = request.Request(url)
-    r.add_header('Content-Type', 'application/json')
-    r.add_header('Content-Length', len(data))
-    
-    try:
-        response = request.urlopen(r, timeout=5, data=data)
-    except HTTPError as e:
-        print("HTTPError: ", e.code, e.reason)
-        return None
-        pass
-        
-    j = __response_json(response)
-        
     return j
     pass
     

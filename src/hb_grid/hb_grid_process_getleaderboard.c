@@ -10,8 +10,8 @@ hb_result_t hb_grid_process_getleaderboard( hb_grid_process_handle_t * _process,
 {
     uint32_t descs_count;
     hb_uid_t uids[16] = {0};
-    uint32_t scores[16] = {0};
-    if( hb_leaderboard_get_global( _process->cache, _in->project_uid, _in->begin, _in->end, uids, scores, &descs_count ) == HB_FAILURE )
+    uint64_t scores[16] = {0};
+    if( hb_leaderboard_get_global( _process->cache, _in->project_uid, _in->leaderboard_begin, _in->leaderboard_end, uids, scores, &descs_count ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

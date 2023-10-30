@@ -8,8 +8,8 @@
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_process_loginaccount_in_data_t
 {
-    char login[128];
-    char password[128];
+    char account_login[128];
+    char account_password[128];
 
 } hb_grid_process_loginaccount_in_data_t;
 //////////////////////////////////////////////////////////////////////////

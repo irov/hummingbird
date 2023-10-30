@@ -10,12 +10,23 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _request, hb_grid_process_handle_t * _process, char * _response, hb_size_t * _size, const hb_grid_process_cmd_args_t * _args )
+hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
 {
-    HB_UNUSED( _request );
+    hb_bool_t required = HB_TRUE;
 
-    const char * arg_account_token = _args->arg1;
-    const char * arg_puid = _args->arg2;
+    const char * arg_account_token;
+    hb_json_get_field_string_required( _data, "account_token", &arg_account_token, HB_NULLPTR, &required );
+
+    const char * arg_project_uid;
+    hb_json_get_field_string_required( _data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+
+    uint32_t arg_messageschannel_maxpost;
+    hb_json_get_field_uint32_required( _data, "messageschannel_maxpost", &arg_messageschannel_maxpost, &required );
+
+    if( required == HB_FALSE )
+    {
+        return HTTP_BADREQUEST;
+    }
 
     hb_account_token_t account_token;
     if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
@@ -25,33 +36,13 @@ hb_http_code_t hb_grid_request_newmessageschannel( struct evhttp_request * _requ
 
     hb_grid_process_newmessageschannel_in_data_t in_data;
     in_data.auid = account_token.account_uid;
-
-    if( hb_base16_decode( arg_puid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
+    
+    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &in_data.puid, sizeof( in_data.puid ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_bool_t required_successful = HB_TRUE;
-
-    {
-        hb_json_handle_t * json_handle;
-        if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        if( hb_json_get_field_uint32_required( json_handle, "maxpost", &in_data.maxpost, &required_successful ) == HB_FAILURE )
-        {
-            return HTTP_BADREQUEST;
-        }
-
-        hb_json_destroy( json_handle );
-    }
-
-    if( required_successful == HB_FALSE )
-    {
-        return HTTP_BADREQUEST;
-    }
+    in_data.messageschannel_maxpost = arg_messageschannel_maxpost;
 
     hb_grid_process_lock( _process, account_token.account_uid );
 

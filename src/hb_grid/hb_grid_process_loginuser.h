@@ -9,8 +9,8 @@ typedef struct hb_grid_process_loginuser_in_data_t
 {
     hb_uid_t project_uid;
 
-    char login[128];
-    char password[128];
+    char login[128 + 1];
+    char password[128 + 1];
 
     int32_t user_public_data_revision;
     int32_t project_public_data_revision;
