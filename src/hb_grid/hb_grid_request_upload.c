@@ -47,7 +47,7 @@ hb_http_code_t hb_grid_request_upload( hb_grid_process_handle_t * _process, hb_j
         return HTTP_BADREQUEST;
     }
 
-    if( hb_base64_decode( arg_code, arg_code_size, in_data.script_source, HB_DATA_MAX_SIZE, &in_data.script_source_size ) == HB_FAILURE )
+    if( hb_base64_decode_string( arg_code, arg_code_size, in_data.script_source, HB_DATA_MAX_SIZE, &in_data.script_source_size ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

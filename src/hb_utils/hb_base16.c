@@ -3,6 +3,12 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
+static const char base16_encode_table[] = {
+    'B', 'C', 'D', 'G',
+    'H', 'J', 'K', 'L',
+    'M', 'N', 'P', 'Q',
+    'R', 'S', 'T', 'V'};
+//////////////////////////////////////////////////////////////////////////
 static const hb_byte_t base16_decode_table[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //15
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //31
@@ -44,12 +50,6 @@ hb_result_t hb_base16_encode( const void * _data, hb_size_t _size, char * _base1
     {
         return HB_FAILURE;
     }
-
-    const char base16_encode_table[] = {
-        'B', 'C', 'D', 'G',
-        'H', 'J', 'K', 'L',
-        'M', 'N', 'P', 'Q',
-        'R', 'S', 'T', 'V'};
 
     const hb_byte_t * data = (const hb_byte_t *)_data;
 
@@ -103,3 +103,4 @@ hb_result_t hb_base16_decode( const char * _base16, hb_size_t _size, void * _dat
 
     return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////

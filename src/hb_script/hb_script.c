@@ -357,13 +357,21 @@ hb_result_t hb_script_initialize( const hb_cache_handle_t * _cache, const hb_db_
 
     lua_atpanic( L, &__hb_lua_panic );
 
-    //luaL_openlibs( L );
-    //luaopen_package( L );
-    //luaopen_coroutine( L );
-    //luaopen_table( L );
-    //luaopen_string( L );
-    //luaopen_utf8( L );
-    //luaopen_math( L );
+    static const luaL_Reg loadedlibs[] = {
+        {LUA_GNAME, luaopen_base},
+        {LUA_COLIBNAME, luaopen_coroutine},
+        {LUA_TABLIBNAME, luaopen_table},
+        {LUA_STRLIBNAME, luaopen_string},
+        {LUA_MATHLIBNAME, luaopen_math},
+        {LUA_UTF8LIBNAME, luaopen_utf8},
+        {NULL, NULL}
+    };
+
+    for( const luaL_Reg * lib = loadedlibs; lib->func; lib++ )
+    {
+        luaL_requiref( L, lib->name, lib->func, 1 );
+        lua_pop( L, 1 );
+    }
 
     lua_getglobal( L, "_G" );
     luaL_setfuncs( L, globalLib, 0 );
