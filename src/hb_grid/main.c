@@ -68,13 +68,32 @@ static const hb_grid_cmd_inittab_t grid_cmds[] =
     {"geteventstopic", &hb_grid_request_geteventstopic},
 };
 //////////////////////////////////////////////////////////////////////////
+static void __hb_grid_reply_badrequest( const char * _uri, struct evhttp_request * _request, const char * _reason, struct evbuffer * _output_buffer )
+{
+    HB_LOG_MESSAGE_WARNING( "grid", "response '%s' reply bad request reason: %s"
+        , _uri
+        , _reason
+    );
+
+    evhttp_send_reply( _request, HTTP_BADREQUEST, _reason, _output_buffer );
+}
+//////////////////////////////////////////////////////////////////////////
+static void __hb_grid_reply_notimplemented( const char * _uri, struct evhttp_request * _request, const char * _reason, struct evbuffer * _output_buffer )
+{
+    HB_LOG_MESSAGE_WARNING( "grid", "response '%s' reply not implemented reason: %s"
+        , _uri
+        , _reason
+    );
+
+    evhttp_send_reply( _request, HTTP_NOTIMPLEMENTED, _reason, _output_buffer );
+}
+//////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
     const char * host = evhttp_request_get_host( _request );
     HB_UNUSED( host );
 
     const char * uri = evhttp_request_get_uri( _request );
-    HB_UNUSED( uri );
 
     struct evbuffer * output_buffer = evhttp_request_get_output_buffer( _request );
 
@@ -99,14 +118,14 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     if( count != 1 )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "cmd count != 1", output_buffer );
+        __hb_grid_reply_badrequest( uri, _request, "cmd count != 1", output_buffer );
 
         return;
     }
 
     if( hb_http_is_request_json( _request ) == HB_FALSE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "request content type should be of json type", output_buffer );
+        __hb_grid_reply_badrequest( uri, _request, "request content type should be of json type", output_buffer );
 
         return;
     }
@@ -114,7 +133,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     hb_json_handle_t * json_data_handle;
     if( hb_http_get_request_json( _request, &json_data_handle ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "bad json format", output_buffer );
+        __hb_grid_reply_badrequest( uri, _request, "bad json format", output_buffer );
 
         return;
     }
@@ -124,7 +143,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     hb_size_t json_string_size;
     if( hb_json_dumps( json_data_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "bad json dumps", output_buffer );
+        __hb_grid_reply_badrequest( uri, _request, "bad json dumps", output_buffer );
 
         return;
     }
@@ -168,7 +187,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     if( cmd_found == HB_FALSE )
     {
-        evhttp_send_reply( _request, HTTP_NOTIMPLEMENTED, "command not found", output_buffer );
+        __hb_grid_reply_notimplemented( uri, _request, "command not found", output_buffer );
 
         return;
     }
