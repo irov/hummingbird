@@ -1,7 +1,5 @@
 #include "hb_grid.h"
 
-#include "hb_grid_cmd.h"
-
 #include "hb_memory/hb_memory.h"
 #include "hb_log/hb_log.h"
 #include "hb_log_console/hb_log_console.h"
@@ -22,6 +20,53 @@
 #include <stdlib.h>
 #include <string.h>
 
+//////////////////////////////////////////////////////////////////////////
+typedef struct hb_grid_cmd_inittab_t
+{
+    const char * name;
+    hb_http_code_t( *request )(hb_grid_request_handle_t * _args);
+} hb_grid_cmd_inittab_t;
+//////////////////////////////////////////////////////////////////////////
+extern hb_http_code_t hb_grid_request_newaccount( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_loginaccount( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_newproject( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_upload( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_newuser( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_loginuser( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_api( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_avatar( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_command( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_setusernickname( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_setleaderscore( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_getleaderrank( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_getleaderboard( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_postmessageschannel( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_neweventstopic( hb_grid_request_handle_t * _args );
+extern hb_http_code_t hb_grid_request_geteventstopic( hb_grid_request_handle_t * _args );
+//////////////////////////////////////////////////////////////////////////
+static const hb_grid_cmd_inittab_t grid_cmds[] =
+{
+    {"newaccount", &hb_grid_request_newaccount},
+    {"loginaccount", &hb_grid_request_loginaccount},
+    {"newproject", &hb_grid_request_newproject},
+    {"upload", &hb_grid_request_upload},
+    {"newuser", &hb_grid_request_newuser},
+    {"loginuser", &hb_grid_request_loginuser},
+    {"api", &hb_grid_request_api},
+    {"setusernickname", &hb_grid_request_setusernickname},
+    {"setleaderscore", &hb_grid_request_setleaderscore},
+    {"getleaderrank", &hb_grid_request_getleaderrank},
+    {"getleaderboard", &hb_grid_request_getleaderboard},
+    {"newmessageschannel", &hb_grid_request_newmessageschannel},
+    {"postmessageschannel", &hb_grid_request_postmessageschannel},
+    {"getmessageschannel", &hb_grid_request_getmessageschannel},
+    {"avatar", &hb_grid_request_avatar},
+    {"command", &hb_grid_request_command},
+    {"neweventstopic", &hb_grid_request_neweventstopic},
+    {"geteventstopic", &hb_grid_request_geteventstopic},
+};
 //////////////////////////////////////////////////////////////////////////
 static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 {
@@ -58,31 +103,27 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     hb_http_code_t response_code = HTTP_OK;
 
-    hb_size_t response_data_size = 2;
-    char response_data[HB_GRID_RESPONSE_DATA_MAX_SIZE];
-    strcpy( response_data, "{}" );
-
     char cmd_name[64 + 1];
     int32_t count = sscanf( uri, "/%64[^'/']", cmd_name );
 
     if( count != 1 )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "cmd count != 1", output_buffer );
 
         return;
     }
 
     if( hb_http_is_request_json( _request ) == HB_FALSE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "request content type should be of json type", output_buffer );
 
         return;
     }
 
-    hb_json_handle_t * json_handle;
-    if( hb_http_get_request_json( _request, &json_handle ) == HB_FAILURE )
+    hb_json_handle_t * json_data_handle;
+    if( hb_http_get_request_json( _request, &json_data_handle ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "bad json format", output_buffer );
 
         return;
     }
@@ -90,9 +131,9 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 #ifdef HB_DEBUG
     char json_string[HB_DATA_MAX_SIZE];
     hb_size_t json_string_size;
-    if( hb_json_dumps( json_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
+    if( hb_json_dumps( json_data_handle, json_string, HB_DATA_MAX_SIZE, &json_string_size ) == HB_FAILURE )
     {
-        evhttp_send_reply( _request, HTTP_BADREQUEST, "", output_buffer );
+        evhttp_send_reply( _request, HTTP_BADREQUEST, "bad json dumps", output_buffer );
 
         return;
     }
@@ -104,9 +145,15 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     );
 #endif
 
+    hb_grid_request_handle_t args;
+    args.process = process;
+    args.data = json_data_handle;
+    strcpy( args.reason, "" );
+    strcpy( args.response, "{}" );
+
     hb_bool_t cmd_found = HB_FALSE;
 
-    for( hb_grid_cmd_inittab_t
+    for( const hb_grid_cmd_inittab_t
         * cmd_inittab = grid_cmds,
         *cmd_inittab_end = grid_cmds + sizeof( grid_cmds ) / sizeof( grid_cmds[0] );
         cmd_inittab != cmd_inittab_end;
@@ -117,28 +164,29 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
             continue;
         }
 
-        response_code = (*cmd_inittab->request)(process, json_handle, response_data, &response_data_size);
+        response_code = (*cmd_inittab->request)(&args);
 
         cmd_found = HB_TRUE;
 
         break;
     }
 
-    hb_json_destroy( json_handle );
+    hb_json_destroy( json_data_handle );
 
     if( cmd_found == HB_FALSE )
     {
         response_code = HTTP_NOTIMPLEMENTED;
     }
 
-    HB_LOG_MESSAGE_INFO( "grid", "response '%s' code: %d data: %.*s"
+    HB_LOG_MESSAGE_INFO( "grid", "response '%s' code: %d data: %s"
         , cmd_name
         , response_code
-        , response_data_size
-        , response_data
+        , args.response
     );
 
-    evbuffer_add( output_buffer, response_data, response_data_size );
+    size_t response_size = strlen( args.response );
+
+    evbuffer_add( output_buffer, args.response, response_size );
 
     struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
 
@@ -147,7 +195,7 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     evhttp_add_header( output_headers, "Access-Control-Allow-Methods", "POST" );
     evhttp_add_header( output_headers, "Content-Type", "application/json" );
 
-    evhttp_send_reply( _request, response_code, "", output_buffer );
+    evhttp_send_reply( _request, response_code, args.reason, output_buffer );
 }
 //////////////////////////////////////////////////////////////////////////
 static void __hb_ev_thread_base( void * _ud )

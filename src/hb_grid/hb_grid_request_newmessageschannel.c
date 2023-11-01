@@ -10,18 +10,18 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
+hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_request_handle_t * _args )
 {
     hb_bool_t required = HB_TRUE;
 
     const char * arg_account_token;
-    hb_json_get_field_string_required( _data, "account_token", &arg_account_token, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "account_token", &arg_account_token, HB_NULLPTR, &required );
 
     const char * arg_project_uid;
-    hb_json_get_field_string_required( _data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
 
     uint32_t arg_messageschannel_maxpost;
-    hb_json_get_field_uint32_required( _data, "messageschannel_maxpost", &arg_messageschannel_maxpost, &required );
+    hb_json_get_field_uint32_required( _args->data, "messageschannel_maxpost", &arg_messageschannel_maxpost, &required );
 
     if( required == HB_FALSE )
     {
@@ -29,7 +29,7 @@ hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_process_handle_t * _p
     }
 
     hb_account_token_t account_token;
-    if( hb_cache_get_token( _process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_token( _args->process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -44,23 +44,21 @@ hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_process_handle_t * _p
 
     in_data.messageschannel_maxpost = arg_messageschannel_maxpost;
 
-    hb_grid_process_lock( _process, account_token.account_uid );
+    hb_grid_process_lock( _args->process, account_token.account_uid );
 
     hb_grid_process_newmessageschannel_out_data_t out_data;
-    hb_result_t result = hb_grid_process_newmessageschannel( _process, &in_data, &out_data );
+    hb_result_t result = hb_grid_process_newmessageschannel( _args->process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, account_token.account_uid );
+    hb_grid_process_unlock( _args->process, account_token.account_uid );
 
     if( result == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u}"
+    snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":0,\"uid\":%u}"
         , out_data.cuid
     );
-
-    *_size = response_data_size;
     
     return HTTP_OK;
 }

@@ -12,18 +12,18 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
+hb_http_code_t hb_grid_request_newuser( hb_grid_request_handle_t * _args )
 {
     hb_bool_t required = HB_TRUE;
 
     const char * arg_project_uid;
-    hb_json_get_field_string_required( _data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
 
     const char * arg_user_login;
-    hb_json_get_field_string_required( _data, "user_login", &arg_user_login, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "user_login", &arg_user_login, HB_NULLPTR, &required );
 
     const char * arg_user_password;
-    hb_json_get_field_string_required( _data, "user_password", &arg_user_password, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "user_password", &arg_user_password, HB_NULLPTR, &required );
 
     if( required == HB_FALSE )
     {
@@ -41,18 +41,16 @@ hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_
     strncpy( in_data.user_password, arg_user_password, 128 );
 
     hb_grid_process_newuser_out_data_t out_data;
-    if( hb_grid_process_newuser( _process, &in_data, &out_data ) == HB_FAILURE )
+    if( hb_grid_process_newuser( _args->process, &in_data, &out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     if( out_data.code != HB_ERROR_OK )
     {
-        hb_size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+        snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":%u}"
             , out_data.code
         );
-
-        *_size = response_data_size;
 
         return HTTP_OK;
     }
@@ -68,7 +66,7 @@ hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_
     strcpy( api_in_data.method, "onCreateUser" );
 
     hb_grid_process_script_api_out_data_t api_out_data;
-    if( hb_grid_process_script_api( _process, &api_in_data, &api_out_data ) == HB_FAILURE )
+    if( hb_grid_process_script_api( _args->process, &api_in_data, &api_out_data ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
@@ -82,13 +80,11 @@ hb_http_code_t hb_grid_request_newuser( hb_grid_process_handle_t * _process, hb_
         );
     }
 
-    hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"uid\":%u,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
+    snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":0,\"uid\":%u,\"stat\":{\"memory_used\":%zu,\"call_used\":%u}}"
         , out_data.user_uid
         , api_out_data.memory_used
         , api_out_data.call_used
     );
-
-    *_size = response_data_size;
 
     return HTTP_OK;
 }

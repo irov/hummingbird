@@ -10,12 +10,9 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_neweconomicsrecords( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
+hb_http_code_t hb_grid_request_neweconomicsrecords( hb_grid_request_handle_t * _args )
 {
-    HB_UNUSED( _process );
-    HB_UNUSED( _data );
-    HB_UNUSED( _response );
-    HB_UNUSED( _size );
+    HB_UNUSED( _args );
 
     //const char * arg_account_token = _args->arg1;
     //const char * arg_puid = _args->arg2;

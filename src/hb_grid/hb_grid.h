@@ -14,6 +14,14 @@
 #include "evhttp.h"
 #include "event2/thread.h"
 
+#ifndef HB_GRID_REASON_DATA_MAX_SIZE
+#define HB_GRID_REASON_DATA_MAX_SIZE 1024
+#endif
+
+#ifndef HB_GRID_RESPONSE_DATA_MAX_SIZE
+#define HB_GRID_RESPONSE_DATA_MAX_SIZE 10240
+#endif
+
 typedef struct hb_grid_config_t
 {
     char name[32];
@@ -61,6 +69,14 @@ typedef struct hb_grid_process_handle_t
 
     hb_cache_handle_t * cache;
 } hb_grid_process_handle_t;
+
+typedef struct hb_grid_request_handle_t
+{
+    hb_grid_process_handle_t * process;
+    hb_json_handle_t * data;
+    char reason[HB_GRID_REASON_DATA_MAX_SIZE];
+    char response[HB_GRID_RESPONSE_DATA_MAX_SIZE];
+} hb_grid_request_handle_t;
 
 void hb_grid_process_lock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
 void hb_grid_process_unlock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );

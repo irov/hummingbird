@@ -10,18 +10,18 @@
 
 #include <string.h>
 
-hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _process, hb_json_handle_t * _data, char * _response, hb_size_t * _size )
+hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_request_handle_t * _args )
 {
     hb_bool_t required = HB_TRUE;
 
     const char * arg_user_token;
-    hb_json_get_field_string_required( _data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+    hb_json_get_field_string_required( _args->data, "user_token", &arg_user_token, HB_NULLPTR, &required );
 
     uint32_t arg_messageschannel_uid;
-    hb_json_get_field_uint32_required( _data, "messageschannel_uid", &arg_messageschannel_uid, &required );
+    hb_json_get_field_uint32_required( _args->data, "messageschannel_uid", &arg_messageschannel_uid, &required );
 
     uint32_t arg_messageschannel_postid;
-    hb_json_get_field_uint32_required( _data, "messageschannel_postid", &arg_messageschannel_postid, &required );
+    hb_json_get_field_uint32_required( _args->data, "messageschannel_postid", &arg_messageschannel_postid, &required );
 
     if( required == HB_FALSE )
     {
@@ -29,7 +29,7 @@ hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _p
     }
 
     hb_user_token_t user_token;
-    if( hb_cache_get_token( _process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_cache_get_token( _args->process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -40,12 +40,12 @@ hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _p
     in_data.messageschannel_uid = arg_messageschannel_uid;
     in_data.messageschannel_postid = arg_messageschannel_postid;
 
-    hb_grid_process_lock( _process, user_token.user_uid );
+    hb_grid_process_lock( _args->process, user_token.user_uid );
 
     hb_grid_process_getmessageschannel_out_data_t out_data;
-    hb_result_t result = hb_grid_process_getmessageschannel( _process, &in_data, &out_data );
+    hb_result_t result = hb_grid_process_getmessageschannel( _args->process, &in_data, &out_data );
 
-    hb_grid_process_unlock( _process, user_token.user_uid );
+    hb_grid_process_unlock( _args->process, user_token.user_uid );
 
     if( result == HB_FAILURE )
     {
@@ -54,16 +54,16 @@ hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _p
 
     if( out_data.code == HB_ERROR_OK )
     {
-        hb_size_t response_data_size = sprintf( _response, "{\"code\":0,\"posts\":[" );
+        hb_size_t response_data_offset = snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":0,\"posts\":[" );
 
         for( uint32_t index = 0; index != out_data.posts_count; ++index )
         {
             if( index != 0 )
             {
-                response_data_size += sprintf( _response + response_data_size, "," );
+                response_data_offset += sprintf( _args->response + response_data_offset, "," );
             }
 
-            response_data_size += sprintf( _response + response_data_size, "{\"postid\":%u,\"uuid\":%u,\"message\":\"%s\",\"metainfo\":\"%s\"}"
+            response_data_offset += snprintf( _args->response + response_data_offset, HB_GRID_RESPONSE_DATA_MAX_SIZE - response_data_offset, "{\"postid\":%u,\"uuid\":%u,\"message\":\"%s\",\"metainfo\":\"%s\"}"
                 , out_data.posts[index].postid
                 , out_data.posts[index].user_uid
                 , out_data.posts[index].message
@@ -71,17 +71,13 @@ hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_process_handle_t * _p
             );
         }
 
-        response_data_size += sprintf( _response + response_data_size, "]}" );
-
-        *_size = response_data_size;
+        snprintf( _args->response + response_data_offset, HB_GRID_RESPONSE_DATA_MAX_SIZE - response_data_offset, "]}" );
     }
     else
     {
-        hb_size_t response_data_size = sprintf( _response, "{\"code\":%u}"
+        snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":%u}"
             , out_data.code
         );
-
-        *_size = response_data_size;
     }
 
     return HTTP_OK;
