@@ -94,8 +94,6 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     hb_grid_process_handle_t * process = (hb_grid_process_handle_t *)_ud;
 
-    hb_http_code_t response_code = HTTP_OK;
-
     char cmd_name[64 + 1];
     int32_t count = sscanf( uri, "/%64[^'/']", cmd_name );
 
@@ -138,6 +136,8 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
     );
 #endif
 
+    hb_http_code_t response_code = HTTP_OK;
+
     hb_grid_request_handle_t args;
     args.process = process;
     args.data = json_data_handle;
@@ -168,7 +168,9 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     if( cmd_found == HB_FALSE )
     {
-        response_code = HTTP_NOTIMPLEMENTED;
+        evhttp_send_reply( _request, HTTP_NOTIMPLEMENTED, "command not found", output_buffer );
+
+        return;
     }
 
     HB_LOG_MESSAGE_INFO( "grid", "response '%s' code: %d data: %s"
