@@ -87,13 +87,6 @@ static void __hb_grid_request( struct evhttp_request * _request, void * _ud )
 
     if( command_type == EVHTTP_REQ_OPTIONS )
     {
-        struct evkeyvalq * output_headers = evhttp_request_get_output_headers( _request );
-
-        evhttp_add_header( output_headers, "Access-Control-Allow-Origin", "*" );
-        evhttp_add_header( output_headers, "Access-Control-Allow-Headers", "*" );
-        evhttp_add_header( output_headers, "Access-Control-Allow-Methods", "POST" );
-        evhttp_add_header( output_headers, "Content-Type", "application/json" );
-
         evhttp_send_reply( _request, HTTP_OK, "", output_buffer );
 
         return;
