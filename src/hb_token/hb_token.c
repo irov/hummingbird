@@ -65,10 +65,11 @@ hb_result_t hb_token_generate( const hb_cache_handle_t * _cache, const char _pre
         return HB_FAILURE;
     }
 
-    if( hb_cache_expire_value( _cache, _token->value, sizeof( hb_token_t ), _expire ) == HB_FAILURE )
+    if( hb_cache_expire_value( _cache, _token->value, sizeof( hb_token_t ), _expire, HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
     return HB_SUCCESSFUL;
 }
+//////////////////////////////////////////////////////////////////////////

@@ -52,7 +52,7 @@ hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeou
 
     if( c->err != REDIS_OK )
     {
-        HB_LOG_MESSAGE_ERROR( "cache", "connect radis url:'%s' port: %u get error [%s:%d]"
+        HB_LOG_MESSAGE_ERROR( "cache", "connect radis url:'%s' port: %" PRIu16 " get error[% s:% d]"
             , _uri
             , _port
             , c->errstr
@@ -62,7 +62,7 @@ hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeou
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "cache", "connect radis url:'%s' port: %u successful"
+    HB_LOG_MESSAGE_INFO( "cache", "connect radis url:'%s' port: %" PRIu16 " successful"
         , _uri
         , _port
     );
@@ -74,7 +74,7 @@ hb_result_t hb_cache_create( const char * _uri, uint16_t _port, uint32_t _timeou
         return HB_FAILURE;
     }
 
-    HB_LOG_MESSAGE_INFO( "cache", "enable keep alive radis url:'%s' port: %u successful"
+    HB_LOG_MESSAGE_INFO( "cache", "enable keep alive radis url:'%s' port: %" PRIu16 " successful"
         , _uri
         , _port
     );
@@ -254,7 +254,7 @@ hb_result_t hb_cache_incrby_value( const hb_cache_handle_t * _cache, const void 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, uint32_t _seconds )
+hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void * _key, hb_size_t _keysize, uint32_t _seconds, hb_bool_t * const _exist )
 {
     if( _keysize == HB_UNKNOWN_STRING_SIZE )
     {
@@ -283,6 +283,29 @@ hb_result_t hb_cache_expire_value( const hb_cache_handle_t * _cache, const void 
         return HB_FAILURE;
     }
 
+    if( reply->type != REDIS_REPLY_INTEGER )
+    {
+        HB_LOG_MESSAGE_ERROR( "cache", "redis command 'EXPIRE' reply invalid type [%d]"
+            , reply->type
+        );
+
+        freeReplyObject( reply );
+
+        return HB_FAILURE;
+    }
+
+    if( _exist != HB_NULLPTR )
+    {
+        if( reply->integer == 1 )
+        {
+            *_exist = HB_TRUE;
+        }
+        else
+        {
+            *_exist = HB_FALSE;
+        }
+    }
+
     freeReplyObject( reply );
 
     return HB_SUCCESSFUL;
@@ -296,7 +319,7 @@ hb_result_t hb_cache_get_token( const hb_cache_handle_t * _cache, const char * _
         return HB_FAILURE;
     }
 
-    if( hb_cache_expire_value( _cache, token.value, sizeof( hb_token_t ), _seconds ) == HB_FAILURE )
+    if( hb_cache_expire_value( _cache, token.value, sizeof( hb_token_t ), _seconds, HB_NULLPTR ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

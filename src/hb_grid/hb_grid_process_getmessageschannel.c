@@ -12,7 +12,6 @@
 #include "hb_utils/hb_httpopt.h"
 #include "hb_utils/hb_memmem.h"
 
-//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_getmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_getmessageschannel_in_data_t * _in, hb_grid_process_getmessageschannel_out_data_t * const _out )
 {
     if( hb_messages_channel_get_posts( _process->messages, _in->project_uid, _in->messageschannel_uid, _in->messageschannel_postid, _out->posts, 256, &_out->posts_count, &_out->code ) == HB_FAILURE )

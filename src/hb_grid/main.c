@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_grid_cmd_inittab_t
 {
@@ -240,7 +243,9 @@ static void __hb_ev_thread_base( void * _ud )
 
     if( *handle->ev_socket == -1 )
     {
-        struct evhttp_bound_socket * bound_socket = evhttp_bind_socket_with_handle( http_server, handle->grid_uri, handle->grid_port );
+        const hb_grid_config_t * config = handle->config;
+
+        struct evhttp_bound_socket * bound_socket = evhttp_bind_socket_with_handle( http_server, config->grid_uri, config->grid_port );
 
         *handle->ev_socket = evhttp_bound_socket_get_fd( bound_socket );
     }
@@ -317,9 +322,8 @@ int main( int _argc, char * _argv[] )
     uint32_t max_thread = 16;
     uint32_t factor_mutex = 4;
 
-    char grid_uri[HB_MAX_URI];
-    strcpy( grid_uri, "127.0.0.1" );
-    uint16_t grid_port = 5555;
+    strcpy( config->grid_uri, "127.0.0.1" );
+    config->grid_port = 5555;
 
     strcpy( config->name, "hb" );
     strcpy( config->cache_uri, "127.0.0.1" );
@@ -360,8 +364,8 @@ int main( int _argc, char * _argv[] )
 
         hb_json_get_field_uint32( json_handle, "max_thread", &max_thread, max_thread );
         hb_json_get_field_uint32( json_handle, "factor_mutex", &factor_mutex, factor_mutex );
-        hb_json_copy_field_string( json_handle, "grid_uri", grid_uri, HB_MAX_URI, grid_uri );
-        hb_json_get_field_uint16( json_handle, "grid_port", &grid_port, grid_port );
+        hb_json_copy_field_string( json_handle, "grid_uri", config->grid_uri, HB_MAX_URI, config->grid_uri );
+        hb_json_get_field_uint16( json_handle, "grid_port", &config->grid_port, config->grid_port );
 
         hb_json_copy_field_string( json_handle, "name", config->name, 32, config->name );
         hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, HB_MAX_URI, config->cache_uri );
@@ -402,17 +406,17 @@ int main( int _argc, char * _argv[] )
     HB_LOG_MESSAGE_INFO( "grid", "start grid with config:" );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
     HB_LOG_MESSAGE_INFO( "grid", "max_thread: %u", max_thread );
-    HB_LOG_MESSAGE_INFO( "grid", "grid_uri: %s", grid_uri );
-    HB_LOG_MESSAGE_INFO( "grid", "grid_port: %u", grid_port );
+    HB_LOG_MESSAGE_INFO( "grid", "grid_uri: %s", config->grid_uri );
+    HB_LOG_MESSAGE_INFO( "grid", "grid_port: %" PRIu16, config->grid_port );
     HB_LOG_MESSAGE_INFO( "grid", "name: %s", config->name );
     HB_LOG_MESSAGE_INFO( "grid", "cache_uri: %s", config->cache_uri );
-    HB_LOG_MESSAGE_INFO( "grid", "cache_port: %u", config->cache_port );
-    HB_LOG_MESSAGE_INFO( "grid", "cache_timeout: %u", config->cache_timeout );    
+    HB_LOG_MESSAGE_INFO( "grid", "cache_port: %" PRIu16, config->cache_port );
+    HB_LOG_MESSAGE_INFO( "grid", "cache_timeout: %" PRIu16, config->cache_timeout );
     HB_LOG_MESSAGE_INFO( "grid", "db_uri: %s", config->db_uri );
     HB_LOG_MESSAGE_INFO( "grid", "db_host: %s", config->db_host );
-    HB_LOG_MESSAGE_INFO( "grid", "db_port: %u", config->db_port );
+    HB_LOG_MESSAGE_INFO( "grid", "db_port: %" PRIu16, config->db_port );
     HB_LOG_MESSAGE_INFO( "grid", "log_uri: %s", config->log_uri );
-    HB_LOG_MESSAGE_INFO( "grid", "log_port: %u", config->log_port );
+    HB_LOG_MESSAGE_INFO( "grid", "log_port: %" PRIu16, config->log_port );
     HB_LOG_MESSAGE_INFO( "grid", "------------------------------------" );
 
     HB_LOG_MESSAGE_INFO( "grid", "[db] try..." );
@@ -420,7 +424,7 @@ int main( int _argc, char * _argv[] )
     hb_db_handle_t * db;
     if( hb_db_initialze( config->db_uri, config->db_host, config->db_port, &db ) == HB_FAILURE )
     {
-        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component uri: %s host: %s port: %u"
+        HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid initialize [db] component uri: %s host: %s port: %" PRIu16
             , config->name
             , config->db_uri
             , config->db_host
@@ -516,9 +520,6 @@ int main( int _argc, char * _argv[] )
     {
         hb_grid_process_handle_t * process_handle = process_handles + i;
 
-        strcpy( process_handle->grid_uri, grid_uri );
-        process_handle->grid_port = grid_port;
-
         process_handle->ev_socket = &ev_socket;
         process_handle->mutex_ev_socket = mutex_ev_socket;
 
@@ -540,7 +541,7 @@ int main( int _argc, char * _argv[] )
         hb_cache_handle_t * cache;
         if( hb_cache_create( config->cache_uri, config->cache_port, config->cache_timeout, &cache ) == HB_FAILURE )
         {
-            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create [cache] component [uri %s:%u]"
+            HB_LOG_MESSAGE_ERROR( "grid", "grid '%s' invalid create [cache] component [uri %s:%" PRIu16 "]"
                 , config->name
                 , config->cache_uri
                 , config->cache_port
@@ -621,8 +622,6 @@ int main( int _argc, char * _argv[] )
 
     hb_log_tcp_finalize();
 
-    HB_DELETE( config );
-
 #ifdef HB_PLATFORM_WINDOWS
     WSACleanup();
 #endif
@@ -634,6 +633,8 @@ int main( int _argc, char * _argv[] )
 #endif
 
     hb_log_finalize();
+
+    HB_DELETE( config );
 
     return EXIT_SUCCESS;
 }

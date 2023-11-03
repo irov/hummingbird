@@ -125,7 +125,7 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 
         if( mongoc_uri == HB_NULLPTR )
         {
-            HB_LOG_MESSAGE_ERROR( "db", "failed to use host: %s port: %u"
+            HB_LOG_MESSAGE_ERROR( "db", "failed to use host: %s port: %" PRIu16
                 , _host
                 , _port
             );
@@ -140,7 +140,7 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 
     if( mongoc_client_pool_set_error_api( mongo_pool, MONGOC_ERROR_API_VERSION_2 ) == false )
     {
-        HB_LOG_MESSAGE_ERROR( "db", "failed to set error api: %s:%u"
+        HB_LOG_MESSAGE_ERROR( "db", "failed to set error api: %s:%" PRIu16
             , _host
             , _port
         );
@@ -166,7 +166,7 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 
     if( mongoc_ping == false )
     {
-        HB_LOG_MESSAGE_ERROR( "db", "invalid ping error: %s [%u]"
+        HB_LOG_MESSAGE_ERROR( "db", "invalid ping error: %s code: %u"
             , error.message
             , error.code
         );
@@ -176,7 +176,7 @@ hb_result_t hb_db_initialze( const char * _uri, const char * _host, uint16_t _po
 
     HB_LOG_MESSAGE_INFO( "db", "ping successful" );
 
-    HB_LOG_MESSAGE_INFO( "db", "create pool url:'%s' port:%u successful"
+    HB_LOG_MESSAGE_INFO( "db", "create pool url:'%s' port:%" PRIu16 " successful"
         , _host
         , _port
     );
@@ -1046,7 +1046,7 @@ static hb_result_t __hb_db_get_bson_value( hb_db_value_handle_t * _value, const 
         }break;
     default:
         {
-            HB_LOG_MESSAGE_ERROR( "db", "invalid get bson value for '%s' unknown type [%u]"
+            HB_LOG_MESSAGE_ERROR( "db", "invalid get bson value for '%s' unknown type: %u"
                 , _field
                 , type
             );

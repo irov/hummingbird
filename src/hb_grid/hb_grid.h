@@ -26,6 +26,9 @@ typedef struct hb_grid_config_t
 {
     char name[32];
 
+    char grid_uri[HB_MAX_URI];
+    uint16_t grid_port;
+
     char cache_uri[HB_MAX_URI];
     uint16_t cache_port;
     uint16_t cache_timeout;
@@ -47,9 +50,6 @@ typedef struct hb_grid_mutex_handle_t
 
 typedef struct hb_grid_process_handle_t
 {
-    char grid_uri[HB_MAX_URI];
-    ev_uint16_t grid_port;
-
     evutil_socket_t * ev_socket;
     hb_mutex_handle_t * mutex_ev_socket;
 
@@ -57,7 +57,7 @@ typedef struct hb_grid_process_handle_t
     hb_db_handle_t * db;
     hb_db_client_handle_t * db_client;
 
-    hb_grid_config_t * config;
+    const hb_grid_config_t * config;
     
     hb_matching_handle_t * matching;
     hb_messages_handle_t * messages;

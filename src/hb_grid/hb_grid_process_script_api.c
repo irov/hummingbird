@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 
-//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, const hb_grid_process_script_api_in_data_t * _in, hb_grid_process_script_api_out_data_t * const _out )
 {
     hb_script_handle_t * script_handle;
