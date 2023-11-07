@@ -1,11 +1,12 @@
 # Docker
 
-## Easy
-Скачать готовые сборки и запустить:
-```
-docker-compose up
-```
+## Config
+* *0.0.0.0* - INADDR_ANY (only ipv4)
+* *127.0.0.1* - INADDR_LOOPBACK (only)
+* *::1* - IN6ADDR_LOOPBACK (only)
+* *localhost* - system dns (127.0.0.1 and ::1)
 
+## Geting Started
 Если нужно замонтировать папку логов для fluentd в docker-compose.yml раскомментировать volumes и указать host-путь, у которого есть разрешения на запись.
 ```
 chmod o+w -R you_path_to_log
@@ -14,13 +15,11 @@ chmod o+w -R you_path_to_log
 ## Cheetsheet
 
 Build image
-
 ```
 docker build -f Dockerfile.build -t hummingfab:build .
 ```
 
 Run and connect to container
-
 ```
 docker run -it --rm hummingfab:build
 ```
