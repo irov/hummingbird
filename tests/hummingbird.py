@@ -47,6 +47,8 @@ def post(url, **params):
         print("post url '{0}' invalid json".format(url))
         return None
         pass
+        
+    print("post url '{0}' data: {1}".format(url, data))
     
     r = request.Request(url)
     r.add_header('Content-Type', 'application/json')

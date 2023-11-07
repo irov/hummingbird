@@ -30,7 +30,6 @@ typedef enum hb_json_type_t
 } hb_json_type_t;
 
 hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out );
-hb_result_t hb_json_get_field_required( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out, hb_bool_t * _result );
 uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle );
 hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle );
 hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size );
@@ -42,20 +41,22 @@ hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * _val
 hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * _value );
 hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value );
 
-hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default );
-hb_result_t hb_json_get_field_string_required( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, hb_bool_t * _result );
-hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default );
-hb_result_t hb_json_copy_field_string_required( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, hb_bool_t * _result );
-hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default );
-hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _key, int32_t * _value, int32_t _default );
-hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default );
-hb_result_t hb_json_get_field_uint16( hb_json_handle_t * _handle, const char * _key, uint16_t * _value, uint16_t _default );
-hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, uint32_t _default );
-hb_result_t hb_json_get_field_uint64( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, uint64_t _default );
-hb_result_t hb_json_get_field_int32_required( hb_json_handle_t * _handle, const char * _key, int32_t * _value, hb_bool_t * _result );
-hb_result_t hb_json_get_field_int64_required( hb_json_handle_t * _handle, const char * _key, int64_t * _value, hb_bool_t * _result );
-hb_result_t hb_json_get_field_uint32_required( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, hb_bool_t * _result );
-hb_result_t hb_json_get_field_uint64_required( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, hb_bool_t * _result );
+hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * const _size );
+hb_result_t hb_json_get_field_string_default( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default );
+hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity );
+hb_result_t hb_json_copy_field_string_default( hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default );
+hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _key, int16_t * _value );
+hb_result_t hb_json_get_field_int16_default( hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default );
+hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _key, int32_t * _value );
+hb_result_t hb_json_get_field_int32_default( hb_json_handle_t * _handle, const char * _key, int32_t * _value, int32_t _default );
+hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _key, int64_t * _value );
+hb_result_t hb_json_get_field_int64_default( hb_json_handle_t * _handle, const char * _key, int64_t * _value, int64_t _default );
+hb_result_t hb_json_get_field_uint16( hb_json_handle_t * _handle, const char * _key, uint16_t * _value );
+hb_result_t hb_json_get_field_uint16_default( hb_json_handle_t * _handle, const char * _key, uint16_t * _value, uint16_t _default );
+hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _key, uint32_t * _value );
+hb_result_t hb_json_get_field_uint32_default( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, uint32_t _default );
+hb_result_t hb_json_get_field_uint64( hb_json_handle_t * _handle, const char * _key, uint64_t * _value );
+hb_result_t hb_json_get_field_uint64_default( hb_json_handle_t * _handle, const char * _key, uint64_t * _value, uint64_t _default );
 
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update );
 hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * _size );

@@ -1,7 +1,7 @@
 {
   "max_thread": 16,
     
-  "grid_uri": "127.0.0.1",
+  "grid_uri": "::1",
   "grid_port": 5555,
   
   "name": "hb",

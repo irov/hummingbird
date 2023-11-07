@@ -362,21 +362,21 @@ int main( int _argc, char * _argv[] )
             return EXIT_FAILURE;
         }
 
-        hb_json_get_field_uint32( json_handle, "max_thread", &max_thread, max_thread );
-        hb_json_get_field_uint32( json_handle, "factor_mutex", &factor_mutex, factor_mutex );
-        hb_json_copy_field_string( json_handle, "grid_uri", config->grid_uri, HB_MAX_URI, config->grid_uri );
-        hb_json_get_field_uint16( json_handle, "grid_port", &config->grid_port, config->grid_port );
+        hb_json_get_field_uint32_default( json_handle, "max_thread", &max_thread, max_thread );
+        hb_json_get_field_uint32_default( json_handle, "factor_mutex", &factor_mutex, factor_mutex );
+        hb_json_copy_field_string_default( json_handle, "grid_uri", config->grid_uri, HB_MAX_URI, config->grid_uri );
+        hb_json_get_field_uint16_default( json_handle, "grid_port", &config->grid_port, config->grid_port );
 
-        hb_json_copy_field_string( json_handle, "name", config->name, 32, config->name );
-        hb_json_copy_field_string( json_handle, "cache_uri", config->cache_uri, HB_MAX_URI, config->cache_uri );
-        hb_json_get_field_uint16( json_handle, "cache_port", &config->cache_port, config->cache_port );
-        hb_json_get_field_uint16( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );        
-        hb_json_copy_field_string( json_handle, "db_uri", config->db_uri, HB_MAX_URI, config->db_uri );
-        hb_json_copy_field_string( json_handle, "db_host", config->db_host, 128, config->db_host );
-        hb_json_get_field_uint16( json_handle, "db_port", &config->db_port, config->db_port );
-        hb_json_copy_field_string( json_handle, "log_file", config->log_file, HB_MAX_PATH, config->log_file );
-        hb_json_copy_field_string( json_handle, "log_uri", config->log_uri, HB_MAX_URI, config->log_uri );
-        hb_json_get_field_uint16( json_handle, "log_port", &config->log_port, config->log_port );
+        hb_json_copy_field_string_default( json_handle, "name", config->name, 32, config->name );
+        hb_json_copy_field_string_default( json_handle, "cache_uri", config->cache_uri, HB_MAX_URI, config->cache_uri );
+        hb_json_get_field_uint16_default( json_handle, "cache_port", &config->cache_port, config->cache_port );
+        hb_json_get_field_uint16_default( json_handle, "cache_timeout", &config->cache_timeout, config->cache_timeout );
+        hb_json_copy_field_string_default( json_handle, "db_uri", config->db_uri, HB_MAX_URI, config->db_uri );
+        hb_json_copy_field_string_default( json_handle, "db_host", config->db_host, 128, config->db_host );
+        hb_json_get_field_uint16_default( json_handle, "db_port", &config->db_port, config->db_port );
+        hb_json_copy_field_string_default( json_handle, "log_file", config->log_file, HB_MAX_PATH, config->log_file );
+        hb_json_copy_field_string_default( json_handle, "log_uri", config->log_uri, HB_MAX_URI, config->log_uri );
+        hb_json_get_field_uint16_default( json_handle, "log_port", &config->log_port, config->log_port );
 
         hb_json_destroy( json_handle );
     }

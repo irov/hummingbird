@@ -53,8 +53,8 @@ process
     hb_grid_process_newproject.c
     hb_grid_process_upload.h
     hb_grid_process_upload.c
-    hb_grid_process_script_api.h
-    hb_grid_process_script_api.c
+    hb_grid_process_api.h
+    hb_grid_process_api.c
     hb_grid_process_newmessageschannel.h
     hb_grid_process_newmessageschannel.c
     hb_grid_process_getmessageschannel.h

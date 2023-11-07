@@ -165,41 +165,37 @@ static hb_result_t __hb_json_vocabulary( const char * _key, const hb_json_handle
 
         hb_economics_record_handle_t * record = HB_NEW( hb_economics_record_handle_t );
 
-        hb_bool_t required_successful = HB_TRUE;
-        if( hb_json_copy_field_string_required( jrecord, "name", record->name, 32, &required_successful ) == HB_FAILURE )
+        if( hb_json_copy_field_string( jrecord, "name", record->name, 32 ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( required_successful == HB_FALSE )
+        if( hb_json_get_field_uint32( jrecord, "time", &record->time ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( hb_json_get_field_uint32( jrecord, "time", &record->time, 0U ) == HB_FAILURE )
+        if( hb_json_get_field( jrecord, "tags", &record->tags ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( hb_json_get_field_required( jrecord, "tags", &record->tags, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field( jrecord, "conditions", &record->conditions ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( hb_json_get_field_required( jrecord, "conditions", &record->conditions, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field( jrecord, "pay", &record->pay ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( hb_json_get_field_required( jrecord, "pay", &record->pay, HB_NULLPTR ) == HB_FAILURE )
+        if( hb_json_get_field( jrecord, "reward", &record->reward ) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
 
-        if( hb_json_get_field_required( jrecord, "reward", &record->reward, HB_NULLPTR ) == HB_FAILURE )
-        {
-            return HB_FAILURE;
-        }
+        hb_json_destroy( jrecord );
 
         if( hb_vectorptr_set( records->vector_records, record_index, record ) == HB_FAILURE )
         {

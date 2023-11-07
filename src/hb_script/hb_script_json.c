@@ -79,7 +79,7 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char
                         break;
                     }
 
-                    *_offset += sprintf( _buffer + *_offset, ", " );
+                    *_offset += sprintf( _buffer + *_offset, "," );
                 }
 
                 lua_pop( L, 1 );
@@ -109,7 +109,7 @@ static hb_result_t __hb_script_json_value_dumps( lua_State * L, int _index, char
                         break;
                     }
 
-                    *_offset += sprintf( _buffer + *_offset, ", " );
+                    *_offset += sprintf( _buffer + *_offset, "," );
                 }
 
                 lua_pop( L, 1 );

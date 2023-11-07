@@ -10,17 +10,20 @@
 #include <string.h>
 
 hb_http_code_t hb_grid_request_loginaccount( hb_grid_request_handle_t * _args )
-{
-    hb_bool_t required = HB_TRUE;
-
+{    
     const char * arg_account_login;
-    hb_json_get_field_string_required( _args->data, "account_login", &arg_account_login, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "account_login", &arg_account_login, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account login" );
+
+        return HTTP_BADREQUEST;
+    }
 
     const char * arg_account_password;
-    hb_json_get_field_string_required( _args->data, "account_password", &arg_account_password, HB_NULLPTR, &required );
-
-    if( required == HB_FALSE )
+    if( hb_json_get_field_string( _args->data, "account_password", &arg_account_password, HB_NULLPTR ) == HB_FAILURE )
     {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account password" );
+
         return HTTP_BADREQUEST;
     }
 

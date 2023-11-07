@@ -11,22 +11,35 @@
 
 hb_http_code_t hb_grid_request_neweventstopic( hb_grid_request_handle_t * _args )
 {
-    hb_bool_t required = HB_TRUE;
-
     const char * arg_account_token;
-    hb_json_get_field_string_required( _args->data, "account_token", &arg_account_token, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
+
+        return HTTP_BADREQUEST;
+    }
 
     const char * arg_project_uid;
-    hb_json_get_field_string_required( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
+
+        return HTTP_BADREQUEST;
+    }
 
     const char * arg_eventstopic_name;
-    hb_json_get_field_string_required( _args->data, "eventstopic_name", &arg_eventstopic_name, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "eventstopic_name", &arg_eventstopic_name, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic name" );
+
+        return HTTP_BADREQUEST;
+    }
 
     uint32_t arg_eventstopic_delay;
-    hb_json_get_field_uint32_required( _args->data, "eventstopic_delay", &arg_eventstopic_delay, &required );
-
-    if( required == HB_FALSE )
+    if( hb_json_get_field_uint32( _args->data, "eventstopic_delay", &arg_eventstopic_delay ) == HB_FAILURE )
     {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic delay" );
+
         return HTTP_BADREQUEST;
     }
 
@@ -54,7 +67,7 @@ hb_http_code_t hb_grid_request_neweventstopic( hb_grid_request_handle_t * _args 
         return HTTP_BADREQUEST;
     }
 
-    snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":0,\"topic_uid\":%u}"
+    snprintf( _args->response, HB_GRID_RESPONSE_DATA_MAX_SIZE, "{\"code\":0,\"uid\":%u}"
         , topic_uid
     );
     

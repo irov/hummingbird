@@ -12,16 +12,19 @@
 
 hb_http_code_t hb_grid_request_setleaderscore( hb_grid_request_handle_t * _args )
 {
-    hb_bool_t required = HB_TRUE;
-
     const char * arg_user_token;
-    hb_json_get_field_string_required( _args->data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "user_token", &arg_user_token, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user token" );
+
+        return HTTP_BADREQUEST;
+    }
 
     uint64_t arg_score;
-    hb_json_get_field_uint64_required( _args->data, "score", &arg_score, &required );
-
-    if( required == HB_FALSE )
+    if( hb_json_get_field_uint64( _args->data, "score", &arg_score ) == HB_FAILURE )
     {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get score" );
+
         return HTTP_BADREQUEST;
     }
 

@@ -9,13 +9,11 @@
 
 hb_http_code_t hb_grid_request_newproject( hb_grid_request_handle_t * _args )
 {
-    hb_bool_t required = HB_TRUE;
-
     const char * arg_account_token;
-    hb_json_get_field_string_required( _args->data, "account_token", &arg_account_token, HB_NULLPTR, &required );
-
-    if( required == HB_FALSE )
+    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
     {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
+
         return HTTP_BADREQUEST;
     }
 

@@ -98,7 +98,7 @@ class Testing(unittest.TestCase):
 
     def test_06_loginuser(self):
         print("----loginuser---- pid: {0} login: {1} password: {2}".format(Testing.pid, Testing.user_login, Testing.user_password))
-        jresult = hummingbird.post("http://localhost:5555/loginuser", project_uid = Testing.pid, user_login = Testing.user_login, user_password = Testing.user_password)
+        jresult = hummingbird.post("http://localhost:5555/loginuser", project_uid = Testing.pid, user_login = Testing.user_login, user_password = Testing.user_password, user_public_data_revision = 0, project_public_data_revision = 0)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
@@ -112,7 +112,7 @@ class Testing(unittest.TestCase):
         method = "test"
         args = dict(a=1, b=2, c="testc")
         print("----api---- token: {0} method: {1} data: {2}".format(Testing.user_token, method, args))
-        jresult = hummingbird.api("http://localhost:5555/api", user_token = Testing.user_token, method = method, args = args)
+        jresult = hummingbird.post("http://localhost:5555/api", user_token = Testing.user_token, method = method, args = args)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
@@ -131,7 +131,7 @@ class Testing(unittest.TestCase):
         self.assertEqual(jresult["code"], 0)
 
         print("----loginuser---- pid: {0} login: {1} password: {2}".format(pid, user_login, user_password))
-        jresult = hummingbird.post("http://localhost:5555/loginuser", project_uid = pid, user_login = user_login, user_password = user_password)
+        jresult = hummingbird.post("http://localhost:5555/loginuser", project_uid = pid, user_login = user_login, user_password = user_password, user_public_data_revision = 0, project_public_data_revision = 0)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
@@ -147,7 +147,7 @@ class Testing(unittest.TestCase):
         method = "join"
         args = dict()
         print("----api---- token: {0} method: {1} data: {2}".format(token, method, args))
-        japi = hummingbird.api("http://localhost:5555/api", user_token = token, method = method, args = args)
+        japi = hummingbird.post("http://localhost:5555/api", user_token = token, method = method, args = args)
         print("response: ", japi)
 
         self.assertIsNotNone(japi)
@@ -259,7 +259,7 @@ class Testing(unittest.TestCase):
         print("----messages----")
         
         print("----newmessageschannel---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
-        jresult = hummingbird.post("http://localhost:5555/newmessageschannel", account_token = Testing.account_token, project_uid = pid, messageschannel_maxpost=64)
+        jresult = hummingbird.post("http://localhost:5555/newmessageschannel", account_token = Testing.account_token, project_uid = Testing.pid, messageschannel_maxpost = 64)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
@@ -268,23 +268,23 @@ class Testing(unittest.TestCase):
         
         channel = jresult["uid"]
         
-        user_token0 = self.__createuser(Testing.pid)
-        user_token1 = self.__createuser(Testing.pid)
+        token0 = self.__createuser(Testing.pid)
+        token1 = self.__createuser(Testing.pid)
         
         postid0 = self.__postmessagechannel(token0, channel, "Hello World!", "<hello>")
         postid1 = self.__postmessagechannel(token1, channel, "Happy World!", "<happy>")
         
         print("----getmessageschannel---- token: {0}".format(token0))
-        jresult = hummingbird.post("http://localhost:5555/getmessageschannel", user_token = user_token0, messageschannel_uid=channel, messageschannel_postid=0)
+        jresult = hummingbird.post("http://localhost:5555/getmessageschannel", user_token = token0, messageschannel_uid = channel, messageschannel_postid = 0)
         print("response: ", jresult)
 
         self.assertIsNotNone(jresult)
         self.assertEqual(jresult["code"], 0)
         pass
         
-    def __geteventstopic(self, account_token, topic):
-        print("----geteventstopic---- token: {0}".format(account_token))
-        jresult = hummingbird.post("http://localhost:5555/geteventstopic", account_token = account_token, eventstopic_uid=topic, eventstopic_index=-1)
+    def __geteventstopic(self, user_token, topic):
+        print("----geteventstopic---- user_token: {0}".format(user_token))
+        jresult = hummingbird.post("http://localhost:5555/geteventstopic", user_token = user_token, eventstopic_uid = topic, eventstopic_index = -1)
         print("response: ", jresult)
         
         self.assertIsNotNone(jresult)
@@ -302,8 +302,8 @@ class Testing(unittest.TestCase):
     def test_13_events(self):
         print("----events----")
         
-        print("----neweventstopic---- token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
-        jresult = hummingbird.post("http://localhost:5555/neweventstopic", account_token = Testing.account_token, project_uid = Testing.pid, eventstopic_name="daily", eventstopic_delay=5)
+        print("----neweventstopic---- account_token: {0} pid: {1}".format(Testing.account_token, Testing.pid))
+        jresult = hummingbird.post("http://localhost:5555/neweventstopic", account_token = Testing.account_token, project_uid = Testing.pid, eventstopic_name = "daily", eventstopic_delay = 5)
         print("response: ", jresult)
         
         self.assertIsNotNone(jresult)

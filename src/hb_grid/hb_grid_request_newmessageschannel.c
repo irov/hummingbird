@@ -12,19 +12,27 @@
 
 hb_http_code_t hb_grid_request_newmessageschannel( hb_grid_request_handle_t * _args )
 {
-    hb_bool_t required = HB_TRUE;
-
     const char * arg_account_token;
-    hb_json_get_field_string_required( _args->data, "account_token", &arg_account_token, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
+
+        return HTTP_BADREQUEST;
+    }
 
     const char * arg_project_uid;
-    hb_json_get_field_string_required( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
+
+        return HTTP_BADREQUEST;
+    }
 
     uint32_t arg_messageschannel_maxpost;
-    hb_json_get_field_uint32_required( _args->data, "messageschannel_maxpost", &arg_messageschannel_maxpost, &required );
-
-    if( required == HB_FALSE )
+    if( hb_json_get_field_uint32( _args->data, "messageschannel_maxpost", &arg_messageschannel_maxpost ) == HB_FAILURE )
     {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get messageschannel maxpost" );
+
         return HTTP_BADREQUEST;
     }
 

@@ -1,4 +1,4 @@
-#include "hb_grid_process_script_api.h"
+#include "hb_grid_process_api.h"
 
 #include "hb_log/hb_log.h"
 #include "hb_db/hb_db.h"
@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-hb_result_t hb_grid_process_script_api( hb_grid_process_handle_t * _process, const hb_grid_process_script_api_in_data_t * _in, hb_grid_process_script_api_out_data_t * const _out )
+hb_result_t hb_grid_process_api( hb_grid_process_handle_t * _process, const hb_grid_process_api_in_data_t * _in, hb_grid_process_api_out_data_t * const _out )
 {
     hb_script_handle_t * script_handle;
     if( hb_script_initialize( _process->cache, _process->db_client, HB_DATA_MAX_SIZE, HB_DATA_MAX_SIZE, _in->project_uid, _in->user_uid, _process->matching, &script_handle ) == HB_FAILURE )

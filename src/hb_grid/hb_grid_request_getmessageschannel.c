@@ -12,19 +12,27 @@
 
 hb_http_code_t hb_grid_request_getmessageschannel( hb_grid_request_handle_t * _args )
 {
-    hb_bool_t required = HB_TRUE;
-
     const char * arg_user_token;
-    hb_json_get_field_string_required( _args->data, "user_token", &arg_user_token, HB_NULLPTR, &required );
+    if( hb_json_get_field_string( _args->data, "user_token", &arg_user_token, HB_NULLPTR ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user token" );
+
+        return HTTP_BADREQUEST;
+    }
 
     uint32_t arg_messageschannel_uid;
-    hb_json_get_field_uint32_required( _args->data, "messageschannel_uid", &arg_messageschannel_uid, &required );
+    if( hb_json_get_field_uint32( _args->data, "messageschannel_uid", &arg_messageschannel_uid ) == HB_FAILURE )
+    {
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get messageschannel uid" );
+
+        return HTTP_BADREQUEST;
+    }
 
     uint32_t arg_messageschannel_postid;
-    hb_json_get_field_uint32_required( _args->data, "messageschannel_postid", &arg_messageschannel_postid, &required );
+    if( hb_json_get_field_uint32( _args->data, "messageschannel_postid", &arg_messageschannel_postid ) == HB_FAILURE )
+{
+        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get messageschannel postid" );
 
-    if( required == HB_FALSE )
-    {
         return HTTP_BADREQUEST;
     }
 
