@@ -11,43 +11,43 @@
 hb_http_code_t hb_grid_request_command( hb_grid_request_handle_t * _args )
 {
     const char * arg_account_token;
-    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_token", &arg_account_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     const char * arg_project_uid;
-    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "project_uid", &arg_project_uid ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     const char * arg_method;
-    if( hb_json_get_field_string( _args->data, "method", &arg_method, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "method", &arg_method ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_json_handle_t * json_method_args;
-    if( hb_json_get_field( _args->data, "args", &json_method_args ) == HB_FAILURE )
+    if( hb_grid_get_arg_json( _args, "args", &json_method_args ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_account_token_t account_token;
-    if( hb_cache_get_token( _args->process->cache, arg_account_token, 1800, &account_token, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_account_token( _args, arg_account_token, &account_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
-    hb_uid_t puid;
-    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &puid, sizeof( hb_uid_t ), HB_NULLPTR ) == HB_FAILURE )
+    hb_uid_t project_uid;
+    if( hb_grid_get_uid( arg_project_uid, &project_uid ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_grid_process_api_in_data_t in_data;
-    in_data.project_uid = puid;
+    in_data.project_uid = project_uid;
     in_data.user_uid = HB_UID_NONE;
 
     strncpy( in_data.api, "command", 32 );

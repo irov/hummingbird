@@ -8,7 +8,7 @@
 typedef struct hb_grid_process_newmessageschannel_in_data_t
 {
     hb_uid_t auid;
-    hb_uid_t puid;
+    hb_uid_t project_uid;
 
     uint32_t messageschannel_maxpost;
 } hb_grid_process_newmessageschannel_in_data_t;

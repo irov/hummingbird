@@ -621,7 +621,7 @@ hb_result_t hb_json_get_field_uint16_default( hb_json_handle_t * _handle, const 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _key, uint32_t * _value )
+hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _key, uint32_t * const _value )
 {
     hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -641,7 +641,7 @@ hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_uint32_default( hb_json_handle_t * _handle, const char * _key, uint32_t * _value, uint32_t _default )
+hb_result_t hb_json_get_field_uint32_default( hb_json_handle_t * _handle, const char * _key, uint32_t * const _value, uint32_t _default )
 {
     if( hb_json_get_field_uint32( _handle, _key, _value ) == HB_SUCCESSFUL )
     {

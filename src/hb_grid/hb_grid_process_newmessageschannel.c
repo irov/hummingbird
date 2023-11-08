@@ -15,7 +15,7 @@
 hb_result_t hb_grid_process_newmessageschannel( hb_grid_process_handle_t * _process, const hb_grid_process_newmessageschannel_in_data_t * _in, hb_grid_process_newmessageschannel_out_data_t * const _out )
 {
     hb_uid_t cuid;
-    if( hb_messages_new_channel( _process->messages, _process->db_client, _in->puid, _in->messageschannel_maxpost, &cuid ) == HB_FAILURE )
+    if( hb_messages_new_channel( _process->messages, _process->db_client, _in->project_uid, _in->messageschannel_maxpost, &cuid ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

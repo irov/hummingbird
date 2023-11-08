@@ -14,18 +14,14 @@
 hb_http_code_t hb_grid_request_newaccount( hb_grid_request_handle_t * _args )
 {
     const char * arg_account_login;
-    if( hb_json_get_field_string( _args->data, "account_login", &arg_account_login, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_login", &arg_account_login ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account login" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_account_password;
-    if( hb_json_get_field_string( _args->data, "account_password", &arg_account_password, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_password", &arg_account_password ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account password" );
-
         return HTTP_BADREQUEST;
     }
 

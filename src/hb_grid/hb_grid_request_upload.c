@@ -16,32 +16,26 @@
 hb_http_code_t hb_grid_request_upload( hb_grid_request_handle_t * _args )
 {
     const char * arg_account_token;
-    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_token", &arg_account_token ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_project_uid;
-    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "project_uid", &arg_project_uid ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_code;
     hb_size_t arg_code_size;
-    if( hb_json_get_field_string( _args->data, "code", &arg_code, &arg_code_size ) == HB_FAILURE )
+    if( hb_grid_get_arg_string_size( _args, "code", &arg_code, &arg_code_size ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get code" );
-
         return HTTP_BADREQUEST;
     }
 
     hb_account_token_t account_token;
-    if( hb_cache_get_token( _args->process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_account_token( _args, arg_account_token, &account_token ) == HB_FAILURE )
     {
         snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
 
@@ -51,7 +45,7 @@ hb_http_code_t hb_grid_request_upload( hb_grid_request_handle_t * _args )
     hb_grid_process_upload_in_data_t in_data;
     in_data.account_uid = account_token.account_uid;
 
-    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_uid( arg_project_uid, &in_data.project_uid ) == HB_FAILURE )
     {
         snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
 

@@ -15,32 +15,26 @@
 hb_http_code_t hb_grid_request_newuser( hb_grid_request_handle_t * _args )
 {
     const char * arg_project_uid;
-    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "project_uid", &arg_project_uid ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_user_login;
-    if( hb_json_get_field_string( _args->data, "user_login", &arg_user_login, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "user_login", &arg_user_login ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user login" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_user_password;
-    if( hb_json_get_field_string( _args->data, "user_password", &arg_user_password, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "user_password", &arg_user_password ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user password" );
-
         return HTTP_BADREQUEST;
     }
 
     hb_grid_process_newuser_in_data_t in_data;
 
-    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &in_data.project_uid, sizeof( in_data.project_uid ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_uid( arg_project_uid, &in_data.project_uid ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

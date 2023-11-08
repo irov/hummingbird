@@ -10,25 +10,25 @@
 hb_http_code_t hb_grid_request_avatar( hb_grid_request_handle_t * _args )
 {
     const char * arg_user_token;
-    if( hb_json_get_field_string( _args->data, "user_token", &arg_user_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "user_token", &arg_user_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     const char * arg_method;
-    if( hb_json_get_field_string( _args->data, "method", &arg_method, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "method", &arg_method ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_json_handle_t * json_method_args;
-    if( hb_json_get_field( _args->data, "args", &json_method_args ) == HB_FAILURE )
+    if( hb_grid_get_arg_json( _args, "args", &json_method_args ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }    
 
     hb_user_token_t user_token;
-    if( hb_cache_get_token( _args->process->cache, arg_user_token, 1800, &user_token, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_user_token( _args, arg_user_token, &user_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

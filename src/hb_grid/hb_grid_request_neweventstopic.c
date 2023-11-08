@@ -12,45 +12,37 @@
 hb_http_code_t hb_grid_request_neweventstopic( hb_grid_request_handle_t * _args )
 {
     const char * arg_account_token;
-    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_token", &arg_account_token ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_project_uid;
-    if( hb_json_get_field_string( _args->data, "project_uid", &arg_project_uid, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "project_uid", &arg_project_uid ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get project uid" );
-
         return HTTP_BADREQUEST;
     }
 
     const char * arg_eventstopic_name;
-    if( hb_json_get_field_string( _args->data, "eventstopic_name", &arg_eventstopic_name, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "eventstopic_name", &arg_eventstopic_name ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic name" );
-
         return HTTP_BADREQUEST;
     }
 
     uint32_t arg_eventstopic_delay;
-    if( hb_json_get_field_uint32( _args->data, "eventstopic_delay", &arg_eventstopic_delay ) == HB_FAILURE )
+    if( hb_grid_get_arg_uint32( _args, "eventstopic_delay", &arg_eventstopic_delay ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic delay" );
-
         return HTTP_BADREQUEST;
     }
 
     hb_account_token_t account_token;
-    if( hb_cache_get_token( _args->process->cache, arg_account_token, 1800, &account_token, sizeof( hb_user_token_t ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_account_token( _args, arg_account_token, &account_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }
 
     hb_uid_t project_uid;
-    if( hb_base16_decode( arg_project_uid, HB_UNKNOWN_STRING_SIZE, &project_uid, sizeof( hb_uid_t ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_uid( arg_project_uid, &project_uid ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

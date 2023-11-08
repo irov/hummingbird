@@ -10,15 +10,13 @@
 hb_http_code_t hb_grid_request_newproject( hb_grid_request_handle_t * _args )
 {
     const char * arg_account_token;
-    if( hb_json_get_field_string( _args->data, "account_token", &arg_account_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "account_token", &arg_account_token ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get account token" );
-
         return HTTP_BADREQUEST;
     }
 
     hb_account_token_t account_token;
-    if( hb_cache_get_token( _args->process->cache, arg_account_token, 1800, &account_token, sizeof( account_token ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_account_token( _args, arg_account_token, &account_token ) == HB_FAILURE )
     {
         return HTTP_BADREQUEST;
     }

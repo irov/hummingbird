@@ -16,3 +16,4 @@ hb_result_t hb_uid_base16_decode( const hb_uid16_t * _base16, hb_uid_t * _uid )
 
     return result;
 }
+//////////////////////////////////////////////////////////////////////////

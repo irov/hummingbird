@@ -13,31 +13,25 @@
 hb_http_code_t hb_grid_request_geteventstopic( hb_grid_request_handle_t * _args )
 {
     const char * arg_user_token;
-    if( hb_json_get_field_string( _args->data, "user_token", &arg_user_token, HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_arg_string( _args, "user_token", &arg_user_token ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user token" );
-
         return HTTP_BADREQUEST;
     }
 
     uint32_t arg_eventstopic_uid;
-    if( hb_json_get_field_uint32( _args->data, "eventstopic_uid", &arg_eventstopic_uid ) == HB_FAILURE )
+    if( hb_grid_get_arg_uint32( _args, "eventstopic_uid", &arg_eventstopic_uid ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic uid" );
-
         return HTTP_BADREQUEST;
     }
 
     uint32_t arg_eventstopic_index;
-    if( hb_json_get_field_uint32( _args->data, "eventstopic_index", &arg_eventstopic_index ) == HB_FAILURE )
+    if( hb_grid_get_arg_uint32( _args, "eventstopic_index", &arg_eventstopic_index ) == HB_FAILURE )
     {
-        snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get eventstopic index" );
-
         return HTTP_BADREQUEST;
     }
 
     hb_user_token_t user_token;
-    if( hb_cache_get_token( _args->process->cache, arg_user_token, 1800, &user_token, sizeof( user_token ), HB_NULLPTR ) == HB_FAILURE )
+    if( hb_grid_get_user_token( _args, arg_user_token, &user_token ) == HB_FAILURE )
     {
         snprintf( _args->reason, HB_GRID_REASON_DATA_MAX_SIZE, "invalid get user token" );
 

@@ -81,4 +81,15 @@ typedef struct hb_grid_request_handle_t
 void hb_grid_process_lock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
 void hb_grid_process_unlock( hb_grid_process_handle_t * _process, hb_uid_t _uuid );
 
+hb_result_t hb_grid_get_account_token( hb_grid_request_handle_t * _handle, const char * _field, hb_account_token_t * const _token );
+hb_result_t hb_grid_get_user_token( hb_grid_request_handle_t * _handle, const char * _field, hb_user_token_t * const _token );
+hb_result_t hb_grid_get_uid( const char * _base16, hb_uid_t * const _uid );
+
+hb_result_t hb_grid_get_arg_json( hb_grid_request_handle_t * _handle, const char * _field, hb_json_handle_t ** _json );
+hb_result_t hb_grid_get_arg_string( hb_grid_request_handle_t * _handle, const char * _field, const char ** _value );
+hb_result_t hb_grid_get_arg_string_size( hb_grid_request_handle_t * _handle, const char * _field, const char ** _value, hb_size_t * const _size );
+hb_result_t hb_grid_get_arg_int32( hb_grid_request_handle_t * _handle, const char * _field, int32_t * const _value );
+hb_result_t hb_grid_get_arg_uint32( hb_grid_request_handle_t * _handle, const char * _field, uint32_t * const _value );
+hb_result_t hb_grid_get_arg_uint64( hb_grid_request_handle_t * _handle, const char * _field, uint64_t * const _value );
+
 #endif
