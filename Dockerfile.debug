@@ -17,6 +17,7 @@ EXPOSE 5555
 
 WORKDIR /hummingfab/
 # ENTRYPOINT ["/hummingfab/hb_grid", "--config", "./debug.json"]
+RUN echo "STARTING"
 CMD /hummingfab/hb_grid --config ./debug.json
 
 # grid
