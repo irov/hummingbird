@@ -10,7 +10,7 @@
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_storage_set( const hb_db_collection_handle_t * _collection, const void * _code, hb_size_t _codesize, const char * _source, hb_size_t _sourcesize, hb_sha1_t * _sha1 )
+hb_result_t hb_storage_set_code( const hb_db_collection_handle_t * _collection, const void * _code, hb_size_t _codesize, const char * _source, hb_size_t _sourcesize, hb_sha1_t * _sha1 )
 {
     hb_size_t bound_size = hb_archive_bound( _codesize );
 

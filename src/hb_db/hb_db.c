@@ -1714,7 +1714,7 @@ hb_result_t hb_db_upload_script( const hb_db_collection_handle_t * _handle, cons
             char sha1hex[41];
             hb_base64_encode( _sha1->value, sizeof( hb_sha1_t ), sha1hex, 41, &sha1hexsize );
 
-            HB_LOG_MESSAGE_ERROR( "db", "failed to insert: %s\nerror message: %s\n"
+            HB_LOG_MESSAGE_ERROR( "db", "failed to upload script sha1: %s\nerror message: %s\n"
                 , sha1hex
                 , insert_error.message
             );

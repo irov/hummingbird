@@ -40,7 +40,8 @@ def __post_json(params):
     return None
     pass
 
-def post(url, **params):
+def post(server, cmd, **params):
+    url = "{0}/{1}".format(server, cmd)
     data = __post_json(params)
     
     if data is None:

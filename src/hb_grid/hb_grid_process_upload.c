@@ -33,7 +33,7 @@ hb_result_t hb_grid_process_upload( hb_grid_process_handle_t * _process, const h
     }
 
     hb_sha1_t sha1;
-    if( hb_storage_set( db_collection_scripts, code_buffer, code_size, _in->script_source, _in->script_source_size, &sha1 ) == HB_FAILURE )
+    if( hb_storage_set_code( db_collection_scripts, code_buffer, code_size, _in->script_source, _in->script_source_size, &sha1 ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
