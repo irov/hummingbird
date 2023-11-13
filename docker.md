@@ -53,6 +53,7 @@ Production
 
 ```
 docker build -f Dockerfile.debug -v /usr/bin/python:/usr/bin/python -t hummingfab:debug .
+docker run -d --rm --net=host --name grid hummingfab:v1.debug prod
 ```
 
 - f - файл сборки

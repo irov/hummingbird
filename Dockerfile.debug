@@ -16,10 +16,13 @@ COPY ./docker_tmp /hummingfab/
 EXPOSE 5555 
 
 WORKDIR /hummingfab/
-# ENTRYPOINT ["/hummingfab/hb_grid", "--config", "./debug.json"]
-RUN echo "STARTING"
-CMD /hummingfab/hb_grid --config ./debug.json
 
-# grid
-# EXPOSE 5555 
+RUN chmod +x ./hb_grid ./docker-entrypoint.sh
+
+# ENTRYPOINT ["./hb_grid"]
+# CMD ["--config", "./debug.json"]
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
+# dev | prod
+CMD ["dev"]
 
