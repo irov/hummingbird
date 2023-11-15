@@ -1,1 +1,0 @@
-call build_solution.bat Release

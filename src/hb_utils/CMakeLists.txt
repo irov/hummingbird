@@ -11,7 +11,7 @@ ELSEIF(HUMMINGBIRD_TARGET_OSX)
     SET(hb_sleep_platform hb_sleep_macos.c)
 ENDIF()
 
-ADD_FILTER(
+HUMMINGBIRD_ADD_FILTER(
 src
     hb_sha1.h
     hb_sha1.c
@@ -77,6 +77,6 @@ src
     hb_list.c    
 )
 
-ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+HUMMINGBIRD_ADD_LIBRARY()
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_memory)

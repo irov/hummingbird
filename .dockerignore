@@ -1,7 +1,0 @@
-*.pyc
-/bin/
-/lib/
-/solutions/
-/dependencies/
-/.vscode/
-# /docker_tmp/

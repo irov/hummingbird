@@ -1,12 +1,12 @@
 PROJECT(hb_log_file C)
 
-ADD_FILTER(
+HUMMINGBIRD_ADD_FILTER(
 src
-	hb_log_file.h
-	hb_log_file.c
+    hb_log_file.h
+    hb_log_file.c
 )
 
-ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
+HUMMINGBIRD_ADD_LIBRARY()
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_config)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} hb_log)
