@@ -1,4 +1,4 @@
-PROJECT(hb_mutex C)
+PROJECT(hb_mutex LANGUAGES C)
 
 IF(HUMMINGBIRD_TARGET_WIN32)
     SET(hb_mutex_platform hb_mutex_win32.c)

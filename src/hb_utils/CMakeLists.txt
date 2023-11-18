@@ -1,4 +1,4 @@
-PROJECT(hb_utils C)
+PROJECT(hb_utils LANGUAGES C)
 
 IF(HUMMINGBIRD_TARGET_WIN32)
     SET(hb_time_platform hb_time_win32.c)
@@ -74,7 +74,7 @@ src
     hb_vectorptr.c
     
     hb_list.h
-    hb_list.c    
+    hb_list.c
 )
 
 HUMMINGBIRD_ADD_LIBRARY()

@@ -1,4 +1,4 @@
-PROJECT(hb_archive C)
+PROJECT(hb_archive LANGUAGES C)
 
 HUMMINGBIRD_ADD_FILTER(
 src

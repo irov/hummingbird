@@ -1,4 +1,4 @@
-PROJECT(hb_log_tcp C)
+PROJECT(hb_log_tcp LANGUAGES C)
 
 HUMMINGBIRD_ADD_FILTER(
 src

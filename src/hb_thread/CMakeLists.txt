@@ -1,4 +1,4 @@
-PROJECT(hb_thread C)
+PROJECT(hb_thread LANGUAGES C)
 
 IF(HUMMINGBIRD_TARGET_WIN32)
     SET(hb_thread_platform hb_thread_win32.c)

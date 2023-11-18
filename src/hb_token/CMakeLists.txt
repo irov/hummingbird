@@ -1,4 +1,4 @@
-PROJECT(hb_token C)
+PROJECT(hb_token LANGUAGES C)
 
 HUMMINGBIRD_ADD_FILTER(
 src

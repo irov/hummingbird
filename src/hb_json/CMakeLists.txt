@@ -1,4 +1,4 @@
-PROJECT(hb_json C)
+PROJECT(hb_json LANGUAGES C)
 
 HUMMINGBIRD_ADD_FILTER(
 src
