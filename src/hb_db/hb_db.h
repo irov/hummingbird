@@ -59,7 +59,7 @@ hb_result_t hb_db_copy_string_value( const hb_db_values_handle_t * _values, uint
 hb_result_t hb_db_get_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, const void ** _buffer, hb_size_t * _length );
 hb_result_t hb_db_copy_binary_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _buffer, hb_size_t _capacity );
 hb_result_t hb_db_get_time_value( const hb_db_values_handle_t * _values, uint32_t _index, hb_time_t * _value );
-hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, const hb_json_handle_t ** _value );
+hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _pool, hb_size_t _capacity, const hb_json_handle_t ** _value );
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

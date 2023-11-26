@@ -4,99 +4,69 @@
 #include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_file.h"
 
-#include "jansson.h"
+#include "yyjson.h"
 
 #include <string.h>
 #include <memory.h>
 
 //////////////////////////////////////////////////////////////////////////
-typedef struct hb_json_handle_t
+hb_result_t hb_json_create( const void * _data, hb_size_t _size, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _handle )
 {
-    json_t * jroot;
-} hb_json_handle_t;
-//////////////////////////////////////////////////////////////////////////
-typedef struct hb_json_load_data_t
-{
-    const hb_byte_t * buffer;
-    hb_size_t carriage;
-    hb_size_t capacity;
-} hb_json_load_data_t;
-//////////////////////////////////////////////////////////////////////////
-static hb_size_t __hb_json_load_callback( void * _buffer, hb_size_t _buflen, void * _ud )
-{
-    hb_json_load_data_t * jd = (hb_json_load_data_t *)_ud;
+    yyjson_alc alc;
+    yyjson_alc_pool_init( &alc, _pool, _capacity );
 
-    if( _buflen > jd->capacity - jd->carriage )
+    yyjson_read_err err;
+    yyjson_doc * doc = yyjson_read_opts( (char *)_data, _size, YYJSON_READ_NOFLAG, &alc, &err );
+
+    if( doc == HB_NULLPTR )
     {
-        _buflen = jd->capacity - jd->carriage;
-    }
-
-    if( _buflen <= 0 )
-    {
-        return 0;
-    }
-
-    const hb_byte_t * jd_buffer = jd->buffer + jd->carriage;
-    memcpy( _buffer, jd_buffer, _buflen );
-    jd->carriage += _buflen;
-
-    return _buflen;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_create( const void * _data, hb_size_t _size, hb_json_handle_t ** _handle )
-{
-    if( _size == 0 )
-    {
-        hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
-
-        handle->jroot = json_object();
-
-        *_handle = handle;
-
-        return HB_SUCCESSFUL;
-    }
-
-    hb_json_load_data_t jd;
-    jd.buffer = (const hb_byte_t *)(_data);
-    jd.carriage = 0;
-    jd.capacity = _size;
-
-    json_error_t er;
-    json_t * jroot = json_load_callback( &__hb_json_load_callback, &jd, 0, &er );
-
-    if( jroot == HB_NULLPTR )
-    {
-        HB_LOG_MESSAGE_ERROR( "json", "json '%.*s' error line [%d] column [%d] position [%d]: %s"
+        HB_LOG_MESSAGE_ERROR( "json", "json '%.*s' error pos: %zu code: %u message: %s"
             , _size
             , (const char *)_data
-            , er.line
-            , er.column
-            , er.position
-            , er.text
+            , err.pos
+            , err.code
+            , err.msg
         );
 
         return HB_FAILURE;
     }
 
-    hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
+    yyjson_val * root = yyjson_doc_get_root( doc );
 
-    handle->jroot = jroot;
-
-    *_handle = handle;
+    *_handle = (hb_json_handle_t *)root;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_json_destroy( const hb_json_handle_t * _handle )
+hb_result_t hb_json_mapping( void * _data, hb_size_t _size, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _handle )
 {
-    json_t * jroot = _handle->jroot;
+    yyjson_alc alc;
+    yyjson_alc_pool_init( &alc, _pool, _capacity );
 
-    json_decref( jroot );
+    yyjson_read_err err;
+    yyjson_doc * doc = yyjson_read_opts( (char *)_data, _size, YYJSON_READ_INSITU, &alc, &err );
 
-    HB_DELETE( _handle );
+    if( doc == HB_NULLPTR )
+    {
+        HB_LOG_MESSAGE_ERROR( "json", "json '%.*s' error pos: %zu code: %u message: %s"
+            , _size
+            , (const char *)_data
+            , err.pos
+            , err.code
+            , err.msg
+        );
+
+        return HB_FAILURE;
+    }
+
+    yyjson_val * root = yyjson_doc_get_root( doc );
+
+    *_handle = (hb_json_handle_t *)root;
+
+    return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
+hb_result_t hb_json_load( const char * _file, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _handle )
 {
     char buffer[HB_DATA_MAX_SIZE];
     hb_size_t buffer_size;
@@ -105,7 +75,7 @@ hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
         return HB_FAILURE;
     }
 
-    if( hb_json_create( buffer, buffer_size, _handle ) == HB_FAILURE )
+    if( hb_json_create( buffer, buffer_size, _pool, _capacity, _handle ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -113,58 +83,77 @@ hb_result_t hb_json_load( const char * _file, hb_json_handle_t ** _handle )
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update )
+hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _result )
 {
-    json_t * jbase = _base->jroot;
-    json_t * jupdate = _update->jroot;
+    yyjson_val * jbase = (yyjson_val *)_base;
+    yyjson_val * jupdate = (yyjson_val *)_update;
 
-    if( json_object_update( jbase, jupdate ) == -1 )
+    yyjson_alc alc;
+    yyjson_alc_pool_init( &alc, _pool, _capacity );
+
+    yyjson_mut_doc * jdoc = yyjson_mut_doc_new( &alc );
+    
+    yyjson_mut_val * jpatch = yyjson_merge_patch( jdoc, jbase, jupdate );
+
+    if( jpatch == HB_NULLPTR )
     {
         return HB_FAILURE;
     }
+
+    * _result = (hb_json_handle_t *)jpatch;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * _size )
 {
-    json_t * jroot = _handle->jroot;
+    yyjson_val * jval = (yyjson_val *)_handle;
 
-    hb_size_t sz = json_dumpb( jroot, _buffer, _capacity, JSON_COMPACT );
+    size_t len;
+    char * str = yyjson_val_write( jval, YYJSON_WRITE_NOFLAG, &len );
 
-    if( sz == 0 )
+    if( str == HB_NULLPTR )
     {
         return HB_FAILURE;
     }
 
-    *_size = sz;
+    strncpy( _buffer, str, _capacity );
+    _buffer[_capacity - 1] = '\0';
+
+    *_size = len;
+
+    free( str );
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle )
 {
-    if( json_is_object( _handle->jroot ) == HB_FALSE )
+    yyjson_val * jval = (yyjson_val *)_handle;
+
+    if( yyjson_is_obj( jval ) == HB_FALSE )
     {
-        return HB_FALSE;
+        return HB_TRUE;
     }
 
-    if( json_object_size( _handle->jroot ) != 0 )
+    if( yyjson_obj_size( jval ) == 0 )
     {
-        return HB_FALSE;
+        return HB_TRUE;
     }
 
-    return HB_TRUE;
+    return HB_FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_array_empty( const hb_json_handle_t * _handle )
 {
-    if( json_is_array( _handle->jroot ) == HB_FALSE )
+    yyjson_val * jval = (yyjson_val *)_handle;
+
+    if( yyjson_is_arr( jval ) == HB_FALSE )
     {
         return HB_FALSE;
     }
 
-    if( json_array_size( _handle->jroot ) != 0 )
+    if( yyjson_arr_size( jval ) != 0 )
     {
         return HB_FALSE;
     }
@@ -174,107 +163,125 @@ hb_bool_t hb_json_is_array_empty( const hb_json_handle_t * _handle )
 //////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle )
 {
-    return json_is_array( _handle->jroot );
+    yyjson_val * jval = (yyjson_val *)_handle;
+
+    bool result = yyjson_is_arr( jval );
+
+    return result;
 }
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_json_array_count( const hb_json_handle_t * _handle )
 {
-    hb_size_t size = json_array_size( _handle->jroot );
+    yyjson_val * jval = (yyjson_val *)_handle;
+
+    size_t size = yyjson_arr_size( jval );
 
     return (uint32_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_array_get( const hb_json_handle_t * _handle, uint32_t _index, hb_json_handle_t ** _out )
 {
-    json_t * jvalue = json_array_get( _handle->jroot, (hb_size_t)_index );
+    yyjson_val * jval = (yyjson_val *)_handle;
 
-    if( jvalue == HB_NULLPTR )
+    yyjson_val * jelement = yyjson_arr_get( jval, (hb_size_t)_index );
+
+    if( jelement == HB_NULLPTR )
     {
         return HB_FAILURE;
     }
 
-    json_incref( jvalue );
-
-    hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
-    handle->jroot = jvalue;
-
-    *_out = handle;
+    *_out = (hb_json_handle_t *)jelement;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, hb_json_handle_t ** _out )
 {
-    json_t * jroot = _handle->jroot;
+    yyjson_val * jval = (yyjson_val *)_handle;
 
-    json_t * jvalue = json_object_get( jroot, _key );
+    yyjson_val * jelement = yyjson_obj_get( jval, _key );
 
-    if( jvalue == HB_NULLPTR )
+    if( jelement == HB_NULLPTR )
     {
-        *_out = HB_NULLPTR;
-
         return HB_FAILURE;
     }
 
-    json_incref( jvalue );
-
-    hb_json_handle_t * handle = HB_NEW( hb_json_handle_t );
-    handle->jroot = jvalue;
-
-    *_out = handle;
+    *_out = (hb_json_handle_t *)jelement;
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
 uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle )
 {
-    json_t * jroot = _handle->jroot;
+    yyjson_val * jval = (yyjson_val *)_handle;
 
-    hb_size_t jcount = json_object_size( jroot );
+    size_t size = yyjson_obj_size( jval );
 
-    return (uint32_t)jcount;
+    return (uint32_t)size;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    json_type jtype = json_typeof( jvalue );
+    yyjson_type t = yyjson_get_type( val );
 
-    switch( jtype )
+    switch( t )
     {
-    case JSON_OBJECT:
+    case YYJSON_TYPE_OBJ:
         return e_hb_json_object;
-    case JSON_ARRAY:
+    case YYJSON_TYPE_ARR:
         return e_hb_json_array;
-    case JSON_STRING:
+    case YYJSON_TYPE_STR:
         return e_hb_json_string;
-    case JSON_INTEGER:
-        return e_hb_json_integer;
-    case JSON_REAL:
-        return e_hb_json_real;
-    case JSON_TRUE:
-        return e_hb_json_true;
-    case JSON_FALSE:
-        return e_hb_json_false;
-    case JSON_NULL:
+    case YYJSON_TYPE_NUM:
+        {
+            yyjson_subtype subtype = yyjson_get_subtype( val );
+
+            switch( subtype )
+            {
+            case YYJSON_SUBTYPE_UINT:
+                return e_hb_json_integer;
+            case YYJSON_SUBTYPE_SINT:
+                return e_hb_json_integer;
+            case YYJSON_SUBTYPE_REAL:
+                return e_hb_json_real;
+            default:
+                return e_hb_json_invalid;
+            }
+        }
+    case YYJSON_TYPE_BOOL:
+        {
+            yyjson_subtype subtype = yyjson_get_subtype( val );
+
+            switch( subtype )
+            {
+            case YYJSON_SUBTYPE_FALSE:
+                return e_hb_json_false;
+            case YYJSON_SUBTYPE_TRUE:
+                return e_hb_json_true;
+            default:
+                return e_hb_json_invalid;
+            }
+        }break;
+    case YYJSON_TYPE_NULL:
         return e_hb_json_null;
     default:
-        return 0;
+        return e_hb_json_invalid;
     }
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_string( jvalue ) == HB_FALSE )
+    if( yyjson_is_str( val ) == false )
     {
         return HB_FAILURE;
     }
 
-    const char * value = json_string_value( jvalue );
-    hb_size_t size = json_string_length( jvalue );
+    const char * value = unsafe_yyjson_get_str( val );
+    hb_size_t size = unsafe_yyjson_get_len( val );
 
     *_value = value;
 
@@ -286,116 +293,277 @@ hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * _value )
+hb_result_t hb_json_to_boolean( const hb_json_handle_t * _handle, hb_bool_t * const _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_bool( val ) == false )
     {
         return HB_FAILURE;
     }
 
-    json_int_t value = json_integer_value( jvalue );
+    bool value = unsafe_yyjson_get_bool( val );
 
-    *_value = (int16_t)value;
+    *_value = (hb_bool_t)value;
 
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
+
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * _value )
+{
+    yyjson_val * val = (yyjson_val *)_handle;
+
+    if( yyjson_is_sint( val ) == true )
+    {
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (int16_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (int16_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (int16_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_int32( const hb_json_handle_t * _handle, int32_t * _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (int32_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (int32_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (int32_t)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    json_int_t value = json_integer_value( jvalue );
-
-    *_value = (int32_t)value;
-
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_uint16( const hb_json_handle_t * _handle, uint16_t * _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (uint16_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (uint16_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (uint16_t)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    json_int_t value = json_integer_value( jvalue );
-
-    *_value = (uint16_t)value;
-
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (uint32_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (uint32_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (uint32_t)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    json_int_t value = json_integer_value( jvalue );
-
-    *_value = (uint32_t)value;
-
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_int64( const hb_json_handle_t * _handle, int64_t * _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (int64_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (int64_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (int64_t)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    json_int_t value = json_integer_value( jvalue );
-
-    *_value = (int64_t)value;
-
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_integer( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (uint64_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (uint64_t)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (uint64_t)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    json_int_t value = json_integer_value( jvalue );
-
-    *_value = (uint64_t)value;
-
-    return HB_SUCCESSFUL;
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_real( const hb_json_handle_t * _handle, double * _value )
+hb_result_t hb_json_to_float( const hb_json_handle_t * _handle, float * const _value )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    if( json_is_real( jvalue ) == HB_FALSE )
+    if( yyjson_is_sint( val ) == true )
     {
-        return HB_FAILURE;
+        int64_t value = unsafe_yyjson_get_sint( val );
+
+        *_value = (float)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (float)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (float)value;
+
+        return HB_SUCCESSFUL;
     }
 
-    double value = json_real_value( jvalue );
+    return HB_FAILURE;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const _value )
+{
+    yyjson_val * val = (yyjson_val *)_handle;
 
-    *_value = (double)value;
+    if( yyjson_is_sint( val ) == true )
+    {
+        int64_t value = unsafe_yyjson_get_sint( val );
 
-    return HB_SUCCESSFUL;
+        *_value = (double)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_uint( val ) == true )
+    {
+        uint64_t value = unsafe_yyjson_get_uint( val );
+
+        *_value = (double)value;
+
+        return HB_SUCCESSFUL;
+    }
+    else if( yyjson_is_real( val ) == true )
+    {
+        double value = unsafe_yyjson_get_real( val );
+
+        *_value = (double)value;
+
+        return HB_SUCCESSFUL;
+    }
+
+    return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * const _size )
@@ -408,12 +576,8 @@ hb_result_t hb_json_get_field_string( hb_json_handle_t * _handle, const char * _
 
     if( hb_json_to_string( field, _value, _size ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -452,22 +616,16 @@ hb_result_t hb_json_copy_field_string( hb_json_handle_t * _handle, const char * 
     hb_size_t size;
     if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
 
     if( size > _capacity )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
 
     memcpy( _value, value, size );
     _value[size] = '\0';
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -502,12 +660,8 @@ hb_result_t hb_json_get_field_int16( hb_json_handle_t * _handle, const char * _k
 
     if( hb_json_to_int16( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -535,12 +689,8 @@ hb_result_t hb_json_get_field_int32( hb_json_handle_t * _handle, const char * _k
 
     if( hb_json_to_int32( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -567,12 +717,8 @@ hb_result_t hb_json_get_field_int64( hb_json_handle_t * _handle, const char * _k
 
     if( hb_json_to_int64( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -599,12 +745,8 @@ hb_result_t hb_json_get_field_uint16( hb_json_handle_t * _handle, const char * _
 
     if( hb_json_to_uint16( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -631,12 +773,8 @@ hb_result_t hb_json_get_field_uint32( hb_json_handle_t * _handle, const char * _
 
     if( hb_json_to_uint32( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -663,12 +801,8 @@ hb_result_t hb_json_get_field_uint64( hb_json_handle_t * _handle, const char * _
 
     if( hb_json_to_uint64( field, _value ) == HB_FAILURE )
     {
-        hb_json_destroy( field );
-
         return HB_FAILURE;
     }
-
-    hb_json_destroy( field );
 
     return HB_SUCCESSFUL;
 }
@@ -687,17 +821,17 @@ hb_result_t hb_json_get_field_uint64_default( hb_json_handle_t * _handle, const 
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_object_visitor_t _visitor, void * _ud )
 {
-    json_t * jvalue = _handle->jroot;
+    yyjson_val * obj = (yyjson_val *)_handle;
 
-    for( const char * key = json_object_iter_key( json_object_iter( jvalue ) );
-        key != NULL;
-        key = json_object_iter_key( json_object_iter_next( jvalue, json_object_key_to_iter( key ) ) ) )
+    size_t idx, max;
+    yyjson_val * objkey;
+    yyjson_val * objval;
+    yyjson_obj_foreach( obj, idx, max, objkey, objval )
     {
-        json_t * jelement = json_object_iter_value( json_object_key_to_iter( key ) );
+        const hb_json_handle_t * objkeyhandle = (const hb_json_handle_t *)objkey;
+        const hb_json_handle_t * objvalhandle = (const hb_json_handle_t *)objval;
 
-        hb_json_handle_t handle;
-        handle.jroot = jelement;
-        if( (*_visitor)(key, &handle, _ud) == HB_FAILURE )
+        if( (*_visitor)((hb_size_t)idx, objkeyhandle, objvalhandle, _ud) == HB_FAILURE )
         {
             return HB_FAILURE;
         }
@@ -708,17 +842,15 @@ hb_result_t hb_json_object_foreach( const hb_json_handle_t * _handle, hb_json_ob
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_array_foreach( const hb_json_handle_t * _handle, hb_json_array_visitor_t _visitor, void * _ud )
 {
-    json_t * jvalue = _handle->jroot;
-    
-    hb_size_t array_size = json_array_size( jvalue );
+    yyjson_val * arr = (yyjson_val *)_handle;
 
-    for( hb_size_t index = 0; index != array_size; ++index )
+    size_t idx, max;
+    yyjson_val * val;
+    yyjson_arr_foreach( arr, idx, max, val )
     {
-        json_t * jelement = json_array_get( jvalue, index );
+        const hb_json_handle_t * idhandle = (const hb_json_handle_t *)val;
 
-        hb_json_handle_t handle;
-        handle.jroot = jelement;
-        if( (*_visitor)(index, &handle, _ud) == HB_FAILURE )
+        if( (*_visitor)((hb_size_t)idx, idhandle, _ud) == HB_FAILURE )
         {
             return HB_FAILURE;
         }

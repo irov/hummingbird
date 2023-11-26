@@ -695,7 +695,7 @@ hb_result_t hb_db_get_string_value( const hb_db_values_handle_t * _values, uint3
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, const hb_json_handle_t ** _value )
+hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_t _index, void * _pool, hb_size_t _capacity, const hb_json_handle_t ** _value )
 {
     if( _index >= _values->value_count )
     {
@@ -710,7 +710,7 @@ hb_result_t hb_db_get_json_value( const hb_db_values_handle_t * _values, uint32_
     }
 
     hb_json_handle_t * json_value;
-    if( hb_json_create( value->u.symbol.buffer, value->u.symbol.length, &json_value ) == HB_FAILURE )
+    if( hb_json_create( value->u.symbol.buffer, value->u.symbol.length, _pool, _capacity, &json_value ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

@@ -12,7 +12,7 @@
 #endif
 
 #ifndef HB_LOG_MAX_MESSAGE_SIZE
-#define HB_LOG_MAX_MESSAGE_SIZE 2048
+#define HB_LOG_MAX_MESSAGE_SIZE 4096
 #endif
 
 //////////////////////////////////////////////////////////////////////////

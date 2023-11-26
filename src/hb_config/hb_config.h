@@ -79,7 +79,7 @@ typedef struct hb_account_token_t
 } hb_account_token_t;
 
 #ifndef HB_DATA_MAX_SIZE
-#define HB_DATA_MAX_SIZE 102400
+#define HB_DATA_MAX_SIZE 51200
 #endif
 
 typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
