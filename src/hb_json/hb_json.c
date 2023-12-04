@@ -4,7 +4,7 @@
 #include "hb_memory/hb_memory.h"
 #include "hb_utils/hb_file.h"
 
-#include "yyjson.h"
+#include "json.h"
 
 #include <string.h>
 #include <memory.h>
