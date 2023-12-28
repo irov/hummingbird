@@ -39,3 +39,26 @@ void hb_rand_hex_generate( const char * _vocabulary, hb_size_t _count, char * _h
         rand = hb_rand_seed( rand );
     }
 }
+//////////////////////////////////////////////////////////////////////////
+static inline uint64_t __ror64( uint64_t v, uint64_t r )
+{
+    return (v >> r) | (v << (64 - r));
+}
+//////////////////////////////////////////////////////////////////////////
+uint64_t hb_rand64( uint64_t * const _seed )
+{
+    const uint64_t prime = 0x9FB21C651E98DF25L;
+
+    uint64_t v = *_seed;
+
+    v ^= __ror64( v, 49 ) ^ __ror64( v, 24 );
+    v *= prime;
+    v ^= v >> 28;
+    v *= prime;
+    v ^= v >> 28;
+
+    *_seed = v;
+
+    return v;
+}
+//////////////////////////////////////////////////////////////////////////

@@ -75,6 +75,9 @@ src
     
     hb_list.h
     hb_list.c
+    
+    hb_math.h
+    hb_math.c
 )
 
 HUMMINGBIRD_ADD_LIBRARY()

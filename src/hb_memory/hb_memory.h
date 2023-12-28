@@ -29,6 +29,10 @@ void hb_memory_free( const void * _ptr );
 #define HB_NEW(TYPE) ((TYPE*)hb_memory_alloc(sizeof(TYPE)))
 #endif
 
+#ifndef HB_NEWE
+#define HB_NEWE(TYPE, E) ((TYPE*)hb_memory_alloc(sizeof(TYPE) + E))
+#endif
+
 #ifndef HB_NEWN
 #define HB_NEWN(TYPE, N) ((TYPE*)hb_memory_alloc(sizeof(TYPE) * N))
 #endif
