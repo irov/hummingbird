@@ -95,6 +95,9 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_MEMOFFSET(P, I) ((void *)((uint8_t *)(P) + I))
 #define HB_TMEMOFFSET(T, P, I) ((T)((uint8_t *)(P) + I))
 
+#define HB_MIN(A, B) ((A) < (B) ? (A) : (B))
+#define HB_MAX(A, B) ((A) > (B) ? (A) : (B))
+
 #ifndef HB_MAX_PATH
 #define HB_MAX_PATH 260
 #endif

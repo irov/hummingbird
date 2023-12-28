@@ -37,8 +37,11 @@ src
     hb_multipart.h
     hb_multipart.c
 
-    hb_strstre.c
     hb_strstre.h
+    hb_strstre.c
+    
+    hb_strncpyn.h
+    hb_strncpyn.c
     
     hb_time.h
     ${hb_time_platform}

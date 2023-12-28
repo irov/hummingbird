@@ -9,7 +9,7 @@ hb_result_t hb_json_create( const void * _data, hb_size_t _size, void * _pool, h
 hb_result_t hb_json_mapping( const void * _data, hb_size_t _size, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _handle );
 hb_result_t hb_json_load( const char * _file, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _handle );
 
-typedef enum hb_json_type_t
+typedef enum hb_json_type_e
 {
     e_hb_json_null,
     e_hb_json_false,
@@ -19,19 +19,19 @@ typedef enum hb_json_type_t
     e_hb_json_string,
     e_hb_json_array,
     e_hb_json_object,
-} hb_json_type_t;
+} hb_json_type_e;
 
-hb_json_type_t hb_json_get_type( const hb_json_handle_t * _handle );
+hb_json_type_e hb_json_get_type( const hb_json_handle_t * _handle );
 
 hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle );
 hb_bool_t hb_json_is_array_empty( const hb_json_handle_t * _handle );
 hb_bool_t hb_json_is_array( const hb_json_handle_t * _handle );
 
-uint32_t hb_json_get_array_count( const hb_json_handle_t * _handle );
+hb_size_t hb_json_get_array_size( const hb_json_handle_t * _handle );
 hb_result_t hb_json_array_get_element( const hb_json_handle_t * _handle, uint32_t _index, const hb_json_handle_t ** _out );
 
-hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out );
-uint32_t hb_json_get_fields_count( const hb_json_handle_t * _handle );
+hb_size_t hb_json_get_object_size( const hb_json_handle_t * _handle );
+hb_result_t hb_json_object_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out );
 
 hb_result_t hb_json_to_boolean( const hb_json_handle_t * _handle, hb_bool_t * const _value );
 hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * const _value );
@@ -46,6 +46,7 @@ hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const 
 hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size );
 
 hb_result_t hb_json_copy_string( const hb_json_handle_t * _handle, char * _value, hb_size_t _capacity, hb_size_t * const _size );
+hb_result_t hb_json_get_string_size( const hb_json_handle_t * _handle, hb_size_t * const _size );
 
 hb_result_t hb_json_get_field_boolean( const hb_json_handle_t * _handle, const char * _key, hb_bool_t * const _value );
 void hb_json_get_field_boolean_default( const hb_json_handle_t * _handle, const char * _key, hb_bool_t * const _value, hb_bool_t _default );
