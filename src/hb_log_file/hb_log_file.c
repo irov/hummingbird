@@ -62,9 +62,11 @@ hb_result_t hb_log_file_initialize( const char * _file )
 //////////////////////////////////////////////////////////////////////////
 void hb_log_file_finalize()
 {
-    hb_log_file_handle_t * handle;
-    if( hb_log_remove_observer( &__hb_log_file_observer, &handle ) == HB_SUCCESSFUL )
+    void * ud;
+    if( hb_log_remove_observer( &__hb_log_file_observer, &ud ) == HB_SUCCESSFUL )
     {
+        hb_log_file_handle_t * handle = (hb_log_file_handle_t *)ud;
+
         fclose( handle->f );
         handle->f = HB_NULLPTR;
 

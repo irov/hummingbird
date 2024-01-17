@@ -109,9 +109,11 @@ hb_result_t hb_log_tcp_initialize( const char * _url, uint16_t _port )
 //////////////////////////////////////////////////////////////////////////
 void hb_log_tcp_finalize()
 {
-    hb_log_tcp_handle_t * handle;
-    if( hb_log_remove_observer( &__hb_log_tcp_observer, &handle ) == HB_SUCCESSFUL )
+    void * ud;
+    if( hb_log_remove_observer( &__hb_log_tcp_observer, &ud ) == HB_SUCCESSFUL )
     {
+        hb_log_tcp_handle_t * handle = (hb_log_tcp_handle_t *)ud;
+
         bufferevent_free( handle->bev_cnn );
         event_base_free( handle->base );
 
