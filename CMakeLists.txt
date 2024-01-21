@@ -55,7 +55,10 @@ MACRO(HUMMINGBIRD_ADD_LIBRARY)
     ADD_LIBRARY(${PROJECT_NAME} STATIC ${HUMMINGBIRD_SOURCE_FILES})
     
     set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER hummingbird)
+    
+    if(MSVC)
+        set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER hummingbird)
+    endif()
 ENDMACRO()
 
 MACRO(HUMMINGBIRD_ADD_INTERFACE)
@@ -63,10 +66,9 @@ MACRO(HUMMINGBIRD_ADD_INTERFACE)
     
     if(MSVC)
         add_custom_target(${PROJECT_NAME}.headers SOURCES ${HUMMINGBIRD_SOURCE_FILES})
+        
+        set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER hummingbird)
     endif()
-    
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER hummingbird)
 ENDMACRO()
 
 ADD_SUBDIRECTORY(src)
