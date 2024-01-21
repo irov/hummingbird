@@ -78,6 +78,13 @@ hb_result_t hb_json_load( const char * _file, void * _pool, hb_size_t _capacity,
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+void hb_json_free( hb_json_handle_t * _handle )
+{
+    js_element_t * jval = (js_element_t *)_handle;
+
+    js_free( jval );
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _result )
 {
     js_element_t * jbase = (js_element_t *)_base;
