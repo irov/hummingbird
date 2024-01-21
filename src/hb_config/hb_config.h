@@ -106,6 +106,11 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_MAX_URI 2048
 #endif
 
+#ifndef HB_PP_STRINGIZE
+#define HB_PP_STRINGIZE_I(X) #X
+#define HB_PP_STRINGIZE(X) HB_PP_STRINGIZE_I(X)
+#endif
+
 #if defined(WIN32)
 #   define HB_PLATFORM_WINDOWS
 #elif defined(__linux__) && !defined(__ANDROID__)
