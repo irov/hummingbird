@@ -6,6 +6,7 @@
 #include "hb_utils/hb_strncpyn.h"
 
 #include "json.h"
+#include "json_dump.h"
 
 #include <string.h>
 #include <memory.h>
@@ -197,7 +198,7 @@ hb_result_t hb_json_array_get_element( const hb_json_handle_t * _handle, uint32_
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_object_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out )
+hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out )
 {
     const js_element_t * jval = (const js_element_t *)_handle;
 
@@ -545,7 +546,7 @@ hb_result_t hb_json_get_string_size( const hb_json_handle_t * _handle, hb_size_t
 hb_result_t hb_json_get_field_string( const hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * const _size )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -576,7 +577,7 @@ void hb_json_get_field_string_default( const hb_json_handle_t * _handle, const c
 hb_result_t hb_json_copy_field_string( const hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -616,7 +617,7 @@ hb_result_t hb_json_copy_field_string_default( const hb_json_handle_t * _handle,
 hb_result_t hb_json_get_field_boolean( const hb_json_handle_t * _handle, const char * _key, hb_bool_t * const _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -643,7 +644,7 @@ void hb_json_get_field_boolean_default( const hb_json_handle_t * _handle, const 
 hb_result_t hb_json_get_field_int16( const hb_json_handle_t * _handle, const char * _key, int16_t * _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -659,7 +660,7 @@ hb_result_t hb_json_get_field_int16( const hb_json_handle_t * _handle, const cha
 void hb_json_get_field_int16_default( const hb_json_handle_t * _handle, const char * _key, int16_t * _value, int16_t _default )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_SUCCESSFUL )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_SUCCESSFUL )
     {
         return;
     }
@@ -670,7 +671,7 @@ void hb_json_get_field_int16_default( const hb_json_handle_t * _handle, const ch
 hb_result_t hb_json_get_field_int32( const hb_json_handle_t * _handle, const char * _key, int32_t * _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -696,7 +697,7 @@ void hb_json_get_field_int32_default( const hb_json_handle_t * _handle, const ch
 hb_result_t hb_json_get_field_int64( const hb_json_handle_t * _handle, const char * _key, int64_t * _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -722,7 +723,7 @@ void hb_json_get_field_int64_default( const hb_json_handle_t * _handle, const ch
 hb_result_t hb_json_get_field_uint16( const hb_json_handle_t * _handle, const char * _key, uint16_t * _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -748,7 +749,7 @@ void hb_json_get_field_uint16_default( const hb_json_handle_t * _handle, const c
 hb_result_t hb_json_get_field_uint32( const hb_json_handle_t * _handle, const char * _key, uint32_t * const _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -774,7 +775,7 @@ void hb_json_get_field_uint32_default( const hb_json_handle_t * _handle, const c
 hb_result_t hb_json_get_field_uint64( const hb_json_handle_t * _handle, const char * _key, uint64_t * _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -800,7 +801,7 @@ void hb_json_get_field_uint64_default( const hb_json_handle_t * _handle, const c
 hb_result_t hb_json_get_field_size_t( const hb_json_handle_t * _handle, const char * _key, hb_size_t * const _value )
 {
     const hb_json_handle_t * field;
-    if( hb_json_object_get_field( _handle, _key, &field ) == HB_FAILURE )
+    if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }

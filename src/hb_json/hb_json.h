@@ -32,7 +32,7 @@ hb_size_t hb_json_get_array_size( const hb_json_handle_t * _handle );
 hb_result_t hb_json_array_get_element( const hb_json_handle_t * _handle, uint32_t _index, const hb_json_handle_t ** _out );
 
 hb_size_t hb_json_get_object_size( const hb_json_handle_t * _handle );
-hb_result_t hb_json_object_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out );
+hb_result_t hb_json_get_field( const hb_json_handle_t * _handle, const char * _key, const hb_json_handle_t ** _out );
 
 hb_result_t hb_json_to_boolean( const hb_json_handle_t * _handle, hb_bool_t * const _value );
 hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * const _value );
