@@ -46,6 +46,7 @@ hb_result_t hb_json_to_float( const hb_json_handle_t * _handle, float * const _v
 hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const _value );
 hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size );
 
+hb_bool_t hb_json_is_string( const hb_json_handle_t * _handle );
 hb_result_t hb_json_copy_string( const hb_json_handle_t * _handle, char * _value, hb_size_t _capacity, hb_size_t * const _size );
 hb_result_t hb_json_get_string_size( const hb_json_handle_t * _handle, hb_size_t * const _size );
 

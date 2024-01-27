@@ -499,6 +499,18 @@ hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_json_is_string( const hb_json_handle_t * _handle )
+{
+    const js_element_t * jval = (const js_element_t *)_handle;
+
+    if( js_is_string( jval ) == JS_FALSE )
+    {
+        return HB_FALSE;
+    }
+
+    return HB_TRUE;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_copy_string( const hb_json_handle_t * _handle, char * _value, hb_size_t _capacity, hb_size_t * const _size )
 {
     const js_element_t * jval = (const js_element_t *)_handle;
