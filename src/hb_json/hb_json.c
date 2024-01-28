@@ -573,7 +573,15 @@ void hb_json_get_field_string_default( const hb_json_handle_t * _handle, const c
     }
 
     _value->value = _default;
-    _value->size = strlen( _default );
+
+    if( _default != HB_NULLPTR )
+    {
+        _value->size = strlen( _default );
+    }
+    else
+    {
+        _value->size = 0;
+    }
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_copy_field_string( const hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity )
