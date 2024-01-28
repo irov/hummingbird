@@ -130,6 +130,15 @@ hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_json_is_object( const hb_json_handle_t * _handle )
+{
+    const js_element_t * jval = (const js_element_t *)_handle;
+
+    js_bool_t result = js_is_object( jval );
+
+    return result;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_bool_t hb_json_is_object_empty( const hb_json_handle_t * _handle )
 {
     const js_element_t * jval = (const js_element_t *)_handle;
@@ -275,7 +284,7 @@ hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * const 
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (int16_t)value;
 
@@ -283,7 +292,7 @@ hb_result_t hb_json_to_int16( const hb_json_handle_t * _handle, int16_t * const 
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (int16_t)value;
 
@@ -299,7 +308,7 @@ hb_result_t hb_json_to_int32( const hb_json_handle_t * _handle, int32_t * const 
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (int32_t)value;
 
@@ -307,7 +316,7 @@ hb_result_t hb_json_to_int32( const hb_json_handle_t * _handle, int32_t * const 
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (int32_t)value;
 
@@ -323,7 +332,7 @@ hb_result_t hb_json_to_uint16( const hb_json_handle_t * _handle, uint16_t * cons
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (uint16_t)value;
 
@@ -331,7 +340,7 @@ hb_result_t hb_json_to_uint16( const hb_json_handle_t * _handle, uint16_t * cons
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (uint16_t)value;
 
@@ -347,7 +356,7 @@ hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * cons
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (uint32_t)value;
 
@@ -355,7 +364,7 @@ hb_result_t hb_json_to_uint32( const hb_json_handle_t * _handle, uint32_t * cons
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (uint32_t)value;
 
@@ -371,7 +380,7 @@ hb_result_t hb_json_to_int64( const hb_json_handle_t * _handle, int64_t * const 
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (int64_t)value;
 
@@ -379,7 +388,7 @@ hb_result_t hb_json_to_int64( const hb_json_handle_t * _handle, int64_t * const 
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (int64_t)value;
 
@@ -395,7 +404,7 @@ hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * cons
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (uint64_t)value;
 
@@ -403,7 +412,7 @@ hb_result_t hb_json_to_uint64( const hb_json_handle_t * _handle, uint64_t * cons
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (uint64_t)value;
 
@@ -419,7 +428,7 @@ hb_result_t hb_json_to_size_t( const hb_json_handle_t * _handle, hb_size_t * con
 
     if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (hb_size_t)value;
 
@@ -427,7 +436,7 @@ hb_result_t hb_json_to_size_t( const hb_json_handle_t * _handle, hb_size_t * con
     }
     else if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (hb_size_t)value;
 
@@ -443,7 +452,7 @@ hb_result_t hb_json_to_float( const hb_json_handle_t * _handle, float * const _v
 
     if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (float)value;
 
@@ -451,7 +460,7 @@ hb_result_t hb_json_to_float( const hb_json_handle_t * _handle, float * const _v
     }
     else if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (float)value;
 
@@ -467,7 +476,7 @@ hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const 
 
     if( js_is_real( jval ) == JS_TRUE )
     {
-        js_real_value_t value = js_get_real( jval );
+        js_real_t value = js_get_real( jval );
 
         *_value = (double)value;
 
@@ -475,7 +484,7 @@ hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const 
     }
     else if( js_is_integer( jval ) == JS_TRUE )
     {
-        js_integer_value_t value = js_get_integer( jval );
+        js_integer_t value = js_get_integer( jval );
 
         *_value = (double)value;
 
@@ -485,7 +494,7 @@ hb_result_t hb_json_to_double( const hb_json_handle_t * _handle, double * const 
     return HB_FAILURE;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _value, hb_size_t * _size )
+hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, hb_json_string_t * const _value )
 {
     const js_element_t * jval = (const js_element_t *)_handle;
 
@@ -494,7 +503,11 @@ hb_result_t hb_json_to_string( const hb_json_handle_t * _handle, const char ** _
         return HB_FAILURE;
     }
 
-    js_get_string( jval, _value, _size );
+    js_string_t value;
+    js_get_string( jval, &value );
+
+    _value->value = value.value;
+    _value->size = (hb_size_t)value.size;
 
     return HB_SUCCESSFUL;
 }
@@ -520,42 +533,23 @@ hb_result_t hb_json_copy_string( const hb_json_handle_t * _handle, char * _value
         return HB_FAILURE;
     }
 
-    const char * value;
-    hb_size_t size;
-    js_get_string( jval, &value, &size );
+    js_string_t value;
+    js_get_string( jval, &value );
 
-    if( hb_strncpyn( _value, _capacity, value, size ) == HB_FALSE )
+    if( hb_strncpyn( _value, _capacity, value.value, value.size ) == HB_FALSE )
     {
         return HB_FAILURE;
     }
 
     if( _size != HB_NULLPTR )
     {
-        *_size = size;
+        *_size = value.size;
     }
 
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_string_size( const hb_json_handle_t * _handle, hb_size_t * const _size )
-{
-    const js_element_t * jval = (const js_element_t *)_handle;
-
-    if( js_is_string( jval ) == JS_FALSE )
-    {
-        return HB_FAILURE;
-    }
-
-    const char * value;
-    hb_size_t size;
-    js_get_string( jval, &value, &size );
-
-    *_size = size;
-
-    return HB_SUCCESSFUL;
-}
-//////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_get_field_string( const hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * const _size )
+hb_result_t hb_json_get_field_string( const hb_json_handle_t * _handle, const char * _key, hb_json_string_t * const _value )
 {
     const hb_json_handle_t * field;
     if( hb_json_get_field( _handle, _key, &field ) == HB_FAILURE )
@@ -563,7 +557,7 @@ hb_result_t hb_json_get_field_string( const hb_json_handle_t * _handle, const ch
         return HB_FAILURE;
     }
 
-    if( hb_json_to_string( field, _value, _size ) == HB_FAILURE )
+    if( hb_json_to_string( field, _value ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
@@ -571,19 +565,15 @@ hb_result_t hb_json_get_field_string( const hb_json_handle_t * _handle, const ch
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-void hb_json_get_field_string_default( const hb_json_handle_t * _handle, const char * _key, const char ** _value, hb_size_t * _size, const char * _default )
+void hb_json_get_field_string_default( const hb_json_handle_t * _handle, const char * _key, hb_json_string_t * const _value, const char * _default )
 {
-    if( hb_json_get_field_string( _handle, _key, _value, _size ) == HB_SUCCESSFUL )
+    if( hb_json_get_field_string( _handle, _key, _value ) == HB_SUCCESSFUL )
     {
         return;
     }
 
-    *_value = _default;
-
-    if( _size != HB_NULLPTR )
-    {
-        *_size = strlen( _default );
-    }
+    _value->value = _default;
+    _value->size = strlen( _default );
 }
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_json_copy_field_string( const hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity )
@@ -594,14 +584,13 @@ hb_result_t hb_json_copy_field_string( const hb_json_handle_t * _handle, const c
         return HB_FAILURE;
     }
 
-    const char * value;
-    hb_size_t size;
-    if( hb_json_to_string( field, &value, &size ) == HB_FAILURE )
+    hb_json_string_t json_string;
+    if( hb_json_to_string( field, &json_string ) == HB_FAILURE )
     {
         return HB_FAILURE;
     }
 
-    if( hb_strncpyn( _value, _capacity, value, size ) == HB_FALSE )
+    if( hb_strncpyn( _value, _capacity, json_string.value, json_string.size ) == HB_FALSE )
     {
         return HB_FAILURE;
     }
