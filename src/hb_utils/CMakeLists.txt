@@ -25,6 +25,9 @@ src
     hb_base64.h
     hb_base64.c
     
+    hb_getenv.h
+    hb_getenv.c
+    
     hb_getopt.h
     hb_getopt.c
     
