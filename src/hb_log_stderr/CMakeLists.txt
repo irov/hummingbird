@@ -1,9 +1,9 @@
-PROJECT(hb_log_console LANGUAGES C)
+PROJECT(hb_log_stderr LANGUAGES C)
 
 HUMMINGBIRD_ADD_FILTER(
 src
-    hb_log_console.h
-    hb_log_console.c
+    hb_log_stderr.h
+    hb_log_stderr.c
 )
 
 HUMMINGBIRD_ADD_LIBRARY()

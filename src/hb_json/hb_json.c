@@ -5,8 +5,8 @@
 #include "hb_utils/hb_file.h"
 #include "hb_utils/hb_strncpyn.h"
 
-#include "json.h"
-#include "json_dump.h"
+#include "json/json.h"
+#include "json/json_dump.h"
 
 #include <string.h>
 #include <memory.h>
