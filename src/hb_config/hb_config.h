@@ -111,6 +111,11 @@ typedef hb_byte_t hb_data_t[HB_DATA_MAX_SIZE];
 #define HB_PP_STRINGIZE(X) HB_PP_STRINGIZE_I(X)
 #endif
 
+#ifndef HB_PP_CONCATENATE
+#define HB_PP_CONCATENATE_I(A, B) A##B
+#define HB_PP_CONCATENATE(A, B) HB_PP_CONCATENATE_I(A, B)
+#endif
+
 #if defined(WIN32)
 #   define HB_PLATFORM_WINDOWS
 #elif defined(__linux__) && !defined(__ANDROID__)
