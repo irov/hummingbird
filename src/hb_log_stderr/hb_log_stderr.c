@@ -7,10 +7,11 @@ static void __hb_log_observer( const char * _category, hb_log_level_t _level, co
 {
     HB_UNUSED( _ud );
 
-    const char * ls = hb_log_level_string[_level];
+    const char * ls = hb_log_level_stringize( _level );
 
     switch( _level )
     {
+    case HB_LOG_DEBUG:
     case HB_LOG_INFO:
     case HB_LOG_WARNING:
         {

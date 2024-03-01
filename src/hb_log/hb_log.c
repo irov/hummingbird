@@ -11,21 +11,29 @@
 #define HB_LOG_MAX_OBSERVER 16
 #endif
 
+#ifndef HB_LOG_MAX_CATEGORY_SIZE
+#define HB_LOG_MAX_CATEGORY_SIZE 31
+#endif
+
 #ifndef HB_LOG_MAX_MESSAGE_SIZE
 #define HB_LOG_MAX_MESSAGE_SIZE 4096
 #endif
+
+static const char * hb_log_level_string[] = {"all", "debug", "info", "warning", "error", "critical"};
 
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_observer_desc_t
 {
     hb_log_level_t level;
-    char category[32];
+    char category[HB_LOG_MAX_CATEGORY_SIZE + 1];
     hb_log_observer_t observer;
     void * ud;
 }hb_log_service_observer_desc_t;
 //////////////////////////////////////////////////////////////////////////
 typedef struct hb_log_service_handle_t
 {
+    hb_log_level_t verbose_level;
+
     uint32_t observer_count;
     hb_log_service_observer_desc_t observers[HB_LOG_MAX_OBSERVER];
 
@@ -37,6 +45,8 @@ static hb_log_service_handle_t * g_log_service_handle = HB_NULLPTR;
 hb_result_t hb_log_initialize()
 {
     hb_log_service_handle_t * handle = HB_NEW( hb_log_service_handle_t );
+
+    handle->verbose_level = HB_LOG_INFO;
     handle->observer_count = 0;
 
     hb_mutex_handle_t * mutex;
@@ -59,6 +69,47 @@ void hb_log_finalize()
     g_log_service_handle = HB_NULLPTR;
 }
 //////////////////////////////////////////////////////////////////////////
+const char * hb_log_level_stringize( hb_log_level_t _level )
+{
+    const char * level_string = hb_log_level_string[_level];
+
+    return level_string;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_log_level_parse( const char * _string, hb_log_level_t * const _level )
+{
+    for( hb_log_level_t level = 0; level != HB_LOG_CRITICAL + 1; ++level )
+    {
+        const char * level_string = hb_log_level_stringize( level );
+
+        if( strcmp( level_string, _string ) != 0 )
+        {
+            continue;
+        }
+
+        *_level = level;
+
+        return HB_SUCCESSFUL;
+    }
+
+    return HB_FAILURE;
+}
+//////////////////////////////////////////////////////////////////////////
+void hb_log_set_verbose_level( hb_log_level_t _level )
+{
+    g_log_service_handle->verbose_level = _level;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_log_level_t hb_log_get_verbose_level()
+{
+    return g_log_service_handle->verbose_level;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_bool_t hb_log_check_verbose_level( hb_log_level_t _level )
+{
+    return g_log_service_handle->verbose_level <= _level;
+}
+//////////////////////////////////////////////////////////////////////////
 hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, hb_log_observer_t _observer, void * _ud )
 {
     if( g_log_service_handle->observer_count == HB_LOG_MAX_OBSERVER )
@@ -71,7 +122,7 @@ hb_result_t hb_log_add_observer( const char * _category, hb_log_level_t _level, 
 
     if( _category != HB_NULLPTR )
     {
-        strcpy( desc.category, _category );
+        strncpy( desc.category, _category, HB_LOG_MAX_CATEGORY_SIZE );
     }
     else
     {
@@ -137,7 +188,7 @@ void hb_log_message( const char * _category, hb_log_level_t _level, const char *
     va_list args;
     va_start( args, _format );
 
-    char message[HB_LOG_MAX_MESSAGE_SIZE];
+    char message[HB_LOG_MAX_MESSAGE_SIZE] = {'\0'};
     int32_t n = vsnprintf( message, HB_LOG_MAX_MESSAGE_SIZE, _format, args );
 
     va_end( args );

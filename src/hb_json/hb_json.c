@@ -125,7 +125,10 @@ hb_result_t hb_json_dumps( hb_json_handle_t * _handle, char * _buffer, hb_size_t
 
     js_size_t dump_size = js_get_buffer_size( &dump_buff );
 
-    *_size = (hb_size_t)dump_size;
+    if( _size != HB_NULLPTR )
+    {
+        *_size = (hb_size_t)dump_size;
+    }
 
     return HB_SUCCESSFUL;
 }

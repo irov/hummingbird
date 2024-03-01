@@ -21,7 +21,7 @@ static void __hb_log_file_observer( const char * _category, hb_log_level_t _leve
 
     hb_log_file_handle_t * handle = (hb_log_file_handle_t *)_ud;
 
-    const char * ls = hb_log_level_string[_level];
+    const char * ls = hb_log_level_stringize( _level );
 
     hb_date_t d;
     hb_date( &d );
