@@ -37,7 +37,6 @@ hb_result_t hb_http_get_request_params( struct evhttp_request * _request, multip
 
     hb_data_t multipart;
     ev_ssize_t copyout_buffer_size = evbuffer_copyout( input_buffer, multipart, multipart_length );
-    HB_UNUSED( copyout_buffer_size );
 
     ((char *)multipart)[copyout_buffer_size] = '\0';
 
