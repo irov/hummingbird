@@ -108,7 +108,7 @@ hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update
     return HB_SUCCESSFUL;
 }
 //////////////////////////////////////////////////////////////////////////
-hb_result_t hb_json_dumps( const hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * const _size )
+hb_result_t hb_json_dump( const hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * const _size )
 {
     js_element_t * jval = (js_element_t *)_handle;
 
@@ -128,6 +128,18 @@ hb_result_t hb_json_dumps( const hb_json_handle_t * _handle, char * _buffer, hb_
     if( _size != HB_NULLPTR )
     {
         *_size = (hb_size_t)dump_size;
+    }
+
+    return HB_SUCCESSFUL;
+}
+//////////////////////////////////////////////////////////////////////////
+hb_result_t hb_json_dump_string( const char * _value, char * _buffer, hb_size_t _capacity, hb_size_t * const _size )
+{
+    js_string_t string = JS_MAKE_STRING( _value, strlen( _value ) );
+
+    if( js_dump_string( string, _buffer, _capacity, _size ) == JS_FAILURE )
+    {
+        return HB_FAILURE;
     }
 
     return HB_SUCCESSFUL;

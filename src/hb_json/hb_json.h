@@ -78,7 +78,8 @@ hb_result_t hb_json_copy_field_string( const hb_json_handle_t * _handle, const c
 hb_result_t hb_json_copy_field_string_default( const hb_json_handle_t * _handle, const char * _key, char * _value, hb_size_t _capacity, const char * _default );
 
 hb_result_t hb_json_update( hb_json_handle_t * _base, hb_json_handle_t * _update, void * _pool, hb_size_t _capacity, hb_json_handle_t ** _result );
-hb_result_t hb_json_dumps( const hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * const _size );
+hb_result_t hb_json_dump( const hb_json_handle_t * _handle, char * _buffer, hb_size_t _capacity, hb_size_t * const _size );
+hb_result_t hb_json_dump_string( const char * _value, char * _buffer, hb_size_t _capacity, hb_size_t * const _size );
 
 typedef hb_result_t( *hb_json_object_visit_t )(hb_size_t _index, const hb_json_handle_t * _key, const hb_json_handle_t * _value, void * _ud);
 hb_result_t hb_json_visit_object( const hb_json_handle_t * _handle, hb_json_object_visit_t _visitor, void * _ud );
