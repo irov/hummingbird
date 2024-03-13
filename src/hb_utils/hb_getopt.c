@@ -8,7 +8,9 @@ hb_result_t hb_getopt( int argc, char * argv[], const char * _name, const char *
 {
     for( int index = 1; index != argc; ++index )
     {
-        if( strcmp( argv[index], _name ) != 0 )
+        const char * arg = argv[index];
+
+        if( strcmp( arg, _name ) != 0 )
         {
             continue;
         }
@@ -18,7 +20,9 @@ hb_result_t hb_getopt( int argc, char * argv[], const char * _name, const char *
             return HB_FAILURE;
         }
 
-        *_value = argv[index + 1];
+        const char * value = argv[index + 1];
+
+        *_value = value;
 
         return HB_SUCCESSFUL;
     }
