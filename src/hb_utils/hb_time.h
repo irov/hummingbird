@@ -12,6 +12,6 @@ typedef uint64_t hb_time_t;
 
 void hb_time( hb_time_t * _time );
 
-void hb_monotonic( hb_time_t * _time );
+hb_result_t hb_monotonic( hb_time_t * _time );
 
 #endif

@@ -9,12 +9,19 @@ void hb_time( hb_time_t * _time )
     *_time = (hb_time_t)t;
 }
 
-void hb_monotonic( hb_time_t * _time )
+hb_result_t hb_monotonic( hb_time_t * _time )
 {
     struct timespec ts;
-    clock_gettime( CLOCK_MONOTONIC, &ts );
+    if( clock_gettime( CLOCK_MONOTONIC, &ts ) == -1 )
+    {
+        *_time = 0;
+
+        return HB_FAILURE;    
+    }
 
     uint64_t milliseconds = ts.tv_sec * 1000LL + ts.tv_nsec / 1000000LL;
 
     *_time = (hb_time_t)milliseconds;
+
+    return HB_SUCCESSFUL;
 }
