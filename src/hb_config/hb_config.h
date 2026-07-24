@@ -57,12 +57,12 @@ typedef struct hb_sha1_t
 
 typedef struct hb_token_t
 {
-    hb_byte_t value[14];
+    hb_byte_t value[18];
 } hb_token_t;
 
 typedef struct hb_token16_t
 {
-    char value[28];
+    char value[36];
 } hb_token16_t;
 
 static const hb_uid_t HB_UID_NONE = (0);

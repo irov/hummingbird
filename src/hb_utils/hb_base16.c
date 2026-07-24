@@ -1,5 +1,6 @@
 #include "hb_base16.h"
 
+#include <assert.h>
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,9 +75,16 @@ hb_result_t hb_base16_encode( const void * _data, hb_size_t _size, char * _base1
 //////////////////////////////////////////////////////////////////////////
 hb_result_t hb_base16_decode( const char * _base16, hb_size_t _size, void * _data, hb_size_t _capacity, hb_size_t * _outsize )
 {
+    assert( _base16 != HB_NULLPTR && _data != HB_NULLPTR );
+
     if( _size == HB_UNKNOWN_STRING_SIZE )
     {
         _size = strlen( _base16 );
+    }
+
+    if( (_size & 1U) != 0 )
+    {
+        return HB_FAILURE;
     }
 
     hb_size_t totalsize = hb_base16_decode_size( _size );
@@ -90,8 +98,16 @@ hb_result_t hb_base16_decode( const char * _base16, hb_size_t _size, void * _dat
 
     for( hb_size_t i = 0, j = 0; i != _size;)
     {
-        hb_byte_t a = base16_decode_table[_base16[i++]];
-        hb_byte_t b = base16_decode_table[_base16[i++]];
+        unsigned char symbol_a = (unsigned char)_base16[i++];
+        unsigned char symbol_b = (unsigned char)_base16[i++];
+
+        hb_byte_t a = base16_decode_table[symbol_a];
+        hb_byte_t b = base16_decode_table[symbol_b];
+        if( (a == 0 && symbol_a != (unsigned char)base16_encode_table[0]) ||
+            (b == 0 && symbol_b != (unsigned char)base16_encode_table[0]) )
+        {
+            return HB_FAILURE;
+        }
 
         data[j++] = (a << 0) | (b << 4);
     }

@@ -9,4 +9,10 @@ void hb_rand_hex_generate( const char * _vocabulary, hb_size_t _count, char * _h
 
 uint64_t hb_rand64( uint64_t * const _seed );
 
+#define HB_SECURE_RAND_SECRET_SIZE 32
+
+hb_result_t hb_secure_rand_initialize( const hb_byte_t _secret[HB_SECURE_RAND_SECRET_SIZE], uint64_t _time );
+void hb_secure_rand_finalize( void );
+void hb_secure_rand_bytes( void * _buffer, hb_size_t _size );
+
 #endif
